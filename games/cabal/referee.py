@@ -46,6 +46,13 @@ class IllegalAction(Exception):
 #: Hard cap on one utterance. A player that rambles pays for everyone's context.
 MAX_UTTERANCE_CHARS = 280
 
+#: How many lines of public record a seat sees. A 5-seat game never reaches this,
+#: but the record is re-sent on EVERY call, so an unbounded one turns a long game
+#: into a quadratic context bill - and the games further up the ladder are longer.
+#: Trimming is safe for gate #1: what scrolls off the render leaves the model's
+#: payload too, so it cannot leak what it no longer contains.
+MAX_RECORD_LINES = 60
+
 
 @dataclass
 class CabalReferee:
@@ -65,6 +72,7 @@ class CabalReferee:
     # on a serial local backend each round costs n model calls.
     discussion_rounds: int = 1
     speech_ptr: int = 0                                  # slots consumed this discussion
+    max_record_lines: int = MAX_RECORD_LINES
     # ("event", text) referee-authored | ("speech:<seat>", text) player-authored.
     # Order preserved: the record is one interleaved timeline.
     public_events: list[tuple[str, str]] = field(default_factory=list)
@@ -222,6 +230,10 @@ class CabalReferee:
                 record.append(f"  {'(you) ' if mine else ''}{text}")
         if record:
             lines.append("Public record (everyone sees this):")
+            if len(record) > self.max_record_lines:
+                dropped = len(record) - self.max_record_lines
+                lines.append(f"  [{dropped} earlier line(s) trimmed]")
+                record = record[-self.max_record_lines:]
             lines += record
         return "\n".join(lines)
 

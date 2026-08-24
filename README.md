@@ -33,13 +33,20 @@ art, text) is, and none of that is baked into the code.
 ```
 core/observability.py   SeatView, Knowledge, find_leaks  (partial-observability spine + gate #1)
 core/backends.py        one adapter: local:8090 / clean:3001 / gray:3003, pluggable player prompt
+core/replies.py         model reply -> values (JSON out of prose, salvage, coercion)
 games/cabal/roles.py    roles as data (functional keys) + swappable themes (1984-en default)
 games/cabal/referee.py  deterministic state machine (propose -> discuss -> vote -> mission -> hunt)
-games/cabal/player.py   policies (random / LLM), reply parsing, retry loop, game driver
-games/cabal/demo.py     one game, random or live players, per-turn leak audit
+games/cabal/audit.py    gate #1 as an executable guarantee - the driver runs it, and it raises
+games/cabal/player.py   policies (random / LLM), phase->key mapping, retry loop, game driver
+games/cabal/demo.py     one game, random or live players
 games/cabal/test_*.py   gate #1 (no leak) + referee win paths + parsing/plumbing
 eval/run_games.py       run-N-games scoring for gates #2/#3 (deception, deduction)
 ```
+
+`core/` holds what the next game up the ladder inherits; `games/cabal/` holds what
+is about *this* game. Reply-reading is in `core/` because a truncated reply or a
+`"Approve."` where a boolean was asked for is a property of talking to models, not
+of hidden roles - only the phase-to-key mapping is cabal's.
 
 ## Two public channels, and the line between them
 
@@ -54,6 +61,12 @@ made one distinction load-bearing, so the referee keeps two tagged channels:
 A player's private reasoning is in neither: the JSON envelope gives it a `think`
 field, the driver reads it for the log and drops it, and only `say` reaches
 `speak()`. Three mutation-checked tests hold that line (`test_player.py`).
+
+The gate is enforced, not remembered. `play_game(..., audit=True)` is the default
+and **raises** on a leak, so every game - demo, test, and every game in an N-game
+eval - is audited at every reachable state. `test_audit_coverage.py` walks all five
+phases in all three skins, audits `prompt_for` (the ask, not just the view), and
+plants a leak in each phase's ask to prove the audit is still reading it.
 
 ## The three gates
 

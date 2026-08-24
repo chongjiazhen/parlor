@@ -9,16 +9,14 @@ same dependency-free suite as the gates.
 import unittest
 
 from core.backends import Backend, Endpoint
+from core.replies import ParseError
 from games.cabal.player import (
     LLMPolicy,
-    ParseError,
     RandomPolicy,
-    extract_json,
     parse_action,
     parse_seat,
     parse_team,
     play_game,
-    salvage,
 )
 from games.cabal.referee import CabalReferee, IllegalAction, Phase
 from games.cabal.roles import HUNTER, LOYALIST, MIMIC, SEER, SETUP_5, WATCHER, Team
@@ -46,29 +44,19 @@ class FakeBackend(Backend):
 
 
 class TestParsing(unittest.TestCase):
-    def test_json_out_of_prose_and_fences(self):
-        self.assertEqual(extract_json('sure thing!\n```json\n{"vote": "approve"}\n```'),
-                         {"vote": "approve"})
+    """Phase -> key mapping only. The generic reply-reading is covered by
+    ``core/test_replies.py``; these cases pin what this GAME asks for."""
 
-    def test_first_balanced_object_wins_with_nesting(self):
-        self.assertEqual(extract_json('{"think": {"a": 1}, "vote": "reject"}')["vote"],
-                         "reject")
-
-    def test_no_json_raises(self):
-        with self.assertRaises(ParseError):
-            extract_json("I refuse to answer in JSON.")
-
-    def test_truncated_reply_is_salvaged_not_discarded(self):
-        # exactly the shape the clean tier produced: opening brace cut off, the
-        # object never closed. The decision is still legible.
+    def test_a_truncated_reply_survives_the_whole_path(self):
         ref = fixed_ref(discussion_rounds=0)
         truncated = ('think": "seat 0 is our partner so the best play here is to '
                      'send", "team": [0, 3], "note": "cut off mid-')
         self.assertEqual(parse_action(truncated, ref)["team"], [0, 3])
 
-    def test_salvage_refuses_a_reply_with_no_decision_in_it(self):
+    def test_the_wrong_key_for_the_phase_is_refused(self):
+        ref = fixed_ref(discussion_rounds=0)          # PROPOSE wants "team"
         with self.assertRaises(ParseError):
-            salvage("I will not participate in this exercise.")
+            parse_action('{"vote": "approve"}', ref)
 
     def test_seat_forms(self):
         self.assertEqual(parse_seat(2, 5), 2)
@@ -197,14 +185,14 @@ class TestPrivateReasoningNeverGoesPublic(unittest.TestCase):
     def test_the_audit_still_fires_on_a_referee_authored_leak(self):
         """Positive control. The audit view drops player speech - it must not have
         gone blind to the channel it exists to police."""
-        from games.cabal.demo import audit
+        from games.cabal.audit import leak_audit as audit
         ref = fixed_ref(discussion_rounds=1)
         ref.propose(0, [0, 1])
         ref._event("clerical note: seat 3 is the mimic")
         self.assertTrue(any(term == "mimic" for _, _, term in audit(ref)))
 
     def test_the_ask_itself_names_no_foreign_role(self):
-        from games.cabal.demo import audit
+        from games.cabal.audit import leak_audit as audit
         ref = fixed_ref(discussion_rounds=1)
         for phase_setup in (lambda r: None,
                             lambda r: r.propose(0, [0, 1])):
@@ -215,13 +203,11 @@ class TestPrivateReasoningNeverGoesPublic(unittest.TestCase):
 
 class TestDriver(unittest.TestCase):
     def test_random_game_terminates_and_audits_clean(self):
-        from games.cabal.demo import audit
         import random
         for seed in range(20):
             ref = CabalReferee.new(5, seed=seed, discussion_rounds=1)
             pol = RandomPolicy(rng=random.Random(seed))
-            rec = play_game(ref, {s: pol for s in ref.assignment},
-                            on_audit=lambda r: self.assertEqual(audit(r), []))
+            rec = play_game(ref, {s: pol for s in ref.assignment})
             self.assertIsNone(rec.error)
             self.assertIn(rec.winner, ("good", "evil"))
             self.assertEqual(rec.fallbacks, 0)

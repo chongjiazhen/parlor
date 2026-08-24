@@ -35,6 +35,16 @@ Queue only. Done work leaves to git log. What's next:
   random baseline, so the scorer will not call gate #2 until gate #3 holds.
 - **A number ships next to its fallback rate.** A decision no model could make
   legally is played at random and counted; the scorer voids its verdicts above 10%.
+- **Gate #1 is enforced by the driver, not by callers.** `play_game` audits every
+  turn and raises; it is not an opt-in callback, because the eval lane forgot to
+  pass one and ran live models unaudited for a full session.
+- **`core/` = what game #2 inherits, `games/<name>/` = what is about that game.**
+  Reply-reading is generic and lives in `core/replies.py`; the phase-to-key mapping
+  is not and stays in the game. Resist promoting anything else until a second game
+  actually needs it.
+- **`find_leaks` stays naive substring matching.** A false positive is a loud test
+  failure; a false negative is a shipped leak. Do not "fix" it with word boundaries
+  to quiet a collision - rename the colliding term instead.
 
 ## Backend notes (measured 2026-08-25)
 
@@ -48,3 +58,10 @@ Queue only. Done work leaves to git log. What's next:
   upstream per request. Live and answering: `minimax-m3`, `nemotron-3-super`,
   `qwen3-30b-a3b-fp8`, `gpt-oss-120b`, `glm-4.7-flash`. Bursts draw 429s - hence the
   transport backoff and `--workers 3`.
+- **`minimax-m3` reasons out loud and needs headroom.** A 10-game run scored nothing
+  at 85% fallback: at `max_tokens=512` it spent the whole budget on visible
+  reasoning and never reached the JSON. Default raised to 1536 and exposed as
+  `--max-tokens`; **not yet re-verified** (the box was 429'd immediately after).
+  Either confirm 1536 clears it or pin a model that answers without thinking aloud
+  (`nemotron-3-super`, `qwen3-30b-a3b-fp8`). A too-tight cap and a refusing model
+  are indistinguishable in the scores - only the refusal trace separates them.

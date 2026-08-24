@@ -164,6 +164,41 @@ class TestDiscussion(unittest.TestCase):
         self.assertIn("proposes [0, 1]", ref.render_context(2, include_speech=False))
 
 
+class TestRecordIsBounded(unittest.TestCase):
+    """The record is re-sent on every call, so an unbounded one is a quadratic
+    context bill on the longer games further up the ladder."""
+
+    def test_oldest_lines_are_trimmed_and_the_trim_is_declared(self):
+        ref = fixed_ref(discussion_rounds=0)
+        ref.max_record_lines = 5
+        for i in range(20):
+            ref._event(f"line {i}")
+        rendered = ref.render_context(0)
+        self.assertIn("[15 earlier line(s) trimmed]", rendered)
+        self.assertIn("line 19", rendered)
+        self.assertNotIn("line 3", rendered)
+
+    def test_a_short_game_is_never_trimmed(self):
+        ref = fixed_ref(discussion_rounds=1)
+        ref.propose(0, [0, 1])
+        for seat in ref.speaking_order():
+            ref.speak(seat, "a word")
+        self.assertNotIn("trimmed", ref.render_context(0))
+
+    def test_trimming_cannot_hide_a_leak_that_is_still_shown(self):
+        """Safe-direction check: a line that scrolls off leaves the model's payload
+        too, and one still shown is still audited."""
+        from games.cabal.audit import leak_audit
+        ref = fixed_ref(discussion_rounds=0)
+        ref.max_record_lines = 3
+        ref._event("clerical note: seat 3 is the mimic")
+        for i in range(10):
+            ref._event(f"filler {i}")
+        self.assertEqual(leak_audit(ref), [])          # scrolled off, not sent
+        ref._event("clerical note: seat 3 is the mimic")
+        self.assertTrue(any(term == "mimic" for _, _, term in leak_audit(ref)))
+
+
 class TestPublicChannel(unittest.TestCase):
     def test_deal_is_never_public(self):
         ref = CabalReferee.new(5, seed=3)

@@ -57,10 +57,14 @@ class Backend:
     system_prompt: str = PLAYER_SYSTEM_PROMPT
     temperature: float = 0.8
     timeout: float = 60.0
-    #: Bounded so a rambling model cannot be truncated mid-JSON by a provider
-    #: default. Observed on the clean tier: a long chain-of-thought reply arrived
-    #: with its opening brace already cut off, and read as "the model won't answer".
-    max_tokens: int = 512
+    #: Bounded so a provider default cannot truncate a reply mid-JSON, but the
+    #: bound has to clear a reasoning model's visible thinking. Measured on the
+    #: clean tier: at 512, `minimax-m3` spent the whole budget on prose reasoning
+    #: and emitted no JSON at all - 85% of decisions fell back to random and the
+    #: run scored nothing. A too-tight cap and a refusing model look identical in
+    #: the numbers; only the refusal trace tells them apart. Raise this (or pin a
+    #: model that does not think out loud) before blaming the model.
+    max_tokens: int = 1536
 
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":

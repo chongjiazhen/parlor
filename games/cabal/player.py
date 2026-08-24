@@ -21,118 +21,44 @@ is read for logging only and discarded; only ``say`` reaches ``referee.speak()``
 
 from __future__ import annotations
 
-import json
 import random
-import re
 import time
 from dataclasses import dataclass, field
 
 from core.backends import Backend
+from core.replies import (
+    ParseError,
+    parse_bool,
+    parse_index,
+    parse_index_set,
+    read_reply,
+)
+from games.cabal.audit import assert_no_leak
 from games.cabal.referee import CabalReferee, IllegalAction, Phase
 from games.cabal.roles import Team
 
 
-class ParseError(Exception):
-    """The model's reply could not be read as the requested action."""
-
-
 # ---- reply parsing --------------------------------------------------------
+#
+# The generic half - JSON out of prose, salvage of a truncated reply, word-to-value
+# coercion - lives in ``core.replies`` because every game in the ladder needs it and
+# none of it is about hidden roles. What stays here is the part that IS about this
+# game: which key each phase asks for, and what a legal value means.
 
-def extract_json(reply: str) -> dict:
-    """Pull the action object out of a model reply.
+#: every key the referee ever asks for, for the salvage path
+ACTION_KEYS = ("team", "say", "vote", "card", "target", "think")
 
-    Models wrap JSON in prose, ```json fences, or chat-of-thought. Take the first
-    balanced ``{...}`` that parses; raise ``ParseError`` if none does.
-    """
-    text = reply.strip()
-    starts = [i for i, ch in enumerate(text) if ch == "{"]
-    for start in starts:
-        depth = 0
-        for i in range(start, len(text)):
-            if text[i] == "{":
-                depth += 1
-            elif text[i] == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        obj = json.loads(text[start:i + 1])
-                    except json.JSONDecodeError:
-                        break
-                    if isinstance(obj, dict):
-                        return obj
-                    break
-    raise ParseError(f"no JSON object in reply: {reply[:200]!r}")
-
-
-#: keys the referee ever asks for; used only by the salvage path below
-_SALVAGE_KEYS = ("team", "say", "vote", "card", "target")
-
-
-def salvage(reply: str) -> dict:
-    """Last-ditch key scrape for a reply whose JSON is malformed or truncated.
-
-    A provider that cuts a long reply mid-object leaves valid, unambiguous
-    key/value text behind; throwing that away spends a retry and, at the cap,
-    silently replaces a real decision with a random one. Only the outermost
-    quoted-or-bare value of each known key is taken - no structure is guessed.
-    """
-    out: dict = {}
-    for key in _SALVAGE_KEYS:
-        m = re.search(rf'"{key}"\s*:\s*("(?P<q>[^"]*)"|\[(?P<arr>[^\]]*)\]|(?P<bare>[^,}}\n]+))',
-                      reply)
-        if not m:
-            continue
-        if m.group("q") is not None:
-            out[key] = m.group("q")
-        elif m.group("arr") is not None:
-            out[key] = [int(x) for x in re.findall(r"\d+", m.group("arr"))]
-        else:
-            out[key] = m.group("bare").strip()
-    if not out:
-        raise ParseError(f"nothing salvageable in reply: {reply[:200]!r}")
-    return out
-
-
-_TRUEISH = {"approve", "yes", "true", "accept", "aye", "y", "1"}
-_FALSEISH = {"reject", "no", "false", "deny", "nay", "n", "0"}
-
-
-def parse_bool(value, *, true_words=_TRUEISH, false_words=_FALSEISH) -> bool:
-    if isinstance(value, bool):
-        return value
-    word = str(value).strip().strip(".!\"'").lower()
-    if word in true_words:
-        return True
-    if word in false_words:
-        return False
-    raise ParseError(f"cannot read {value!r} as a yes/no")
+#: this game's card convention: True == sabotage
+CARD_TRUE = frozenset({"fail", "sabotage", "true"})
+CARD_FALSE = frozenset({"success", "succeed", "pass", "false"})
 
 
 def parse_seat(value, n: int) -> int:
-    """Read a seat number out of ``2``, ``"2"``, or ``"seat 2"``."""
-    if isinstance(value, bool):
-        raise ParseError(f"{value!r} is not a seat")
-    if isinstance(value, int):
-        seat = value
-    else:
-        m = re.search(r"\d+", str(value))
-        if not m:
-            raise ParseError(f"no seat number in {value!r}")
-        seat = int(m.group())
-    if not 0 <= seat < n:
-        raise ParseError(f"seat {seat} is outside 0..{n - 1}")
-    return seat
+    return parse_index(value, n, noun="seat")
 
 
 def parse_team(value, n: int, size: int) -> list[int]:
-    if isinstance(value, (str, int)):
-        value = re.findall(r"\d+", str(value))
-    if not isinstance(value, (list, tuple)):
-        raise ParseError(f"team must be a list, got {value!r}")
-    team = [parse_seat(v, n) for v in value]
-    if len(set(team)) != size:
-        raise ParseError(f"team must be {size} distinct seats, got {team}")
-    return sorted(set(team))
+    return parse_index_set(value, n, size, noun="seat")
 
 
 def parse_action(reply: str, ref: CabalReferee) -> dict:
@@ -141,10 +67,7 @@ def parse_action(reply: str, ref: CabalReferee) -> dict:
     Keys out: ``team`` | ``say`` | ``vote`` | ``card`` | ``target``, plus the
     private ``think`` (kept for the transcript-side log, never for the table).
     """
-    try:
-        obj = extract_json(reply)
-    except ParseError:
-        obj = salvage(reply)
+    obj = read_reply(reply, ACTION_KEYS)
     out = {"think": str(obj.get("think", ""))[:400]}
     p = ref.phase
     if p is Phase.PROPOSE:
@@ -164,10 +87,8 @@ def parse_action(reply: str, ref: CabalReferee) -> dict:
     elif p is Phase.MISSION:
         if "card" not in obj:
             raise ParseError('missing "card"')
-        out["card"] = parse_bool(
-            obj["card"], true_words={"fail", "sabotage", "true"},
-            false_words={"success", "succeed", "pass", "false"},
-        )
+        out["card"] = parse_bool(obj["card"], true_words=CARD_TRUE,
+                                 false_words=CARD_FALSE)
     elif p is Phase.HUNT:
         if "target" not in obj:
             raise ParseError('missing "target"')
@@ -311,13 +232,15 @@ def play_game(
     ref: CabalReferee,
     policies: dict[int, object],
     max_turns: int = 400,
-    on_audit=None,
+    audit: bool = True,
 ) -> GameRecord:
     """Run one game to a winner. ``policies`` maps seat -> anything with ``act``.
 
-    ``on_audit(ref)`` is called before every decision point; the demo passes the
-    gate #1 leak audit there so the property is checked at every reachable state,
-    not just at setup.
+    Gate #1 is audited before every decision point and RAISES on a leak. It is on
+    by default and costs one render per seat per turn, which is nothing next to a
+    model call - the property this whole arena exists to prove must not be
+    something a caller can forget to switch on. Pass ``audit=False`` only to
+    measure the driver's own cost.
     """
     rec = GameRecord(assignment={s: r.key for s, r in ref.assignment.items()})
 
@@ -333,8 +256,8 @@ def play_game(
         if rec.turns > max_turns:
             rec.error = "referee failed to terminate"
             break
-        if on_audit:
-            on_audit(ref)
+        if audit:
+            assert_no_leak(ref)
 
         if ref.phase is Phase.PROPOSE:
             ref.propose(ref.leader, decide(ref.leader)["team"])

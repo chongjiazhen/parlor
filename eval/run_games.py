@@ -71,6 +71,7 @@ def one_game(index: int, args) -> GameRecord:
             api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
             temperature=args.temperature,
             timeout=args.timeout,
+            max_tokens=args.max_tokens,
         )
         # one policy per seat: each seat needs its own retry trace, and sharing a
         # policy object across seats would interleave last_fell_back
@@ -233,6 +234,8 @@ def main() -> None:
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--temperature", type=float, default=0.8)
+    ap.add_argument("--max-tokens", type=int, default=1536,
+                    help="raise for a model that reasons out loud before answering")
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--max-turns", type=int, default=400)
     ap.add_argument("--theme", choices=list(THEMES))

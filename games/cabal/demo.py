@@ -19,41 +19,10 @@ import os
 import random
 
 from core.backends import Backend
-from core.observability import find_leaks
+from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee, Phase
 from games.cabal.roles import DEFAULT_THEME, THEMES
-
-
-def secret_terms(ref: CabalReferee) -> dict[int, list[str]]:
-    """Each seat's role, in both skins - the sentinels a leak would trip."""
-    return {
-        s: [role.key, ref.theme.role_names[role.key]]
-        for s, role in ref.assignment.items()
-    }
-
-
-def audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
-    """Return every (viewer, leaked_seat, term). Empty == gate #1 holds.
-
-    Audits the referee-authored payload only: ``include_speech=False`` drops other
-    players' utterances, because a player naming a role out loud is a claim (true
-    or false) and therefore gameplay. The referee doing it would be the leak. For
-    whichever seats are on the clock, the ask is audited too - it is bytes that
-    leave for the model like any other.
-    """
-    terms = secret_terms(ref)
-    acting = set(ref.acting_seats())
-    out = []
-    for viewer in ref.assignment:
-        entitled = {k.seat for k in ref.entitled_knowledge(viewer)}
-        payload = (
-            ref.prompt_for(viewer, include_speech=False) if viewer in acting
-            else ref.render_context(viewer, include_speech=False)
-        )
-        for seat, term in find_leaks(payload, terms, entitled, viewer):
-            out.append((viewer, seat, term))
-    return out
 
 
 def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
@@ -113,11 +82,11 @@ def main() -> None:
     print("--- one seat's private view (seat 0), the exact bytes it would send ---")
     print(ref.prompt_for(0) if 0 in ref.acting_seats() else ref.render_context(0))
     print("\n--- play ---")
-    rec = play_game(ref, policies, on_audit=lambda r: _assert_clean(r))
+    rec = play_game(ref, policies)          # gate #1 audited every turn, raises on a leak
     for line in ref.log:
         print(" ", line)
 
-    leaks = audit(ref)
+    leaks = leak_audit(ref)
     print(f"\ngate #1 leak audit: {'CLEAN' if not leaks else leaks} "
           f"({ref.n} seats, every turn)")
     print(f"winner: {ref.theme.faction_names[ref.winner]}")
@@ -126,11 +95,6 @@ def main() -> None:
     print("\n(secret assignment, referee-side only:)")
     for s, r in sorted(ref.assignment.items()):
         print(f"  seat {s}: {r.key}")
-
-
-def _assert_clean(ref: CabalReferee) -> None:
-    leaks = audit(ref)
-    assert not leaks, f"LEAK: {leaks}"
 
 
 if __name__ == "__main__":
