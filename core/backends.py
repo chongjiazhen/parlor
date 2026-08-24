@@ -57,6 +57,10 @@ class Backend:
     system_prompt: str = PLAYER_SYSTEM_PROMPT
     temperature: float = 0.8
     timeout: float = 60.0
+    #: Bounded so a rambling model cannot be truncated mid-JSON by a provider
+    #: default. Observed on the clean tier: a long chain-of-thought reply arrived
+    #: with its opening brace already cut off, and read as "the model won't answer".
+    max_tokens: int = 512
 
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":
@@ -71,6 +75,7 @@ class Backend:
         payload = {
             "model": self.model,
             "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
             "messages": [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": context},

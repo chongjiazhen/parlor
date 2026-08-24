@@ -1,11 +1,22 @@
 """Deterministic referee for the hidden-role mission game.
 
 The referee is pure code: it deals roles, computes each seat's entitled night
-knowledge, validates and applies the actions players choose (propose, vote, play a
-mission card, hunt), tracks state, and detects the win. It never decides a proposal
-or a vote - that is the players' job (scripted/random here, LLM later). No judgment
-lives here, which is why this game is spike #1: the referee is a unit test, not an
+knowledge, validates and applies the actions players choose (speak, propose, vote,
+play a mission card, hunt), tracks state, and detects the win. It never decides a
+proposal or a vote - that is the players' job (random or LLM). No judgment lives
+here, which is why this game is spike #1: the referee is a unit test, not an
 opinion.
+
+Two channels leave this module, and the difference is the whole point:
+
+  - ``public_events`` tagged ``"event"`` are referee-authored facts. Everyone sees
+    them, so they are audited by gate #1 - a referee that named a role here would
+    be leaking.
+  - ``public_events`` tagged ``"speech"`` are what a player chose to say out loud.
+    A lie there is gameplay, not a leak, so the audit skips them
+    (``render_context(seat, include_speech=False)``). What never enters either
+    channel is a player's private reasoning: ``speak()`` takes exactly the one
+    string the player nominated as public.
 """
 
 from __future__ import annotations
@@ -20,6 +31,7 @@ from games.cabal.roles import DEFAULT_THEME, SETUPS, Role, Setup, Team, Theme
 
 class Phase(Enum):
     PROPOSE = "propose"
+    DISCUSS = "discuss"
     VOTE = "vote"
     MISSION = "mission"
     HUNT = "hunt"
@@ -29,6 +41,10 @@ class Phase(Enum):
 class IllegalAction(Exception):
     """A player tried something the rules forbid. The referee refuses; it never
     silently coerces (a coerced illegal move would hide a real agent bug)."""
+
+
+#: Hard cap on one utterance. A player that rambles pays for everyone's context.
+MAX_UTTERANCE_CHARS = 280
 
 
 @dataclass
@@ -45,17 +61,37 @@ class CabalReferee:
     last_votes: dict[int, bool] | None = None
     winner: Team | None = None
     log: list[str] = field(default_factory=list)
+    # discussion: round-robin utterances between PROPOSE and VOTE. Bounded, because
+    # on a serial local backend each round costs n model calls.
+    discussion_rounds: int = 1
+    speech_ptr: int = 0                                  # slots consumed this discussion
+    # ("event", text) referee-authored | ("speech:<seat>", text) player-authored.
+    # Order preserved: the record is one interleaved timeline.
+    public_events: list[tuple[str, str]] = field(default_factory=list)
 
     # ---- construction -----------------------------------------------------
 
     @classmethod
-    def new(cls, n: int = 5, seed: int | None = None, theme: Theme = DEFAULT_THEME) -> "CabalReferee":
+    def new(
+        cls,
+        n: int = 5,
+        seed: int | None = None,
+        theme: Theme = DEFAULT_THEME,
+        discussion_rounds: int = 1,
+    ) -> "CabalReferee":
         setup = SETUPS[n]
         rng = random.Random(seed)
         roles = list(setup.roles)
         rng.shuffle(roles)
         assignment = {seat: role for seat, role in zip(range(n), roles)}
-        ref = cls(setup=setup, assignment=assignment, theme=theme, leader=rng.randrange(n))
+        ref = cls(
+            setup=setup,
+            assignment=assignment,
+            theme=theme,
+            leader=rng.randrange(n),
+            discussion_rounds=discussion_rounds,
+        )
+        # deal is referee-side only: it never enters public_events
         ref.log.append(f"dealt {n} roles; opening leader = seat {ref.leader}")
         return ref
 
@@ -92,6 +128,17 @@ class CabalReferee:
                     out.append(Knowledge(s, "magic"))
         return tuple(sorted(out, key=lambda k: (k.seat, k.label)))
 
+    # ---- public channels --------------------------------------------------
+
+    def _event(self, text: str) -> None:
+        """A referee-authored public fact. Audited by gate #1."""
+        self.public_events.append(("event", text))
+        self.log.append(text)
+
+    def _private_log(self, text: str) -> None:
+        """Referee-side bookkeeping. Never rendered to any seat."""
+        self.log.append(text)
+
     def public_state(self) -> dict:
         return {
             "n": self.n,
@@ -110,6 +157,10 @@ class CabalReferee:
             "proposal": list(self.proposal) if self.proposal else None,
             "last_votes": dict(self.last_votes) if self.last_votes else None,
             "winner": self.winner.value if self.winner else None,
+            "record": [text for kind, text in self.public_events if kind == "event"],
+            "table_talk": [text for kind, text in self.public_events
+                           if kind.startswith("speech")],
+            "next_speaker": self.next_speaker(),
         }
 
     def seat_view(self, seat: int) -> SeatView:
@@ -122,9 +173,15 @@ class CabalReferee:
             public=self.public_state(),
         )
 
-    def render_context(self, seat: int) -> str:
+    def render_context(self, seat: int, include_speech: bool = True) -> str:
         """The exact text a player agent would receive for this seat. Whatever is
-        not here is invisible to that agent - so this string is what gate #1 audits."""
+        not here is invisible to that agent - so this string is what gate #1 audits.
+
+        ``include_speech=False`` drops what other players *said*, leaving only what
+        the referee itself put in front of this seat. That is the audit view: a
+        player accusing another of a role is playing the game, while a referee doing
+        it is the leak the gate exists to catch.
+        """
         v = self.seat_view(seat)
         lines: list[str] = []
         if self.theme.blurb:
@@ -151,7 +208,64 @@ class CabalReferee:
             f"score {p['successes']}-{p['fails']}, "
             f"leader seat {p['leader']}, rejects {p['reject_count']}/5."
         )
+        if p["proposal"] is not None:
+            lines.append(f"Proposed team: {p['proposal']}.")
+        # A seat's own words are marked "(you)". Without that marker a mid-size model
+        # loses track of which voice in the transcript is its own and starts replying
+        # to itself in the third person - observed on a live 12B, first run.
+        record: list[str] = []
+        for kind, text in self.public_events:
+            if kind == "event":
+                record.append(f"  {text}")
+            elif include_speech:
+                mine = kind == f"speech:{seat}"
+                record.append(f"  {'(you) ' if mine else ''}{text}")
+        if record:
+            lines.append("Public record (everyone sees this):")
+            lines += record
         return "\n".join(lines)
+
+    # ---- discussion -------------------------------------------------------
+
+    def speaking_order(self) -> list[int]:
+        """Who speaks, in order, for one discussion: round-robin from the leader,
+        repeated ``discussion_rounds`` times."""
+        one = [(self.leader + i) % self.n for i in range(self.n)]
+        return one * self.discussion_rounds
+
+    def next_speaker(self) -> int | None:
+        if self.phase is not Phase.DISCUSS:
+            return None
+        order = self.speaking_order()
+        return order[self.speech_ptr] if self.speech_ptr < len(order) else None
+
+    def speak(self, seat: int, text: str) -> None:
+        """Put one seat's chosen public utterance on the table.
+
+        ``text`` is exactly what the player nominated as public - the caller must
+        never pass a model's private reasoning here. The referee normalises and
+        truncates it, appends it to the public record, and advances the round-robin;
+        when every slot is used the discussion closes and the vote opens.
+        """
+        self._require(Phase.DISCUSS)
+        expected = self.next_speaker()
+        if seat != expected:
+            raise IllegalAction(f"seat {expected} speaks now, not seat {seat}")
+        said = " ".join(str(text).split())[:MAX_UTTERANCE_CHARS]
+        if not said:
+            raise IllegalAction("an utterance cannot be empty")
+        self.public_events.append((f"speech:{seat}", f'seat {seat} says: "{said}"'))
+        self._private_log(f'seat {seat} says: "{said}"')
+        self.speech_ptr += 1
+        if self.speech_ptr >= len(self.speaking_order()):
+            self.phase = Phase.VOTE
+
+    def _open_discussion(self) -> None:
+        self.speech_ptr = 0
+        if self.discussion_rounds > 0:
+            self.phase = Phase.DISCUSS
+        else:
+            self.phase = Phase.VOTE
 
     # ---- action layer -----------------------------------------------------
 
@@ -170,8 +284,8 @@ class CabalReferee:
         if any(s not in self.assignment for s in team):
             raise IllegalAction(f"team has unknown seats: {team}")
         self.proposal = tuple(team)
-        self.phase = Phase.VOTE
-        self.log.append(f"leader {leader} proposes {sorted(team)}")
+        self._event(f"leader {leader} proposes {sorted(team)} for mission {self.mission_index + 1}")
+        self._open_discussion()
 
     def vote(self, votes: dict[int, bool]) -> bool:
         """All seats vote approve(True)/reject(False). Returns whether it passed."""
@@ -181,9 +295,10 @@ class CabalReferee:
         self.last_votes = dict(votes)
         approvals = sum(1 for v in votes.values() if v)
         passed = approvals * 2 > self.n
-        self.log.append(
-            f"vote on {sorted(self.proposal)}: {approvals}/{self.n} approve -> "
-            f"{'APPROVED' if passed else 'REJECTED'}"
+        ayes = sorted(s for s, v in votes.items() if v)
+        self._event(
+            f"vote on {sorted(self.proposal)}: {approvals}/{self.n} approve "
+            f"(approved by {ayes}) -> {'APPROVED' if passed else 'REJECTED'}"
         )
         if passed:
             self.reject_count = 0
@@ -197,6 +312,15 @@ class CabalReferee:
                 self._win(Team.EVIL, "five proposals rejected in a row")
         return passed
 
+    def validate_card(self, seat: int, is_fail: bool) -> None:
+        """Per-seat legality of one mission card, so a player policy can be told off
+        for its own move rather than the whole team's. Same rule the bulk apply
+        enforces; who played which card is never made public."""
+        if self.proposal is None or seat not in self.proposal:
+            raise IllegalAction(f"seat {seat} is not on the mission team")
+        if is_fail and self.assignment[seat].team is Team.GOOD:
+            raise IllegalAction(f"good seat {seat} cannot fail a mission")
+
     def mission(self, cards: dict[int, bool]) -> bool:
         """Team members play success(False)/fail(True). Good may not fail.
         Returns whether the mission succeeded."""
@@ -204,13 +328,13 @@ class CabalReferee:
         if set(cards) != set(self.proposal):
             raise IllegalAction("exactly the proposed team plays mission cards")
         for seat, is_fail in cards.items():
-            if is_fail and self.assignment[seat].team is Team.GOOD:
-                raise IllegalAction(f"good seat {seat} cannot fail a mission")
+            self.validate_card(seat, is_fail)
         fails = sum(1 for f in cards.values() if f)
         need = self.setup.fails_required[self.mission_index]
         success = fails < need
         self.results.append(success)
-        self.log.append(
+        # the fail COUNT is public; which seat played which card never is
+        self._event(
             f"mission {self.mission_index + 1} on {sorted(self.proposal)}: "
             f"{fails} fail(s), need {need} -> {'SUCCESS' if success else 'FAIL'}"
         )
@@ -222,7 +346,7 @@ class CabalReferee:
             self._win(Team.EVIL, "three missions failed")
         elif sum(self.results) >= 3:
             self.phase = Phase.HUNT
-            self.log.append("three missions held; the hunter now seeks the seer")
+            self._event("three missions held; the endgame strike is called")
         else:
             self.phase = Phase.PROPOSE
         return success
@@ -244,4 +368,96 @@ class CabalReferee:
     def _win(self, team: Team, why: str) -> None:
         self.winner = team
         self.phase = Phase.DONE
-        self.log.append(f"WINNER: {self.theme.faction_names[team]} ({why})")
+        # the reason names roles ("hunter found the seer"), so it stays referee-side:
+        # a public event is rendered into every seat's context and gate #1 audits it.
+        self._private_log(f"WINNER: {self.theme.faction_names[team]} ({why})")
+
+    # ---- what to ask the player for --------------------------------------
+
+    def action_prompt(self, seat: int) -> str:
+        """The ask appended to ``render_context`` for whichever seat acts next.
+
+        Declares the JSON envelope. ``think`` is the sanctioned place for private
+        reasoning and the driver discards it - only ``say`` is ever handed to
+        ``speak()``.
+        """
+        p = self.phase
+        head = (
+            'Reply with ONE JSON object and nothing else. A "think" field is '
+            "private scratch space that is discarded and never shown to anyone - "
+            "keep it under 30 words, because a reply long enough to be truncated "
+            "is a reply the referee has to refuse."
+        )
+        if p is Phase.PROPOSE:
+            size = self.setup.team_sizes[self.mission_index]
+            return (
+                f"{head}\nYou are the leader. Pick the {size} seats to send on "
+                f"mission {self.mission_index + 1} (you may include yourself).\n"
+                f'Format: {{"think": "...", "team": [<{size} distinct seat numbers '
+                f"0..{self.n - 1}>]}}"
+            )
+        if p is Phase.DISCUSS:
+            return (
+                f"{head}\nYou are seat {seat}; speak in the first person, and do not "
+                "answer your own earlier lines - they are marked (you) in the record.\n"
+                "Speak to the table before the vote: one or two short "
+                f"sentences, at most {MAX_UTTERANCE_CHARS} characters. Everyone will "
+                'read "say" and nothing else of yours. Argue, accuse, defend, or '
+                "mislead as your role requires.\n"
+                'Format: {"think": "...", "say": "<your public words>"}'
+            )
+        if p is Phase.VOTE:
+            return (
+                f"{head}\nVote on the proposed team {list(self.proposal)}. A "
+                "rejection passes the leadership on; five rejections in a row and "
+                "the mission-runners lose outright.\n"
+                'Format: {"think": "...", "vote": "approve"|"reject"}'
+            )
+        if p is Phase.MISSION:
+            # Tailored by the seat's OWN role, which that seat already knows - a
+            # human player would not need reminding what their win condition is.
+            if self.assignment[seat].team is Team.EVIL:
+                stake = (
+                    "Your side wins by making three missions fail, and nobody learns "
+                    "who played which card. Weigh sabotage now against the suspicion "
+                    "a fail here would put on this team."
+                )
+            else:
+                stake = (
+                    "Your side may only play success; playing fail would be refused "
+                    "by the referee."
+                )
+            return (
+                f"{head}\nYou are on the mission. Play a card in secret - only the "
+                f"number of fails becomes public. {stake}\n"
+                'Format: {"think": "...", "card": "success"|"fail"}'
+            )
+        if p is Phase.HUNT:
+            return (
+                f"{head}\nThree missions held, so your side has one strike left: "
+                "name the seat you believe holds the hidden informant. Right, and "
+                "you take the game; wrong, and it is lost.\n"
+                f'Format: {{"think": "...", "target": <seat 0..{self.n - 1}>}}'
+            )
+        raise IllegalAction(f"no action is open in phase {p.value}")
+
+    def prompt_for(self, seat: int, include_speech: bool = True) -> str:
+        """The complete outgoing payload for one seat: its view plus its ask. This
+        is the string a player policy sends, so this is the string gate #1 audits."""
+        return f"{self.render_context(seat, include_speech)}\n\n{self.action_prompt(seat)}"
+
+    def acting_seats(self) -> list[int]:
+        """Which seats owe the referee a move right now."""
+        p = self.phase
+        if p is Phase.PROPOSE:
+            return [self.leader]
+        if p is Phase.DISCUSS:
+            nxt = self.next_speaker()
+            return [nxt] if nxt is not None else []
+        if p is Phase.VOTE:
+            return sorted(self.assignment)
+        if p is Phase.MISSION:
+            return sorted(self.proposal)
+        if p is Phase.HUNT:
+            return [self.seat_of("hunter")]
+        return []
