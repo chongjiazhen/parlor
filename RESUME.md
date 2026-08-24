@@ -2,6 +2,12 @@
 
 Queue only. Done work leaves to git log. What's next:
 
+- [ ] **No readable transcript exists.** `demo.py` prints to stdout, `run_games.py`
+      writes JSON; neither leaves a game log a human can read. Add `--transcript`
+      to both, rendering from `public_events` (speech as speech, `think` never).
+      Sample records to render against: `eval/records/*.json` (gitignored - raw run
+      output stays out of history; a rendered transcript that evidences a claim is
+      what gets committed).
 - [ ] **Gates #2/#3 are wired but not shown.** `eval/run_games.py` runs and scores;
       no run yet has cleared gate #3, so gate #2 stays unreadable by design. Two
       things to try before widening N: more discussion rounds (`--rounds 2`) so
@@ -45,6 +51,21 @@ Queue only. Done work leaves to git log. What's next:
 - **`find_leaks` stays naive substring matching.** A false positive is a loud test
   failure; a false negative is a shipped leak. Do not "fix" it with word boundaries
   to quiet a collision - rename the colliding term instead.
+
+## Route: local is for spot-checks, not for gates
+
+Local needs no wiring - `Backend` passes `--model` straight through and the router
+is exact-match, so any armed model is one flag away. The question is whether it is
+worth running there at all, and for the GATES it is not: local is serial, ~9 min a
+game, so the N-game statistics gate #3 needs are unaffordable there. Local's job is
+the thing cloud cannot do - an uncensored model, privately, to answer "will it
+deceive at all" - and that answer is already in hand.
+
+Reach for a better local model (a qwen3.8-27b, or a half-resident quant sized so an
+image-diffusion model stays co-resident on the 16 GB card) only when one of these
+lands: a cloud model turns out to REFUSE to deceive (untested - the one cloud run
+was void), or you want games running alongside image gen. Neither is on the gate
+path today.
 
 ## Backend notes (measured 2026-08-25)
 

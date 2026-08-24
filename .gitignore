@@ -6,3 +6,9 @@ data/
 _*.md
 *.log
 .pytest_cache/
+
+# Raw run output. Regenerable, grows per run, and git is not a data store. The
+# directory is durable (unlike the harness scratchpad), so records survive a
+# reboot without entering history. A run that EVIDENCES a claim in the docs gets
+# rendered to a readable transcript and that transcript is committed - not the blob.
+eval/records/
