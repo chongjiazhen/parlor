@@ -10,6 +10,7 @@ cheap way to eyeball whether agents will actually deceive.
     python -m games.cabal.demo --rounds 2            # two discussion rounds
     python -m games.cabal.demo --backend local --model qwen36-35b-a3b-iq3
     python -m games.cabal.demo --backend clean --speaker   # only discussion is live
+    python -m games.cabal.demo --transcript game.md        # readable log on disk
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ import os
 import random
 
 from core.backends import Backend
+from games.cabal import transcript
 from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee, Phase
@@ -71,6 +73,7 @@ def main() -> None:
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--speaker", action="store_true",
                     help="model plays the discussion phase only")
+    ap.add_argument("--transcript", help="write this game as markdown here")
     args = ap.parse_args()
 
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
@@ -95,6 +98,13 @@ def main() -> None:
     print("\n(secret assignment, referee-side only:)")
     for s, r in sorted(ref.assignment.items()):
         print(f"  seat {s}: {r.key}")
+
+    if args.transcript:
+        text = transcript.from_referee(ref, rec, meta={
+            "backend": args.backend, "model": args.model if args.backend else None,
+            "rounds": args.rounds, "seed": args.seed,
+        })
+        print(f"\nwrote transcript to {transcript.write(args.transcript, text)}")
 
 
 if __name__ == "__main__":

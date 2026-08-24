@@ -40,6 +40,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 
 from core.backends import ENDPOINTS, Backend
+from games.cabal import transcript
 from games.cabal.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import DEFAULT_THEME, THEMES
@@ -241,6 +242,10 @@ def main() -> None:
     ap.add_argument("--theme", choices=list(THEMES))
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
+    ap.add_argument("--transcript",
+                    help="write ONE game as a readable markdown transcript here")
+    ap.add_argument("--transcript-game", type=int, default=None,
+                    help="which game to transcribe (default: the first completed one)")
     args = ap.parse_args()
 
     if args.arm == "llm" and not args.backend:
@@ -269,6 +274,18 @@ def main() -> None:
             json.dump({"args": vars(args), "summary": s,
                        "games": [asdict(r) for r in records]}, fh, indent=2)
         print(f"\nwrote {args.out}")
+    if args.transcript:
+        if args.transcript_game is not None:
+            index = args.transcript_game
+        else:
+            index = next((i for i, r in enumerate(records)
+                          if r.error is None and r.winner), None)
+        if index is None:
+            print("\nno game completed - nothing to transcribe", file=sys.stderr)
+        else:
+            text = transcript.render(records[index], vars(args))
+            print(f"\nwrote transcript of game {index} to "
+                  f"{transcript.write(args.transcript, text)}")
 
 
 if __name__ == "__main__":

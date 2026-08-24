@@ -222,6 +222,16 @@ class GameRecord:
     fallbacks: int = 0        # decisions no model could make legally
     decisions: int = 0
     utterances: list[str] = field(default_factory=list)
+    #: Both public channels verbatim, in the order the referee wrote them:
+    #: ("event", ...) referee-authored | ("speech:<seat>", ...) player-authored.
+    #: Kept so a transcript renders from what was actually said rather than from a
+    #: second implementation of the rules run backwards over end state. Private
+    #: ``think`` is discarded by the driver and is in neither channel.
+    public_events: list[tuple[str, str]] = field(default_factory=list)
+    #: Referee-side log: the deal, the win reason, every public event. Never shown
+    #: to a seat - this is the document a human reads after the game.
+    log: list[str] = field(default_factory=list)
+    theme: str = ""
     #: why decisions were refused or fell back - a run reporting 100% fallback is
     #: useless without this (measured: a stale model id read as "the model is bad")
     trace_sample: list[str] = field(default_factory=list)
@@ -295,6 +305,9 @@ def play_game(
     rec.winner = ref.winner.value if ref.winner else None
     rec.missions = list(ref.results)
     rec.reason = ref.log[-1] if ref.log else ""
+    rec.public_events = list(ref.public_events)
+    rec.log = list(ref.log)
+    rec.theme = ref.theme.name
     seen: list[str] = []
     for policy in policies.values():
         for line in getattr(policy, "trace", []) or []:
