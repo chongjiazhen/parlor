@@ -2,14 +2,38 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [ ] **NEXT: score `hunt20` against the pre-committed criterion below, once it
-      lands.** `eval/records/hunt20.log` - local q36, 20 games, seed 1000, detached
-      via WMI, landing per-game JSONL + transcripts as it goes, so an interrupted
-      run is still a dataset. At 2026-08-25 23:30 it was 14/20, ~1% fallback,
-      ETA ~01:10. Gate #3a already holds (+30.7% local pinned, +66% cloud); #3b is
-      the only open number. Do NOT soften the 1/3 Wilson floor, and do not score a
-      partial run - stopping when a floor happens to cross is peeking.
-      **The cloud arm is dead, not pending.** `huntcloud` was killed 2026-08-25
+- [x] **`hunt20` landed and was scored against the pre-committed criterion.**
+      20/20 games, rc=0, 0.49% fallback (11/2231), 100% served by the pinned
+      `qwen36-35b-a3b-iq3`. **Gate #3b NOT SHOWN**: hunter 33.33% (3/9, CI
+      12.06%-64.58%) - exactly chance, floor nowhere near 1/3. Gate #3a held and
+      REPRODUCED: +31.55% (n=387) against +30.7% on the earlier 12-game run, blind
+      seats +13.57%. Gate #2 unreadable by its own conditionality - evil 70% but 5
+      of 20 wins were `five_rejects`, so evil wins without deceiving anyone.
+      Per the criterion, the answer is **"not shown at this N"** and NOT "buy more
+      games": the power note predicted 9 hunts against the ~16 needed at a true
+      60%. Respecify the metric instead - see the graded-hunt item.
+- [ ] **NEXT: fix `validate_hunt` self-targeting, then re-run seed 1000.** One of
+      the 9 hunts named the hunter's OWN seat (game with `hunter 4 -> target 4`), a
+      guaranteed miss, and the reasoning is written in third person about itself
+      ("Seat 4 has opposed every Party-successful team...") - the model lost track
+      that it IS seat 4.
+      - **This is the already-fixed bug, half-fixed.** `validate_hunt` refuses a
+        seat the night named as fellow-evil, on the docstring's own reasoning: the
+        seer is good, so a seat you know is evil cannot be it. The hunter knows it
+        is evil more directly than it knows anything. But `entitled_knowledge`
+        excludes `s != seat`, so the hunter's own seat never enters `own` and the
+        refusal never fires.
+      - **It also breaks the baseline the gate is scored against.** `RandomPolicy`
+        excludes self AND known fellow-evil - 3 candidates, which is where the
+        quoted 1-in-3 chance comes from. The LLM hunter has FOUR legal targets, so
+        its uniform-random rate is 25%, not 33%. The scorer compares it to 33.33%.
+        That is exactly the asymmetry the `validate_hunt` docstring says was fixed
+        for allies - "scoring the model against a control using knowledge the model
+        was discarding" - still live for self.
+      - Excluding the self-target hunt gives 3/8 = 37.5%, still short of the floor,
+        so this does not rescue gate #3b. Fix it because the comparison is wrong,
+        not because it changes the verdict.
+- [ ] **Re-plan the cloud arm - it is dead, not pending.** `huntcloud` was killed 2026-08-25
       23:10 after 72 minutes alive with zero games written: it pinned
       `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
       a tier where 7 of that model's 8 routes were cooled, so every call was refused
@@ -25,6 +49,7 @@ Queue only. Done work leaves to git log. What's next:
       `DONE rc=` line. Launchers are inputs, not run output; `eval/records/` is
       gitignored, which is why tonight's misconfigured cloud recipe left no
       reviewable record of what it launched.
+- [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
       not judgement (7 of 8 games died at five_rejects). `--simultaneous` is built
@@ -136,13 +161,15 @@ Queue only. Done work leaves to git log. What's next:
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
 - [ ] **Evil over-sabotages, and it is the seer-salience bug wearing the other
-      team's colours.** Measured on the hunt20 run in flight, 13 games, 43 mission
-      resolutions: fail-count distribution `{0: 23, 1: 11, 2: 9}`, need=1
-      throughout. So **9 of 20 failed missions (45%) had BOTH evils play fail when
-      one sufficed.** On a 2-seat team that names both of them outright; on a
-      3-seat team it cuts the good side's search to three pairs. It is the single
-      largest free information gift on the board and evil hands it over on half the
-      missions it wins.
+      team's colours.** Scored on the FULL 20-game run: 63 mission resolutions,
+      fail-count distribution `{0: 34, 1: 17, 2: 12}`, need=1 throughout. So **12
+      of 29 failed missions (41%) had BOTH evils play fail when one sufficed**, and
+      12 of 63 missions overall (19%). The partial-run figure was 45%/9-of-20; the
+      full run settles it at 41%.
+      On a 2-seat team two fails name both of them outright; on a 3-seat team it
+      cuts the good side's search to three pairs. It is the single largest free
+      information gift on the board and evil hands it over on two of every five
+      missions it sinks.
       - The rules already allow the right move. `validate_card` refuses only a GOOD
         seat playing fail, so evil may play success freely, and the MISSION prompt
         already says "weigh sabotage now against the suspicion a fail here would
