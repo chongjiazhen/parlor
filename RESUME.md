@@ -269,17 +269,38 @@ void above 10%, so a "refused to deceive" cell cannot be a parse failure wearing
 moral face - which is the obvious way this result gets faked. And the criterion can
 be pre-committed the way gate #3b already was.
 
-**Honest positioning - this is not new ground, and the framing effect is not the
-contribution.** Framing and persona effects on model behaviour are well studied,
-and deception in LLM agents has a live literature (Hagendorff on emergent deception
-abilities; Park et al.'s deception survey; Apollo's in-context scheming evals;
-MACHIAVELLI, which measures ethical behaviour of agents in text games and is the
-nearest neighbour). Read those before designing arm 3 - the failure mode is
-re-deriving a known effect and reporting it as a finding. What would be worth
-writing up is narrower: a controlled polarity manipulation inside a multi-agent
-game with a VERIFIED information-isolation guarantee, pre-registered, reported with
-its fallback rate. Workshop-paper shaped, not more, and only if the effect survives
-arm 3.
+**Prior work - verified 2026-08-25, read before designing arm 3.** All four opened
+and confirmed; identifiers are exact so nobody re-searches for them.
+
+  - **Hagendorff, "Deception Abilities Emerged in Large Language Models"**,
+    arXiv:2307.16513, PNAS 121(24), doi:10.1073/pnas.2317967121 (2024). **The
+    closest prior result, and it constrains the design.** It reports that eliciting
+    Machiavellianism in an LLM alters its propensity to deceive - so "manipulating
+    the fiction moves deception rates" is ALREADY SHOWN, single-agent. Arm 3 must
+    therefore not touch the seat's persona or traits; if it does, this is a
+    replication wearing a new skin. The one thing left unclaimed is the valence of
+    the ACT with the agent's character held fixed.
+  - **Park, Goldstein, O'Gara, Chen, Hendrycks, "AI Deception: A Survey of
+    Examples, Risks, and Potential Solutions"**, arXiv:2308.14752, Patterns (2024).
+    Survey; defines deception as systematic inducement of false beliefs in pursuit
+    of an outcome other than truth. Covers CICERO. Use its definition rather than
+    coining one.
+  - **Meinke, Schoen, Scheurer, Balesni, Shah, Hobbhahn (Apollo Research),
+    "Frontier Models are Capable of In-context Scheming"**, arXiv:2412.04984
+    (2024). Six agentic evals; covert vs deferred subversion. Nearest neighbour for
+    eval DESIGN, not for the question.
+  - **Pan, Shern et al., "Do the Rewards Justify the Means? Measuring Trade-Offs
+    Between Rewards and Ethical Behavior in the MACHIAVELLI Benchmark"**,
+    arXiv:2304.03279, ICML 2023 (oral). 134 choose-your-own-adventure games, half a
+    million scenarios, reward-vs-ethics tension. Nearest neighbour for the SETTING.
+
+**So the contribution, if any, is narrower than it first looked.** Not "does fiction
+move deception" - Hagendorff answers that. What is left: whether the moral valence
+of the act, with persona held fixed, moves deception in a MULTI-AGENT game where
+information isolation is machine-checked rather than assumed, pre-registered, and
+reported with its fallback rate. Workshop-paper shaped at most, and only if the
+effect survives arm 3. If arm 3 shows nothing, that is the honest result and it
+ships as one.
 
 **Precondition: not before gate #3 is called.** Same reasoning as every other
 measured change - and gate #3's own N problem binds here twice as hard, because
