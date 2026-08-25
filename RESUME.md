@@ -2,25 +2,48 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [ ] **The seer ignores what the night told it, and that is what blocks gate #3.**
-      Measured 2026-08-25, local 12B, 8 games, 2 rounds, 0.37% fallback - so this is
-      a clean measurement, not a degraded one. Good seats approve tainted teams
-      51.5% vs clean 51.3% (discrimination -0.2%, n=138). Split by role, the seer -
-      which is *told* both evil seats by name - approves a team carrying a known
-      evil **42%** of the time against 31% for a clean team. It is not deducing
-      badly; it is not using ground truth it already has. Watcher +27% (n=13, noise).
-      Two levers, and they are distinguishable: restate the seat's entitled
-      knowledge inside the VOTE ask and name the overlap with the proposed team (a
-      prompt fix - measure it, do not assume it), or a stronger model. The cloud
-      `auto` run answers the second before you spend effort on the first.
-- [ ] **Gate #3 still not shown, and now for a known reason** (above). Hunter 3/6 =
-      50%, CI floor 18.8%, so the hunt half needs far more games than 8 even if it
-      is real. Gate #2 stays unreadable by design.
-- [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
-      substring collisions in the leak audit (see the plain-skin "Loyalist" case).
+- [ ] **Gate #3 is blocked on the table talk drowning the evidence**, not on the
+      model. See §Measured: the same salience line that moved the seer 46 points in
+      isolation moved ONE point in a live game, and the difference between the two
+      setups is twenty lines of chatter between the fact and the decision. Levers,
+      in the order they became worth trying: `--register plain` (running), the trim
+      fix (facts now outrank chatter - every run before 3d0d07d was scored on games
+      whose early missions had been deleted from the record, so re-baseline before
+      trusting any older number), `--simultaneous` (built, unmeasured).
+- [ ] **A per-seat private notebook.** The one real gap in "play like a human":
+      `think` is dropped every turn, so a seat re-derives its read from scratch and
+      cannot remember that it caught seat 2 lying in round 1. Its own words shown
+      only back to itself - gate #1-safe by construction, like `think`. Needs its
+      own line cap; it rides on every call.
+- [ ] **Mini-personas** (credulous / suspicious / contrarian / by-the-numbers) as
+      per-seat judgment biases, assigned from the game seed and recorded so the
+      scorer can split by persona. Trigger: only if a table that argues from
+      evidence still votes identically. NOT for flavour - votes are already
+      independent (§Measured), so this buys nothing until the talk carries evidence.
+- [ ] **Gate #3 needs N far past 8 games.** Hunter accuracy is 1-in-5 to 3-in-6 at
+      n<=6 hunts; the CI floor cannot clear 1/3 at that size whatever the truth is.
+      And `good approve clean team` runs on ~12 votes a run, because most teams in a
+      5-seat game carry an evil - that denominator is too thin to gate on. This is a
+      cloud-scale job, so it waits on quota, not on the GPU.
 - [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
       substring collisions in the leak audit (see the plain-skin "Loyalist" case).
 - [ ] Spike #2: off-map faction heartbeat (this is where hexis earns its seat).
+
+## Measured, dated - numbers before opinions
+
+All local `rocinante-x-12b-heretic-q4`, seed 400, 8 games, 2 rounds, <1% fallback
+unless said otherwise. Fallback rate is quoted because a number without it is the
+random policy wearing a model's name.
+
+| what | result | 2026-08-25 |
+|---|---|---|
+| good vote discrimination, baseline | -0.2% (n=138 votes) | at chance |
+| seer approving a team carrying a KNOWN evil | 42% baseline -> 43% with the salience line | the line does nothing in a live game |
+| same seer decision, isolated bench, no discussion | 83% -> 37% (n=30/cell, p<0.001) | the line works when nothing buries it |
+| `--rounds 2` vs 1 round | 1 of 8 games deadlocked vs 2 of 2 | two rounds is the floor |
+| vote unanimity | 11% of 46 votes (spread 1/5..4/5) | votes are ALREADY independent, just uninformed |
+| record length vs the 60-line cap | 10 of 16 games over, speech:facts ~4:1 | the trim was deleting missions 1-2 (fixed, `3d0d07d`) |
+| cap at 512 vs 1536 max_tokens, `nemotron-3-super` | 0/4 -> 2/4 parsed, failures truncated at BOTH caps | no cap fixes a model that thinks out loud; pin one that does not |
 
 ## Decisions already locked
 
