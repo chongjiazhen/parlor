@@ -197,6 +197,8 @@ class LLMPolicy:
         so the seat is told off for its own move while it can still fix it."""
         if ref.phase is Phase.MISSION:
             ref.validate_card(seat, action["card"])
+        elif ref.phase is Phase.HUNT:
+            ref.validate_hunt(seat, action["target"])
         elif ref.phase is Phase.PROPOSE:
             size = ref.setup.team_sizes[ref.mission_index]
             if len(action["team"]) != size:

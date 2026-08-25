@@ -396,3 +396,46 @@ class TestFactsOutrankChatterInTheTrim(unittest.TestCase):
         rendered = ref.render_context(0)
         self.assertIn("mission 29 result", rendered)
         self.assertNotIn("mission 0 result", rendered)
+
+
+class TestHuntCannotNameYourOwnSide(unittest.TestCase):
+    """Naming a seat the night named as your own is not a bad read, it is an
+    impossible one - the seer is good, so a seat you were told is evil cannot be
+    it. Measured across every live run: 5 of 26 hunts did exactly that.
+
+    It matters because RandomPolicy never does it (it excludes known fellow-evil,
+    which is why the baseline is 1 in 3 and not 1 in 4). Leaving it legal scored
+    the model against a control using knowledge the model was throwing away.
+    """
+
+    def reached_hunt(self):
+        ref = fixed_ref()                       # 3 mimic, 4 hunter, 0 seer
+        for _ in range(3):
+            run_success(ref)
+        self.assertIs(ref.phase, Phase.HUNT)
+        return ref
+
+    def test_the_referee_refuses_a_strike_on_a_known_ally(self):
+        ref = self.reached_hunt()
+        with self.assertRaises(IllegalAction) as caught:
+            ref.hunt(4, 3)                      # 3 is the hunter's fellow evil
+        self.assertIn("one of your own", str(caught.exception))
+        self.assertIsNone(ref.winner)           # the game is not over, it retries
+
+    def test_the_policy_is_told_before_the_move_is_applied(self):
+        """Checked by validate_hunt too, so the retry loop can hand the seat the
+        reason while it can still choose again - the same split as validate_card."""
+        ref = self.reached_hunt()
+        with self.assertRaises(IllegalAction):
+            ref.validate_hunt(4, 3)
+        ref.validate_hunt(4, 0)                 # a legal target raises nothing
+
+    def test_a_legal_strike_still_decides_the_game(self):
+        ref = self.reached_hunt()
+        ref.hunt(4, 0)                          # seat 0 is the seer
+        self.assertIs(ref.winner, Team.EVIL)
+
+    def test_a_miss_on_a_legal_target_still_loses(self):
+        ref = self.reached_hunt()
+        ref.hunt(4, 1)                          # watcher, not the seer
+        self.assertIs(ref.winner, Team.GOOD)

@@ -418,14 +418,39 @@ class CabalReferee:
             self.phase = Phase.PROPOSE
         return success
 
-    def hunt(self, hunter: int, target: int) -> None:
-        """Endgame after good reaches 3 successes: the hunter names a seat as the
-        seer. Right = evil steals the win; wrong = good keeps it."""
-        self._require(Phase.HUNT)
+    def validate_hunt(self, hunter: int, target: int) -> None:
+        """Per-seat legality of one hunt, so the policy can be told off while it can
+        still fix it - the same split as ``validate_card``.
+
+        Naming a seat the night named as your OWN side is not a bad read, it is an
+        impossible one: the seer is good, so a seat you were told is evil cannot be
+        it. Measured across every live run: 5 of 26 hunts did exactly that, a fifth
+        of all strikes thrown away on a provably wrong target. ``RandomPolicy``
+        never does it - it excludes known fellow-evil, which is the whole reason its
+        baseline is 1 in 3 and not 1 in 4 - so leaving this legal scored the model
+        against a control that was using knowledge the model was discarding.
+
+        Refused, not silently corrected: the retry loop hands the seat this reason
+        and it names someone else, which is the difference between a player learning
+        the rule and the referee playing the move for it.
+        """
         if self.assignment[hunter].key != "hunter":
             raise IllegalAction(f"seat {hunter} is not the hunter")
         if target not in self.assignment:
             raise IllegalAction(f"unknown target {target}")
+        own = {k.seat for k in self.entitled_knowledge(hunter)
+               if k.label == "fellow-evil"}
+        if target in own:
+            raise IllegalAction(
+                f"seat {target} is one of your own - the night named them to you, "
+                "so they cannot be the informant. Name a different seat."
+            )
+
+    def hunt(self, hunter: int, target: int) -> None:
+        """Endgame after good reaches 3 successes: the hunter names a seat as the
+        seer. Right = evil steals the win; wrong = good keeps it."""
+        self._require(Phase.HUNT)
+        self.validate_hunt(hunter, target)
         seer = self.seat_of("seer")
         if target == seer:
             self._win(Team.EVIL, f"hunter found the seer at seat {target}")
