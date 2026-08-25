@@ -95,7 +95,7 @@ THEME_PLAIN = Theme(
 # that is a variable, not decoration: nothing yet measures whether it moves how
 # readily a model deceives. So changing DEFAULT_THEME is a MEASURED change on the
 # same terms as any other, since no recorded number says which theme produced it.
-# See RESUME.md §Open design note - moral framing.
+# See docs/moral-framing.md.
 # The trusting majority who inform on each other + a hidden watcher are the loyal
 # Party; the informed minority who deceive are the Brotherhood underground who
 # sabotage each directive. Failing a "mission" is heroic sabotage; the martyr makes

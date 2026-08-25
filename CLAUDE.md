@@ -2,8 +2,11 @@
 
 `RESUME.md` is the queue, the dated measurements, and the route decisions - read it
 before picking up work or trusting a number. `README.md` has the three gates and the
-two public channels. Run output lands in `eval/records/` (gitignored, durable); the
-rendered transcript that evidences a claim is what gets committed, in `transcripts/`.
+two public channels. `docs/` holds the durable design notes and reference that would
+otherwise silt up the queue - `RESUME.md` carries a one-line pointer to each, and a
+design note that hardens into a decision moves to the Invariants below. Run output
+lands in `eval/records/` (gitignored, durable); the rendered transcript that
+evidences a claim is what gets committed, in `transcripts/`.
 
 ## Invariants - the single source of truth for these
 

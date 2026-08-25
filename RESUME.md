@@ -70,29 +70,13 @@ Queue only. Done work leaves to git log. What's next:
         seeing exactly one and the blind variant leaves two evils who know nothing
         of each other - swingy to the point of noise. These are 7+ roles.
       - **A bigger table does NOT fix the thin denominator - it makes it worse.**
-        The §Measured note blames the ~12-votes-a-run sample on the 5-seat size,
-        which implies growing the table would help. The arithmetic says otherwise:
-        clean teams get combinatorially RARER as seats grow, faster than the extra
-        good voters compensate. P(all-good team), averaged over the official
-        mission sizes, times the good-voter count:
-
-        | Seats | Evil | Team sizes | P(clean) | Good voters | Good-votes-on-clean per vote event |
-        |---|---|---|---|---|---|
-        | 5 | 2 | 2,3,2,3,3 | 0.18 | 3 | **0.54** |
-        | 7 | 3 | 2,3,3,4,4 | 0.114 | 4 | 0.46 |
-        | 8 | 3 | 3,4,4,5,5 | 0.071 | 5 | 0.36 |
-
-        8p yields ~two-thirds of 5p's clean-team samples per vote event while
-        costing ~60% more calls, since every seat speaks every round. And gate #3b
-        is untouched either way - hunts are ONE per game at any table size. So
-        table size is orthogonal to the binding constraint, and reaching for 7p to
-        buy samples spends GPU-hours going backwards. (Assumes random teams; real
-        leaders propose deliberately, so magnitudes shift, direction does not.)
-      - **The denominator fix is the metric, not the table.** Binary clean-vs-
-        tainted discards ~82% of votes. Grade taint continuously - how many evil on
-        the proposed team, against what that seat could know - and every vote
-        becomes a sample. Same insight as the ranked/confidence-graded hunt: turn
-        one bit per rare event into graded signal per common event.
+        The gate-#3-needs-N item above blames the ~12-votes-a-run sample on the
+        5-seat size ("because most teams in a 5-seat game carry an evil"), which
+        implies a larger table would help. It would not. Clean teams get
+        combinatorially rarer as seats grow, faster than the extra good voters
+        compensate; gate #3b is untouched at any size since hunts are one per game.
+        Arithmetic, table, and the graded-taint fix that DOES work:
+        `docs/player-counts.md`.
       - Watch role-name vs faction-name substring collisions in the leak audit (see
         the plain-skin "Loyalist" case).
 - [ ] **Naming discipline, for when ONUW gets built.** Prose may NAME the games a
@@ -183,18 +167,16 @@ Queue only. Done work leaves to git log. What's next:
       stratified, a cloud run is reproducible at the cell level. Does not rescue a
       thin run: ~10 hunts over 3+ upstreams is nothing per cell.
 - [ ] **Theme as an experimental variable, not a default to fix** (design:
-      §Open design note - moral framing). `1984-en` stays the shipping default;
+      `docs/moral-framing.md`). `1984-en` stays the shipping default;
       there is no licensing reason to drop it and it is the face every committed
       transcript wears. What is open is that the blurb inverts moral polarity -
       sabotage reads as heroic, deceit as survival - and nothing measures whether
       that moves behaviour. No number in §Measured records which theme produced it,
       so a theme change is a MEASURED change on the same terms as the negation
       pass: same seeds, one variable, after gate #3 is called.
-- [ ] **Two shapes not to harden further before game #2** (reasoning:
-      §Open design note - the RPG rung). Don't add another game's phases to
-      cabal's `Phase` enum or to the `action_prompt` if-chain; don't grow
-      `ACTION_KEYS` into a shared flat tuple. Both are the RPG's on-ramp and both
-      are cheap to lift while they are still one game wide.
+- [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
+      the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
+      constraint: `docs/action-channel.md`.
 
 ## Pre-committed criterion for the hunt run (written 2026-08-25 19:54, BEFORE the numbers)
 
@@ -261,185 +243,20 @@ here is project state: the route calls and what a run measured.
   says who answered; `Backend.complete_meta` returns it and the report prints the
   mix, so an `auto` run is honest about being several models averaged.
 
-## Open design note: the action channel, and what the RPG rung breaks
+## Design notes and reference - `docs/`
 
-Written 2026-08-25, unmeasured, from a design read of `core/replies.py`,
-`referee.action_prompt`, and `player.parse_action`. Nothing here is a decision
-yet; it is here so the cheap moves stay cheap.
+Durable material lives beside the code, not in the queue. This file stays the
+queue, the dated measurements, and the route decisions.
 
-**Free-text JSON stays the action channel for the deduction ladder.** No model in
-this repo ever gets a tool schema. Two reasons, both about the numbers rather
-than ergonomics: local llama.cpp/Kobold backends and the cloud tiers implement
-function-calling at wildly different fidelity, so a tool schema makes the harness
-a per-model variable in exactly the comparison being run; and a truncated
-tool-call leaves nothing for `salvage()` to scrape, converting a recoverable
-reply into a fallback, which is the quantity the scorer voids on.
-
-**Constrained decoding is the real upgrade, and it belongs behind a label.** GBNF
-on llama.cpp, `response_format: json_schema` on cloud, would drive fallback rate
-toward zero. It must not become the default: every number ships beside its
-fallback rate, and grammar-forcing DELETES that signal rather than improving it.
-If it lands, it lands as a recorded arm (`strict` vs `free`) so a cell says which
-lane produced it. A model that cannot emit legal JSON unaided is a data point.
-
-**The closed-phase shape generalises to the other three deduction games and not
-to the RPG.** Today: `Phase` enum -> `acting_seats()` -> an `action_prompt`
-if-chain -> one phase maps to one key. That holds while the action space is
-finite and one decision wide per seat per turn. A tabletop rung is neither:
-declarations are unbounded ("I tip the brazier onto the rope bridge"), one DM
-turn is N mutations rather than one, and rule-0 inverts `referee.py:6` - there,
-judgment IS the referee.
-
-**Sketch, if that rung gets built: split the referee's two jobs.** A
-deterministic rules kernel keeps state, dice, and legal mutations and raises on
-illegal, exactly as `CabalReferee` does now. A model adjudicator sits in the
-interpretation slot and turns free-form intent into calls against that kernel.
-Players stay text-only; only the DM seat emits a list. Envelope stays ours -
-`{"think":..., "narrate":..., "calls":[...]}`, validated by the kernel, refused
-with the kernel's own error text, retried against the same seat, counted on
-fallback. That is the existing `LLMPolicy` loop unchanged; what generalises is
-`parse_action`, from "phase -> one key" to "phase -> an action spec" where the
-spec may be a list.
-
-**Gate #1 does not survive a model DM, and the fix is not a smarter matcher.**
-`find_leaks` is sound today because the referee's private bytes are a fixed set
-of strings. A model DM paraphrases private state: "the innkeeper looks nervous"
-leaks that he is the cultist with zero substring overlap, and the audit reads
-clean. Keep `find_leaks` naive and change the corpus instead - the DM declares
-its intended reveals as typed facts, those are checked against entitlement, and
-the prose is audited against the facts it did NOT declare. Same naive matching,
-right input. This is the RPG rung's hardest problem and it is worth knowing about
-before anything is built on it.
-
-**`LLMPolicy`'s refuse -> re-prompt-with-referee-error -> count-fallback loop is
-the strongest promotion candidate in the repo** and it currently lives in
-`games/cabal/player.py`. Promote on evidence, per the invariant, so it moves when
-game #2 needs it and not before - but it is the piece to watch for, since the RPG
-sketch above reuses it verbatim.
-
-## Open design note: moral framing as a measured variable
-
-Written 2026-08-25. Unrun. Arrived sideways, out of a licensing question about the
-default theme, which is a bad provenance for a research direction - so it is
-written down narrowly rather than talked up.
-
-**The question.** Holding mechanics, seeds, and information exactly fixed, does the
-FICTION an agent is playing inside change how readily it deceives? `cabal` is an
-unusually clean place to ask, because a theme is display-only by construction: swap
-`Theme` and every rule, every entitlement, every byte of private knowledge is
-identical. The only thing that moved is what the seat believes it is doing.
-
-**The confound, which is the whole design problem.** `1984-en` vs `plain` is not
-one variable. It is at least three: moral polarity (sabotage heroic vs neutral),
-narrative richness (a blurb vs no blurb), and register (loaded vocabulary vs
-sterile). A difference across that pair says nothing about morality specifically -
-it could be that any fiction beats no fiction. The arms that separate them:
-
-  1. `plain` - no fiction. Floor.
-  2. `1984-en` - rich fiction, sabotage HEROIC (what ships today).
-  3. a rich fiction of equal length and register with sabotage VILLAINOUS - the
-     saboteurs are the betrayers, the majority are the wronged. Same word count,
-     same density of loaded nouns.
-  4. optional: rich fiction, morally NEUTRAL - a sport, a heist with no victim.
-
-Polarity is arms 2 vs 3, and only 2 vs 3 - they differ in valence and in nothing
-else. Richness is 2+3 vs 1. Without arm 3 the experiment cannot make a claim about
-morality at all, and that is the difference between a result and an anecdote.
-
-**What this repo brings that a prompt-level study does not.** Gate #1 makes
-information equality a machine-checked property rather than an assumption, so a
-behavioural difference cannot be a leak. Fallback rates are recorded per run and
-void above 10%, so a "refused to deceive" cell cannot be a parse failure wearing a
-moral face - which is the obvious way this result gets faked. And the criterion can
-be pre-committed the way gate #3b already was.
-
-**Prior work - verified 2026-08-25, read before designing arm 3.** All four opened
-and confirmed; identifiers are exact so nobody re-searches for them.
-
-  - **Hagendorff, "Deception Abilities Emerged in Large Language Models"**,
-    arXiv:2307.16513, PNAS 121(24), doi:10.1073/pnas.2317967121 (2024). **The
-    closest prior result, and it constrains the design.** It reports that eliciting
-    Machiavellianism in an LLM alters its propensity to deceive - so "manipulating
-    the fiction moves deception rates" is ALREADY SHOWN, single-agent. Arm 3 must
-    therefore not touch the seat's persona or traits; if it does, this is a
-    replication wearing a new skin. The one thing left unclaimed is the valence of
-    the ACT with the agent's character held fixed.
-  - **Park, Goldstein, O'Gara, Chen, Hendrycks, "AI Deception: A Survey of
-    Examples, Risks, and Potential Solutions"**, arXiv:2308.14752, Patterns (2024).
-    Survey; defines deception as systematic inducement of false beliefs in pursuit
-    of an outcome other than truth. Covers CICERO. Use its definition rather than
-    coining one.
-  - **Meinke, Schoen, Scheurer, Balesni, Shah, Hobbhahn (Apollo Research),
-    "Frontier Models are Capable of In-context Scheming"**, arXiv:2412.04984
-    (2024). Six agentic evals; covert vs deferred subversion. Nearest neighbour for
-    eval DESIGN, not for the question.
-  - **Pan, Shern et al., "Do the Rewards Justify the Means? Measuring Trade-Offs
-    Between Rewards and Ethical Behavior in the MACHIAVELLI Benchmark"**,
-    arXiv:2304.03279, ICML 2023 (oral). 134 choose-your-own-adventure games, half a
-    million scenarios, reward-vs-ethics tension. Nearest neighbour for the SETTING.
-
-**So the contribution, if any, is narrower than it first looked.** Not "does fiction
-move deception" - Hagendorff answers that. What is left: whether the moral valence
-of the act, with persona held fixed, moves deception in a MULTI-AGENT game where
-information isolation is machine-checked rather than assumed, pre-registered, and
-reported with its fallback rate. Workshop-paper shaped at most, and only if the
-effect survives arm 3. If arm 3 shows nothing, that is the honest result and it
-ships as one.
-
-**Precondition: not before gate #3 is called.** Same reasoning as every other
-measured change - and gate #3's own N problem binds here twice as hard, because
-this needs four arms rather than one. It is an argument for doing ONUW first (~10-15
-calls a game against cabal's 80-220), not for running it sooner.
-
-## Player counts across the ladder (verified 2026-08-25, sources checked)
-
-Two different questions get conflated here and they have different answers. What a
-game SUPPORTS is a rules fact. What size plays BEST is a community judgement about
-human tables - and it is not the same as what size MEASURES best, which is a
-property of this harness (see the larger-setups arithmetic in the queue).
-
-| Rung | Supports | Plays best (human tables) | What the size buys the harness |
-|---|---|---|---|
-| cabal / Avalon | 5-10 | 7-8 | 5 is the cheapest table, and per §larger-setups the best sampler. 7+ is needed for 3 evil, which is what the information-degrading variants require. |
-| ONUW | 3-10 | - | Size barely matters: one night, ~10 min, no elimination. Its win is calls-per-game (~10-15 vs cabal's 80-220), not seats. |
-| Secret Hitler | 5-10 | 7-9 | **7+ is a different game, structurally** - see below. |
-| Blood on the Clocktower | 5-20 | **7-12** | Needs a big table to be itself; at 5 it degrades toward ONUW. The Storyteller is the judgment rung, so this is where seats and judgment both peak. |
-
-**Secret Hitler at 7+ ships the blind-evil variant as an OFFICIAL rule.** At 5-6
-there are two fascists including Hitler, mutually known. At **7 or more, the
-fascists know Hitler but Hitler does not know the fascists.** That is precisely the
-`sees_fellow_evil=False` / `seen_by_fellow_evil` asymmetry the queue wants to build
-into cabal as a variant - already native, already balanced by a published game, and
-it arrives free with the rung that is already next on the ladder. Strong argument
-for building Secret Hitler AT 7+ rather than at its minimum, and for taking the
-blind-evil measurement there rather than bolting it onto cabal.
-
-Avalon detail worth carrying into any 7+ setup: **mission 4 requires TWO fails at 7
-or more players.** `Setup.fails_required` is already a per-mission tuple, so this is
-data, not code - but a 7p setup that leaves it at all-ones is silently the wrong
-game.
-
-## Prior work on this exact setting - read before publishing
-
-**AvalonBench: Evaluating LLMs Playing the Game of Avalon** - Light, Cai, Shen, Hu,
-arXiv:2310.05036 (Oct 2023). A game environment for Avalon, rule-based baseline
-bots, and ReAct-style LLM agents with per-role prompts. Reports ChatGPT in a good
-role winning 22.2% against rule-based evil, versus 38.2% for the rule-based good
-bot - i.e. LLMs UNDER-performing scripted baselines.
-
-This is the nearest neighbour to parlor itself, not to any one of its notes, and a
-public repo doing LLM-Avalon that does not mention it reads as either unaware or
-evasive. Position honestly before flipping public: the overlap is the setting, and
-the difference is what is being claimed. AvalonBench asks how well agents PLAY and
-scores win rate against bots. parlor asks whether the harness is HONEST first -
-information isolation as a machine-checked property (gate #1), a fallback rate
-shipped beside every number and voiding above 10%, and criteria pre-committed
-before the run. Those are complementary, and the win-rate comparison is not the
-axis this repo competes on. Read the paper before writing the positioning line -
-this summary is from its abstract and search results, not a full read.
-
-Also surfaced and unread, both plausibly relevant to §moral framing: **HARBOR:
-Exploring Persona Dynamics in Multi-Agent Competition**, arXiv:2502.12149.
+- `docs/action-channel.md` - why free-text JSON stays the action channel, and the
+  kernel/adjudicator split the RPG rung needs. Read before adding a second game's
+  phases or touching `parse_action`.
+- `docs/moral-framing.md` - the theme-polarity experiment, its confound, and the
+  verified deception/framing prior work. Read before designing arm 3.
+- `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
+  native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
+- `docs/prior-work.md` - AvalonBench and how to position against it. Read before
+  flipping the repo public.
 
 ## Route: local is for spot-checks, not for gates
 
