@@ -98,6 +98,17 @@ Queue only. Done work leaves to git log. What's next:
       that question wants evidence, not a guess.
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
+- [ ] **Stratify cloud results by served upstream instead of pooling them.** The
+      problem with an `auto` run was never that it is undocumented - `complete_meta`
+      already returns the served model and the report prints the mix. It is that
+      POOLING hunts across a time-varying model population computes a Wilson
+      interval over an ill-defined denominator. Record the served upstream on each
+      decision, report per model class, and an `auto` run stops being "several
+      models averaged": cells accumulate ACROSS runs, so tonight's nano hunts and a
+      future 120B-class run land in different cells instead of contaminating one.
+      Retires the "reproducible, unlike the cloud's 30-upstream mix" asymmetry -
+      stratified, a cloud run is reproducible at the cell level. Does not rescue a
+      thin run: ~10 hunts over 3+ upstreams is nothing per cell.
 - [ ] **Theme as an experimental variable, not a default to fix** (design:
       §Open design note - moral framing). `1984-en` stays the shipping default;
       there is no licensing reason to drop it and it is the face every committed
@@ -329,6 +340,24 @@ path today.
   conversation to build credibility, the hunter played concerned-loyalist and then
   correctly named the seer. `PLAYER_SYSTEM_PROMPT` needed no jailbreak. Cost: ~3s
   per decision, ~9 min per game, serial.
+- **Burst-probe result, gray, 2026-08-25 23:10 - the single-call trap firing
+  exactly as documented.** Pinned `gpt-oss-120b`: **1/12 served, 11 instant 429s**
+  (`All models exhausted: 8 routes checked, 7 rate-limited or on cooldown, 1 no
+  usable key`), and the ONE success was the FASTEST call of the set at 0.4s. A
+  single-call probe would have reported the tier healthy and fast. This is why the
+  `huntcloud` run sat alive for 72 minutes and wrote zero games: pinned to a model
+  whose whole route pool was cooled, refused in 40ms, nothing to fail over to.
+  Killed rather than waited out - free-tier cooldowns clear on nobody's schedule.
+- **`auto` availability is NOT `auto` capability** (same probe, same minute).
+  `auto` served **12/12 at 0.3s median** - but the upstreams were
+  `gpt-oss-20b`, `gpt-oss-safeguard-20b` (x5), `nemotron-3-nano-30b-a3b` (x6). Not
+  one 120B-class model: the big ones are exactly what is cooled. So `auto`'s
+  composition is time-varying and **anti-correlated with the thing being measured**
+  - it degrades precisely when capacity is short, which is when you reach for it.
+  A gate run on tonight's `auto` would most likely read "hunter at chance" while
+  actually measuring which models were uncooled at 23:10. Given -0.2% on the 12B
+  vs +66% on 120B-class, a 20B/30B-nano mix sits near the at-chance end. False
+  negative wearing a real number; worse than no run.
 - `clean:3001` needs `PARLOR_API_KEY`. Pin a model - `glm-4.7` is in `/v1/models`
   and 404s at call time (stale catalog entry), and `auto` silently varies the
   upstream per request. Live and answering: `minimax-m3`, `nemotron-3-super`,
