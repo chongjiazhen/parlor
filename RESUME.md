@@ -132,27 +132,13 @@ random policy wearing a model's name.
 
 ## Decisions already locked
 
+**Code invariants moved to `CLAUDE.md`** - it is always loaded, these are not,
+and two copies of one rule is how the stale copy wins an argument. What stays
+here is project state: the route calls and what a run measured.
+
 - Independent context = one model + per-seat private context slice, not N brains.
 - Referee is deterministic code; LLM only for players (and, later, judgment-GMs).
-- Canonical layer is branding-free functional keys; fiction is a swappable Theme.
-  Default face = 1984-en; no branded skin shipped.
 - Cloud is fine for game-fiction secrets (not credentials); local for deception checks.
-- **What a player says is gameplay, not a leak.** Gate #1 audits the referee's own
-  bytes only (`render_context(seat, include_speech=False)`); an agent naming a role
-  out loud is a claim, and it may be false. Private reasoning (`think`) reaches
-  neither channel.
-- **Gate #2 is conditional on gate #3.** Measured: with good voting at chance, evil
-  wins ~65% with no deception at all. An unconditioned evil win rate measures the
-  random baseline, so the scorer will not call gate #2 until gate #3 holds.
-- **A number ships next to its fallback rate.** A decision no model could make
-  legally is played at random and counted; the scorer voids its verdicts above 10%.
-- **Gate #1 is enforced by the driver, not by callers.** `play_game` audits every
-  turn and raises; it is not an opt-in callback, because the eval lane forgot to
-  pass one and ran live models unaudited for a full session.
-- **`core/` = what game #2 inherits, `games/<name>/` = what is about that game.**
-  Reply-reading is generic and lives in `core/replies.py`; the phase-to-key mapping
-  is not and stays in the game. Resist promoting anything else until a second game
-  actually needs it.
 - **`--rounds 2` cleared the rejection deadlock.** 1 of 8 games ended `five_rejects`
   at two discussion rounds, against 2 of 2 at one round. One round gives a vote
   nothing to reason from; treat 2 as the floor for any live run.
@@ -163,9 +149,6 @@ random policy wearing a model's name.
   keeps answering. The response body's top-level `model` is the ONLY thing that
   says who answered; `Backend.complete_meta` returns it and the report prints the
   mix, so an `auto` run is honest about being several models averaged.
-- **`find_leaks` stays naive substring matching.** A false positive is a loud test
-  failure; a false negative is a shipped leak. Do not "fix" it with word boundaries
-  to quiet a collision - rename the colliding term instead.
 
 ## Route: local is for spot-checks, not for gates
 
