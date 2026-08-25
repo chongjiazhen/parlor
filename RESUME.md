@@ -135,6 +135,42 @@ Queue only. Done work leaves to git log. What's next:
         paragraph, not a spike.
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
+- [ ] **Evil over-sabotages, and it is the seer-salience bug wearing the other
+      team's colours.** Measured on the hunt20 run in flight, 13 games, 43 mission
+      resolutions: fail-count distribution `{0: 23, 1: 11, 2: 9}`, need=1
+      throughout. So **9 of 20 failed missions (45%) had BOTH evils play fail when
+      one sufficed.** On a 2-seat team that names both of them outright; on a
+      3-seat team it cuts the good side's search to three pairs. It is the single
+      largest free information gift on the board and evil hands it over on half the
+      missions it wins.
+      - The rules already allow the right move. `validate_card` refuses only a GOOD
+        seat playing fail, so evil may play success freely, and the MISSION prompt
+        already says "weigh sabotage now against the suspicion a fail here would
+        put on this team". The capability is there; nothing lines it up.
+      - **What the seat is never told: how many fails are REQUIRED.** `need` appears
+        only in the public event AFTER resolution (`referee.py` mission()), never in
+        the ask. A seat cannot weigh redundant sabotage without knowing one fail is
+        enough. It also is not told, at the decision point, that its partner is on
+        this same team - it can derive that from the public proposal plus night
+        knowledge, but deriving is exactly what `_night_against_the_table` proved
+        models do not do unprompted.
+      - **Same shape as the measured seer result, and that is the reason to expect
+        it to work.** The seer HELD the knowledge and did not use it: 83% vs 90%
+        (+7%, nothing) until the prompt lined the fact against the table, then 37%
+        vs 100% (+63%). Evil holds partner identity and team composition and does
+        not line them up either. Fix is the mirror: state `need` in the MISSION ask,
+        and name which other seats on this team are yours.
+      - **This is a confound in gate #3a, not just an evil-side weakness.** Good's
+        +30.7% discrimination is measured against an evil side that self-identifies
+        on 45% of its successful sabotages. Some unknown share of that number is
+        good exploiting a blunder rather than deducing from discussion. So fixing
+        evil is not a fairness gesture - it is required before the good-side number
+        means what it claims. Expect discrimination to DROP when this lands; that
+        drop is a truer number, not a regression.
+      - Sequence: measured change, same seeds, one variable, after gate #3 is
+        called. Distribution above is from a PARTIAL run (13 of 20) and is an
+        incidental mechanical count, not the pre-committed hunt metric - recompute
+        on the full run before quoting it anywhere load-bearing.
 - [ ] **Stratify cloud results by served upstream instead of pooling them.** The
       problem with an `auto` run was never that it is undocumented - `complete_meta`
       already returns the served model and the report prints the mix. It is that
