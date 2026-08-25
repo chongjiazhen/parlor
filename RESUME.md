@@ -27,6 +27,25 @@ Queue only. Done work leaves to git log. What's next:
       cloud-scale job, so it waits on quota, not on the GPU.
 - [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
       substring collisions in the leak audit (see the plain-skin "Loyalist" case).
+- [ ] **Spike #1.5: One Night Ultimate Werewolf** - ahead of Secret Hitler, and not
+      for freshness. Two reasons, both structural:
+      - **Belief != truth.** Robber/troublemaker/drunk swap roles during the night,
+        so a seat's knowledge of ITS OWN role can be stale and false. `SeatView`
+        renders truth today; ONUW forces the split between what is true and what
+        this seat believes, and makes gate #1 strictly harder - the referee must
+        maintain a false belief without correcting it and without leaking the swap.
+        Sharper test of independent context than cabal can pose, where every seat's
+        knowledge is both true and static.
+      - **It fixes the N bottleneck.** One night, one discussion, one vote: ~10-15
+        model calls against cabal's 80-220, so 10-20x the games per hour. Every hard
+        question this session was gated on games-per-hour (14 min/game local, 5
+        hunts per 12 games, a gate needing 30+). ONUW turns "cannot afford the N"
+        into "run 200 overnight".
+      Also no elimination, which is the point of preferring this family. Secret
+      Hitler stays the better LADDER step (forced reveals, a deck the referee
+      controls) but ONUW is the better ENGINE step. Do it only once gate #3 is
+      called - it is also the pressure test for what really belongs in `core/`, and
+      that question wants evidence, not a guess.
 - [ ] Spike #2: off-map faction heartbeat (this is where hexis earns its seat).
 
 ## Pre-committed criterion for the hunt run (written 2026-08-25 19:54, BEFORE the numbers)
