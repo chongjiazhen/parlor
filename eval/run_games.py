@@ -1,8 +1,17 @@
 """Run N games and score gates #2 and #3.
 
-    python -m eval.run_games --games 20 --backend clean --model auto
+    python -m eval.run_games --games 20 --backend clean --model gpt-oss-120b
     python -m eval.run_games --games 200 --arm random          # the chance baseline
+    python -m eval.run_games --games 20 --arm llm-good --backend clean --model gpt-oss-120b
     python -m eval.run_games --games 6 --backend local --model rocinante-x-12b-heretic-q4
+
+Four arms, because ``llm`` on both sides measures deduction and deception
+entangled - good failing to deduce and evil deceiving well look identical in the
+numbers. ``llm-good`` and ``llm-evil`` seat one side live against the random
+control, so the live side's contribution is the only thing moving. Note which
+seats each half of gate #3 belongs to: the vote half is the GOOD seats, but the
+hunt half is the hunter, who is EVIL. Only the full ``llm`` arm can carry gate #3
+whole; a mixed arm carries one half and the report says which.
 
 Route discipline follows the endpoint, not the flag: ``clean``/``gray`` are
 parallel (freellmapi fans out), ``local`` is one model on one GPU and is forced
@@ -43,7 +52,7 @@ from core.backends import ENDPOINTS, Backend
 from games.cabal import transcript
 from games.cabal.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
-from games.cabal.roles import DEFAULT_THEME, THEMES
+from games.cabal.roles import DEFAULT_THEME, THEMES, Team
 
 
 def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
@@ -58,27 +67,46 @@ def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
     return (max(0.0, centre - half), min(1.0, centre + half))
 
 
+#: which side runs on a model, per arm. The mixed arms exist because ``llm`` on
+#: both sides measures deduction and deception entangled: good failing to deduce
+#: and evil deceiving well produce the same numbers. Seat one side on the random
+#: policy and the other side's contribution is the only thing left moving.
+LIVE_TEAMS: dict[str, set] = {
+    "random": set(),
+    "llm": {Team.GOOD, Team.EVIL},
+    "llm-good": {Team.GOOD},
+    "llm-evil": {Team.EVIL},
+}
+
+
+def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
+    """Seat -> policy. Seats on the arm's live side get their own ``LLMPolicy``
+    (each seat needs its own retry trace; a shared object would interleave
+    ``last_fell_back``); everyone else plays the random control."""
+    fallback = RandomPolicy(rng=rng)
+    live = LIVE_TEAMS[args.arm] if args.backend else set()
+    if not live:
+        return {s: fallback for s in ref.assignment}
+    backend = Backend.named(
+        args.backend, args.model,
+        api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+        temperature=args.temperature,
+        timeout=args.timeout,
+        max_tokens=args.max_tokens,
+    )
+    return {
+        s: (LLMPolicy(backend=backend, retries=args.retries, fallback=fallback)
+            if ref.assignment[s].team in live else fallback)
+        for s in ref.assignment
+    }
+
+
 def one_game(index: int, args) -> GameRecord:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
     ref = CabalReferee.new(5, seed=seed, theme=theme, discussion_rounds=args.rounds)
-    fallback = RandomPolicy(rng=rng)
-    if args.arm == "random" or not args.backend:
-        policies = {s: fallback for s in ref.assignment}
-    else:
-        backend = Backend.named(
-            args.backend, args.model,
-            api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
-            temperature=args.temperature,
-            timeout=args.timeout,
-            max_tokens=args.max_tokens,
-        )
-        # one policy per seat: each seat needs its own retry trace, and sharing a
-        # policy object across seats would interleave last_fell_back
-        policies = {s: LLMPolicy(backend=backend, retries=args.retries,
-                                 fallback=fallback)
-                    for s in ref.assignment}
+    policies = build_policies(ref, args, rng)
     try:
         return play_game(ref, policies, max_turns=args.max_turns)
     except Exception as exc:                     # one bad game must not kill the run
@@ -193,21 +221,40 @@ def report(s: dict, args, elapsed: float) -> str:
         lines += [f"    {line}" for line in integ["trace_sample"]]
     if s["errors"]:
         lines.append(f"  {len(s['errors'])} game(s) errored: {s['errors'][:3]}")
-    verdict_3a = g3["discrimination"] > 0
-    verdict_3b = g3["hunter_ci95"][0] > 1 / 3
+    # Which side a verdict is allowed to speak for is an ARM question before it is a
+    # numbers question. Gate #3 straddles both: the vote half is the good seats
+    # deducing, but the hunt half is the HUNTER - an evil seat - deducing. So the
+    # mixed arms can each carry only one half of gate #3, and only the full llm arm
+    # can carry the gate.
+    live = LIVE_TEAMS[args.arm] if args.backend else set()
+    good_is_live, evil_is_live = Team.GOOD in live, Team.EVIL in live
+    n_3a = g3["discrimination"] > 0
+    n_3b = g3["hunter_ci95"][0] > 1 / 3
+    verdict_3a, verdict_3b = n_3a and good_is_live, n_3b and evil_is_live
     verdict_3 = verdict_3a and verdict_3b
     rate_ok = g2["ci95"][0] > 0.05
     lines += [
         "",
         f"gate #3 {'PASS' if verdict_3 else 'not shown'} - "
-        f"vote discrimination {'>0' if verdict_3a else 'at/below 0'}, hunter "
-        f"{'beats' if verdict_3b else 'does not beat'} chance at the CI floor",
+        f"vote discrimination {'>0' if n_3a else 'at/below 0'}, hunter "
+        f"{'beats' if n_3b else 'does not beat'} chance at the CI floor",
     ]
+    if not good_is_live:
+        lines.append("  (good played at random in this arm, so the vote half is the "
+                     "chance baseline, not a deduction claim)")
+    if not evil_is_live:
+        lines.append("  (the hunter is an EVIL seat and played at random in this "
+                     "arm, so the hunt half is the 1-in-3 baseline)")
     # Gate #2 is conditional on gate #3, and that is not pedantry: against good
     # seats voting at chance, evil wins ~65% of the time with no deception at all
     # (measured, --arm random). An unconditioned evil win rate measures the
     # random baseline, so it cannot be evidence that deception works.
-    if not verdict_3:
+    if not evil_is_live:
+        lines.append(
+            f"gate #2 not shown - evil played at random in this arm, so its "
+            f"{g2['evil_win_rate']:.2%} win rate is the baseline itself."
+        )
+    elif not verdict_3:
         lines.append(
             f"gate #2 not shown - evil win rate is {g2['evil_win_rate']:.2%}, but "
             "good is at chance, so evil wins without deceiving anyone. Gate #2 is "
@@ -227,8 +274,10 @@ def report(s: dict, args, elapsed: float) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=10)
-    ap.add_argument("--arm", choices=["llm", "random"], default="llm",
-                    help="'random' is the chance baseline - no model calls at all")
+    ap.add_argument("--arm", choices=list(LIVE_TEAMS), default="llm",
+                    help="which side runs on the model: 'random' is the chance "
+                         "baseline (no model calls), 'llm-good'/'llm-evil' seat one "
+                         "side live against the random control")
     ap.add_argument("--backend", choices=list(ENDPOINTS))
     ap.add_argument("--model", default="auto")
     ap.add_argument("--rounds", type=int, default=1)
@@ -248,11 +297,12 @@ def main() -> None:
                     help="which game to transcribe (default: the first completed one)")
     args = ap.parse_args()
 
-    if args.arm == "llm" and not args.backend:
-        sys.exit("--arm llm needs --backend (or run --arm random for the baseline)")
+    if LIVE_TEAMS[args.arm] and not args.backend:
+        sys.exit(f"--arm {args.arm} needs --backend "
+                 "(or run --arm random for the baseline)")
 
     workers = args.workers
-    if args.arm == "random":
+    if not LIVE_TEAMS[args.arm] or not args.backend:
         workers = 1
     elif not ENDPOINTS[args.backend].parallel:
         workers = 1
