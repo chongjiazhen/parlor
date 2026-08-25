@@ -12,6 +12,23 @@ Queue only. Done work leaves to git log. What's next:
       Per the criterion, the answer is **"not shown at this N"** and NOT "buy more
       games": the power note predicted 9 hunts against the ~16 needed at a true
       60%. Respecify the metric instead - see the graded-hunt item.
+- [ ] **A good seat approves a team it KNOWS is tainted, 7 of 76 times (9%).**
+      Found by `eval/audit_decisions.py` on the seed-1000 run - a seat that was
+      told a specific seat is evil, sees it on the proposal, and votes yes anyway.
+      Good wins by holding missions, so this is voting against its own win
+      condition using knowledge it holds.
+      - **The obvious excuse does not apply.** At four rejections a fifth loses
+        outright, so approving a bad team can beat rejecting. Walked the reject
+        streak alongside the votes: **0 of the 7 were under that pressure.** All
+        seven were free choices.
+      - Same family as the over-sabotage and self-target findings: the seat holds
+        the fact and does not act on it. Unlike those two it is NOT refusable - a
+        good seat approving a tainted team is legal, and making it illegal would
+        be the referee playing the game. This one is a prompt or a notebook
+        question, not a rules question.
+      - It also bounds gate #3a from the inside: discrimination is +31.55%, and
+        part of the remaining gap is this - seats discarding knowledge they were
+        handed, not failing to deduce.
 - [ ] **NEXT: re-run seed 1000 now that `validate_hunt` refuses self-targeting.**
       The fix landed 2026-08-26: the hunter's own seat is now in the same refusal
       as its known ally (`own | {hunter}`), so the legal candidate set is exactly
