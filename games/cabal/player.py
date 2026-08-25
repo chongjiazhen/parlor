@@ -156,6 +156,11 @@ class LLMPolicy:
     upstreams: Counter = field(default_factory=Counter)
     #: incremented by the driver's caller-visible record, not here
     last_fell_back: bool = False
+    #: the upstream that served the MOST RECENT decision. The per-run mix answers
+    #: "who played this run"; only this answers "who made THAT move" - which is the
+    #: question worth asking under a routing alias, where the hunter and the voter
+    #: in one game can be different models entirely.
+    last_upstream: str = ""
 
     def act(self, ref: CabalReferee, seat: int) -> dict:
         self.last_fell_back = False
@@ -169,6 +174,7 @@ class LLMPolicy:
             try:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
+                self.last_upstream = served_by
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self.trace.append(f"seat {seat} attempt {attempt}: {complaint}")
@@ -190,6 +196,7 @@ class LLMPolicy:
             return action
         self.trace.append(f"seat {seat}: {self.retries + 1} attempts failed, playing random")
         self.last_fell_back = True
+        self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
 
     def _precheck(self, ref: CabalReferee, seat: int, action: dict) -> None:
@@ -240,6 +247,10 @@ class Decision:
     played: str
     think: str = ""
     fell_back: bool = False
+    #: which upstream actually answered THIS decision. Under a routing alias the
+    #: gateway picks per request, so a per-run mix cannot tell you whether the model
+    #: that misread the hunt is the one that voted well.
+    served_by: str = ""
 
 
 def played_summary(phase: Phase, action: dict) -> str:
@@ -322,6 +333,8 @@ def play_game(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
             think=str(action.get("think", "")), fell_back=fell_back,
+            served_by=("" if fell_back
+                       else str(getattr(policies[seat], "last_upstream", "") or "")),
         ))
         return action
 

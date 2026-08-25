@@ -283,8 +283,6 @@ class TestUpstreamAttribution(unittest.TestCase):
         self.assertEqual(sum(rec.upstreams.values()), backend.calls)
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestVoteKnowledgeSplit(unittest.TestCase):
@@ -336,3 +334,49 @@ def play_one_vote(ref, policies, rec):
             knew_evil_on_team=bool(known_evil & set(team)),
         ))
     ref.vote(votes)
+
+
+class TestPerDecisionAttribution(unittest.TestCase):
+    """The per-run mix says who played the run. Only the per-decision record says
+    who made THAT move - and under a routing alias the seat that misread the hunt
+    and the seat that voted well can be different models entirely."""
+
+    def test_each_decision_names_the_upstream_that_answered_it(self):
+        backend = TestUpstreamAttribution.Rotating('{"vote": "approve"}',
+                                                   ["up-a", "up-b"])
+        ref = fixed_ref(discussion_rounds=0)
+        ref.propose(0, [0, 1])
+        policy = LLMPolicy(backend=backend, retries=0)
+        rec = GameRecord()
+        served = []
+        for seat in sorted(ref.assignment):
+            policy.act(ref, seat)
+            served.append(policy.last_upstream)
+        del rec
+        self.assertEqual(served, ["up-a", "up-b", "up-a", "up-b", "up-a"])
+
+    def test_a_fallback_names_nobody(self):
+        """The random policy answered it, not a model. Attributing it to whichever
+        upstream last succeeded would put a random move on a model's record."""
+        backend = TestUpstreamAttribution.Rotating("{}", ["up-a"])   # never legal
+        policy = LLMPolicy(backend=backend, retries=0,
+                           fallback=RandomPolicy(rng=random.Random(1)))
+        ref = CabalReferee.new(5, seed=7, discussion_rounds=1)
+        rec = play_game(ref, {s: policy for s in ref.assignment})
+        self.assertTrue(rec.decision_log)
+        self.assertTrue(all(d.fell_back for d in rec.decision_log))
+        self.assertTrue(all(d.served_by == "" for d in rec.decision_log))
+
+    def test_the_log_carries_it_through_a_real_game(self):
+        backend = TestUpstreamAttribution.Rotating('{"say": "hello"}', ["up-a"])
+        ref = CabalReferee.new(5, seed=3, discussion_rounds=1)
+        rec = play_game(ref, {s: LLMPolicy(backend=backend, retries=0,
+                                           fallback=RandomPolicy(rng=random.Random(3)))
+                              for s in ref.assignment})
+        spoke = [d for d in rec.decision_log if d.phase == "discuss" and not d.fell_back]
+        self.assertTrue(spoke)
+        self.assertTrue(all(d.served_by == "up-a" for d in spoke))
+
+
+if __name__ == "__main__":
+    unittest.main()

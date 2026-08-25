@@ -172,6 +172,8 @@ def _decision_lines(rec: dict) -> list[str]:
     lines = []
     for d in log:
         note = " - fell back to random" if d.get("fell_back") else ""
+        if d.get("served_by"):
+            note += f" [{d['served_by']}]"
         think = " ".join(str(d.get("think") or "").split())
         body = f' "{think}"' if think else " *(no reasoning given)*"
         lines.append(f"- `t{d['turn']:>3} {d['phase']:<7} seat {d['seat']}` "

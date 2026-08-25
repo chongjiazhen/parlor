@@ -29,6 +29,28 @@ Queue only. Done work leaves to git log. What's next:
       substring collisions in the leak audit (see the plain-skin "Loyalist" case).
 - [ ] Spike #2: off-map faction heartbeat (this is where hexis earns its seat).
 
+## Pre-committed criterion for the hunt run (written 2026-08-25 19:54, BEFORE the numbers)
+
+Run in flight: 20 games, `qwen36-35b-a3b-iq3`, seed 1000, 2 rounds, hunt fix in,
+detached (`eval/records/run-hunt20.cmd`, log `eval/records/hunt20.log`).
+
+- **Gate #3b holds only if the hunter's Wilson 95% floor clears 1/3.** That is the
+  bar the scorer already applies; it is written here so it cannot be softened after
+  seeing the result.
+- **If it lands near chance, the answer is "not shown at this N" - NOT "run more
+  games until it clears".** Stopping when a floor happens to cross is peeking, and
+  it manufactures the significance it claims to find. A repo that voids runs over
+  10% fallback and refuses to read gate #2 off a random baseline cannot ship that.
+- **Power, computed before the run:** at a true 60% the gate needs ~16 hunts
+  (~21-38 games); at 50%, ~32 hunts (~43-76 games); at 45%, ~62 hunts (83-148
+  games). This run yields ~8-15 hunts. So it can SHOW a strong hunter and cannot
+  settle a marginal one - that asymmetry is the reason for the bullet above.
+- **If the hunter lands marginal, respecify the metric rather than buying games.**
+  Gate #3 is bottlenecked on its lowest-power half: the vote metric collects
+  100-222 samples per 12 games, the hunt collects 5. A ranked or confidence-graded
+  hunt would yield graded signal per hunt instead of one bit, which is the same
+  reason the blind-seat split beats the raw discrimination number.
+
 ## Measured, dated - numbers before opinions
 
 All local `rocinante-x-12b-heretic-q4`, seed 400, 8 games, 2 rounds, <1% fallback
