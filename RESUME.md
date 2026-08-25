@@ -79,10 +79,12 @@ path today.
   upstream per request. Live and answering: `minimax-m3`, `nemotron-3-super`,
   `qwen3-30b-a3b-fp8`, `gpt-oss-120b`, `glm-4.7-flash`. Bursts draw 429s - hence the
   transport backoff and `--workers 3`.
-- **`minimax-m3` reasons out loud and needs headroom.** A 10-game run scored nothing
-  at 85% fallback: at `max_tokens=512` it spent the whole budget on visible
-  reasoning and never reached the JSON. Default raised to 1536 and exposed as
-  `--max-tokens`; **not yet re-verified** (the box was 429'd immediately after).
-  Either confirm 1536 clears it or pin a model that answers without thinking aloud
-  (`nemotron-3-super`, `qwen3-30b-a3b-fp8`). A too-tight cap and a refusing model
-  are indistinguishable in the scores - only the refusal trace separates them.
+- **The cap was the cause, and 1536 is not enough for a rambler** (measured
+  2026-08-25, same VOTE prompt, n=4 per cell, `clean`). `nemotron-3-super`:
+  `max_tokens=512` -> 0/4 parsed, every reply ~2100 chars of visible reasoning cut
+  mid-sentence; at 1536 -> 2/4, and both failures were ~6000 chars, i.e. truncated
+  at the new cap too. So a model that thinks out loud does it at whatever length it
+  likes and no cap is a fix. `gpt-oss-120b` answers in 80-125 chars, 4/4 at both
+  caps - pin it for gate runs. `minimax-m3` itself is still unverified: the
+  provider has been 429ing it since the void run, and a 429 is a transport failure,
+  not a refusal. `qwen3-30b-a3b-fp8` and `glm-4.7-flash` currently 502.

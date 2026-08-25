@@ -39,6 +39,7 @@ games/cabal/referee.py  deterministic state machine (propose -> discuss -> vote 
 games/cabal/audit.py    gate #1 as an executable guarantee - the driver runs it, and it raises
 games/cabal/player.py   policies (random / LLM), phase->key mapping, retry loop, game driver
 games/cabal/demo.py     one game, random or live players
+games/cabal/transcript.py  one game -> readable markdown, straight off the public record
 games/cabal/test_*.py   gate #1 (no leak) + referee win paths + parsing/plumbing
 eval/run_games.py       run-N-games scoring for gates #2/#3 (deception, deduction)
 ```
@@ -96,7 +97,27 @@ python -m games.cabal.demo --backend clean --speaker    # model on the discussio
 # scoring
 python -m eval.run_games --games 200 --arm random                 # the chance baseline
 python -m eval.run_games --games 20 --backend clean --model <id> --workers 3
+python -m eval.run_games --games 20 --arm llm-good --backend clean --model <id>
+
+# a game a human can read
+python -m games.cabal.demo --transcript game.md
+python -m eval.run_games --games 12 ... --transcript one-game.md
+python -m games.cabal.transcript run.json --game 3 --out game3.md
 ```
+
+**Arms.** `--arm llm` seats both sides on the model, which measures deduction and
+deception entangled - good failing to deduce and evil deceiving well move the
+numbers the same way. `llm-good` / `llm-evil` seat one side live against the random
+control, so the live side is the only thing moving. Note where gate #3's two halves
+live: the vote half is the good seats, but the hunt half is the **hunter, who is
+evil**. A mixed arm therefore carries one half at most, and every verdict line
+names the side it is entitled to speak for.
+
+**Transcripts** render from the two public channels in the order the referee wrote
+them, never from re-derived end state: referee events in italic, player speech
+plain, private `think` in neither channel and so in no transcript. Raw run JSON
+stays out of git (`eval/records/` is gitignored); a rendered transcript that
+evidences a claim is what gets committed.
 
 Pin a model id; `auto` picks a different upstream per request, and a catalog entry
 can be stale (`model_not_found` at call time on a model `/v1/models` lists). The

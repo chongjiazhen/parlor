@@ -45,7 +45,7 @@ import os
 import random
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
 from core.backends import ENDPOINTS, Backend
@@ -113,6 +113,46 @@ def one_game(index: int, args) -> GameRecord:
         rec = GameRecord(assignment={s: r.key for s, r in ref.assignment.items()})
         rec.error = f"{type(exc).__name__}: {exc}"
         return rec
+
+
+def progress_line(done: int, total: int, index: int, rec: GameRecord,
+                  elapsed: float) -> str:
+    """One finished game, as it finishes. A run prints nothing until the end
+    otherwise, and the failure worth catching early - a provider throttling the
+    whole run into the random fallback - is invisible in a summary that arrives
+    twenty minutes late. Every game reports its own fallback share, so a 429 storm
+    shows up as it starts rather than as a void verdict afterwards."""
+    share = rec.fallbacks / rec.decisions if rec.decisions else 0.0
+    eta = (elapsed / done) * (total - done) if done else 0.0
+    line = (f"[{done}/{total}] game {index}: {rec.winner or 'no winner'}, "
+            f"{rec.fallbacks}/{rec.decisions} fell back ({share:.0%}), "
+            f"{elapsed / 60:.1f}m in, ~{eta / 60:.1f}m left")
+    if rec.error:
+        line += f"  ERROR {rec.error}"
+    elif share > 0.10:
+        line += "  <- above 10%: this game is mostly the random policy"
+    return line
+
+
+def run_games(args, workers: int, started: float) -> list[GameRecord]:
+    """All N games, reporting each as it lands. Order is preserved regardless of
+    completion order - a seeded run must produce the same records either way."""
+    total = args.games
+    records: list[GameRecord] = [None] * total          # type: ignore[list-item]
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            pending = {pool.submit(one_game, i, args): i for i in range(total)}
+            for done, future in enumerate(as_completed(pending), start=1):
+                index = pending[future]
+                records[index] = future.result()
+                print(progress_line(done, total, index, records[index],
+                                    time.time() - started), file=sys.stderr, flush=True)
+    else:
+        for index in range(total):
+            records[index] = one_game(index, args)
+            print(progress_line(index + 1, total, index, records[index],
+                                time.time() - started), file=sys.stderr, flush=True)
+    return records
 
 
 def score(records: list[GameRecord]) -> dict:
@@ -310,11 +350,7 @@ def main() -> None:
               file=sys.stderr)
 
     started = time.time()
-    if workers > 1:
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            records = list(pool.map(lambda i: one_game(i, args), range(args.games)))
-    else:
-        records = [one_game(i, args) for i in range(args.games)]
+    records = run_games(args, workers, started)
     elapsed = time.time() - started
 
     s = score(records)

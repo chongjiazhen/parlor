@@ -20,8 +20,14 @@ LLM players will plug into once the state machine is proven.
 from __future__ import annotations
 
 import json
+import time
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
+
+#: HTTP codes that mean "later", not "no": the free tiers throttle bursts (429)
+#: and briefly park an upstream (502/503). Everything else raises immediately.
+RETRY_CODES = frozenset({429, 500, 502, 503, 504})
 
 
 @dataclass(frozen=True)
@@ -65,6 +71,15 @@ class Backend:
     #: the numbers; only the refusal trace tells them apart. Raise this (or pin a
     #: model that does not think out loud) before blaming the model.
     max_tokens: int = 1536
+    #: Transport retries for a throttled or briefly-unavailable endpoint, doubling
+    #: from ``rate_backoff``. A 429 is the provider saying "later"; it is not the
+    #: model refusing, and it must not spend the player policy's semantic retry
+    #: budget. Measured 2026-08-25 on the free cloud tier: a run whose every call
+    #: was a 429 scored 89% fallback, which reads in the summary as a model that
+    #: cannot follow the rules. Retried here, a throttle costs wall-clock instead
+    #: of poisoning the numbers.
+    rate_retries: int = 4
+    rate_backoff: float = 2.0
 
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":
@@ -94,6 +109,20 @@ class Backend:
             headers=headers,
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            body = json.loads(resp.read().decode())
+        body = self._post(req)
         return body["choices"][0]["message"]["content"]
+
+    def _post(self, req) -> dict:
+        """One request, retried while the endpoint says "later". Anything else -
+        a 404 on a stale catalog id, a 400, a timeout - raises on the first try:
+        those do not get better by waiting, and a caller waiting 30s to be told a
+        model does not exist is worse than being told now."""
+        for attempt in range(self.rate_retries + 1):
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                    return json.loads(resp.read().decode())
+            except urllib.error.HTTPError as exc:
+                if exc.code not in RETRY_CODES or attempt == self.rate_retries:
+                    raise
+                time.sleep(self.rate_backoff * (2 ** attempt))
+        raise RuntimeError("unreachable")
