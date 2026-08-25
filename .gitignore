@@ -12,3 +12,6 @@ _*.md
 # reboot without entering history. A run that EVIDENCES a claim in the docs gets
 # rendered to a readable transcript and that transcript is committed - not the blob.
 eval/records/
+
+# Launchers are INPUTS, not run output - they live in eval/runs/ and are tracked.
+# A run recipe that is not versioned cannot be reviewed after it misfires.

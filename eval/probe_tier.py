@@ -74,7 +74,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--model", default="auto")
     ap.add_argument("-n", "--calls", type=int, default=12,
                     help="burst size; 12 is enough to expose a cooldown (default: 12)")
-    ap.add_argument("--timeout", type=float, default=120.0)
+    # A probe asks for 8 tokens. A call that has not answered in 30s is not slow,
+    # it is wedged - and a gate that waits 12 x 120s is a gate nobody puts in front
+    # of a run.
+    ap.add_argument("--timeout", type=float, default=30.0)
     args = ap.parse_args(argv)
 
     endpoint = ENDPOINTS[args.backend]
@@ -88,18 +91,28 @@ def main(argv: list[str] | None = None) -> int:
     ok: list[float] = []
     codes: dict[object, int] = {}
     served: dict[str, int] = {}
-    for i in range(1, args.calls + 1):
+    n = args.calls
+    failed = 0
+    made = 0
+    for i in range(1, n + 1):
         status, secs, who, detail = probe_once(endpoint.base_url, args.model, key, args.timeout)
+        made = i
         codes[status] = codes.get(status, 0) + 1
         if status == 200:
             ok.append(secs)
             served[who] = served.get(who, 0) + 1
-            print(f"[{i:2}/{args.calls}] 200 {secs:6.1f}s served={who} {detail!r}")
+            print(f"[{i:2}/{n}] 200 {secs:6.1f}s served={who} {detail!r}")
         else:
-            print(f"[{i:2}/{args.calls}] {status} {secs:6.1f}s {detail}")
+            failed += 1
+            print(f"[{i:2}/{n}] {status} {secs:6.1f}s {detail}")
+        # The verdict needs ok >= n-1, so two failures decide it. Keep going and a
+        # wedged tier costs n x timeout, which is why nobody would gate on this.
+        if failed > 1:
+            print(f"[--/{n}] stopping early: {failed} failures, the verdict cannot change")
+            break
 
-    n = args.calls
-    print(f"\nok={len(ok)}/{n} codes={ {str(k): v for k, v in codes.items()} }")
+    print(f"\nok={len(ok)}/{made} attempted (burst of {n}) "
+          f"codes={ {str(k): v for k, v in codes.items()} }")
     if ok:
         ok.sort()
         print(f"latency ok: min={ok[0]:.1f}s med={ok[len(ok) // 2]:.1f}s max={ok[-1]:.1f}s")
