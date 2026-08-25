@@ -12,23 +12,35 @@ Queue only. Done work leaves to git log. What's next:
       Per the criterion, the answer is **"not shown at this N"** and NOT "buy more
       games": the power note predicted 9 hunts against the ~16 needed at a true
       60%. Respecify the metric instead - see the graded-hunt item.
-- [ ] **A good seat approves a team it KNOWS is tainted, 7 of 76 times (9%).**
-      Found by `eval/audit_decisions.py` on the seed-1000 run - a seat that was
-      told a specific seat is evil, sees it on the proposal, and votes yes anyway.
-      Good wins by holding missions, so this is voting against its own win
-      condition using knowledge it holds.
-      - **The obvious excuse does not apply.** At four rejections a fifth loses
-        outright, so approving a bad team can beat rejecting. Walked the reject
-        streak alongside the votes: **0 of the 7 were under that pressure.** All
-        seven were free choices.
-      - Same family as the over-sabotage and self-target findings: the seat holds
-        the fact and does not act on it. Unlike those two it is NOT refusable - a
-        good seat approving a tainted team is legal, and making it illegal would
-        be the referee playing the game. This one is a prompt or a notebook
-        question, not a rules question.
-      - It also bounds gate #3a from the inside: discrimination is +31.55%, and
-        part of the remaining gap is this - seats discarding knowledge they were
-        handed, not failing to deduce.
+- [ ] **Two behaviours the auditor prices, neither of them bugs** (steer
+      2026-08-26 - my PROOF classification was wrong on both).
+      - **A good seat approves a known-tainted team, 7/76 (9%).** Legal and
+        plausibly CORRECT: a seer that always rejects exactly the tainted teams
+        has a perfect tell, and the hunter's whole job is finding the seer, so
+        buying concealment with mission EV is real play. The model appears to do
+        it deliberately - a seer's private reasoning reads "I must support [1,4]
+        ... and vote yes - without revealing I know who's darkness." Checked the
+        one forced case (four rejections, a fifth loses outright): 0 of 7 were
+        under that pressure, so they were free choices - but free is not the same
+        as careless, and this count cannot separate strategy from lapse.
+        **Consequence for the metric, which is the part that matters:** gate #3a's
+        "good approves clean vs tainted" scores a concealing seer as a bad one, so
+        the headline +31.55% and the blind-seat +13.57% are not measuring the same
+        thing. Blind seats have nothing to hide, which is why that half is the
+        sturdier number - and an argument for reporting it as the primary.
+      - **Over-sabotage, 12/63 missions.** Two evils on one mission decide
+        independently and the game gives them NO private channel, so playing
+        success is only better if the other one fails and nothing says it will.
+        Anti-coordination with a mixed equilibrium; the ideal count is not zero
+        and calling it dominated was wrong.
+        Still worth counting for one reason: a focal point needs no channel at all
+        - "the lower-numbered evil on this team plays fail" is derivable by both
+        seats from the public proposal alone, and Schelling points do not require
+        communication. A pair that finds any such convention drives this near zero
+        without signalling. 41% of sunk missions says the model finds none. That is
+        a fact about reasoning, not a rules violation.
+        So the `need` disclosure stays worth doing (it is entitled rules
+        information the ask withholds) but stop expecting it to zero this number.
 - [ ] **NEXT: re-run seed 1000 now that `validate_hunt` refuses self-targeting.**
       The fix landed 2026-08-26: the hunter's own seat is now in the same refusal
       as its known ally (`own | {hunter}`), so the legal candidate set is exactly

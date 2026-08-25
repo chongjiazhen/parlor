@@ -69,9 +69,20 @@ def hunt_named_impossible(games: list[dict]) -> tuple[int, int, list[str]]:
 def over_sabotage(games: list[dict]) -> tuple[int, int, list[str]]:
     """More fail cards than the mission required.
 
-    Redundant sabotage is free information for the good side: two fails on a
-    two-seat team names both evils outright. Dominated for evil in every case,
-    because one fail achieves the same result and reveals strictly less.
+    NOT an error, and the first version of this file was wrong to call it one.
+    Two evils on one mission decide independently and there is no private channel
+    between them - that is a rule of the game, not an oversight. Playing success
+    is only better IF the other one fails, and nothing tells you it will. It is an
+    anti-coordination game with a mixed equilibrium, so some double-fail rate is
+    irreducible and the ideal count is not zero.
+
+    What is still worth counting: a focal point exists that needs no channel at
+    all - "the lower-numbered evil on this team plays fail" is derivable by both
+    seats from the public proposal alone. Schelling points do not require
+    communication. A pair that finds any such convention drives this near zero
+    without ever signalling; the observed 41% of sunk missions says the model is
+    not finding one. That is a fact about reasoning, not a rules violation, which
+    is why it sits under COST rather than PROOF.
     """
     bad, total, notes = 0, 0, []
     for g in games:
@@ -90,16 +101,23 @@ def over_sabotage(games: list[dict]) -> tuple[int, int, list[str]]:
 def approved_a_team_it_knew_was_tainted(games: list[dict]) -> tuple[int, int, list[str]]:
     """A GOOD seat approving a team it was told carries an evil.
 
-    Good wins by holding missions, so sending a known saboteur is dominated - the
-    seat is voting against its own win condition using knowledge it holds.
+    Also NOT an error, and calling it one was the same mistake. A seer that always
+    rejects exactly the tainted teams has a perfect tell, and the hunter's whole
+    job is finding the seer - so buying concealment with mission EV can be correct
+    play. The model appears to do it deliberately: one seer's private reasoning in
+    the seed-1000 run reads "I must support [1,4] ... and vote yes - without
+    revealing I know who's darkness."
 
-    One real exception: at four rejections a fifth loses the game outright, so
-    approving anything can beat rejecting. Checked on the seed-1000 run by walking
-    the reject streak alongside the votes - **0 of the 7 hits were under that
-    pressure**, so the exception explains none of them and the count stands as
-    dominated play. The check does not exclude them automatically because
-    reject_count is not on the vote record; re-do that walk before quoting the
-    number on a run where five_rejects is common.
+    Counted because it PRICES the concealment and because it bounds a gate:
+    "good approves clean vs tainted" scores a concealing seer as though it were a
+    bad one, so gate #3a's headline number and its blind-seat half are not
+    measuring the same thing. Blind seats have nothing to hide, which is why that
+    split is the sturdier number.
+
+    Checked against the one case where it is unambiguously forced: at four
+    rejections a fifth loses outright. Walking the reject streak alongside the
+    votes on seed 1000, 0 of the 7 were under that pressure - so these were free
+    choices, whether strategic or careless, and this count cannot tell those apart.
     """
     bad, total, notes = 0, 0, []
     for g in games:
@@ -177,8 +195,14 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
 
 PROOF = [
     ("hunt named a seat it knew was evil", hunt_named_impossible),
-    ("mission over-sabotaged", over_sabotage),
-    ("good seat approved a known-tainted team", approved_a_team_it_knew_was_tainted),
+]
+#: Legal, sometimes correct, and counted anyway - each one prices something the
+#: rules make unavoidable or the metrics mis-score. Never added to the proof total:
+#: a strategic cost reported as an error is a wrong finding with a number on it.
+COST = [
+    ("mission over-sabotaged (no private channel; focal point unused)", over_sabotage),
+    ("good seat approved a known-tainted team (concealment has value)",
+     approved_a_team_it_knew_was_tainted),
 ]
 HEURISTIC = [
     ("seat referred to itself in the third person", third_person_self),
@@ -196,8 +220,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(games)} games from {args.jsonl}\n")
 
     proof_total = 0
-    for heading, checks in (("PROOF - wrong on the rules", PROOF),
-                            ("HEURISTIC - needs a human read", HEURISTIC)):
+    for heading, checks in (
+        ("PROOF - impossible given what that seat knew", PROOF),
+        ("COST - legal, sometimes correct, priced here not blamed", COST),
+        ("HEURISTIC - needs a human read", HEURISTIC),
+    ):
         print(f"== {heading} ==")
         for name, fn in checks:
             bad, total, notes = fn(games)
