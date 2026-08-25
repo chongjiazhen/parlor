@@ -87,10 +87,15 @@ THEME_PLAIN = Theme(
 # domain in the UK/EU since 2021 (life+70); still under US copyright until 2045
 # (published 1949, 95-year term). So this is a flavour choice, not a licensing claim -
 # a theme is display-only and deliberately outside the engine's branding-free
-# guarantee, which covers the canonical layer. `plain` is the skin that references
-# nothing. Flipping DEFAULT_THEME is a MEASURED change, not a cleanup: the blurb
-# inverts moral polarity (sabotage reads as heroic) and no recorded number says which
-# theme produced it. See RESUME.md.
+# guarantee, which covers the canonical layer. Coined vocabulary is not copyrightable
+# (words and short phrases never are); the novel's TEXT is, and none of it is here.
+# `plain` is the skin that references nothing.
+#
+# The blurb inverts moral polarity - sabotage is heroic, deceit is survival - and
+# that is a variable, not decoration: nothing yet measures whether it moves how
+# readily a model deceives. So changing DEFAULT_THEME is a MEASURED change on the
+# same terms as any other, since no recorded number says which theme produced it.
+# See RESUME.md §Open design note - moral framing.
 # The trusting majority who inform on each other + a hidden watcher are the loyal
 # Party; the informed minority who deceive are the Brotherhood underground who
 # sabotage each directive. Failing a "mission" is heroic sabotage; the martyr makes

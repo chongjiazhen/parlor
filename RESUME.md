@@ -98,16 +98,14 @@ Queue only. Done work leaves to git log. What's next:
       that question wants evidence, not a guess.
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
-- [ ] **Flip `DEFAULT_THEME` to `plain` - a MEASURED change, queued behind gate #3.**
-      The shipping face evokes a novel under US copyright until 2045 (`roles.py`
-      carries the dates), so `plain` is the cleaner public default. It does not
-      happen as a cleanup: the 1984 blurb inverts moral polarity - sabotage reads as
-      heroic, deceit as survival - and that is plausibly load-bearing on whether a
-      model will deceive at all, which is the one question local runs exist to
-      answer. No number in §Measured records which theme produced it, so flipping
-      now contaminates the comparison exactly as the negation pass would. Sequence
-      it with the other measured changes: same seeds, one variable, after gate #3 is
-      called. Cheap tell that it matters: run the seer bench under both skins.
+- [ ] **Theme as an experimental variable, not a default to fix** (design:
+      §Open design note - moral framing). `1984-en` stays the shipping default;
+      there is no licensing reason to drop it and it is the face every committed
+      transcript wears. What is open is that the blurb inverts moral polarity -
+      sabotage reads as heroic, deceit as survival - and nothing measures whether
+      that moves behaviour. No number in §Measured records which theme produced it,
+      so a theme change is a MEASURED change on the same terms as the negation
+      pass: same seeds, one variable, after gate #3 is called.
 - [ ] **Two shapes not to harden further before game #2** (reasoning:
       §Open design note - the RPG rung). Don't add another game's phases to
       cabal's `Phase` enum or to the `action_prompt` if-chain; don't grow
@@ -234,6 +232,59 @@ the strongest promotion candidate in the repo** and it currently lives in
 `games/cabal/player.py`. Promote on evidence, per the invariant, so it moves when
 game #2 needs it and not before - but it is the piece to watch for, since the RPG
 sketch above reuses it verbatim.
+
+## Open design note: moral framing as a measured variable
+
+Written 2026-08-25. Unrun. Arrived sideways, out of a licensing question about the
+default theme, which is a bad provenance for a research direction - so it is
+written down narrowly rather than talked up.
+
+**The question.** Holding mechanics, seeds, and information exactly fixed, does the
+FICTION an agent is playing inside change how readily it deceives? `cabal` is an
+unusually clean place to ask, because a theme is display-only by construction: swap
+`Theme` and every rule, every entitlement, every byte of private knowledge is
+identical. The only thing that moved is what the seat believes it is doing.
+
+**The confound, which is the whole design problem.** `1984-en` vs `plain` is not
+one variable. It is at least three: moral polarity (sabotage heroic vs neutral),
+narrative richness (a blurb vs no blurb), and register (loaded vocabulary vs
+sterile). A difference across that pair says nothing about morality specifically -
+it could be that any fiction beats no fiction. The arms that separate them:
+
+  1. `plain` - no fiction. Floor.
+  2. `1984-en` - rich fiction, sabotage HEROIC (what ships today).
+  3. a rich fiction of equal length and register with sabotage VILLAINOUS - the
+     saboteurs are the betrayers, the majority are the wronged. Same word count,
+     same density of loaded nouns.
+  4. optional: rich fiction, morally NEUTRAL - a sport, a heist with no victim.
+
+Polarity is arms 2 vs 3, and only 2 vs 3 - they differ in valence and in nothing
+else. Richness is 2+3 vs 1. Without arm 3 the experiment cannot make a claim about
+morality at all, and that is the difference between a result and an anecdote.
+
+**What this repo brings that a prompt-level study does not.** Gate #1 makes
+information equality a machine-checked property rather than an assumption, so a
+behavioural difference cannot be a leak. Fallback rates are recorded per run and
+void above 10%, so a "refused to deceive" cell cannot be a parse failure wearing a
+moral face - which is the obvious way this result gets faked. And the criterion can
+be pre-committed the way gate #3b already was.
+
+**Honest positioning - this is not new ground, and the framing effect is not the
+contribution.** Framing and persona effects on model behaviour are well studied,
+and deception in LLM agents has a live literature (Hagendorff on emergent deception
+abilities; Park et al.'s deception survey; Apollo's in-context scheming evals;
+MACHIAVELLI, which measures ethical behaviour of agents in text games and is the
+nearest neighbour). Read those before designing arm 3 - the failure mode is
+re-deriving a known effect and reporting it as a finding. What would be worth
+writing up is narrower: a controlled polarity manipulation inside a multi-agent
+game with a VERIFIED information-isolation guarantee, pre-registered, reported with
+its fallback rate. Workshop-paper shaped, not more, and only if the effect survives
+arm 3.
+
+**Precondition: not before gate #3 is called.** Same reasoning as every other
+measured change - and gate #3's own N problem binds here twice as hard, because
+this needs four arms rather than one. It is an argument for doing ONUW first (~10-15
+calls a game against cabal's 80-220), not for running it sooner.
 
 ## Route: local is for spot-checks, not for gates
 
