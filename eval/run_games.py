@@ -137,24 +137,46 @@ def progress_line(done: int, total: int, index: int, rec: GameRecord,
     return line
 
 
+def land(index: int, rec: GameRecord, args) -> None:
+    """Persist one finished game immediately.
+
+    A 50-game run on a local reasoning model is a twelve-hour job, and until now
+    NOTHING reached disk until the last game returned: a crash, a reboot, or an OOM
+    at hour eleven threw away eleven hours of GPU. Each game now lands as a JSONL
+    line the moment it finishes, and its transcript with it, so an interrupted run
+    is still a dataset - one short of what was asked for, not empty.
+    """
+    if args.out:
+        with open(f"{args.out}.jsonl", "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"game": index, **asdict(rec)}) + "\n")
+    if getattr(args, "transcript_dir", None):
+        os.makedirs(args.transcript_dir, exist_ok=True)
+        transcript.write(os.path.join(args.transcript_dir, f"game-{index:03d}.md"),
+                         transcript.render(rec, vars(args)))
+
+
 def run_games(args, workers: int, started: float) -> list[GameRecord]:
     """All N games, reporting each as it lands. Order is preserved regardless of
     completion order - a seeded run must produce the same records either way."""
     total = args.games
     records: list[GameRecord] = [None] * total          # type: ignore[list-item]
+
+    def landed(done: int, index: int) -> None:
+        land(index, records[index], args)
+        print(progress_line(done, total, index, records[index],
+                            time.time() - started), file=sys.stderr, flush=True)
+
     if workers > 1:
         with ThreadPoolExecutor(max_workers=workers) as pool:
             pending = {pool.submit(one_game, i, args): i for i in range(total)}
             for done, future in enumerate(as_completed(pending), start=1):
                 index = pending[future]
                 records[index] = future.result()
-                print(progress_line(done, total, index, records[index],
-                                    time.time() - started), file=sys.stderr, flush=True)
+                landed(done, index)
     else:
         for index in range(total):
             records[index] = one_game(index, args)
-            print(progress_line(index + 1, total, index, records[index],
-                                time.time() - started), file=sys.stderr, flush=True)
+            landed(index + 1, index)
     return records
 
 
@@ -372,6 +394,9 @@ def main() -> None:
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     ap.add_argument("--transcript",
                     help="write ONE game as a readable markdown transcript here")
+    ap.add_argument("--transcript-dir",
+                    help="write EVERY game as its own markdown transcript here, as "
+                         "it finishes - the readable half of a long run")
     ap.add_argument("--transcript-game", type=int, default=None,
                     help="which game to transcribe (default: the first completed one)")
     args = ap.parse_args()
