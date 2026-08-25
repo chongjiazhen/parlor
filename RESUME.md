@@ -25,8 +25,34 @@ Queue only. Done work leaves to git log. What's next:
       And `good approve clean team` runs on ~12 votes a run, because most teams in a
       5-seat game carry an evil - that denominator is too thin to gate on. This is a
       cloud-scale job, so it waits on quota, not on the GPU.
-- [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
-      substring collisions in the leak audit (see the plain-skin "Loyalist" case).
+- [ ] **Larger setups (6/7p) + the two information-degrading evils.** Package them
+      together, because both only make sense at 3 evil seats.
+      - The engine already supports both, and has since the first commit: `Role`
+        carries `seen_by_seer` (False = the evil the seer cannot see) and
+        `sees_fellow_evil` / `seen_by_fellow_evil` (False = the evil who neither
+        knows nor is known by its own side). `entitled_knowledge` honours all
+        three, so each role is ~2 lines of DATA. The cost is measurement, not code.
+      - **Why they are worth more than variety: they degrade information in a
+        principled way.** The unseen-evil variant halves the seer's knowledge, so
+        the current +30.7% local / +66% cloud stops being partly "the seer acting on
+        a handed answer" (already isolated at +13.7% by the blind-seat split) and
+        becomes a claim about deduction. The blind-evil variant makes evil deceive
+        WITHOUT knowing its partner, which is the honest version of gate #2 - the
+        current claim is really "two agents told about each other cooperated".
+      - **Not before gate #3 is called.** Changing what the seer knows mid-run means
+        neither the old nor the new number means anything. Sequence them as the
+        hardening pass you would actually publish from.
+      - At 5 seats there are only 2 evil, so the unseen variant leaves the seer
+        seeing exactly one and the blind variant leaves two evils who know nothing
+        of each other - swingy to the point of noise. These are 7+ roles.
+      - Watch role-name vs faction-name substring collisions in the leak audit (see
+        the plain-skin "Loyalist" case).
+- [ ] **Naming discipline, for when ONUW gets built.** Prose may NAME the games a
+      rung is modelled on - README has done that since commit #1 and that is
+      nominative reference, not passing off. What must never enter the canonical
+      layer is a game's expression: its role names, art, or text. So ONUW's roles
+      arrive as functional keys (`swapper`, `switcher`, `deceived`), never as the
+      published character names, exactly as this game uses seer/watcher/mimic.
 - [ ] **Spike #1.5: One Night Ultimate Werewolf** - ahead of Secret Hitler, and not
       for freshness. Two reasons, both structural:
       - **Belief != truth.** Robber/troublemaker/drunk swap roles during the night,
