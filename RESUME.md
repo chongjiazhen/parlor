@@ -21,6 +21,19 @@ Queue only. Done work leaves to git log. What's next:
       with a BURST (12 back-to-back), never a single call: a key under cooldown
       serves the occasional request while failing a stream, so a single-call probe
       says "healthy" about a tier that cannot carry a run.
+- [ ] **Negation pass over the model-facing strings** (the rule is
+      `.claude/rules/model-facing-text.md`, path-scoped so it fires when you open
+      the files that hold them). Steering by prohibition makes the banned behaviour
+      MORE available, and the live prompts do it in at least three places:
+      `"speak in the first person, and do not answer your own earlier lines"`
+      (referee DISCUSS ask), `"do not defer to whatever the table already seems to
+      think"` (plain register), `"no theatrics, no slogans, no world-flavour"`
+      (same). Each has a positive form - speak TO the other seats; form your own
+      read first; speak plainly and cite the record. The referee's refusals
+      (`cannot fail a mission`, `cannot be the informant`) are hard guardrails and
+      stay, though each already pairs with a positive instruction.
+      **This is a measured change, not a cleanup** - same seeds, one variable, and
+      it waits until the runs in flight land or it contaminates them.
 - [ ] **A per-seat private notebook.** The one real gap in "play like a human":
       `think` is dropped every turn, so a seat re-derives its read from scratch and
       cannot remember that it caught seat 2 lying in round 1. Its own words shown
