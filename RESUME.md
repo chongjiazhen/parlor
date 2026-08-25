@@ -17,7 +17,13 @@ Queue only. Done work leaves to git log. What's next:
       a separate decision - the honest options are wait for an uncontrollable
       cooldown, run `auto` and accept a population that is currently 20B/30B-nano,
       or spend the effort on ONUW instead. Third one is preferred; see its item.
-- [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
+- [ ] **Gate a cloud run on `eval/probe_tier.py` rather than remembering to probe.**
+      The probe landed 2026-08-25 (`python -m eval.probe_tier --backend gray --model
+      <id>`, exit 0 = carried the burst, 1 = did not), so the rule below now has an
+      artifact. It is not yet WIRED: `run-hunt-cloud.cmd` still launches straight
+      into a 25-game run with no precondition, which is exactly how 72 minutes went
+      to a cooled route pool. Put the probe in front of the run and abort on rc=1.
+      Cheap, deterministic, and it converts a prose rule into a gate.
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
       not judgement (7 of 8 games died at five_rejects). `--simultaneous` is built
