@@ -8,23 +8,29 @@ hidden in the UI, they are *absent from the bytes sent to its model*.
 The endgame is a freeform AI-run TTRPG: independent actors, off-map factions acting
 on their own clock, and a referee that oversees without micromanaging. The games
 below are increasingly-freeform test harnesses for that one `core/` engine. We start
-with `cabal` - a bounded team-mission hidden-role deduction game - because it is
-the purest test of the property, and
-its referee needs zero judgment: it is a unit test, not an opinion.
+with `cabal` - a bounded team-mission hidden-role deduction game, modelled on The
+Resistance: Avalon - because it is the purest test of the property, and its referee
+needs zero judgment: it is a unit test, not an opinion.
 
 Naming is deliberately branding-free. The canonical layer (dir, class, role *keys*)
 is functional - `seer`, `watcher`, `mimic`, `hunter` - so the engine reads cleanly
-and carries no game's trademark. Fiction lives only in swappable **themes**; the
-default face is a 1984 skin (public-domain novel), with a sterile `plain` skin as
-fallback. Game *rules/mechanics* aren't copyrightable; only *expression* (names,
-art, text) is, and none of that is baked into the code.
+and carries no game's trademark. Game *rules/mechanics* aren't copyrightable; only
+*expression* (names, art, text) is, and no game's expression is baked into the
+engine. Naming a game in prose as the thing a rung is modelled on is reference, not
+reliance: nothing here needs a licence from anyone.
+
+Fiction lives only in swappable **themes**, which are display-only and sit outside
+that guarantee. `plain` is the sterile functional skin. The shipping default is a
+dystopia skin evoking Orwell's *Nineteen Eighty-Four* - public domain in the UK/EU
+since 2021, still under US copyright until 2045, so it is a flavour choice and not
+a licensing claim. Run `--theme plain` for a face that makes no reference at all.
 
 ## The ladder (rule-heavy -> judgment-heavy)
 
 | Rung | Referee is | Status |
 |---|---|---|
 | **cabal** (hidden-role missions) | pure deterministic code | spike #1 (here) |
-| Secret Hitler | deterministic + forced reveals | next (fully CC-licensed) |
+| Secret Hitler | deterministic + forced reveals | next |
 | Blood on the Clocktower | a Storyteller with discretion | north star |
 | Freeform TTRPG (5e SRD) | mostly LLM judgment | the actual product |
 

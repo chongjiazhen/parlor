@@ -96,7 +96,18 @@ Queue only. Done work leaves to git log. What's next:
       controls) but ONUW is the better ENGINE step. Do it only once gate #3 is
       called - it is also the pressure test for what really belongs in `core/`, and
       that question wants evidence, not a guess.
-- [ ] Spike #2: off-map faction heartbeat (this is where hexis earns its seat).
+- [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
+      driven by a long-running agent process outside the game loop.
+- [ ] **Flip `DEFAULT_THEME` to `plain` - a MEASURED change, queued behind gate #3.**
+      The shipping face evokes a novel under US copyright until 2045 (`roles.py`
+      carries the dates), so `plain` is the cleaner public default. It does not
+      happen as a cleanup: the 1984 blurb inverts moral polarity - sabotage reads as
+      heroic, deceit as survival - and that is plausibly load-bearing on whether a
+      model will deceive at all, which is the one question local runs exist to
+      answer. No number in §Measured records which theme produced it, so flipping
+      now contaminates the comparison exactly as the negation pass would. Sequence
+      it with the other measured changes: same seeds, one variable, after gate #3 is
+      called. Cheap tell that it matters: run the seer bench under both skins.
 - [ ] **Two shapes not to harden further before game #2** (reasoning:
       §Open design note - the RPG rung). Don't add another game's phases to
       cabal's `Phase` enum or to the `action_prompt` if-chain; don't grow
@@ -241,7 +252,7 @@ path today.
 
 ## Backend notes (measured 2026-08-25)
 
-- `local:8090` armed: `hexis-active`, `rocinante-x-12b-heretic-q4`. The heretic 12B
+- `local:8090` armed: `rocinante-x-12b-heretic-q4`. The heretic 12B
   deceives without any prompt escalation - the mimic fabricated a prior private
   conversation to build credibility, the hunter played concerned-loyalist and then
   correctly named the seer. `PLAYER_SYSTEM_PROMPT` needed no jailbreak. Cost: ~3s
