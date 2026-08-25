@@ -422,13 +422,26 @@ class CabalReferee:
         """Per-seat legality of one hunt, so the policy can be told off while it can
         still fix it - the same split as ``validate_card``.
 
-        Naming a seat the night named as your OWN side is not a bad read, it is an
-        impossible one: the seer is good, so a seat you were told is evil cannot be
-        it. Measured across every live run: 5 of 26 hunts did exactly that, a fifth
-        of all strikes thrown away on a provably wrong target. ``RandomPolicy``
-        never does it - it excludes known fellow-evil, which is the whole reason its
-        baseline is 1 in 3 and not 1 in 4 - so leaving this legal scored the model
-        against a control that was using knowledge the model was discarding.
+        Naming a seat you KNOW is on your own side is not a bad read, it is an
+        impossible one: the seer is good, so any seat you know to be evil cannot be
+        it. Two seats are known that way, and the hunter is one of them.
+
+        The night names the fellow evil, and 5 of 26 hunts in early runs struck one
+        anyway - a fifth of all strikes spent on a provably wrong target.
+
+        The hunter also knows its OWN role, more directly than it knows anything
+        else, and that case was missed until the 20-game run of 2026-08-25 (seed
+        1000) turned up a hunt naming its own seat, reasoning about itself in the
+        third person. ``entitled_knowledge`` builds its reveals with ``s != seat``,
+        so a seat is never in its own knowledge and this branch never fired. Hence
+        ``| {hunter}`` rather than a second special case: the rule is one rule.
+
+        Both halves also keep the SCORER honest, which is the real reason they are
+        refusals and not advice. ``RandomPolicy`` excludes itself and its known
+        ally, leaving 3 candidates - that is exactly where the 1-in-3 chance the
+        gate is measured against comes from. Every target left legal here that the
+        control will not pick scores the model against a baseline using knowledge
+        the model was allowed to throw away.
 
         Refused, not silently corrected: the retry loop hands the seat this reason
         and it names someone else, which is the difference between a player learning
@@ -438,6 +451,11 @@ class CabalReferee:
             raise IllegalAction(f"seat {hunter} is not the hunter")
         if target not in self.assignment:
             raise IllegalAction(f"unknown target {target}")
+        if target == hunter:
+            raise IllegalAction(
+                f"you are seat {hunter}, and you know your own role - the informant "
+                "is one of the other seats at this table. Name one of them."
+            )
         own = {k.seat for k in self.entitled_knowledge(hunter)
                if k.label == "fellow-evil"}
         if target in own:

@@ -422,6 +422,45 @@ class TestHuntCannotNameYourOwnSide(unittest.TestCase):
         self.assertIn("one of your own", str(caught.exception))
         self.assertIsNone(ref.winner)           # the game is not over, it retries
 
+    def test_the_referee_refuses_a_strike_on_the_hunter_itself(self):
+        """The same rule as the ally case: a seat you know is evil cannot be the
+        seer, and the hunter knows its own role most directly of all.
+
+        Missed until the seed-1000 20-game run, because ``entitled_knowledge``
+        builds reveals with ``s != seat`` so a seat is never in its own knowledge.
+        One of that run's 9 hunts named its own seat - a guaranteed miss the
+        RandomPolicy control could not make, so the model was being scored against
+        a baseline with a smaller candidate set than its own.
+        """
+        ref = self.reached_hunt()
+        with self.assertRaises(IllegalAction) as caught:
+            ref.hunt(4, 4)                      # 4 IS the hunter
+        self.assertIn("you are seat 4", str(caught.exception))
+        self.assertIsNone(ref.winner)           # not over - the seat names again
+
+    def test_the_hunter_has_the_same_candidate_set_as_the_control(self):
+        """The scorer's 1-in-3 chance is RandomPolicy's candidate count. If the
+        referee lets the model pick from a wider set, the gate compares a 1-in-4
+        guess against a 1-in-3 baseline - the asymmetry this whole class exists to
+        close. Assert the two sets are identical rather than trusting the two
+        exclusion lists to stay in step.
+        """
+        ref = self.reached_hunt()
+        hunter = ref.seat_of("hunter")
+        legal = []
+        for target in sorted(ref.assignment):
+            try:
+                ref.validate_hunt(hunter, target)
+            except IllegalAction:
+                continue
+            legal.append(target)
+        known_evil = {k.seat for k in ref.entitled_knowledge(hunter)
+                      if k.label == "fellow-evil"}
+        control = [s for s in sorted(ref.assignment)
+                   if s != hunter and s not in known_evil]
+        self.assertEqual(legal, control)
+        self.assertEqual(len(legal), 3)         # the 1-in-3 the gate is scored on
+
     def test_the_policy_is_told_before_the_move_is_applied(self):
         """Checked by validate_hunt too, so the retry loop can hand the seat the
         reason while it can still choose again - the same split as validate_card."""

@@ -12,27 +12,19 @@ Queue only. Done work leaves to git log. What's next:
       Per the criterion, the answer is **"not shown at this N"** and NOT "buy more
       games": the power note predicted 9 hunts against the ~16 needed at a true
       60%. Respecify the metric instead - see the graded-hunt item.
-- [ ] **NEXT: fix `validate_hunt` self-targeting, then re-run seed 1000.** One of
-      the 9 hunts named the hunter's OWN seat (game with `hunter 4 -> target 4`), a
-      guaranteed miss, and the reasoning is written in third person about itself
-      ("Seat 4 has opposed every Party-successful team...") - the model lost track
-      that it IS seat 4.
-      - **This is the already-fixed bug, half-fixed.** `validate_hunt` refuses a
-        seat the night named as fellow-evil, on the docstring's own reasoning: the
-        seer is good, so a seat you know is evil cannot be it. The hunter knows it
-        is evil more directly than it knows anything. But `entitled_knowledge`
-        excludes `s != seat`, so the hunter's own seat never enters `own` and the
-        refusal never fires.
-      - **It also breaks the baseline the gate is scored against.** `RandomPolicy`
-        excludes self AND known fellow-evil - 3 candidates, which is where the
-        quoted 1-in-3 chance comes from. The LLM hunter has FOUR legal targets, so
-        its uniform-random rate is 25%, not 33%. The scorer compares it to 33.33%.
-        That is exactly the asymmetry the `validate_hunt` docstring says was fixed
-        for allies - "scoring the model against a control using knowledge the model
-        was discarding" - still live for self.
-      - Excluding the self-target hunt gives 3/8 = 37.5%, still short of the floor,
-        so this does not rescue gate #3b. Fix it because the comparison is wrong,
-        not because it changes the verdict.
+- [ ] **NEXT: re-run seed 1000 now that `validate_hunt` refuses self-targeting.**
+      The fix landed 2026-08-26: the hunter's own seat is now in the same refusal
+      as its known ally (`own | {hunter}`), so the legal candidate set is exactly
+      `RandomPolicy`'s three. Two tests, both mutation-checked against a compiling
+      mutant. The prior number stands until re-measured - **this is a measured
+      change and the 33.33% was scored under the old rule.**
+      - It does NOT rescue gate #3b and must not be sold as if it might: dropping
+        the one self-target hunt from the old run gives 3/8 = 37.5%, still short of
+        the 1/3 floor. The reason to fix it is that the COMPARISON was wrong - the
+        model chose from 4 targets while the control chose from 3, so a 25% guess
+        was being scored against a 33% baseline.
+      - Expect the re-run to shift hunter accuracy slightly and nothing else. If it
+        moves anything other than the hunt, something else changed too.
 - [ ] **Re-plan the cloud arm - it is dead, not pending.** `huntcloud` was killed 2026-08-25
       23:10 after 72 minutes alive with zero games written: it pinned
       `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
