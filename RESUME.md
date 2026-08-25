@@ -96,6 +96,19 @@ Queue only. Done work leaves to git log. What's next:
       controls) but ONUW is the better ENGINE step. Do it only once gate #3 is
       called - it is also the pressure test for what really belongs in `core/`, and
       that question wants evidence, not a guess.
+      - **Ship a werewolf-vocabulary theme on this rung, and that is the whole
+        answer to public legibility.** A public repo has a real problem that "team-
+        mission hidden-role deduction game" means nothing to anyone outside the
+        hobby, while "werewolf / seer / villager" means something to nearly
+        everyone. That vocabulary is public-domain folk-game vocabulary (Mafia,
+        Davidoff 1986) carrying no branding question, and it lands free on a rung
+        already queued on engine grounds. **This is why a vanilla Werewolf rung is
+        NOT worth building for legibility**: it sits on the same rung as cabal
+        (deterministic referee, bounded actions, no judgment), so it buys
+        recognition and no engine progress, and it has elimination - a shrinking
+        table, variable agent count per game, dead seats contributing no decisions,
+        i.e. the N problem from the wrong side. Legibility is a theme and a README
+        paragraph, not a spike.
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
 - [ ] **Stratify cloud results by served upstream instead of pooling them.** The

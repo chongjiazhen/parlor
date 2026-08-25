@@ -12,6 +12,18 @@ with `cabal` - a bounded team-mission hidden-role deduction game, modelled on Th
 Resistance: Avalon - because it is the purest test of the property, and its referee
 needs zero judgment: it is a unit test, not an opinion.
 
+**The game, if you don't know it.** Five players. Two are secretly saboteurs and
+know each other. Of the other three, one secretly knows who they are, and a second
+knows only that the informant is one of two people - without knowing which of those
+two is the informant and which is a saboteur wearing the same face. Each round a
+leader proposes a small team, everyone argues, everyone votes. The chosen team goes
+on a mission and plays cards in secret - a saboteur may fail it, and only the number
+of fails becomes public, never who played what. Three missions held wins it for the
+majority; three failed wins it for the saboteurs. If the majority is about to win,
+the saboteurs get one last shot: name the player who secretly knew, and take the
+game instead. Everything interesting happens in the argument between those votes,
+which is exactly what is being measured.
+
 Naming is deliberately branding-free. The canonical layer (dir, class, role *keys*)
 is functional - `seer`, `watcher`, `mimic`, `hunter` - so the engine reads cleanly
 and carries no game's trademark. Game *rules/mechanics* aren't copyrightable; only
