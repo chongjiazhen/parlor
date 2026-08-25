@@ -2,14 +2,25 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [ ] **Gate #3 is blocked on the table talk drowning the evidence**, not on the
-      model. See §Measured: the same salience line that moved the seer 46 points in
-      isolation moved ONE point in a live game, and the difference between the two
-      setups is twenty lines of chatter between the fact and the decision. Levers,
-      in the order they became worth trying: `--register plain` (running), the trim
-      fix (facts now outrank chatter - every run before 3d0d07d was scored on games
-      whose early missions had been deleted from the record, so re-baseline before
-      trusting any older number), `--simultaneous` (built, unmeasured).
+- [ ] **NEXT: score the two runs in flight against the pre-committed criterion
+      below.** `eval/records/hunt20.log` (local q36, 20 games, seed 1000) and
+      `eval/records/huntcloud.log` (gray `auto`, 25 games, seed 2000) - both
+      detached via WMI, both landing per-game JSONL + transcripts as they go, so an
+      interrupted run is still a dataset. Gate #3a already holds (+30.7% local pinned,
+      +66% cloud); #3b is the only open number. Do NOT soften the 1/3 Wilson floor.
+- [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
+      model capability: identical prompts scored -0.2% on the 12B and +66% on
+      120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
+      not judgement (7 of 8 games died at five_rejects). `--simultaneous` is built
+      and unmeasured; the salience line has no measured benefit anywhere and is a
+      removal candidate, on its own measurement.
+- [ ] **Judge a detached run only by its own log/JSONL - never by a proxy.** Three
+      times in one session CPU seconds, Win32 IO counters, and an exit code each
+      read as liveness for network-bound work; the IO-counter one killed a healthy
+      cloud run (those counters track FILE io, not sockets). And probe a cloud tier
+      with a BURST (12 back-to-back), never a single call: a key under cooldown
+      serves the occasional request while failing a stream, so a single-call probe
+      says "healthy" about a tier that cannot carry a run.
 - [ ] **A per-seat private notebook.** The one real gap in "play like a human":
       `think` is dropped every turn, so a seat re-derives its read from scratch and
       cannot remember that it caught seat 2 lying in round 1. Its own words shown
