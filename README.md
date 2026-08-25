@@ -12,7 +12,10 @@ with `cabal` - a bounded team-mission hidden-role deduction game, modelled on Th
 Resistance: Avalon - because it is the purest test of the property, and its referee
 needs zero judgment: it is a unit test, not an opinion.
 
-**The game, if you don't know it.** Five players. Two are secretly saboteurs and
+**The game, if you don't know it.** The family plays 5-10 and is usually best at
+7-8; this ships the 5-seat setup, which is the cheapest to run and, for what is
+being measured here, the densest in usable samples. Five players. Two are secretly
+saboteurs and
 know each other. Of the other three, one secretly knows who they are, and a second
 knows only that the informant is one of two people - without knowing which of those
 two is the informant and which is a saboteur wearing the same face. Each round a
