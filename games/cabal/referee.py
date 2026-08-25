@@ -232,21 +232,52 @@ class CabalReferee:
         # A seat's own words are marked "(you)". Without that marker a mid-size model
         # loses track of which voice in the transcript is its own and starts replying
         # to itself in the third person - observed on a live 12B, first run.
-        record: list[str] = []
+        record: list[tuple[bool, str]] = []          # (is a referee fact, rendered)
         for kind, text in self.public_events:
             if kind == "event":
-                record.append(f"  {text}")
+                record.append((True, f"  {text}"))
             elif include_speech:
                 mine = kind == f"speech:{seat}"
-                record.append(f"  {'(you) ' if mine else ''}{text}")
+                record.append((False, f"  {'(you) ' if mine else ''}{text}"))
         if record:
+            kept, dropped = self._trim(record)
             lines.append("Public record (everyone sees this):")
-            if len(record) > self.max_record_lines:
-                dropped = len(record) - self.max_record_lines
-                lines.append(f"  [{dropped} earlier line(s) trimmed]")
-                record = record[-self.max_record_lines:]
-            lines += record
+            if dropped:
+                lines.append(f"  [{dropped} earlier line(s) trimmed - oldest table "
+                             "talk goes first, mission results and votes last]")
+            lines += kept
         return "\n".join(lines)
+
+    def _trim(self, record: list[tuple[bool, str]]) -> tuple[list[str], int]:
+        """Fit the record into the budget by dropping the OLDEST SPEECH, never a
+        referee fact.
+
+        The budget exists because the record is re-sent on every call and an
+        unbounded one turns a long game into a quadratic context bill. Trimming
+        oldest-first was wrong about WHAT to drop: speech outnumbers referee facts
+        four to one at two discussion rounds, so a flat trim evicted missions 1 and
+        2 - who was on the team that failed, and how each seat voted on it - while
+        keeping eighty lines of table talk. Measured on the first live runs: 10 of
+        16 games crossed the cap, so most games asked their seats to deduce from
+        evidence the referee had already deleted.
+
+        Facts are few (about 20 a game) and are the whole substrate of deduction;
+        old chatter is what a human forgets first. The budget itself still holds -
+        facts have priority within it, not exemption from it, so the record stays
+        bounded for the longer games up the ladder and a line that scrolls off
+        still leaves the model's payload.
+        """
+        if len(record) <= self.max_record_lines:
+            return [text for _, text in record], 0
+        budget = self.max_record_lines
+        facts_at = [i for i, (is_fact, _) in enumerate(record) if is_fact]
+        speech_at = [i for i, (is_fact, _) in enumerate(record) if not is_fact]
+        keep = set(facts_at[-budget:] if budget else [])
+        left = budget - len(keep)
+        if left > 0:
+            keep |= set(speech_at[-left:])
+        kept = [text for i, (_, text) in enumerate(record) if i in keep]
+        return kept, len(record) - len(kept)
 
     # ---- discussion -------------------------------------------------------
 

@@ -174,7 +174,7 @@ class TestRecordIsBounded(unittest.TestCase):
         for i in range(20):
             ref._event(f"line {i}")
         rendered = ref.render_context(0)
-        self.assertIn("[15 earlier line(s) trimmed]", rendered)
+        self.assertIn("[15 earlier line(s) trimmed", rendered)
         self.assertIn("line 19", rendered)
         self.assertNotIn("line 3", rendered)
 
@@ -349,3 +349,50 @@ class TestSimultaneousDiscussion(unittest.TestCase):
         self.assertEqual(ref._pending_speech, [])
         self.assertEqual(
             len([t for k, t in ref.public_events if k.startswith("speech:")]), 10)
+
+
+class TestFactsOutrankChatterInTheTrim(unittest.TestCase):
+    """What the record drops decides what a seat can deduce from.
+
+    Measured on the first live runs: at two discussion rounds, speech outnumbers
+    referee facts about four to one, and 10 of 16 games crossed the 60-line cap.
+    Trimming oldest-first therefore deleted missions 1 and 2 - who was on the team
+    that failed, and how each seat voted on it - while keeping eighty lines of
+    table talk. The table was asked to deduce from evidence the referee had
+    already thrown away.
+    """
+
+    def loaded_ref(self, facts: int, speech: int, cap: int):
+        ref = fixed_ref(discussion_rounds=0)
+        ref.max_record_lines = cap
+        for i in range(facts):
+            ref._event(f"mission {i} result")
+        for i in range(speech):
+            ref.public_events.append((f"speech:{i % 5}", f"seat {i % 5} says: chatter {i}"))
+        return ref
+
+    def test_every_mission_result_survives_a_record_full_of_talk(self):
+        ref = self.loaded_ref(facts=20, speech=80, cap=60)
+        rendered = ref.render_context(0)
+        for i in range(20):
+            self.assertIn(f"mission {i} result", rendered)
+
+    def test_the_oldest_talk_is_what_goes(self):
+        ref = self.loaded_ref(facts=20, speech=80, cap=60)
+        rendered = ref.render_context(0)
+        self.assertNotIn("chatter 0", rendered)
+        self.assertIn("chatter 79", rendered)
+
+    def test_the_budget_still_holds(self):
+        """Priority within the cap, not exemption from it - the record is re-sent
+        on every call, and the games up the ladder are longer than this one."""
+        ref = self.loaded_ref(facts=20, speech=80, cap=60)
+        body = ref.render_context(0).split("Public record (everyone sees this):")[1]
+        shown = [ln for ln in body.splitlines() if ln.strip() and "trimmed" not in ln]
+        self.assertEqual(len(shown), 60)
+
+    def test_facts_alone_over_budget_still_trim(self):
+        ref = self.loaded_ref(facts=30, speech=0, cap=10)
+        rendered = ref.render_context(0)
+        self.assertIn("mission 29 result", rendered)
+        self.assertNotIn("mission 0 result", rendered)
