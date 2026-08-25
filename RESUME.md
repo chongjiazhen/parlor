@@ -2,12 +2,21 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [ ] **NEXT: score the two runs in flight against the pre-committed criterion
-      below.** `eval/records/hunt20.log` (local q36, 20 games, seed 1000) and
-      `eval/records/huntcloud.log` (gray `auto`, 25 games, seed 2000) - both
-      detached via WMI, both landing per-game JSONL + transcripts as they go, so an
-      interrupted run is still a dataset. Gate #3a already holds (+30.7% local pinned,
-      +66% cloud); #3b is the only open number. Do NOT soften the 1/3 Wilson floor.
+- [ ] **NEXT: score `hunt20` against the pre-committed criterion below, once it
+      lands.** `eval/records/hunt20.log` - local q36, 20 games, seed 1000, detached
+      via WMI, landing per-game JSONL + transcripts as it goes, so an interrupted
+      run is still a dataset. At 2026-08-25 23:30 it was 14/20, ~1% fallback,
+      ETA ~01:10. Gate #3a already holds (+30.7% local pinned, +66% cloud); #3b is
+      the only open number. Do NOT soften the 1/3 Wilson floor, and do not score a
+      partial run - stopping when a floor happens to cross is peeking.
+      **The cloud arm is dead, not pending.** `huntcloud` was killed 2026-08-25
+      23:10 after 72 minutes alive with zero games written: it pinned
+      `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
+      a tier where 7 of that model's 8 routes were cooled, so every call was refused
+      in 40ms. Burst-probe evidence in §Backend notes. Re-planning the cloud arm is
+      a separate decision - the honest options are wait for an uncontrollable
+      cooldown, run `auto` and accept a population that is currently 20B/30B-nano,
+      or spend the effort on ONUW instead. Third one is preferred; see its item.
 - [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
