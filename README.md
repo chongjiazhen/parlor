@@ -115,9 +115,19 @@ names the side it is entitled to speak for.
 
 **Transcripts** render from the two public channels in the order the referee wrote
 them, never from re-derived end state: referee events in italic, player speech
-plain, private `think` in neither channel and so in no transcript. Raw run JSON
+plain. Below the assignment reveal comes the referee-side half a post-game read
+needs - every decision in order, the private reasoning behind it, and the plays
+the table is never told (who put the fail card in). Gate #1 governs the bytes a
+seat's *model* receives, and none of that section ever reaches one. Raw run JSON
 stays out of git (`eval/records/` is gitignored); a rendered transcript that
 evidences a claim is what gets committed.
+
+**Register** is a separate dial from the fiction skin. `--register character`
+(default) plays the theme; `--register plain` keeps the same rules and asks for
+the argument instead of the performance - name seats, cite which missions failed
+and who was on them, no slogans. On the 1984 skin agents answered each other in
+Party rhetoric for a whole game without once naming who was on the mission that
+failed, which is a table that never starts deducing.
 
 Pin a model id; `auto` picks a different upstream per request, and a catalog entry
 can be stale (`model_not_found` at call time on a model `/v1/models` lists). The

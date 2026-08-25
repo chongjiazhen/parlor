@@ -12,9 +12,16 @@ The channel distinction survives the render:
     #1 audits - a role named in one of these would be a leak.
   - ``("speech:<seat>", ...)`` is what a player chose to say. Plain here. A lie in
     one is a move, not a leak.
-  - A seat's private ``think`` is in neither channel and is discarded by the driver
-    before it could reach one, so it cannot reach this file either. ``_record_lines``
-    whitelists the two kinds above rather than rendering whatever it is handed.
+  - A seat's private ``think`` is in neither channel: the driver hands ``speak()``
+    only ``say``. ``_record_lines`` whitelists the two kinds above rather than
+    rendering whatever it is handed, so nothing private can enter the record by
+    someone appending a new tuple kind upstream.
+
+Private reasoning DOES appear in this file, in its own referee-side section after
+the assignment reveal, and that is deliberate. Gate #1 is about the bytes a seat's
+MODEL receives; a post-game document read by a human is the one place all of it is
+meant to be visible, and without it a transcript shows what happened and never why.
+The public record above stays clean either way.
 
 Two inputs, one output. A live ``CabalReferee`` (``from_referee``) or a
 ``GameRecord`` - live or loaded from a ``run_games.py --out`` JSON. Records
@@ -148,6 +155,30 @@ def _assignment_lines(rec: dict, theme) -> list[str]:
     return lines
 
 
+def _decision_lines(rec: dict) -> list[str]:
+    """Every decision in order, with the reasoning behind it and the plays the
+    table never sees - who put the fail card in, who voted which way before the
+    tally, what the hunter was thinking when it named a seat.
+
+    This is referee-side, like the assignment above it. Gate #1 governs the bytes a
+    seat's MODEL receives; a post-game document for a human is the one place all of
+    it is supposed to be visible, and without it a transcript shows what happened
+    and never why.
+    """
+    log = rec.get("decision_log") or []
+    if not log:
+        return ["*(This record predates the decision log - the reasoning behind "
+                "each play was not kept.)*"]
+    lines = []
+    for d in log:
+        note = " - fell back to random" if d.get("fell_back") else ""
+        think = " ".join(str(d.get("think") or "").split())
+        body = f' "{think}"' if think else " *(no reasoning given)*"
+        lines.append(f"- `t{d['turn']:>3} {d['phase']:<7} seat {d['seat']}` "
+                     f"**{d['played']}**{note}:{body}")
+    return lines
+
+
 def _integrity_lines(rec: dict) -> list[str]:
     decisions = rec.get("decisions") or 0
     fallbacks = rec.get("fallbacks") or 0
@@ -232,6 +263,8 @@ def render(record, meta: dict | None = None) -> str:
     out += ["", "## Integrity", ""] + _integrity_lines(rec)
     out += ["", "## The secret assignment (referee-side, revealed)", ""]
     out += _assignment_lines(rec, theme)
+    out += ["", "## Every decision, and why (referee-side - no seat saw any of this)",
+            ""] + _decision_lines(rec)
     out += [""]
     return "\n".join(out)
 

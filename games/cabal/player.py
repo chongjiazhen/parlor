@@ -220,6 +220,43 @@ class VoteRecord:
 
 
 @dataclass
+class Decision:
+    """One decision as it was made: what the seat played, and the private reasoning
+    it gave for playing it.
+
+    ``think`` is referee-side and stays referee-side. Gate #1 is about the bytes a
+    seat's model receives - ``render_context`` - and nothing here enters that; the
+    driver still hands ``speak()`` only ``say``. What this buys is the half a
+    post-game read was missing: the public record says seat 3 rejected, and this
+    says why it thought it should. Also the secret plays - which seat put the fail
+    card in - which the table is never told and an analyst always wants.
+    """
+
+    turn: int
+    seat: int
+    phase: str
+    played: str
+    think: str = ""
+    fell_back: bool = False
+
+
+def played_summary(phase: Phase, action: dict) -> str:
+    """What a seat actually did, in a few characters. Speech is left out: it is
+    already in the public record, verbatim, where it belongs."""
+    if phase is Phase.PROPOSE:
+        return f"proposes {action.get('team')}"
+    if phase is Phase.DISCUSS:
+        return "speaks"
+    if phase is Phase.VOTE:
+        return "approve" if action.get("vote") else "reject"
+    if phase is Phase.MISSION:
+        return "plays FAIL" if action.get("card") else "plays success"
+    if phase is Phase.HUNT:
+        return f"names seat {action.get('target')}"
+    return phase.value
+
+
+@dataclass
 class GameRecord:
     """Everything the gate #2/#3 scorer needs, plus honesty about degradation."""
 
@@ -234,6 +271,9 @@ class GameRecord:
     fallbacks: int = 0        # decisions no model could make legally
     decisions: int = 0
     utterances: list[str] = field(default_factory=list)
+    #: every decision in order, with the private reasoning behind it. Referee-side
+    #: only - this is what a post-game read needs and no seat ever sees.
+    decision_log: list[Decision] = field(default_factory=list)
     #: Both public channels verbatim, in the order the referee wrote them:
     #: ("event", ...) referee-authored | ("speech:<seat>", ...) player-authored.
     #: Kept so a transcript renders from what was actually said rather than from a
@@ -271,9 +311,16 @@ def play_game(
 
     def decide(seat: int) -> dict:
         rec.decisions += 1
+        phase = ref.phase
         action = policies[seat].act(ref, seat)
-        if getattr(policies[seat], "last_fell_back", False):
+        fell_back = bool(getattr(policies[seat], "last_fell_back", False))
+        if fell_back:
             rec.fallbacks += 1
+        rec.decision_log.append(Decision(
+            turn=rec.turns, seat=seat, phase=phase.value,
+            played=played_summary(phase, action),
+            think=str(action.get("think", "")), fell_back=fell_back,
+        ))
         return action
 
     while ref.phase is not Phase.DONE:

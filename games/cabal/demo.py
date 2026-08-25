@@ -19,7 +19,7 @@ import argparse
 import os
 import random
 
-from core.backends import Backend
+from core.backends import REGISTERS, Backend
 from games.cabal import transcript
 from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
@@ -36,6 +36,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
         args.backend,
         args.model,
         api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+        system_prompt=REGISTERS[args.register],
     )
     llm = LLMPolicy(backend=backend, retries=args.retries, fallback=fallback)
     if args.speaker:
@@ -79,6 +80,9 @@ def main() -> None:
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--speaker", action="store_true",
                     help="model plays the discussion phase only")
+    ap.add_argument("--register", choices=list(REGISTERS), default="character",
+                    help="'character' roleplays the skin, 'plain' argues from the "
+                         "record out of character")
     ap.add_argument("--transcript", help="write this game as markdown here")
     args = ap.parse_args()
 

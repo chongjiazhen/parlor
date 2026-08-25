@@ -49,7 +49,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
-from core.backends import ENDPOINTS, Backend
+from core.backends import ENDPOINTS, REGISTERS, Backend
 from games.cabal import transcript
 from games.cabal.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
@@ -91,6 +91,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
     backend = Backend.named(
         args.backend, args.model,
         api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+        system_prompt=REGISTERS[getattr(args, "register", "character")],
         temperature=args.temperature,
         timeout=args.timeout,
         max_tokens=args.max_tokens,
@@ -352,6 +353,9 @@ def main() -> None:
     ap.add_argument("--backend", choices=list(ENDPOINTS))
     ap.add_argument("--model", default="auto")
     ap.add_argument("--rounds", type=int, default=1)
+    ap.add_argument("--register", choices=list(REGISTERS), default="character",
+                    help="how players are told to speak: 'character' roleplays the "
+                         "skin, 'plain' argues from the record out of character")
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--temperature", type=float, default=0.8)

@@ -117,7 +117,12 @@ class TestLegacyRecord(unittest.TestCase):
         self.assertIn("Winner:", self.text)
 
     def test_it_does_not_invent_referee_lines(self):
-        self.assertNotIn("proposes", self.text)
+        """Scoped to the public record: the referee's own event lines are exactly
+        what a legacy record lacks, so a reconstruction must not produce any. The
+        referee-side decision log further down is a different section with a
+        different promise, and may legitimately name proposals."""
+        public = self.text.split("## Outcome")[0]
+        self.assertNotIn("proposes", public)
 
 
 class TestCli(unittest.TestCase):
@@ -131,6 +136,50 @@ class TestCli(unittest.TestCase):
             transcript.write(str(out), transcript.render(
                 json.loads(src.read_text(encoding="utf-8"))["games"][0]))
             self.assertIn("## Public record", out.read_text(encoding="utf-8"))
+
+
+
+
+class TestDecisionLog(unittest.TestCase):
+    """The half a post-game read was missing: why each seat played what it played,
+    and the plays the table is never told. Referee-side, like the assignment - gate
+    #1 governs the bytes a seat's MODEL receives, and none of this reaches those."""
+
+    def setUp(self):
+        self.ref, self.rec = played_game(seed=8)
+        self.text = transcript.render(self.rec)
+
+    def test_every_decision_is_logged_in_order(self):
+        self.assertEqual(len(self.rec.decision_log), self.rec.decisions)
+        turns = [d.turn for d in self.rec.decision_log]
+        self.assertEqual(turns, sorted(turns))
+
+    def test_the_secret_plays_are_shown_to_the_reader(self):
+        """Who put the fail card in is never public in-game, and is the first thing
+        an analyst asks."""
+        cards = [d for d in self.rec.decision_log if d.phase == "mission"]
+        self.assertTrue(cards)
+        self.assertIn("plays", self.text)
+
+    def test_private_reasoning_renders_referee_side_only(self):
+        rec = asdict(self.rec)
+        rec["decision_log"][0]["think"] = "seat 4 is my partner"
+        text = transcript.render(rec)
+        head, _, tail = text.partition("## Every decision")
+        self.assertIn("seat 4 is my partner", tail)
+        self.assertNotIn("seat 4 is my partner", head)      # never in the record
+        # and the referee's own channels never carried it in the first place
+        self.assertNotIn("my partner", " ".join(t for _, t in self.ref.public_events))
+
+    def test_a_fallback_decision_is_marked_as_one(self):
+        rec = asdict(self.rec)
+        rec["decision_log"][0]["fell_back"] = True
+        self.assertIn("fell back to random", transcript.render(rec))
+
+    def test_a_record_without_the_log_says_so_instead_of_faking_it(self):
+        rec = asdict(self.rec)
+        rec.pop("decision_log")
+        self.assertIn("predates the decision log", transcript.render(rec))
 
 
 if __name__ == "__main__":
