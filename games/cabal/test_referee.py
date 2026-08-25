@@ -250,3 +250,48 @@ class TestRuleRefusals(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNightAgainstTheTable(unittest.TestCase):
+    """The VOTE ask restates a seat's OWN night knowledge against the proposal.
+
+    Measured on the local 12B (n=30 per cell, seer votes in isolation): with the
+    context as-is the seer approved a team carrying a seat it had been told serves
+    darkness 83% of the time against 90% for a clean team - discrimination +7%,
+    i.e. nothing. With the restatement, 37% vs 100%. Holding the fact and using it
+    are different things, and only one of them wins games.
+    """
+
+    def setUp(self):
+        # seat 0 is the seer; seats 3 and 4 are evil
+        self.ref = fixed_ref()
+
+    def ask(self, seat: int, team: list[int]) -> str:
+        ref = fixed_ref()
+        ref.propose(ref.leader, team)
+        self.assertIs(ref.phase, Phase.VOTE)
+        return ref.action_prompt(seat)
+
+    def test_it_names_the_overlap_when_a_known_evil_is_on_the_team(self):
+        ask = self.ask(0, [0, 3])
+        self.assertIn("seat(s) [3, 4] serve darkness", ask)
+        self.assertIn("contains [3]", ask)
+
+    def test_it_says_so_when_no_known_evil_is_on_the_team(self):
+        ask = self.ask(0, [1, 2])
+        self.assertIn("contains none of them", ask)
+
+    def test_a_seat_the_night_told_nothing_gets_no_such_line(self):
+        """The loyalist knows nothing, so there is nothing to restate - and a line
+        implying otherwise would be the referee inventing knowledge."""
+        self.assertNotIn("serve darkness", self.ask(2, [0, 3]))
+
+    def test_it_never_names_a_seat_this_one_was_not_told_about(self):
+        """The watcher sees 'magic', not 'evil' - restating an aura as darkness
+        would hand it a fact the night withheld."""
+        ask = self.ask(1, [0, 3])
+        self.assertNotIn("serve darkness", ask)
+
+    def test_it_is_absent_outside_a_live_proposal(self):
+        ref = fixed_ref()
+        self.assertEqual(ref._night_against_the_table(0), "")   # PROPOSE, no team yet

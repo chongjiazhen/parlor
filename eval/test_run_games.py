@@ -129,5 +129,42 @@ class TestReportRefusals(unittest.TestCase):
                 self.assertNotIn("gate #3 PASS", report(s, make_args(arm=arm), 1.0))
 
 
+
+
+class TestBlindSplit(unittest.TestCase):
+    """Vote discrimination averages two different things: a seer acting on a fact
+    it was handed, and a seat with nothing reasoning from play. Only the second is
+    deduction, so the report shows it separately."""
+
+    def records(self, blind_approves: int, blind_total: int):
+        from games.cabal.player import VoteRecord
+        rec = play_game(CabalReferee.new(5, seed=1),
+                        {s: RandomPolicy(rng=random.Random(1)) for s in range(5)})
+        rec.votes = (
+            # informed seats: always reject a tainted team
+            [VoteRecord(0, False, False, True, True) for _ in range(10)]
+            # blind seats on a tainted team: as told
+            + [VoteRecord(1, i < blind_approves, False, True, False)
+               for i in range(blind_total)]
+            # everyone on a clean team: always approve
+            + [VoteRecord(2, True, False, False, False) for _ in range(10)]
+        )
+        rec.winner, rec.error = "good", None
+        return [rec]
+
+    def test_a_seer_carrying_the_table_does_not_read_as_deduction(self):
+        s = score(self.records(blind_approves=10, blind_total=10))
+        g3 = s["gate3_deduction"]
+        self.assertGreater(g3["discrimination"], 0)        # the average looks fine
+        self.assertEqual(g3["discrimination_blind"], 0.0)  # the blind half is chance
+        self.assertIn("blind seats only        +0.00%",
+                      report(s, make_args(arm="llm"), 1.0))
+
+    def test_blind_seats_that_do_discriminate_show_it(self):
+        g3 = score(self.records(blind_approves=2, blind_total=10))["gate3_deduction"]
+        self.assertAlmostEqual(g3["discrimination_blind"], 0.8)
+        self.assertEqual(g3["votes_tainted_blind"], 10)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -422,7 +422,8 @@ class CabalReferee:
             return (
                 f"{head}\nVote on the proposed team {list(self.proposal)}. A "
                 "rejection passes the leadership on; five rejections in a row and "
-                "the mission-runners lose outright.\n"
+                "the mission-runners lose outright."
+                f"{self._night_against_the_table(seat)}\n"
                 'Format: {"think": "...", "vote": "approve"|"reject"}'
             )
         if p is Phase.MISSION:
@@ -452,6 +453,31 @@ class CabalReferee:
                 f'Format: {{"think": "...", "target": <seat 0..{self.n - 1}>}}'
             )
         raise IllegalAction(f"no action is open in phase {p.value}")
+
+    def _night_against_the_table(self, seat: int) -> str:
+        """Restate this seat's OWN night knowledge against the proposal in front of
+        it. Adds nothing to what the seat already holds - every seat named here was
+        named to this seat by ``entitled_knowledge``, and the same names are already
+        in its rendered context - so it is gate #1-neutral by construction.
+
+        It is here because the knowledge being present is not the same as the
+        knowledge being used. Measured on the local 12B, n=30 per cell, seer votes
+        in isolation: with the context as-is the seer approved a team carrying a
+        seat it had been told serves darkness 83% of the time (vs 90% for a clean
+        team - discrimination +7%, i.e. nothing). With this line, 37% vs 100%,
+        discrimination +63%. The model could always use the fact; nothing asked it
+        to line the fact up against the table.
+        """
+        if self.proposal is None:
+            return ""
+        known = sorted(k.seat for k in self.entitled_knowledge(seat)
+                       if k.label == "evil")
+        if not known:
+            return ""
+        on_team = [s for s in sorted(self.proposal) if s in known]
+        tail = (f"contains {on_team}" if on_team else "contains none of them")
+        return (f"\nWhat the night told you: seat(s) {known} serve darkness. "
+                f"The proposed team {sorted(self.proposal)} {tail}.")
 
     def prompt_for(self, seat: int, include_speech: bool = True) -> str:
         """The complete outgoing payload for one seat: its view plus its ask. This

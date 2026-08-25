@@ -211,6 +211,12 @@ class VoteRecord:
     approved: bool
     seat_is_evil: bool
     team_has_evil: bool
+    #: did this seat KNOW, from the night, that one of these seats is evil? A seer
+    #: rejecting a team it was handed the answer about is not deduction; a seat with
+    #: no such knowledge rejecting one is. Scored apart, because averaging them
+    #: reports "good play beats chance" for a table where only the informed seat
+    #: does anything.
+    knew_evil_on_team: bool = False
 
 
 @dataclass
@@ -291,12 +297,15 @@ def play_game(
             team_has_evil = any(ref.assignment[s].team is Team.EVIL for s in team)
             votes = {}
             for seat in sorted(ref.assignment):
+                known_evil = {k.seat for k in ref.entitled_knowledge(seat)
+                              if k.label in ("evil", "fellow-evil")}
                 votes[seat] = decide(seat)["vote"]
                 rec.votes.append(VoteRecord(
                     seat=seat,
                     approved=votes[seat],
                     seat_is_evil=ref.assignment[seat].team is Team.EVIL,
                     team_has_evil=team_has_evil,
+                    knew_evil_on_team=bool(known_evil & set(team)),
                 ))
             ref.vote(votes)
         elif ref.phase is Phase.MISSION:

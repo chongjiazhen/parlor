@@ -180,6 +180,14 @@ def score(records: list[GameRecord]) -> dict:
     p_tainted = appr_tainted / len(tainted) if tainted else 0.0
     p_clean = appr_clean / len(clean) if clean else 0.0
 
+    # ...and the same question for the seats that were NOT handed the answer. A
+    # seer rejecting a team the night named for it is acting on knowledge; only a
+    # blind seat rejecting one is deducing. Averaged together, one informed seat
+    # can carry a table that is otherwise voting at chance.
+    blind_tainted = [v for v in tainted if not v.knew_evil_on_team]
+    p_blind = (sum(1 for v in blind_tainted if v.approved) / len(blind_tainted)
+               if blind_tainted else 0.0)
+
     # gate #3b - does the hunter beat 1-in-3?
     hunts = [r.hunt for r in played if r.hunt]
     hits = sum(1 for h in hunts if h["hit"])
@@ -206,6 +214,9 @@ def score(records: list[GameRecord]) -> dict:
             "discrimination": p_clean - p_tainted,
             "votes_tainted": len(tainted),
             "votes_clean": len(clean),
+            "good_approve_tainted_blind": p_blind,
+            "discrimination_blind": p_clean - p_blind,
+            "votes_tainted_blind": len(blind_tainted),
             "hunter_accuracy": hits / len(hunts) if hunts else 0.0,
             "hunter_hits": hits,
             "hunts": len(hunts),
@@ -251,6 +262,10 @@ def report(s: dict, args, elapsed: float) -> str:
         f"(n={g3['votes_tainted']})",
         f"  discrimination             {g3['discrimination']:+.2%}  "
         "(>0 means good seats smell the evil team)",
+        f"  ...blind seats only        {g3['discrimination_blind']:+.2%} "
+        f"(n={g3['votes_tainted_blind']} tainted votes by seats the night told "
+        "nothing about that team - this half is deduction, the rest is a seer "
+        "acting on what it was handed)",
         f"  hunter accuracy            {g3['hunter_accuracy']:.2%} "
         f"({g3['hunter_hits']}/{g3['hunts']}, 95% CI "
         f"{g3['hunter_ci95'][0]:.2%}-{g3['hunter_ci95'][1]:.2%}, chance 33.33%)",

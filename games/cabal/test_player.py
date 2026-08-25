@@ -12,6 +12,7 @@ import unittest
 from core.backends import Backend, Endpoint
 from core.replies import ParseError
 from games.cabal.player import (
+    GameRecord,
     LLMPolicy,
     RandomPolicy,
     parse_action,
@@ -284,3 +285,54 @@ class TestUpstreamAttribution(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestVoteKnowledgeSplit(unittest.TestCase):
+    """A vote by a seat that was TOLD one of these seats is evil is not evidence of
+    deduction. Recorded per vote rather than per role, because a seer whose known
+    evils are off the table is voting as blind as anyone else that round."""
+
+    def test_it_marks_the_seat_the_night_informed(self):
+        ref = fixed_ref(discussion_rounds=0)          # seat 0 seer, 3 and 4 evil
+        rng = random.Random(0)
+        policies = {s: RandomPolicy(rng=rng) for s in ref.assignment}
+        rec = GameRecord()
+
+        def vote_on(team):
+            ref.propose(ref.leader, team)
+            rec.votes.clear()
+            play_one_vote(ref, policies, rec)
+            return {v.seat: v.knew_evil_on_team for v in rec.votes}
+
+        knew = vote_on([0, 3])
+        self.assertTrue(knew[0])        # seer, told about seat 3
+        self.assertFalse(knew[2])       # loyalist, told nothing
+        self.assertTrue(knew[4])        # evil, knows its fellow
+
+    def test_a_seer_with_no_known_evil_on_the_table_counts_as_blind(self):
+        ref = fixed_ref(discussion_rounds=0)
+        rng = random.Random(0)
+        policies = {s: RandomPolicy(rng=rng) for s in ref.assignment}
+        rec = GameRecord()
+        ref.propose(ref.leader, [1, 2])
+        play_one_vote(ref, policies, rec)
+        self.assertFalse({v.seat: v.knew_evil_on_team for v in rec.votes}[0])
+
+
+def play_one_vote(ref, policies, rec):
+    """The driver's VOTE branch, isolated: run one vote and record it."""
+    from games.cabal.player import VoteRecord
+    team = ref.proposal
+    team_has_evil = any(ref.assignment[s].team is Team.EVIL for s in team)
+    votes = {}
+    for seat in sorted(ref.assignment):
+        known_evil = {k.seat for k in ref.entitled_knowledge(seat)
+                      if k.label in ("evil", "fellow-evil")}
+        votes[seat] = policies[seat].act(ref, seat)["vote"]
+        rec.votes.append(VoteRecord(
+            seat=seat, approved=votes[seat],
+            seat_is_evil=ref.assignment[seat].team is Team.EVIL,
+            team_has_evil=team_has_evil,
+            knew_evil_on_team=bool(known_evil & set(team)),
+        ))
+    ref.vote(votes)
