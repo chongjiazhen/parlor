@@ -131,19 +131,27 @@ Queue only. Done work leaves to git log. What's next:
         seat playing fail, so evil may play success freely, and the MISSION prompt
         already says "weigh sabotage now against the suspicion a fail here would
         put on this team". The capability is there; nothing lines it up.
-      - **What the seat is never told: how many fails are REQUIRED.** `need` appears
+      - **Two fixes here, NOT one, and they are different kinds of thing.** Keeping
+        them apart is the whole judgement in this item.
+      - **(a) Disclose `need` - a harness BUG, fix unconditionally.** `need` appears
         only in the public event AFTER resolution (`referee.py` mission()), never in
-        the ask. A seat cannot weigh redundant sabotage without knowing one fail is
-        enough. It also is not told, at the decision point, that its partner is on
-        this same team - it can derive that from the public proposal plus night
-        knowledge, but deriving is exactly what `_night_against_the_table` proved
-        models do not do unprompted.
-      - **Same shape as the measured seer result, and that is the reason to expect
-        it to work.** The seer HELD the knowledge and did not use it: 83% vs 90%
-        (+7%, nothing) until the prompt lined the fact against the table, then 37%
-        vs 100% (+63%). Evil holds partner identity and team composition and does
-        not line them up either. Fix is the mirror: state `need` in the MISSION ask,
-        and name which other seats on this team are yours.
+        the ask. How many fails a mission requires is PUBLIC RULES INFORMATION - a
+        human reads it off the board before playing a card. Withholding it is an
+        information asymmetry against the game's own rules, i.e. the seat is being
+        asked to weigh redundant sabotage against a threshold it was never given.
+        This is not a hint and not a nudge; it is restoring entitled information,
+        and it needs no measurement to justify. It does still need to be SEQUENCED
+        after gate #3, because it changes behaviour mid-run like anything else.
+      - **(b) Naming the partner on this team - a HINT, and the evidence points
+        AGAINST it.** The seat can derive "my partner is on this team" from the
+        public proposal plus its night knowledge. Spelling that out is exactly what
+        `_night_against_the_table` does for the seer - and that line's value
+        INVERTED with model capability: +63% on the 12B bench, then **+80% as-is vs
+        +72% with the line** on q36, i.e. actively harmful, because it competes with
+        reasoning a capable model already does. So do not assume the mirror fix
+        helps; the one measurement we have on this exact move says it hurts on the
+        model gate runs actually use. If (b) is tried at all it is a measured arm of
+        its own, and (a) must land first and alone or the two are confounded.
       - **This is a confound in gate #3a, not just an evil-side weakness.** Good's
         +30.7% discrimination is measured against an evil side that self-identifies
         on 45% of its successful sabotages. Some unknown share of that number is
