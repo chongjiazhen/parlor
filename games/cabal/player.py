@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import random
 import time
+from collections import Counter
 from dataclasses import dataclass, field
 
 from core.backends import Backend
@@ -149,6 +150,10 @@ class LLMPolicy:
     backoff: float = 2.0
     fallback: RandomPolicy = field(default_factory=RandomPolicy)
     trace: list[str] = field(default_factory=list)
+    #: upstream id -> decisions it served. Under a routing alias like ``auto`` the
+    #: gateway picks a different upstream per request, so "the model" is a mix and
+    #: a run that does not say so is reporting a number nobody can attribute.
+    upstreams: Counter = field(default_factory=Counter)
     #: incremented by the driver's caller-visible record, not here
     last_fell_back: bool = False
 
@@ -162,7 +167,8 @@ class LLMPolicy:
                 "Answer again, correctly, as one JSON object."
             )
             try:
-                reply = self.backend.complete(prompt)
+                reply, served_by = self.backend.complete_meta(prompt)
+                self.upstreams[served_by] += 1
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self.trace.append(f"seat {seat} attempt {attempt}: {complaint}")
@@ -232,6 +238,9 @@ class GameRecord:
     #: to a seat - this is the document a human reads after the game.
     log: list[str] = field(default_factory=list)
     theme: str = ""
+    #: which upstreams actually served this game's decisions. Under ``auto`` this
+    #: is a mix, and the mix belongs next to the numbers it produced.
+    upstreams: dict[str, int] = field(default_factory=dict)
     #: why decisions were refused or fell back - a run reporting 100% fallback is
     #: useless without this (measured: a stale model id read as "the model is bad")
     trace_sample: list[str] = field(default_factory=list)
@@ -309,9 +318,14 @@ def play_game(
     rec.log = list(ref.log)
     rec.theme = ref.theme.name
     seen: list[str] = []
-    for policy in policies.values():
+    served: Counter = Counter()
+    # by identity: demo seats can share ONE policy object, and a shared counter
+    # summed once per seat would report five times the decisions that happened
+    for policy in {id(p): p for p in policies.values()}.values():
         for line in getattr(policy, "trace", []) or []:
             if line not in seen:
                 seen.append(line)
+        served.update(getattr(policy, "upstreams", None) or {})
     rec.trace_sample = seen[:8]
+    rec.upstreams = dict(served)
     return rec

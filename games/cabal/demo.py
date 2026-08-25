@@ -55,6 +55,12 @@ class _SpeechOnly:
     def trace(self):
         return self.llm.trace
 
+    @property
+    def upstreams(self):
+        """Pass the served-upstream tally through the wrapper, or a --speaker game
+        reports that nothing answered it."""
+        return self.llm.upstreams
+
     def act(self, ref, seat):
         inner = self.llm if ref.phase is Phase.DISCUSS else self.fallback
         action = inner.act(ref, seat)

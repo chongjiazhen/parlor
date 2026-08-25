@@ -45,6 +45,7 @@ import os
 import random
 import sys
 import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
@@ -185,6 +186,9 @@ def score(records: list[GameRecord]) -> dict:
 
     decisions = sum(r.decisions for r in records)
     fallbacks = sum(r.fallbacks for r in records)
+    served: Counter = Counter()
+    for r in records:
+        served.update(r.upstreams or {})
     return {
         "games_requested": len(records),
         "games_completed": len(played),
@@ -212,6 +216,7 @@ def score(records: list[GameRecord]) -> dict:
             "decisions": decisions,
             "fallbacks": fallbacks,
             "fallback_rate": fallbacks / decisions if decisions else 0.0,
+            "upstreams": dict(served.most_common()),
             "trace_sample": _dedupe([line for r in records for line in r.trace_sample])[:6],
         },
     }
@@ -256,6 +261,17 @@ def report(s: dict, args, elapsed: float) -> str:
     if fr > 0.10:
         lines.append("  WARNING: >10% of decisions were random. These numbers are "
                      "not a measurement of the model.")
+    served = integ.get("upstreams") or {}
+    if served:
+        total = sum(served.values())
+        mix = ", ".join(f"{name} {count / total:.0%}"
+                        for name, count in list(served.items())[:6])
+        lines.append(f"  served by  {mix}"
+                     + (f" (+{len(served) - 6} more)" if len(served) > 6 else ""))
+        if len(served) > 1:
+            lines.append("  NOTE: more than one upstream answered - under a routing "
+                         "alias these numbers are a MIX of models, not one model's "
+                         "play. Pin a model before attributing a result to one.")
     if integ["trace_sample"]:
         lines.append("  why decisions were refused or retried:")
         lines += [f"    {line}" for line in integ["trace_sample"]]

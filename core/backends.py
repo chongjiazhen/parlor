@@ -86,10 +86,21 @@ class Backend:
         return cls(endpoint=ENDPOINTS[name], model=model, **kw)
 
     def complete(self, context: str) -> str:
-        """One turn: system prompt + this seat's rendered context -> model reply.
+        """One turn: system prompt + this seat's rendered context -> model reply."""
+        return self.complete_meta(context)[0]
 
-        Stdlib-only (no dependency), OpenAI /v1/chat/completions shape. Not exercised
-        by the referee or gate #1; wired for when players go live.
+    def complete_meta(self, context: str) -> tuple[str, str]:
+        """The reply, and the id of the upstream that actually served it.
+
+        The second half matters whenever ``model`` is a routing alias rather than a
+        model: ``auto`` lets the gateway fail over across its keys, which is the
+        only way to run anything while a provider is cooled down - but it picks a
+        different upstream per request, and NOTHING in the catalog says which one
+        answered. Only the response body's top-level ``model`` does. Returned here
+        rather than stashed on ``self`` because one Backend is shared by every seat
+        and every worker thread; a shared last-upstream field would be a race.
+
+        Stdlib-only (no dependency), OpenAI /v1/chat/completions shape.
         """
         payload = {
             "model": self.model,
@@ -110,7 +121,8 @@ class Backend:
             method="POST",
         )
         body = self._post(req)
-        return body["choices"][0]["message"]["content"]
+        return (body["choices"][0]["message"]["content"],
+                str(body.get("model") or self.model))
 
     def _post(self, req) -> dict:
         """One request, retried while the endpoint says "later". Anything else -

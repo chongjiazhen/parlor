@@ -6,6 +6,7 @@ No network: a scripted fake backend stands in for the model, so these run in the
 same dependency-free suite as the gates.
 """
 
+import random
 import unittest
 
 from core.backends import Backend, Endpoint
@@ -38,9 +39,12 @@ class FakeBackend(Backend):
         self.replies = list(replies)
         self.prompts = []
 
-    def complete(self, context: str) -> str:
+    #: ``complete_meta`` is the seam the policy calls - it returns the reply AND
+    #: the upstream that served it. Overriding ``complete`` instead would leave the
+    #: real HTTP path live under the test.
+    def complete_meta(self, context: str) -> tuple[str, str]:
         self.prompts.append(context)
-        return self.replies.pop(0) if self.replies else "{}"
+        return (self.replies.pop(0) if self.replies else "{}"), "fake-upstream"
 
 
 class TestParsing(unittest.TestCase):
@@ -127,7 +131,7 @@ class TestRetryLoop(unittest.TestCase):
 
     def test_transport_failure_is_retried_not_raised(self):
         class Dead(FakeBackend):
-            def complete(self, context):
+            def complete_meta(self, context):
                 self.prompts.append(context)
                 raise ConnectionError("endpoint down")
 
@@ -224,6 +228,58 @@ class TestDriver(unittest.TestCase):
             self.assertEqual(v.seat_is_evil, truth)
         if rec.hunt:
             self.assertEqual(rec.hunt["hit"], rec.hunt["target"] == rec.hunt["seer"])
+
+
+class TestUpstreamAttribution(unittest.TestCase):
+    """Under a routing alias (``auto``) the gateway picks a different upstream per
+    request and nothing in the catalog says which answered - only the response
+    body does. If the run cannot name what served each decision, its numbers
+    belong to no model in particular."""
+
+    class Rotating(FakeBackend):
+        """Answers legally, naming a different upstream each call."""
+
+        def __init__(self, reply: str, names):
+            super().__init__([])
+            self.reply, self.names, self.calls = reply, list(names), 0
+
+        def complete_meta(self, context):
+            self.prompts.append(context)
+            served = self.names[self.calls % len(self.names)]
+            self.calls += 1
+            return self.reply, served
+
+    def test_the_policy_counts_who_served_each_decision(self):
+        backend = self.Rotating('{"team": [0, 1]}', ["up-a", "up-b"])
+        policy = LLMPolicy(backend=backend, retries=0)
+        ref = fixed_ref(discussion_rounds=0)
+        for _ in range(4):
+            policy.act(ref, 0)
+        self.assertEqual(dict(policy.upstreams), {"up-a": 2, "up-b": 2})
+
+    def test_a_shared_policy_is_counted_once_not_once_per_seat(self):
+        """demo.py seats every player on ONE policy object. Summing the counter per
+        seat would report five times the calls that actually happened."""
+        backend = self.Rotating("{}", ["only-up"])       # never legal -> all retries
+        policy = LLMPolicy(backend=backend, retries=0,
+                           fallback=RandomPolicy(rng=random.Random(1)))
+        ref = CabalReferee.new(5, seed=7, discussion_rounds=1)
+        rec = play_game(ref, {s: policy for s in ref.assignment})
+        self.assertEqual(rec.upstreams, {"only-up": backend.calls})
+        self.assertEqual(rec.fallbacks, rec.decisions)   # nothing legal ever landed
+
+    def test_the_record_carries_the_mix(self):
+        backend = self.Rotating('{"say": "hello"}', ["up-a", "up-b", "up-a"])
+        ref = CabalReferee.new(5, seed=3, discussion_rounds=1)
+        policies = {s: LLMPolicy(backend=backend, retries=0,
+                                 fallback=RandomPolicy(rng=random.Random(3)))
+                    for s in ref.assignment}
+        # only the DISCUSS phase can use the scripted reply; the rest fall back,
+        # which is fine - what is under test is that served upstreams are recorded
+        rec = play_game(ref, policies)
+        self.assertTrue(rec.upstreams)
+        self.assertLessEqual(set(rec.upstreams), {"up-a", "up-b"})
+        self.assertEqual(sum(rec.upstreams.values()), backend.calls)
 
 
 if __name__ == "__main__":

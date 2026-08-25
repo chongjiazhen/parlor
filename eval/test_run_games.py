@@ -94,6 +94,25 @@ class TestReportRefusals(unittest.TestCase):
         self.assertIn("good played at random", t)
         self.assertNotIn("hunter is an EVIL seat and played at random", t)
 
+    def test_one_upstream_is_named_without_a_mix_warning(self):
+        s = dict(self.s)
+        s["integrity"] = dict(s["integrity"], upstreams={"deepseek-v3.2": 400})
+        t = report(s, make_args(arm="llm"), 1.0)
+        self.assertIn("served by  deepseek-v3.2 100%", t)
+        self.assertNotIn("MIX of models", t)
+
+    def test_several_upstreams_are_flagged_as_a_mix(self):
+        """``auto`` hands each request to whichever key is usable, so a run under it
+        is several models' play averaged together. Reporting that as one model's
+        result is the failure; the mix has to be visible next to the number."""
+        s = dict(self.s)
+        s["integrity"] = dict(s["integrity"],
+                              upstreams={"minimax-m3": 300, "nemotron-nano": 100})
+        t = report(s, make_args(arm="llm"), 1.0)
+        self.assertIn("minimax-m3 75%", t)
+        self.assertIn("nemotron-nano 25%", t)
+        self.assertIn("MIX of models", t)
+
     def test_a_mixed_arm_cannot_pass_gate_3_on_passing_numbers(self):
         """Fed numbers that clear both halves outright, a mixed arm must STILL
         refuse - half of them came from the random side. Scored against a real
