@@ -295,3 +295,57 @@ class TestNightAgainstTheTable(unittest.TestCase):
     def test_it_is_absent_outside_a_live_proposal(self):
         ref = fixed_ref()
         self.assertEqual(ref._night_against_the_table(0), "")   # PROPOSE, no team yet
+
+
+class TestSimultaneousDiscussion(unittest.TestCase):
+    """Sequential discussion anchors: seat 2 reads seat 0 and seat 1 before it
+    speaks, so a table can converge on the first read without anyone deducing.
+    Simultaneous discussion makes every seat commit against the same board."""
+
+    def talking_ref(self, simultaneous: bool, rounds: int = 1):
+        ref = CabalReferee(setup=SETUP_5, assignment=dict(FIXED), leader=0,
+                           discussion_rounds=rounds, simultaneous=simultaneous)
+        ref.propose(0, [0, 1])
+        return ref
+
+    def test_sequential_lets_a_later_seat_read_an_earlier_one(self):
+        ref = self.talking_ref(simultaneous=False)
+        ref.speak(0, "seat 3 worries me")
+        self.assertIn("seat 3 worries me", ref.render_context(1))
+
+    def test_simultaneous_hides_the_round_until_everyone_has_spoken(self):
+        ref = self.talking_ref(simultaneous=True)
+        ref.speak(0, "seat 3 worries me")
+        self.assertNotIn("seat 3 worries me", ref.render_context(1))
+        for seat in (1, 2, 3):
+            ref.speak(seat, f"seat {seat} reporting")
+        self.assertNotIn("seat 3 worries me", ref.render_context(4))  # last to speak
+        ref.speak(4, "seat 4 reporting")
+        self.assertIn("seat 3 worries me", ref.render_context(4))     # now published
+
+    def test_the_whole_round_lands_in_speaking_order(self):
+        ref = self.talking_ref(simultaneous=True)
+        for seat in ref.speaking_order():
+            ref.speak(seat, f"line from {seat}")
+        said = [t for k, t in ref.public_events if k.startswith("speech:")]
+        self.assertEqual(len(said), 5)
+        self.assertTrue(said[0].startswith("seat 0"))
+        self.assertTrue(said[-1].startswith("seat 4"))
+
+    def test_round_two_still_sees_round_one(self):
+        """Simultaneity is within a round, not across them - the second round is
+        where a seat answers what the table actually said."""
+        ref = self.talking_ref(simultaneous=True, rounds=2)
+        order = ref.speaking_order()
+        for seat in order[:5]:
+            ref.speak(seat, f"first round from {seat}")
+        self.assertIn("first round from 0", ref.render_context(order[5]))
+
+    def test_nothing_is_left_pending_when_the_vote_opens(self):
+        ref = self.talking_ref(simultaneous=True, rounds=2)
+        for seat in ref.speaking_order():
+            ref.speak(seat, f"line from {seat}")
+        self.assertIs(ref.phase, Phase.VOTE)
+        self.assertEqual(ref._pending_speech, [])
+        self.assertEqual(
+            len([t for k, t in ref.public_events if k.startswith("speech:")]), 10)

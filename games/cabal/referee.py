@@ -71,6 +71,15 @@ class CabalReferee:
     # discussion: round-robin utterances between PROPOSE and VOTE. Bounded, because
     # on a serial local backend each round costs n model calls.
     discussion_rounds: int = 1
+    #: Sequential discussion (the default) hands each speaker everything said before
+    #: it in the same round, so late seats are anchored on early ones by
+    #: construction - and a table that only ever restates the first read has no
+    #: disagreement for deduction to work with. Simultaneous discussion collects a
+    #: round against ONE board state and publishes it together: every seat commits
+    #: before it sees any of its neighbours. Off by default because it changes what
+    #: the game is, not just how it reads; measure the two against the same seeds.
+    simultaneous: bool = False
+    _pending_speech: list[tuple[str, str]] = field(default_factory=list)
     speech_ptr: int = 0                                  # slots consumed this discussion
     max_record_lines: int = MAX_RECORD_LINES
     # ("event", text) referee-authored | ("speech:<seat>", text) player-authored.
@@ -86,6 +95,7 @@ class CabalReferee:
         seed: int | None = None,
         theme: Theme = DEFAULT_THEME,
         discussion_rounds: int = 1,
+        simultaneous: bool = False,
     ) -> "CabalReferee":
         setup = SETUPS[n]
         rng = random.Random(seed)
@@ -98,6 +108,7 @@ class CabalReferee:
             theme=theme,
             leader=rng.randrange(n),
             discussion_rounds=discussion_rounds,
+            simultaneous=simultaneous,
         )
         # deal is referee-side only: it never enters public_events
         ref.log.append(f"dealt {n} roles; opening leader = seat {ref.leader}")
@@ -266,14 +277,27 @@ class CabalReferee:
         said = " ".join(str(text).split())[:MAX_UTTERANCE_CHARS]
         if not said:
             raise IllegalAction("an utterance cannot be empty")
-        self.public_events.append((f"speech:{seat}", f'seat {seat} says: "{said}"'))
+        entry = (f"speech:{seat}", f'seat {seat} says: "{said}"')
+        if self.simultaneous:
+            self._pending_speech.append(entry)
+        else:
+            self.public_events.append(entry)
         self._private_log(f'seat {seat} says: "{said}"')
         self.speech_ptr += 1
+        if self.simultaneous and self.speech_ptr % self.n == 0:
+            self._flush_round()
         if self.speech_ptr >= len(self.speaking_order()):
+            self._flush_round()               # a partial round still reaches the table
             self.phase = Phase.VOTE
+
+    def _flush_round(self) -> None:
+        """Publish a simultaneous round's utterances together, in speaking order."""
+        self.public_events.extend(self._pending_speech)
+        self._pending_speech.clear()
 
     def _open_discussion(self) -> None:
         self.speech_ptr = 0
+        self._pending_speech.clear()
         if self.discussion_rounds > 0:
             self.phase = Phase.DISCUSS
         else:

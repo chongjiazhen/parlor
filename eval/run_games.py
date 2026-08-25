@@ -107,7 +107,8 @@ def one_game(index: int, args) -> GameRecord:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
-    ref = CabalReferee.new(5, seed=seed, theme=theme, discussion_rounds=args.rounds)
+    ref = CabalReferee.new(5, seed=seed, theme=theme, discussion_rounds=args.rounds,
+                           simultaneous=getattr(args, "simultaneous", False))
     policies = build_policies(ref, args, rng)
     try:
         return play_game(ref, policies, max_turns=args.max_turns)
@@ -353,6 +354,9 @@ def main() -> None:
     ap.add_argument("--backend", choices=list(ENDPOINTS))
     ap.add_argument("--model", default="auto")
     ap.add_argument("--rounds", type=int, default=1)
+    ap.add_argument("--simultaneous", action="store_true",
+                    help="collect each discussion round against one board state and "
+                         "publish it together - no seat sees its neighbours first")
     ap.add_argument("--register", choices=list(REGISTERS), default="character",
                     help="how players are told to speak: 'character' roleplays the "
                          "skin, 'plain' argues from the record out of character")
