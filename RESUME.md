@@ -2,25 +2,22 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [ ] **No readable transcript exists.** `demo.py` prints to stdout, `run_games.py`
-      writes JSON; neither leaves a game log a human can read. Add `--transcript`
-      to both, rendering from `public_events` (speech as speech, `think` never).
-      Sample records to render against: `eval/records/*.json` (gitignored - raw run
-      output stays out of history; a rendered transcript that evidences a claim is
-      what gets committed).
-- [ ] **Gates #2/#3 are wired but not shown.** `eval/run_games.py` runs and scores;
-      no run yet has cleared gate #3, so gate #2 stays unreadable by design. Two
-      things to try before widening N: more discussion rounds (`--rounds 2`) so
-      votes have evidence behind them, and a stronger cloud model than the ones
-      benched below.
-- [ ] **Rejection deadlock on the local 12B.** Both spot-check games ended
-      `five_rejects` - suspicious models reject nearly everything and nobody ever
-      runs a mission. Options: raise the reject penalty's visibility in the VOTE
-      prompt (it already warns), or seat a mixed table (LLM good vs random evil) to
-      isolate which side is stalling.
-- [ ] **A mixed arm.** `--arm llm|random` is all-or-nothing today. LLM-good vs
-      random-evil (and the inverse) would separate "good can deduce" from "evil can
-      deceive" instead of measuring them entangled.
+- [ ] **The seer ignores what the night told it, and that is what blocks gate #3.**
+      Measured 2026-08-25, local 12B, 8 games, 2 rounds, 0.37% fallback - so this is
+      a clean measurement, not a degraded one. Good seats approve tainted teams
+      51.5% vs clean 51.3% (discrimination -0.2%, n=138). Split by role, the seer -
+      which is *told* both evil seats by name - approves a team carrying a known
+      evil **42%** of the time against 31% for a clean team. It is not deducing
+      badly; it is not using ground truth it already has. Watcher +27% (n=13, noise).
+      Two levers, and they are distinguishable: restate the seat's entitled
+      knowledge inside the VOTE ask and name the overlap with the proposed team (a
+      prompt fix - measure it, do not assume it), or a stronger model. The cloud
+      `auto` run answers the second before you spend effort on the first.
+- [ ] **Gate #3 still not shown, and now for a known reason** (above). Hunter 3/6 =
+      50%, CI floor 18.8%, so the hunt half needs far more games than 8 even if it
+      is real. Gate #2 stays unreadable by design.
+- [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
+      substring collisions in the leak audit (see the plain-skin "Loyalist" case).
 - [ ] Larger setups (6/7p): add to `roles.SETUPS`, watch role-name vs faction-name
       substring collisions in the leak audit (see the plain-skin "Loyalist" case).
 - [ ] Spike #2: off-map faction heartbeat (this is where hexis earns its seat).
@@ -48,6 +45,16 @@ Queue only. Done work leaves to git log. What's next:
   Reply-reading is generic and lives in `core/replies.py`; the phase-to-key mapping
   is not and stays in the game. Resist promoting anything else until a second game
   actually needs it.
+- **`--rounds 2` cleared the rejection deadlock.** 1 of 8 games ended `five_rejects`
+  at two discussion rounds, against 2 of 2 at one round. One round gives a vote
+  nothing to reason from; treat 2 as the floor for any live run.
+- **Pin a model for attribution, use `auto` for capacity - and record the served
+  upstream either way.** freellmapi fails over across its keys, but a pinned id can
+  only hop between keys for providers serving that exact id, so a cooled provider
+  returns an instant 429 with no hop available. `auto` has the whole catalog and
+  keeps answering. The response body's top-level `model` is the ONLY thing that
+  says who answered; `Backend.complete_meta` returns it and the report prints the
+  mix, so an `auto` run is honest about being several models averaged.
 - **`find_leaks` stays naive substring matching.** A false positive is a loud test
   failure; a false negative is a shipped leak. Do not "fix" it with word boundaries
   to quiet a collision - rename the colliding term instead.
