@@ -40,6 +40,9 @@ dystopia skin evoking Orwell's *Nineteen Eighty-Four* - public domain in the UK/
 since 2021, still under US copyright until 2045, so it is a flavour choice and not
 a licensing claim. Run `--theme plain` for a face that makes no reference at all.
 
+Full rules, the night-knowledge table, and what each seat can derive:
+`games/cabal/RULES.md`.
+
 ## The ladder (rule-heavy -> judgment-heavy)
 
 | Rung | Referee is | Status |
@@ -55,6 +58,7 @@ a licensing claim. Run `--theme plain` for a face that makes no reference at all
 core/observability.py   SeatView, Knowledge, find_leaks  (partial-observability spine + gate #1)
 core/backends.py        one adapter: local:8090 / clean:3001 / gray:3003, pluggable player prompt
 core/replies.py         model reply -> values (JSON out of prose, salvage, coercion)
+games/cabal/RULES.md    the rules + the night-knowledge table the gates stratify on
 games/cabal/roles.py    roles as data (functional keys) + swappable themes (1984-en default)
 games/cabal/referee.py  deterministic state machine (propose -> discuss -> vote -> mission -> hunt)
 games/cabal/audit.py    gate #1 as an executable guarantee - the driver runs it, and it raises

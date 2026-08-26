@@ -2,8 +2,11 @@
 
 `RESUME.md` is the queue, the dated measurements, and the route decisions - read it
 before picking up work or trusting a number. `README.md` has the three gates and the
-two public channels. `docs/` holds the durable design notes and reference that would
-otherwise silt up the queue - `RESUME.md` carries a one-line pointer to each, and a
+two public channels. `games/<name>/RULES.md` is the canonical statement of that
+game's rules and knowledge model - read it before trusting a gate number, because
+the gate strata, the decision audit and the hunt baseline all derive from it, and
+a variant that changes what a role learns changes all three. `docs/` holds the
+durable design notes and reference that would otherwise silt up the queue - `RESUME.md` carries a one-line pointer to each, and a
 design note that hardens into a decision moves to the Invariants below. Run output
 lands in `eval/records/` (gitignored, durable); the rendered transcript that
 evidences a claim is what gets committed, in `transcripts/`.
