@@ -131,6 +131,29 @@ class Backend:
     #: until a repeat run demonstrates it.
     seed: int | None = None
 
+    #: Ask the chat template to skip the model's reasoning pass. ``None`` sends
+    #: nothing and is the default, so every existing run is byte-identical.
+    #:
+    #: The lever exists because a reasoning-distill model can fail to TERMINATE its
+    #: reasoning, and no token cap fixes that - it only makes each failure slower.
+    #: Measured 2026-08-26 on `qwen36-35b-a3b-iq3` against a changeling decision:
+    #:
+    #:   cap 1536 -> 1536 tokens spent, 6.3k chars of `reasoning_content`, EMPTY
+    #:               `content`, 20s
+    #:   cap 4096 -> 4096 tokens spent, 17k chars of reasoning, EMPTY content, 38s
+    #:   enable_thinking=false -> 171 tokens, no reasoning, 604 chars of content, 3s
+    #:
+    #: Two of three sampled decisions spiralled at BOTH caps and neither at all with
+    #: the flag. It is bimodal: the model either answers in ~330 tokens or does not
+    #: stop, so a fallback rate under a reasoning model measures how often it
+    #: spiralled and not how well it played.
+    #:
+    #: Whether a game NEEDS this is a property of the game, not the model. The same
+    #: model carries `cabal` at 1.6% fallback and spiralled on 27% of changeling's
+    #: decisions, because this ruleset gives it more to chew on. So it is opt-in
+    #: per run, and turning it on is a MEASURED change like any other.
+    enable_thinking: bool | None = None
+
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":
         return cls(endpoint=ENDPOINTS[name], model=model, **kw)
@@ -163,6 +186,9 @@ class Backend:
         }
         if self.seed is not None:
             payload["seed"] = self.seed
+        if self.enable_thinking is not None:
+            payload["chat_template_kwargs"] = {
+                "enable_thinking": self.enable_thinking}
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

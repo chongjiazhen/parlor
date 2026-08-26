@@ -256,7 +256,21 @@ class ChangelingReferee:
 
     def ask(self, seat: int) -> str:
         """The question put to one seat, phrased positively per
-        ``.claude/rules/model-facing-text.md``."""
+        ``.claude/rules/model-facing-text.md``.
+
+        A `cabal`-style bound on the ``think`` field ("keep it under 30 words,
+        because a reply long enough to be truncated is one the referee has to
+        refuse") was tried here on 2026-08-26 and REMOVED: measured against the same
+        seed and model it moved the fallback rate not at all, 4/15 either way. The
+        reasoning that was eating the budget happens in the model's own
+        ``reasoning_content`` channel BEFORE it writes a field, so no instruction
+        about a field can bound it. The lever that worked is
+        ``Backend.enable_thinking``; the argument is there.
+
+        Left out rather than left in, per that rule's last line: a prompt line with
+        no measured benefit is load with no payer, and carrying it would put an
+        unattributed difference between this game's ask and `cabal`'s.
+        """
         if self.phase is Phase.DISCUSS:
             return ("Speak to the table. Reply as one JSON object: "
                     '{"think": "your private reasoning", '

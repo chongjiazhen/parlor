@@ -61,6 +61,7 @@ def build_backend(args) -> Backend:
         timeout=args.timeout,
         max_tokens=args.max_tokens,
         seed=args.seed,
+        enable_thinking=(False if args.no_thinking else None),
     )
 
 
@@ -354,6 +355,11 @@ def main() -> None:
     ap.add_argument("--max-tokens", type=int, default=1536)
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--theme", choices=list(THEMES))
+    ap.add_argument("--no-thinking", action="store_true",
+                    help="ask the chat template to skip the model's reasoning "
+                         "pass. A reasoning-distill model can fail to terminate "
+                         "its reasoning and no token cap fixes that; see "
+                         "core/backends.py. A MEASURED change, off by default.")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
