@@ -65,9 +65,24 @@ def _blind_line(g3: dict) -> str:
                 f"n={g3.get('votes_clean_blind', 0)}, tainted "
                 f"n={g3.get('votes_tainted_blind', 0)})")
     band = f"  95% CI [{ci[0]:+.2%}, {ci[1]:+.2%}]" if ci else "  (CI unavailable)"
-    return (f"  DISCRIMINATION (blind)     {d:+.2%} "
+    return (f"  discrimination, binary     {d:+.2%} "
             f"(n={g3['votes_clean_blind']} clean / {g3['votes_tainted_blind']} "
-            f"tainted, seats the night told NOTHING - this is the gate){band}")
+            f"tainted, same blind seats - superseded by the graded slope above, "
+            f"which uses every taint level){band}")
+
+
+def _graded_lines(g3: dict) -> str:
+    """The graded gate, plus the dose-response table it is fitted to."""
+    b = g3["strata"].get("none") or {}
+    s, ci = b.get("taint_sensitivity"), b.get("taint_sensitivity_ci95")
+    if s is None:
+        return ("  TAINT SENSITIVITY (blind)  REFUSED - blind votes span fewer "
+                "than two taint levels, so no slope is defined")
+    band = f"  95% CI [{ci[0]:+.2%}, {ci[1]:+.2%}]" if ci else "  (CI unavailable)"
+    rows = "  ".join(f"{k}:{h}/{n} ({h / n:.0%})"
+                     for k, (h, n) in sorted(b.get("by_taint", {}).items()))
+    return (f"  TAINT SENSITIVITY (blind)  {s:+.2%} per extra saboteur - THE GATE"
+            f"{band}\n    approval by taint level  {rows}")
 
 
 def _strata_lines(g3: dict) -> str:
@@ -94,6 +109,65 @@ def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
     centre = (p + z * z / (2 * total)) / d
     half = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / d
     return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def taint_sensitivity(votes) -> tuple[float | None, dict[int, tuple[int, int]]]:
+    """How much approval each ADDITIONAL saboteur on the team costs, plus the
+    per-level table it is fitted to.
+
+    The binary metric thresholds taint at 1, which throws away the 1-vs-2 contrast
+    and caps precision on the thinnest cell - at 5 seats a clean team has P~0.18,
+    so `p_clean` is always the scarce term. Grading fits the whole dose-response
+    instead: ordinary least squares of approval on the evil count, sign-flipped so
+    POSITIVE means the seat approves less as the team gets dirtier, matching the
+    direction of the binary figure.
+
+    It degenerates correctly: with only levels 0 and 1 present the slope IS the
+    binary discrimination, so this generalises the old number rather than
+    replacing it with something incomparable.
+
+    The per-level table is returned because the slope alone hides
+    non-monotonicity, and non-monotonicity is the interesting failure - a table
+    that rises from 1 to 2 evils is not a weak deducer, it is a seat responding to
+    something other than taint.
+    """
+    by_level: dict[int, tuple[int, int]] = {}
+    for v in votes:
+        hits, n = by_level.get(v.team_evil_count, (0, 0))
+        by_level[v.team_evil_count] = (hits + bool(v.approved), n + 1)
+    if len({v.team_evil_count for v in votes}) < 2:
+        return None, by_level        # one level only: no slope is defined
+    mean_t = sum(v.team_evil_count for v in votes) / len(votes)
+    mean_y = sum(bool(v.approved) for v in votes) / len(votes)
+    var = sum((v.team_evil_count - mean_t) ** 2 for v in votes)
+    if var == 0:
+        return None, by_level
+    cov = sum((v.team_evil_count - mean_t) * (bool(v.approved) - mean_y)
+              for v in votes)
+    return -(cov / var), by_level
+
+
+def bootstrap_taint_sensitivity(records, cls: str, resamples: int = 4000,
+                                seed: int = 7) -> tuple[float, float] | None:
+    """CI for the graded slope, resampling GAMES for the same clustering reason."""
+    rng = random.Random(seed)
+    n = len(records)
+    if n == 0:
+        return None
+    out: list[float] = []
+    for _ in range(resamples):
+        pool = [v for _ in range(n)
+                for v in records[rng.randrange(n)].votes
+                if not v.seat_is_evil and v.knowledge_class == cls]
+        if not pool:
+            continue
+        s, _ = taint_sensitivity(pool)
+        if s is not None:
+            out.append(s)
+    if len(out) < resamples // 2:
+        return None
+    out.sort()
+    return (out[int(0.025 * len(out))], out[int(0.975 * len(out))])
 
 
 def bootstrap_discrimination(records, cls: str, resamples: int = 4000,
@@ -283,6 +357,7 @@ def score(records: list[GameRecord]) -> dict:
     for cls in ("none", "aura", "identity"):
         c = [v for v in clean if v.knowledge_class == cls]
         t = [v for v in tainted if v.knowledge_class == cls]
+        slope, levels = taint_sensitivity(c + t)
         strata[cls] = {
             "n_clean": len(c),
             "n_tainted": len(t),
@@ -290,6 +365,11 @@ def score(records: list[GameRecord]) -> dict:
                                 - sum(1 for v in t if v.approved) / len(t))
                                if c and t else None),
             "ci95": bootstrap_discrimination(played, cls) if c and t else None,
+            "taint_sensitivity": slope,
+            "taint_sensitivity_ci95": (bootstrap_taint_sensitivity(played, cls)
+                                       if slope is not None else None),
+            # level -> (approvals, votes). The dose-response the slope is fitted to.
+            "by_taint": {k: v for k, v in sorted(levels.items())},
         }
     blind = strata["none"]
 
@@ -320,6 +400,8 @@ def score(records: list[GameRecord]) -> dict:
             "votes_tainted": len(tainted),
             "votes_clean": len(clean),
             "strata": strata,
+            "taint_sensitivity_blind": blind["taint_sensitivity"],
+            "taint_sensitivity_blind_ci95": blind["taint_sensitivity_ci95"],
             "discrimination_blind": blind["discrimination"],
             "discrimination_blind_ci95": blind["ci95"],
             "votes_tainted_blind": blind["n_tainted"],
@@ -375,6 +457,7 @@ def report(s: dict, args, elapsed: float) -> str:
         # have nothing handed and nothing to hide. Reporting the flattering pooled
         # number as the headline was the same class of error as quoting a result
         # without its fallback rate.
+        _graded_lines(g3),
         _blind_line(g3),
         _strata_lines(g3),
         f"  ...pooled, all good seats  {g3['discrimination']:+.2%} "
@@ -422,9 +505,14 @@ def report(s: dict, args, elapsed: float) -> str:
     #     scored `p_clean - 0 > 0` and PASSED on no data. Refused now, and the
     #     refusal is distinguishable from a failure: a fail invites tuning, a
     #     refusal invites more data.
-    blind_ci = g3.get("discrimination_blind_ci95")
+    # Graded, not binary. The binary figure thresholds taint at 1 and so is
+    # precision-capped by the clean cell, which at 5 seats is the scarce one
+    # (P(clean team) ~ 0.18). The slope uses every level. It degenerates to the
+    # binary number when only two levels occur, so this is a strictly better
+    # estimator of the same quantity, not a different claim.
+    blind_ci = g3.get("taint_sensitivity_blind_ci95")
     n_3a = bool(blind_ci) and blind_ci[0] > 0
-    a_refused = g3["discrimination_blind"] is None
+    a_refused = g3.get("taint_sensitivity_blind") is None
     n_3b = g3["hunter_ci95"][0] > 1 / 3
     verdict_3a, verdict_3b = n_3a and good_is_live, n_3b and evil_is_live
     verdict_3 = verdict_3a and verdict_3b
@@ -432,8 +520,8 @@ def report(s: dict, args, elapsed: float) -> str:
     lines += [
         "",
         f"gate #3 {'PASS' if verdict_3 else 'not shown'} - "
-        + ("blind-seat discrimination REFUSED (no blind votes)" if a_refused
-           else f"blind-seat CI floor {'clears 0' if n_3a else 'includes 0'}")
+        + ("blind-seat taint sensitivity REFUSED (no blind votes)" if a_refused
+           else f"blind-seat taint-sensitivity CI floor {'clears 0' if n_3a else 'includes 0'}")
         + ", hunter "
         f"{'beats' if n_3b else 'does not beat'} chance at the CI floor",
     ]

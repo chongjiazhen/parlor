@@ -126,6 +126,8 @@ class TestReportRefusals(unittest.TestCase):
         s["gate3_deduction"] = dict(s["gate3_deduction"],
                                     discrimination=0.4, discrimination_blind=0.4,
                                     discrimination_blind_ci95=(0.2, 0.6),
+                                    taint_sensitivity_blind=0.4,
+                                    taint_sensitivity_blind_ci95=(0.2, 0.6),
                                     hunter_ci95=(0.5, 0.9))
         s["gate2_deception"] = dict(s["gate2_deception"],
                                     ci95=(0.2, 0.6), evil_win_rate=0.4)
@@ -153,16 +155,19 @@ class TestBlindSplit(unittest.TestCase):
                         {s: RandomPolicy(rng=random.Random(1)) for s in range(5)})
         rec.votes = (
             # seer on a tainted team: always rejects, on handed knowledge
-            [VoteRecord(0, False, False, True, True, "identity") for _ in range(10)]
+            [VoteRecord(0, False, False, True, True, "identity", 1 + i % 2)
+               for i in range(10)]
             # blind seats on a tainted team: as told
-            + [VoteRecord(1, i < blind_approves, False, True, False, "none")
+            + [VoteRecord(1, i < blind_approves, False, True, False, "none",
+                          1 + i % 2)
                for i in range(blind_total)]
             # blind seats on a clean team: always approve
-            + [VoteRecord(2, True, False, False, False, "none")
+            + [VoteRecord(2, True, False, False, False, "none", 0)
                for _ in range(blind_clean)]
             # seer on a clean team: certifies it, always approves. Belongs to
             # p_clean only in the POOLED figure - never in the gate.
-            + [VoteRecord(0, True, False, False, False, "identity") for _ in range(10)]
+            + [VoteRecord(0, True, False, False, False, "identity", 0)
+               for _ in range(10)]
         )
         rec.winner, rec.error = "good", None
         return [rec]
@@ -177,7 +182,7 @@ class TestBlindSplit(unittest.TestCase):
         self.assertAlmostEqual(g3["strata"]["identity"]["discrimination"], 1.0)
         text = report(s, make_args(arm="llm"), 1.0)
         self.assertIn("gate #3 not shown", text)
-        self.assertIn("blind-seat CI floor includes 0", text)
+        self.assertIn("blind-seat taint-sensitivity CI floor includes 0", text)
 
     def test_blind_seats_that_do_discriminate_show_it(self):
         g3 = score(self.records(blind_approves=2, blind_total=10))["gate3_deduction"]
@@ -197,16 +202,18 @@ class TestBlindSplit(unittest.TestCase):
         healthy_point_straddling_floor = dict(
             s["gate3_deduction"],
             discrimination_blind=0.30, discrimination_blind_ci95=(-0.05, 0.62),
+            taint_sensitivity_blind=0.30,
+            taint_sensitivity_blind_ci95=(-0.05, 0.62),
             hunter_ci95=(0.5, 0.9))
         text = report(dict(s, gate3_deduction=healthy_point_straddling_floor),
                       make_args(arm="llm"), 1.0)
-        self.assertIn("blind-seat CI floor includes 0", text)
+        self.assertIn("blind-seat taint-sensitivity CI floor includes 0", text)
         self.assertIn("gate #3 not shown", text)
 
         clears = dict(healthy_point_straddling_floor,
-                      discrimination_blind_ci95=(0.05, 0.62))
+                      taint_sensitivity_blind_ci95=(0.05, 0.62))
         text = report(dict(s, gate3_deduction=clears), make_args(arm="llm"), 1.0)
-        self.assertIn("blind-seat CI floor clears 0", text)
+        self.assertIn("blind-seat taint-sensitivity CI floor clears 0", text)
 
     def test_no_blind_votes_is_REFUSED_not_passed(self):
         """The fail-open this replaced: p_blind defaulted to 0.0, so a run with no
@@ -224,11 +231,63 @@ class TestBlindSplit(unittest.TestCase):
         # Two INDEPENDENT paths must both refuse - the metric line and the verdict
         # line. A bare assertIn("REFUSED") passes when either one still fires, so
         # it survived a mutation that made the metric line render +0.00%.
-        self.assertIn("DISCRIMINATION (blind)     REFUSED", text)
-        self.assertIn("blind-seat discrimination REFUSED", text)
-        self.assertNotIn("DISCRIMINATION (blind)     +0.00%", text)
+        self.assertIn("TAINT SENSITIVITY (blind)  REFUSED", text)
+        self.assertIn("blind-seat taint sensitivity REFUSED", text)
+        self.assertNotIn("TAINT SENSITIVITY (blind)  +0.00%", text)
         self.assertIn("gate #3 not shown", text)
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestGradedTaint(unittest.TestCase):
+    """The binary metric thresholds taint at 1, so it is precision-capped by the
+    clean cell - the scarce one at 5 seats (P(clean team) ~ 0.18). The slope uses
+    every level, and degenerates to the binary number when only two occur."""
+
+    def votes(self, by_level):
+        """by_level: {evil_count: (approvals, total)} for one blind seat."""
+        from games.cabal.player import VoteRecord
+        out = []
+        for level, (hits, total) in by_level.items():
+            for i in range(total):
+                out.append(VoteRecord(1, i < hits, False, level > 0, False,
+                                      "none", level))
+        return out
+
+    def test_it_degenerates_to_the_binary_number_at_two_levels(self):
+        """Same quantity, better estimator - not a different claim. With only
+        levels 0 and 1 the slope IS p_clean - p_tainted."""
+        from eval.run_games import taint_sensitivity
+        v = self.votes({0: (8, 10), 1: (3, 10)})
+        slope, _ = taint_sensitivity(v)
+        self.assertAlmostEqual(slope, 0.8 - 0.3)
+
+    def test_the_third_level_carries_signal_the_binary_metric_discards(self):
+        """Two runs identical under the binary split - both 80% clean, 40%
+        tainted - but one keeps discriminating between 1 and 2 saboteurs and the
+        other does not. The binary figure cannot tell them apart."""
+        from eval.run_games import taint_sensitivity
+        graded, _ = taint_sensitivity(self.votes({0: (8, 10), 1: (6, 10), 2: (2, 10)}))
+        flat, _ = taint_sensitivity(self.votes({0: (8, 10), 1: (4, 10), 2: (4, 10)}))
+        for v in (graded, flat):
+            self.assertIsNotNone(v)
+        self.assertGreater(graded, flat)
+
+    def test_a_non_monotonic_table_is_visible_even_when_the_slope_is_positive(self):
+        """A seat that rejects 1 saboteur but approves 2 is not a weak deducer, it
+        is responding to something other than taint. The slope alone hides that,
+        which is why the per-level table ships beside it."""
+        from eval.run_games import taint_sensitivity
+        slope, levels = taint_sensitivity(self.votes({0: (9, 10), 1: (2, 10),
+                                                      2: (5, 10)}))
+        self.assertGreater(slope, 0)                       # slope looks fine
+        rates = [h / n for _, (h, n) in sorted(levels.items())]
+        self.assertLess(rates[1], rates[2])                # but it goes back UP
+
+    def test_one_taint_level_is_refused_not_scored_as_zero(self):
+        from eval.run_games import taint_sensitivity
+        slope, levels = taint_sensitivity(self.votes({0: (5, 10)}))
+        self.assertIsNone(slope)
+        self.assertEqual(levels, {0: (5, 10)})

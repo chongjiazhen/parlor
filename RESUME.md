@@ -47,12 +47,29 @@ Queue only. Done work leaves to git log. What's next:
         exist at 5p, so it cannot be conditioned away here - report the split,
         state the residual.
       - Both push the honest number DOWN, not up.
-- [ ] **Graded taint is now the only route to a resolvable gate #3a**, not an
-      optimisation. The blind interval spans ~31 points at 20 games; binary
-      clean-vs-tainted discards ~82% of votes and the surviving population is one
-      seat per game at 5p. Grade taint continuously (how many evil on the proposed
-      team, against what that seat could know) so every vote is a sample. Same
-      insight as the graded hunt. Arithmetic: `docs/player-counts.md`.
+- [x] **Graded taint landed 2026-08-26 - and it does NOT rescue gate #3a, it
+      sharpens the null.** I called it "the only route to a resolvable gate";
+      that oversold it. What it actually buys is precision, measured on the same
+      seed-1000 records with no new games:
+
+      | metric | estimate | 95% CI | width |
+      |---|---|---|---|
+      | binary clean-vs-tainted | +2.53% | [-13.45%, +18.04%] | 31.5 pts |
+      | **graded, per extra saboteur** | **+1.20%** | **[-8.44%, +9.63%]** | **18.1 pts** |
+
+      Interval width nearly halved at the same N. The dose-response is flat -
+      approval by taint level runs **74% / 71% / 71%** - and the 1-to-2 step goes
+      marginally the WRONG way, so there is no signal to find rather than a weak
+      one being lost in noise.
+      - Slope = OLS of approval on the evil count, sign-flipped so positive means
+        "approves less as the team gets dirtier". It DEGENERATES to the binary
+        figure when only two levels occur, so it is a better estimator of the same
+        quantity, not a different claim - there is a test asserting exactly that.
+      - The per-level table ships beside the slope, because a slope alone hides
+        non-monotonicity, and a seat that rejects one saboteur but approves two is
+        not a weak deducer - it is responding to something other than taint.
+      - Binary figure still printed, marked superseded. Kept because earlier runs
+        reported it, not because it means anything.
 - [ ] **Derive the hunter baseline from the legal target set, not a hardcoded
       1/3.** `run_games.py` hardcodes `hunter_baseline: 1/3` and prints "chance
       33.33%". Both are correct ONLY at 5 seats with a hunter that knows its ally.

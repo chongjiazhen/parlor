@@ -246,6 +246,12 @@ class VoteRecord:
     #: knowledge variant fall out of one field without a schema change - the same
     #: trap as a hardcoded baseline, avoided once.
     knowledge_class: str = "none"
+    #: HOW MANY evil seats the proposed team carried. ``team_has_evil`` is this
+    #: thresholded at 1, which throws away the 1-vs-2 contrast - and at 5 seats a
+    #: clean team is rare (P~0.18), so the binary estimator's precision is capped
+    #: by its thinnest cell while a well-populated comparison sits unused. Graded
+    #: taint uses every vote against every level.
+    team_evil_count: int = 0
 
 
 @dataclass
@@ -376,7 +382,9 @@ def play_game(
             rec.utterances.append(f'seat {seat}: {action["say"]}')
         elif ref.phase is Phase.VOTE:
             team = ref.proposal
-            team_has_evil = any(ref.assignment[s].team is Team.EVIL for s in team)
+            team_evil_count = sum(1 for s in team
+                                  if ref.assignment[s].team is Team.EVIL)
+            team_has_evil = team_evil_count > 0
             votes = {}
             for seat in sorted(ref.assignment):
                 labels = {k.label for k in ref.entitled_knowledge(seat)}
@@ -398,6 +406,7 @@ def play_game(
                     team_has_evil=team_has_evil,
                     knew_evil_on_team=bool(known_evil & set(team)),
                     knowledge_class=knowledge_class,
+                    team_evil_count=team_evil_count,
                 ))
             ref.vote(votes)
         elif ref.phase is Phase.MISSION:
