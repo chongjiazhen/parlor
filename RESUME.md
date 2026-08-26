@@ -310,9 +310,30 @@ Queue only. Done work leaves to git log. What's next:
         into "run 200 overnight".
       Also no elimination, which is the point of preferring this family. Secret
       Hitler stays the better LADDER step (forced reveals, a deck the referee
-      controls) but ONUW is the better ENGINE step. Do it only once gate #3 is
-      called - it is also the pressure test for what really belongs in `core/`, and
-      that question wants evidence, not a guess.
+      controls) but ONUW is the better ENGINE step.
+      - **The constraint is "do not change cabal's RULES mid-measurement", NOT "do
+        not build game #2".** This line used to read "do it only once gate #3 is
+        called", which contradicts the N argument directly above it: it pays the
+        expensive N in the game that is worst at producing it, before building the
+        thing that makes N cheap. They do not compete for the same resource either -
+        cabal's remaining cost is GPU wall-clock, ONUW's is attention, and the card
+        is booked either way. So ONUW is buildable NOW, alongside a running hunt.
+        What must not happen concurrently is an edit to what a cabal seat knows or
+        is asked; that is the 6/7p item's block and it stands.
+      - **ONUW does not retire cabal's gates.** Different rung, different deduction
+        task. Building it decides which game's numbers get published first. It
+        settles nothing about gate #3, and a cabal gate left uncalled stays uncalled.
+      - **When to stop spending GPU on cabal's gate #3: after the anchor pair, if
+        the run-to-run spread is as wide as the effect.** `hunt20c` plus one paired
+        re-run is the first comparison the repo can make, and the spread it measures
+        is the decision. Wider than the ~+9pp taint sensitivity -> 5-seat cabal
+        cannot show gate #3a at an affordable N, and the GPU goes to ONUW. Narrower
+        -> the N is known and it is a scheduling call. Gate #3b is a separate and
+        cheaper question: 54.55% observed puts it in the ~32-62 hunt band, which at
+        `hunt20b`'s 0.55 hunts/game is 58-113 games, 2-4 overnight runs.
+      - It is also the pressure test for what really belongs in `core/`, and that
+        question wants evidence, not a guess - an argument for building it while the
+        cabal answer is open, not after.
       - **Ship a werewolf-vocabulary theme on this rung, and that is the whole
         answer to public legibility.** A public repo has a real problem that "team-
         mission hidden-role deduction game" means nothing to anyone outside the
