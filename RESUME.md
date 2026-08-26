@@ -161,10 +161,17 @@ Queue only. Done work leaves to git log. What's next:
         file caught a week ago - a real number pooled or drawn from the wrong
         population and quoted as a finding.
 - [ ] **NEXT: `hunt20c` IS IN FLIGHT - the first reproducible anchor.** Launched
-      2026-08-26 14:52 SGT off commit `f8c5f71`, clean tree, ETA ~19:40. 20 games,
+      2026-08-26 14:52 SGT off commit `f8c5f71`, clean tree. 20 games,
       seed 1000, 2 rounds, pinned `qwen36-35b-a3b-iq3`, notebook OFF, detached
-      (pid 16440, `eval\runs\hunt-local.cmd hunt20c 20 1000`). Log + JSONL:
-      `eval/records/hunt20c.*`. Judge it by those two only.
+      (`eval\runs\hunt-local.cmd hunt20c 20 1000`; pid 16440 is the `cmd.exe`
+      wrapper, pid 13048 the python child - the wrapper is what to kill, the child
+      is what proves it lives). Log + JSONL: `eval/records/hunt20c.*`. Judge it by
+      those two only.
+      - **ETA is unpinned at one game.** Game 0 ran 9.7m/80 decisions against
+        `hunt20b`'s 18.5m/122, so the launcher extrapolates ~18:07 SGT while
+        `hunt20b`'s 4h42m pace says ~19:40. Game 1 was still running at 15:15
+        (13m+), i.e. already off game 0's pace. Re-read the log for the estimate;
+        do not quote either number as the ETA.
       - Nothing before `2cfe9d5` is reproducible, so there is currently no run a
         later run can be compared against. This one becomes that run.
       - **It is an anchor, not a result.** Its own numbers are a third draw and
