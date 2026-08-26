@@ -160,28 +160,63 @@ Queue only. Done work leaves to git log. What's next:
         heavily. Reporting it as "gate #3a holds" would repeat the exact error this
         file caught a week ago - a real number pooled or drawn from the wrong
         population and quoted as a finding.
-- [ ] **NEXT: `hunt20c` IS IN FLIGHT - the first reproducible anchor.** Launched
-      2026-08-26 14:52 SGT off commit `f8c5f71`, clean tree. 20 games,
-      seed 1000, 2 rounds, pinned `qwen36-35b-a3b-iq3`, notebook OFF, detached
-      (`eval\runs\hunt-local.cmd hunt20c 20 1000`; pid 16440 is the `cmd.exe`
-      wrapper, pid 13048 the python child - the wrapper is what to kill, the child
-      is what proves it lives). Log + JSONL: `eval/records/hunt20c.*`. Judge it by
-      those two only.
-      - **ETA is unpinned at one game.** Game 0 ran 9.7m/80 decisions against
-        `hunt20b`'s 18.5m/122, so the launcher extrapolates ~18:07 SGT while
-        `hunt20b`'s 4h42m pace says ~19:40. Game 1 was still running at 15:15
-        (13m+), i.e. already off game 0's pace. Re-read the log for the estimate;
-        do not quote either number as the ETA.
-      - Nothing before `2cfe9d5` is reproducible, so there is currently no run a
-        later run can be compared against. This one becomes that run.
-      - **It is an anchor, not a result.** Its own numbers are a third draw and
-        settle nothing on their own; what it buys is that the NEXT run can be a
-        pair. Two runs of the same code are also the only way to learn the
-        run-to-run spread, which every "+X% vs +Y%" claim in this file has been
-        assuming and none has measured.
-      - Before launching anything that compares against it: `git log` since its
-        commit. `hunt20b` was voided by a prompt change that landed 43 minutes
-        before launch and went unnoticed because nobody looked.
+- [x] **`hunt20c` LANDED 2026-08-26 21:29:52 SGT - the anchor exists.** 20/20
+      games, 6h37m (23818.2s), off commit `f8c5f71`, clean tree, seed 1000, 2
+      rounds, pinned `qwen36-35b-a3b-iq3` (100% served), notebook OFF, zero errors,
+      1.78% fallback (48/2691). It is the first run in the repo a later run can be
+      compared against.
+      - **Both gates not shown, and both verdicts are safe.** Blind taint
+        sensitivity +9.00% [-0.25%, +18.18%] - the floor INCLUDES 0. Hunter 5/9 =
+        55.56%, floor 26.66%, short of the 1/3 bar for the third run running. Evil
+        80.00% [58.40%, 91.93%], unreadable per the gate-#2-is-conditional rule.
+      - **The result of the day is a negative, and it is about the INSTRUMENT.**
+        `hunt20b` reported +8.82% [+0.94%, +16.82%]; `hunt20c` reports +9.00%
+        [-0.25%, +18.18%]. The point estimates are effectively the same and the
+        floor verdict INVERTS. At n=20 the floor's position relative to 0 is being
+        decided by noise, not by signal - so "the CI floor cleared 0" is not a
+        finding at this N, and anyone reading `hunt20b`'s floor as "gate #3a holds"
+        would have had to unread it tonight. Second independent reason the `hunt20b`
+        void was correct.
+      - **This is still NOT the spread measurement.** `hunt20b` ran pre-`2cfe9d5`
+        with an unseeded sampler; `hunt20c` is post. One uncontrolled variable
+        remains between them, so the above is suggestive, not measured. The pair
+        that measures spread is `hunt20c` + `hunt20d`, both off the same code.
+      - **The graded slope is fitting a step function - two runs now agree.**
+        Approval by taint level: `hunt20b` 93/70/77, `hunt20c` 82/64/64. Both show a
+        real 0->1 drop and NO further response at 2; `hunt20c`'s 1->2 leg is exactly
+        flat. A linear "+X% per extra saboteur" through a step is the wrong
+        statistic, and in both runs the binary clean-vs-tainted split is the
+        better-behaved one (`hunt20c`: +18.11% [+3.52%, +33.53%]). The scorer's
+        "superseded by the graded slope above" note has it backwards; fix that
+        before the next scoring pass, and see the taint-level item.
+      - **`llama-server` degrades over a long run - the fallback rate is partly a
+        function of RUN LENGTH.** Games 0-6 ran 0.83% (8/968); games 7-19 ran 2.32%
+        (40/1723); the last five ran 2.73% (15/549). Bucketing the refusal traces
+        mid-run: EMPTY replies (`reply: ''`) grew 22 -> 32 while every parse-failure
+        bucket stayed flat or fell, and `3 attempts failed, playing random` more
+        than doubled. Empties are the server returning nothing, not the model
+        answering badly. Carry this into the pair: `hunt20d` is the same length and
+        should show the same shape - if it does not, that is a fact about the
+        backend, not the game.
+      - **Evil's win PATH moved a lot**: `five_rejects` 0/20 in `hunt20b` -> 6/20
+        here, now the single most common path (vs missions_failed 5, hunt_hit 5).
+        Deadlocking the table is not sabotage; if this holds in `hunt20d` it changes
+        what gate #2 would even be measuring.
+- [ ] **NEXT: `hunt20d` - the paired re-run that measures the spread.** Same
+      everything as `hunt20c`: 20 games, seed 1000, 2 rounds, pinned
+      `qwen36-35b-a3b-iq3`, notebook OFF, `eval\runs\hunt-local.cmd hunt20d 20 1000`.
+      Budget ~6h40m on the GPU.
+      - **Launching off HEAD is valid and was checked.** `git diff f8c5f71..HEAD`
+        over non-`.md` paths is EMPTY - the four commits since the anchor are all
+        docs. Re-run that check at launch time, not from this line.
+      - What the pair buys, in order: the run-to-run spread on blind taint
+        sensitivity (the number every "+X% vs +Y%" claim in this file has assumed
+        and none has measured); whether the step-not-slope shape replicates a third
+        time; whether the `five_rejects` path shift is real; and whether the
+        transport degradation is a property of run length.
+      - **The spread is the ONUW/cloud decision variable.** Wider than the ~+9pp
+        effect -> 5-seat cabal cannot show gate #3a at an affordable N. See the
+        Spike #1.5 item.
 - [ ] **The local launcher loses its own completion marker.** `hunt20b` finished
       cleanly - full report, complete JSON, 20 JSONL lines, zero errors - and wrote
       no `DONE rc=` line, because `cmd.exe` did not survive to echo it after python
@@ -482,21 +517,38 @@ random policy wearing a model's name.
 | hunts across ALL live runs | 8/26 = 31%, and **5 of 26 named the hunter's own ally** | fixed in `hunt()`: a seat the night named as yours cannot be the seer, so the referee refuses it |
 | cost, `q36` local | ~14.6 min/game (reasoning distill, long generations) | a 50-game hunter run is ~12h overnight; cloud is ~3 min/game when quota allows |
 
-Added 2026-08-26, all `qwen36-35b-a3b-iq3`, seed 1000, 20 games, 2 rounds. The two
-columns are NOT a controlled comparison - see the `hunt20b` item above for the three
-differences between them. They are here as two draws, which is all they are.
+Added 2026-08-26, all `qwen36-35b-a3b-iq3`, seed 1000, 20 games, 2 rounds. **NONE of
+these three columns is a controlled comparison of another.** `hunt20` vs `hunt20b`
+differ by three things (see the `hunt20b` item); `hunt20b` vs `hunt20c` differ by the
+sampler pin `2cfe9d5`, which landed between them. They are three draws, which is all
+they are. The first controlled pair will be `hunt20c` vs `hunt20d`.
 
-| what | `hunt20` (08-25 19:54) | `hunt20b` (08-26 08:56) |
-|---|---|---|
-| blind taint sensitivity - THE GATE | +1.20% [-8.44%, +9.63%] | +8.82% [+0.94%, +16.82%] |
-| blind, binary (superseded) | +2.53% [-13.45%, +18.04%] | +19.94% [+6.27%, +32.02%] |
-| approval by taint level, blind | - | 93% / 70% / 77% (41/44, 28/40, 24/31) |
-| hunter | 3/9 = 33.33%, floor 12.06% | 6/11 = 54.55%, floor 28.01% |
-| evil win rate | 70%, 5 of 14 by `five_rejects` | 75%, **0** by `five_rejects` |
-| evil win paths | 6 missions / 5 rejects / 3 hunts | 9 missions / 0 rejects / 6 hunts |
-| missions, fail-card distribution | 63, `{0:34, 1:17, 2:12}` | 74, `{0:37, 1:22, 2:15}` |
-| over-sabotage, share of sunk (unconditioned - see the open item) | 12/29 = 41% | 15/37 = 41% |
-| fallback rate | 0.49% (11/2231) | 0.54% (11/2033) |
+| what | `hunt20` (08-25 19:54) | `hunt20b` (08-26 08:56) | `hunt20c` (08-26 14:52) |
+|---|---|---|---|
+| blind taint sensitivity - THE GATE | +1.20% [-8.44%, +9.63%] | +8.82% [+0.94%, +16.82%] | +9.00% [**-0.25%**, +18.18%] |
+| blind, binary (superseded - see below) | +2.53% [-13.45%, +18.04%] | +19.94% [+6.27%, +32.02%] | +18.11% [+3.52%, +33.53%] |
+| approval by taint level, blind | - | 93% / 70% / 77% (41/44, 28/40, 24/31) | 82% / 64% / 64% (41/50, 37/58, 32/50) |
+| hunter | 3/9 = 33.33%, floor 12.06% | 6/11 = 54.55%, floor 28.01% | 5/9 = 55.56%, floor 26.66% |
+| evil win rate | 70%, 5 of 14 by `five_rejects` | 75%, **0** by `five_rejects` | 80%, **6 of 16** by `five_rejects` |
+| evil win paths | 6 missions / 5 rejects / 3 hunts | 9 missions / 0 rejects / 6 hunts | 5 missions / 6 rejects / 5 hunts |
+| missions, fail-card distribution | 63, `{0:34, 1:17, 2:12}` | 74, `{0:37, 1:22, 2:15}` | 62, `{0:35, 1:15, 2:12}` (derived) |
+| over-sabotage, share of sunk (unconditioned - see the open item) | 12/29 = 41% | 15/37 = 41% | 12/27 = 44% |
+| fallback rate | 0.49% (11/2231) | 0.54% (11/2033) | 1.78% (48/2691) |
+| wall clock | - | 4h42m | 6h37m |
+
+Two things this table now shows that no single column does:
+
+- **The GATE row's point estimate is stable (+8.82 -> +9.00) while its floor verdict
+  INVERTS** (+0.94 -> -0.25). At n=20 the floor's position relative to 0 is noise.
+  Do not report "the floor cleared 0" as a finding at this N.
+- **The taint-level row is a STEP, not a slope, in both runs that have it** - a real
+  0->1 drop and no further response at 2 (`hunt20c`'s 1->2 leg is exactly flat). The
+  linear "per extra saboteur" statistic is mis-specified for this shape, and the
+  binary row is the better-behaved one. The scorer's "superseded by the graded slope"
+  note has it backwards.
+- `hunt20c`'s fail-card distribution is DERIVED (62 missions, 27 sunk, 39 cards, max 2
+  fails at 5 seats => `{0:35, 1:15, 2:12}`), not read from a scorer field. The JSONL
+  carries `fails_played` per GAME only.
 
 | what | result | 2026-08-26 |
 |---|---|---|
