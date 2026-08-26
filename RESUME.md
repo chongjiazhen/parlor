@@ -185,11 +185,23 @@ Queue only. Done work leaves to git log. What's next:
       stay, though each already pairs with a positive instruction.
       **This is a measured change, not a cleanup** - same seeds, one variable, and
       it waits until the runs in flight land or it contaminates them.
-- [ ] **A per-seat private notebook.** The one real gap in "play like a human":
-      `think` is dropped every turn, so a seat re-derives its read from scratch and
-      cannot remember that it caught seat 2 lying in round 1. Its own words shown
-      only back to itself - gate #1-safe by construction, like `think`. Needs its
-      own line cap; it rides on every call.
+- [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.** `--notebook`
+      on `run_games.py` and `demo.py`; off by default. A seat's `note` is filed
+      under its own seat and rendered back to that seat alone on every later call,
+      so a read survives the turn that formed it. Cap: last 6 lines of 160
+      characters, stamped with the mission it was written on.
+      - **It is a prompt change, so it is a MEASURED change** (`--notebook` vs not,
+        same seeds, one variable, reported beside its fallback rate) and it waits
+        behind the seed-1000 re-run the same way the negation pass does. Nothing
+        about it is quotable until that arm exists.
+      - Gate #1 holds by construction and the audit says so: the notebook leaves
+        the audit view with speech (`include_notes` defaults to `include_speech`),
+        because `find_leaks` is naive substring matching and a seat writing down a
+        correct GUESS would otherwise score as a referee leak. Four mutation-checked
+        tests, each killed by its own named test with a compiling mutant.
+      - Two costs it buys, both real: it rides on every call (~1.1 kB at full
+        notebook), and it hands the seats a memory the earlier runs did not have,
+        so no number from before it is comparable to a number after it.
 - [ ] **Mini-personas** (credulous / suspicious / contrarian / by-the-numbers) as
       per-seat judgment biases, assigned from the game seed and recorded so the
       scorer can split by persona. Trigger: only if a table that argues from

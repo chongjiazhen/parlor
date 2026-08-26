@@ -46,6 +46,16 @@ class IllegalAction(Exception):
 #: Hard cap on one utterance. A player that rambles pays for everyone's context.
 MAX_UTTERANCE_CHARS = 280
 
+#: Hard cap on one notebook line, and how many lines a seat's notebook keeps.
+#:
+#: The notebook is not ``think``. ``think`` is written once and dropped, so it
+#: costs one reply; a notebook line is re-sent to its author on EVERY later call,
+#: so it is a standing bill that grows with the game unless something bounds it.
+#: A rolling window of the last few lines is also the honest model of what it is
+#: for - a human carries a handful of reads into the next round, not a ledger.
+MAX_NOTE_CHARS = 160
+MAX_NOTEBOOK_LINES = 6
+
 #: How many lines of public record a seat sees. A 5-seat game never reaches this,
 #: but the record is re-sent on EVERY call, so an unbounded one turns a long game
 #: into a quadratic context bill - and the games further up the ladder are longer.
@@ -79,6 +89,17 @@ class CabalReferee:
     #: before it sees any of its neighbours. Off by default because it changes what
     #: the game is, not just how it reads; measure the two against the same seeds.
     simultaneous: bool = False
+    #: Per-seat private notebook: a seat's own words, filed under its own seat and
+    #: shown back to it and to nobody else. It closes the one real gap in "play like
+    #: a human" - ``think`` is dropped every turn, so a seat re-derives its read from
+    #: scratch and cannot remember that it caught seat 2 lying in round 1.
+    #:
+    #: Off by default, and that is not timidity: it rides on every call and changes
+    #: what the seats can do, so it is a MEASURED change under
+    #: ``.claude/rules/model-facing-text.md`` - same seeds, one variable, and the
+    #: runs already in flight were scored without it.
+    notebook: bool = False
+    notes: dict[int, list[str]] = field(default_factory=dict)
     _pending_speech: list[tuple[str, str]] = field(default_factory=list)
     speech_ptr: int = 0                                  # slots consumed this discussion
     max_record_lines: int = MAX_RECORD_LINES
@@ -96,6 +117,7 @@ class CabalReferee:
         theme: Theme = DEFAULT_THEME,
         discussion_rounds: int = 1,
         simultaneous: bool = False,
+        notebook: bool = False,
     ) -> "CabalReferee":
         setup = SETUPS[n]
         rng = random.Random(seed)
@@ -109,6 +131,7 @@ class CabalReferee:
             leader=rng.randrange(n),
             discussion_rounds=discussion_rounds,
             simultaneous=simultaneous,
+            notebook=notebook,
         )
         # deal is referee-side only: it never enters public_events
         ref.log.append(f"dealt {n} roles; opening leader = seat {ref.leader}")
@@ -158,6 +181,32 @@ class CabalReferee:
         """Referee-side bookkeeping. Never rendered to any seat."""
         self.log.append(text)
 
+    def note(self, seat: int, text: str) -> str | None:
+        """File one line in ``seat``'s private notebook. Returns the stored line, or
+        ``None`` if there was nothing to store.
+
+        This is a THIRD channel and it belongs to neither of the other two: not an
+        event (the referee did not author it), not speech (the table never reads
+        it). It is the only text a seat writes that it will read again.
+
+        No refusal here, unlike ``speak()``. A seat owes the referee a move every
+        turn; it owes it nothing at all in the notebook, so an empty note is a seat
+        choosing not to write, not an illegal action. Truncation is silent for the
+        same reason: a rambling note costs its author context and nobody else, so
+        refusing the whole decision over it would burn a retry on bookkeeping.
+        """
+        if not self.notebook:
+            return None
+        said = " ".join(str(text).split())[:MAX_NOTE_CHARS]
+        if not said:
+            return None
+        line = f"[mission {self.mission_index + 1}] {said}"
+        kept = self.notes.setdefault(seat, [])
+        kept.append(line)
+        del kept[:-MAX_NOTEBOOK_LINES]
+        self._private_log(f'seat {seat} notes: "{said}"')
+        return line
+
     def public_state(self) -> dict:
         return {
             "n": self.n,
@@ -192,7 +241,8 @@ class CabalReferee:
             public=self.public_state(),
         )
 
-    def render_context(self, seat: int, include_speech: bool = True) -> str:
+    def render_context(self, seat: int, include_speech: bool = True,
+                       include_notes: bool | None = None) -> str:
         """The exact text a player agent would receive for this seat. Whatever is
         not here is invisible to that agent - so this string is what gate #1 audits.
 
@@ -200,7 +250,22 @@ class CabalReferee:
         the referee itself put in front of this seat. That is the audit view: a
         player accusing another of a role is playing the game, while a referee doing
         it is the leak the gate exists to catch.
+
+        ``include_notes`` follows ``include_speech`` unless set, and that default is
+        the load-bearing part. A notebook line is player-authored text, the same
+        class as speech, and it must leave the audit view for a sharper reason than
+        speech does: ``find_leaks`` is naive substring matching by design, so a seat
+        writing down a correct GUESS - "seat 3 is the seer" - would trip the audit
+        as a leak the referee never committed. Defaulting the two flags together
+        means the audit cannot be left holding a channel somebody forgot to pass.
+
+        The gate itself is unweakened, because the notebook cannot carry anything
+        into a payload that was not already in one: the only writer of seat N's
+        notebook is seat N, working from bytes the referee had already given it, and
+        the only reader is seat N.
         """
+        if include_notes is None:
+            include_notes = include_speech
         v = self.seat_view(seat)
         lines: list[str] = []
         if self.theme.blurb:
@@ -246,6 +311,11 @@ class CabalReferee:
                 lines.append(f"  [{dropped} earlier line(s) trimmed - oldest table "
                              "talk goes first, mission results and votes last]")
             lines += kept
+        # Last, so it sits closest to the ask: it is this seat's own carried read,
+        # and the thing it was written to survive is the next decision.
+        if include_notes and self.notebook and self.notes.get(seat):
+            lines.append("Your private notebook (you wrote this; only you read it):")
+            lines += [f"  {text}" for text in self.notes[seat]]
         return "\n".join(lines)
 
     def _trim(self, record: list[tuple[bool, str]]) -> tuple[list[str], int]:
@@ -489,7 +559,8 @@ class CabalReferee:
 
         Declares the JSON envelope. ``think`` is the sanctioned place for private
         reasoning and the driver discards it - only ``say`` is ever handed to
-        ``speak()``.
+        ``speak()``. With the notebook on, ``note`` is the one field a seat writes
+        for its own future self.
         """
         p = self.phase
         head = (
@@ -498,12 +569,24 @@ class CabalReferee:
             "keep it under 30 words, because a reply long enough to be truncated "
             "is a reply the referee has to refuse."
         )
+        scratch = '"think": "..."'
+        if self.notebook:
+            head += (
+                ' You also keep a private notebook. Whatever you put in "note" is '
+                "filed under your seat and shown back to you, and only you, on every "
+                "later turn - the table never reads it. Write down the read you want "
+                "to still have next round: who you doubt and what they did to earn "
+                f"it, who you have decided to trust. Keep it under {MAX_NOTE_CHARS} "
+                f"characters; the notebook shows your most recent "
+                f"{MAX_NOTEBOOK_LINES} lines."
+            )
+            scratch += ', "note": "<what to carry forward>"'
         if p is Phase.PROPOSE:
             size = self.setup.team_sizes[self.mission_index]
             return (
                 f"{head}\nYou are the leader. Pick the {size} seats to send on "
                 f"mission {self.mission_index + 1} (you may include yourself).\n"
-                f'Format: {{"think": "...", "team": [<{size} distinct seat numbers '
+                f'Format: {{{scratch}, "team": [<{size} distinct seat numbers '
                 f"0..{self.n - 1}>]}}"
             )
         if p is Phase.DISCUSS:
@@ -514,7 +597,7 @@ class CabalReferee:
                 f"sentences, at most {MAX_UTTERANCE_CHARS} characters. Everyone will "
                 'read "say" and nothing else of yours. Argue, accuse, defend, or '
                 "mislead as your role requires.\n"
-                'Format: {"think": "...", "say": "<your public words>"}'
+                f'Format: {{{scratch}, "say": "<your public words>"}}'
             )
         if p is Phase.VOTE:
             return (
@@ -522,7 +605,7 @@ class CabalReferee:
                 "rejection passes the leadership on; five rejections in a row and "
                 "the mission-runners lose outright."
                 f"{self._night_against_the_table(seat)}\n"
-                'Format: {"think": "...", "vote": "approve"|"reject"}'
+                f'Format: {{{scratch}, "vote": "approve"|"reject"}}'
             )
         if p is Phase.MISSION:
             # Tailored by the seat's OWN role, which that seat already knows - a
@@ -551,14 +634,14 @@ class CabalReferee:
             return (
                 f"{head}\nYou are on the mission. Play a card in secret - only the "
                 f"number of fails becomes public. {rule} {stake}\n"
-                'Format: {"think": "...", "card": "success"|"fail"}'
+                f'Format: {{{scratch}, "card": "success"|"fail"}}'
             )
         if p is Phase.HUNT:
             return (
                 f"{head}\nThree missions held, so your side has one strike left: "
                 "name the seat you believe holds the hidden informant. Right, and "
                 "you take the game; wrong, and it is lost.\n"
-                f'Format: {{"think": "...", "target": <seat 0..{self.n - 1}>}}'
+                f'Format: {{{scratch}, "target": <seat 0..{self.n - 1}>}}'
             )
         raise IllegalAction(f"no action is open in phase {p.value}")
 

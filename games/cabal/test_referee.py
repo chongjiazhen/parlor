@@ -2,7 +2,13 @@
 
 import unittest
 
-from games.cabal.referee import CabalReferee, IllegalAction, Phase
+from games.cabal.referee import (
+    MAX_NOTE_CHARS,
+    MAX_NOTEBOOK_LINES,
+    CabalReferee,
+    IllegalAction,
+    Phase,
+)
 from games.cabal.roles import (
     HUNTER,
     LOYALIST,
@@ -517,3 +523,93 @@ class TestMissionAskStatesTheThreshold(unittest.TestCase):
         for other in ref.evil_seats():
             if other != evil_on_team[0]:
                 self.assertNotIn(f"seat {other}", ask)
+
+
+class TestPrivateNotebook(unittest.TestCase):
+    """A seat's own words, shown back to it and to nobody else.
+
+    The gap it closes: ``think`` is dropped every turn, so a seat re-derives its
+    read from scratch and cannot remember that it caught seat 2 lying in round 1.
+    """
+
+    def noted_ref(self, **kw):
+        ref = fixed_ref(discussion_rounds=1, **kw)
+        ref.notebook = True
+        return ref
+
+    def test_off_by_default_costs_nothing(self):
+        """It rides on every call, so a run that did not ask for it must not pay
+        for it - and the runs already scored were scored without it."""
+        ref = fixed_ref(discussion_rounds=1)
+        self.assertIsNone(ref.note(0, "seat 3 dodged the question"))
+        self.assertEqual(ref.notes, {})
+        self.assertNotIn("notebook", ref.render_context(0))
+        self.assertNotIn('"note"', ref.action_prompt(0))
+
+    def test_a_note_comes_back_to_its_author_only(self):
+        ref = self.noted_ref()
+        ref.note(2, "seat 3 dodged the question about mission 1")
+        self.assertIn("seat 3 dodged the question", ref.render_context(2))
+        for other in ref.assignment:
+            if other != 2:
+                self.assertNotIn("dodged the question", ref.render_context(other))
+
+    def test_it_survives_the_turn_that_wrote_it(self):
+        """The whole point: the read is still there on a later decision."""
+        ref = self.noted_ref()
+        ref.note(2, "seat 3 lied in round 1")
+        ref.propose(0, [0, 1])
+        ref.speak(0, "Nothing to report.")
+        self.assertIn("seat 3 lied in round 1", ref.prompt_for(2))
+
+    def test_the_notebook_leaves_the_audit_view(self):
+        """A notebook line is player-authored text, the same class as speech.
+
+        It must leave the audit view for a sharper reason than speech does:
+        ``find_leaks`` is naive substring matching by design, so a seat writing
+        down a correct GUESS would be scored as a leak the referee never made.
+        """
+        from games.cabal.audit import leak_audit
+        ref = self.noted_ref()
+        ref.note(2, "my read: seat 3 is the mimic")
+        self.assertIn("mimic", ref.render_context(2))
+        self.assertNotIn("mimic", ref.render_context(2, include_speech=False))
+        self.assertEqual(leak_audit(ref), [])
+
+    def test_the_notebook_holds_only_its_last_lines(self):
+        ref = self.noted_ref()
+        for i in range(MAX_NOTEBOOK_LINES + 4):
+            ref.note(1, f"read number {i}")
+        self.assertEqual(len(ref.notes[1]), MAX_NOTEBOOK_LINES)
+        rendered = ref.render_context(1)
+        self.assertNotIn("read number 0", rendered)
+        self.assertIn(f"read number {MAX_NOTEBOOK_LINES + 3}", rendered)
+
+    def test_a_long_note_is_truncated_not_refused(self):
+        """Refusing would burn a retry on a seat's private bookkeeping, and a
+        burnt retry lands the seat on the random fallback - a decision no model
+        made, scored as if one had."""
+        stored = self.noted_ref().note(0, "x" * 400)
+        self.assertIsNotNone(stored)
+        self.assertEqual(len(stored.split("] ", 1)[1]), MAX_NOTE_CHARS)
+
+    def test_an_empty_note_is_a_seat_choosing_not_to_write(self):
+        ref = self.noted_ref()
+        self.assertIsNone(ref.note(0, "   "))
+        self.assertNotIn(0, ref.notes)
+
+    def test_a_note_is_dated_to_the_board_it_was_written_on(self):
+        ref = self.noted_ref()
+        ref.mission_index = 2
+        self.assertTrue(ref.note(0, "trusting seat 1 now").startswith("[mission 3]"))
+
+    def test_the_ask_offers_the_field_in_every_phase(self):
+        ref = self.noted_ref()
+        ref.propose(0, [0, 1])
+        self.assertIn('"note"', ref.action_prompt(0))          # discuss
+        ref.speak(0, "a")
+        for seat in range(1, 5):
+            ref.speak(seat, "a")
+        self.assertIn('"note"', ref.action_prompt(0))          # vote
+        ref.vote({s: True for s in range(5)})
+        self.assertIn('"note"', ref.action_prompt(0))          # mission

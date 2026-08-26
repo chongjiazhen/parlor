@@ -17,6 +17,8 @@ is counted in ``GameRecord.fallbacks``.
 
 Private reasoning never crosses into the public channel. A reply's ``think`` field
 is read for logging only and discarded; only ``say`` reaches ``referee.speak()``.
+A reply's ``note`` goes to ``referee.note()``, which files it under that seat and
+shows it back to that seat alone - a private channel, and still not a public one.
 """
 
 from __future__ import annotations
@@ -47,7 +49,7 @@ from games.cabal.roles import Team
 # game: which key each phase asks for, and what a legal value means.
 
 #: every key the referee ever asks for, for the salvage path
-ACTION_KEYS = ("team", "say", "vote", "card", "target", "think")
+ACTION_KEYS = ("team", "say", "vote", "card", "target", "think", "note")
 
 #: this game's card convention: True == sabotage
 CARD_TRUE = frozenset({"fail", "sabotage", "true"})
@@ -66,10 +68,19 @@ def parse_action(reply: str, ref: CabalReferee) -> dict:
     """Reply text -> a normalised action dict for the referee's current phase.
 
     Keys out: ``team`` | ``say`` | ``vote`` | ``card`` | ``target``, plus the
-    private ``think`` (kept for the transcript-side log, never for the table).
+    private ``think`` (kept for the transcript-side log, never for the table) and
+    the optional ``note`` (filed in this seat's own notebook, read back only by
+    this seat).
+
+    ``note`` is optional in every phase and its absence is never an error: the
+    referee asks for a move, and the notebook is the seat's own business. Nothing
+    here refuses a long one either - the referee truncates - because burning a
+    retry on a seat's private bookkeeping would turn housekeeping into a fallback,
+    and a fallback is a decision no model made.
     """
     obj = read_reply(reply, ACTION_KEYS)
-    out = {"think": str(obj.get("think", ""))[:400]}
+    out = {"think": str(obj.get("think", ""))[:400],
+           "note": str(obj.get("note", ""))[:400]}
     p = ref.phase
     if p is Phase.PROPOSE:
         size = ref.setup.team_sizes[ref.mission_index]
@@ -272,6 +283,12 @@ class Decision:
     phase: str
     played: str
     think: str = ""
+    #: what this seat filed in its own notebook on this decision, as stored (the
+    #: referee's stamp and truncation applied), or "" if it wrote nothing. Kept for
+    #: the same reason ``think`` is: a post-game read wants the reasoning a seat
+    #: chose to CARRY, which is a different and usually sharper thing than the
+    #: reasoning it happened to have.
+    note: str = ""
     fell_back: bool = False
     #: which upstream actually answered THIS decision. Under a routing alias the
     #: gateway picks per request, so a per-run mix cannot tell you whether the model
@@ -317,7 +334,8 @@ class GameRecord:
     #: ("event", ...) referee-authored | ("speech:<seat>", ...) player-authored.
     #: Kept so a transcript renders from what was actually said rather than from a
     #: second implementation of the rules run backwards over end state. Private
-    #: ``think`` is discarded by the driver and is in neither channel.
+    #: ``think`` is discarded by the driver and is in neither channel, and a seat's
+    #: notebook is in neither either - it goes back only to the seat that wrote it.
     public_events: list[tuple[str, str]] = field(default_factory=list)
     #: Referee-side log: the deal, the win reason, every public event. Never shown
     #: to a seat - this is the document a human reads after the game.
@@ -355,10 +373,14 @@ def play_game(
         fell_back = bool(getattr(policies[seat], "last_fell_back", False))
         if fell_back:
             rec.fallbacks += 1
+        # filed before the move is applied, so a note written about THIS board is
+        # dated to this board. It is a no-op when the notebook is off.
+        stored = ref.note(seat, action.get("note", ""))
         rec.decision_log.append(Decision(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
-            think=str(action.get("think", "")), fell_back=fell_back,
+            think=str(action.get("think", "")), note=stored or "",
+            fell_back=fell_back,
             served_by=("" if fell_back
                        else str(getattr(policies[seat], "last_upstream", "") or "")),
         ))

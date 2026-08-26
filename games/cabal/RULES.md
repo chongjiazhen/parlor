@@ -114,6 +114,14 @@ model was allowed to throw away.
   the audit skips it (`render_context(seat, include_speech=False)`).
 - **Private reasoning reaches neither.** A seat's `think` is kept only in the
   referee-side transcript, which no model ever receives.
+- **The notebook is a third channel and it is nobody's but its author's.** With
+  `--notebook` on (off by default), a seat's `note` is filed under that seat and
+  rendered back to that seat alone on every later call, bounded to its last 6 lines
+  of 160 characters. It leaves the gate #1 audit view with speech, and for a
+  sharper reason: `find_leaks` is naive substring matching, so a seat writing down
+  a correct *guess* would score as a leak the referee never made. The gate is not
+  weakened by it - the only writer of seat N's notebook is seat N, working from
+  bytes it had already been given, and the only reader is seat N.
 
 Consequence worth stating because it drives play: votes are public **with
 attribution**, and the hunter knows the ground-truth taint of every historical team

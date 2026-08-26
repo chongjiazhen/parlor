@@ -378,5 +378,56 @@ class TestPerDecisionAttribution(unittest.TestCase):
         self.assertTrue(all(d.served_by == "up-a" for d in spoke))
 
 
+class TestNotebookThroughTheDriver(unittest.TestCase):
+    """The notebook via ``play_game`` - the code path a real game uses, and the one
+    that would quietly regress."""
+
+    def played(self, reply, notebook=True, seed=4):
+        import random
+        ref = CabalReferee.new(5, seed=seed, discussion_rounds=1, notebook=notebook)
+        rng = random.Random(seed)
+        policies = {s: LLMPolicy(backend=FakeBackend([reply] * 500), retries=0,
+                                 fallback=RandomPolicy(rng=rng))
+                    for s in ref.assignment}
+        return ref, play_game(ref, policies)
+
+    def test_the_driver_files_the_note_and_the_seat_reads_it_back(self):
+        ref, rec = self.played('{"think": "t", "note": "CARRIED-READ", '
+                               '"say": "Nothing to report."}')
+        self.assertTrue(any(d.note for d in rec.decision_log))
+        for seat in ref.assignment:
+            self.assertIn("CARRIED-READ", ref.render_context(seat))
+
+    def test_the_note_never_reaches_the_table(self):
+        """Private like ``think``, not public like ``say`` - so it is in neither
+        public channel, and no OTHER seat's context carries it."""
+        ref, rec = self.played('{"note": "MY-PRIVATE-READ", "say": "Nothing to report."}')
+        self.assertNotIn("MY-PRIVATE-READ",
+                         " ".join(t for _, t in ref.public_events))
+        self.assertNotIn("MY-PRIVATE-READ", " ".join(rec.utterances))
+        wrote = {d.seat for d in rec.decision_log if d.note}
+        self.assertTrue(wrote)
+        for seat in ref.assignment:
+            if seat not in wrote:
+                self.assertNotIn("MY-PRIVATE-READ", ref.render_context(seat))
+
+    def test_a_note_is_never_a_reason_to_refuse_a_move(self):
+        """A reply with no ``note`` is a complete move. Refusing one would spend a
+        retry on bookkeeping and land the seat on the random fallback, which the
+        scorer reads as a decision no model could make."""
+        _, rec = self.played('{"say": "Nothing to report."}', notebook=True)
+        spoke = [d for d in rec.decision_log if d.phase == "discuss"]
+        self.assertTrue(spoke)
+        self.assertFalse([d for d in spoke if d.fell_back], rec.trace_sample)
+        self.assertNotIn("note", " ".join(rec.trace_sample))
+
+    def test_the_notebook_stays_shut_when_the_run_did_not_ask_for_it(self):
+        ref, rec = self.played('{"note": "CARRIED-READ", "say": "Nothing to report."}',
+                               notebook=False)
+        self.assertFalse(any(d.note for d in rec.decision_log))
+        for seat in ref.assignment:
+            self.assertNotIn("CARRIED-READ", ref.render_context(seat))
+
+
 if __name__ == "__main__":
     unittest.main()

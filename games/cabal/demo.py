@@ -82,6 +82,8 @@ def main() -> None:
                     help="model plays the discussion phase only")
     ap.add_argument("--simultaneous", action="store_true",
                     help="every seat commits its line before seeing its neighbours")
+    ap.add_argument("--notebook", action="store_true",
+                    help="each seat keeps a private notebook, read back only to itself")
     ap.add_argument("--register", choices=list(REGISTERS), default="character",
                     help="'character' roleplays the skin, 'plain' argues from the "
                          "record out of character")
@@ -91,7 +93,7 @@ def main() -> None:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     rng = random.Random(args.seed)
     ref = CabalReferee.new(5, seed=args.seed, theme=theme, discussion_rounds=args.rounds,
-                           simultaneous=args.simultaneous)
+                           simultaneous=args.simultaneous, notebook=args.notebook)
     policies = build_policies(ref, args, rng)
 
     print(f"=== 5-seat hidden-role game, theme='{theme.name}' ===\n")

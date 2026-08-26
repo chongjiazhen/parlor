@@ -88,6 +88,11 @@ A player's private reasoning is in neither: the JSON envelope gives it a `think`
 field, the driver reads it for the log and drops it, and only `say` reaches
 `speak()`. Three mutation-checked tests hold that line (`test_player.py`).
 
+`--notebook` adds a private third channel: a seat's `note` comes back to that seat
+and to no other, on every later call, so a read survives the turn that formed it.
+It leaves the audit view with speech, because player-authored text is one class -
+and a seat writing down a correct guess must not score as a referee leak.
+
 The gate is enforced, not remembered. `play_game(..., audit=True)` is the default
 and **raises** on a leak, so every game - demo, test, and every game in an N-game
 eval - is audited at every reachable state. `test_audit_coverage.py` walks all five
