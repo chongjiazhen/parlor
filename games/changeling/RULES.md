@@ -191,7 +191,45 @@ the viewer.
 This is the first evidence-backed pressure on `core/`, and it is exactly the
 question the ladder was built to ask: the primitive was written when belief and
 truth were the same thing, and a second game shows which half of it was an
-assumption.
+assumption. `find_leaks` now takes `self_is_secret`, defaulting off so `cabal` is
+unchanged, and the flag lives in the primitive rather than in the caller because
+the skip it removes lived there - a game cannot opt out of a rule applied before
+it is asked.
+
+### A secret is an ASSOCIATION here, not a card name
+
+The second thing this rung found, and it landed as a false-positive storm rather
+than as a leak: **this deck holds duplicates.** Two `pack`, two `bystander`. So a
+card name is not a seat's secret. Telling a wolf that seat 4 is its partner puts
+"Werewolf" in the bytes and says nothing whatever about the *other* wolf, and a
+naive scan for the bare name flagged 290 of 300 deals.
+
+`cabal` never had this. Its role keys are unique, so a term identified a seat, and
+the repo invariant's remedy for a collision - rename the term - works there. It
+cannot work here: the collision is the game. Renaming one `pack` breaks the deal.
+
+So the audit matches on the **exact strings the referee would emit to tie a seat to
+a card**, which is still naive substring matching, only over a richer term. That
+buys precision at the cost of a false-negative risk: a phrasing written somewhere
+else would tie a seat to a card in bytes the audit never searches, which is the
+shipped leak the invariant exists to prevent. **The risk is answered structurally,
+not by care.** `referee.reveal_forms` is the single source of every such phrasing,
+`_knowledge_line` builds its output from it, and a test asserts that every line the
+renderer can produce is a member of it. A new phrasing is audited by construction,
+or it fails a test.
+
+Two further scopes make the audit sound, and both are argued rather than
+convenient:
+
+- **The preamble is excluded**, because it must name every card in the deck -
+  counting claims against the multiset is the central deduction - and because it is
+  byte-identical for every seat. A string that is the same for all seats carries no
+  information about any seat. A test asserts the invariance; the moment a seat fact
+  is interpolated into it, that assertion is what catches it.
+- **A seat's own card is audited against its own line only.** `self_line` is the
+  only place the referee asserts anything about a seat to that seat, so it is the
+  only place a self-leak can live. Auditing a seat's own term against its whole
+  context would fire every time a wolf is told about its partner.
 
 ## Themes are display-only
 
