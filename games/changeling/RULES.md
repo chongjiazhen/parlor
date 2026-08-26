@@ -154,6 +154,18 @@ before dawn wins with the village, having spent the day lying for the wolves. A
 `bystander` handed `pack` by the switcher loses with the wolves, having never been
 told and never woken.
 
+## The blind stratum is the bottleneck, and here it is affordable
+
+THE GATE is cut on villagers the night told nothing. Measured on the powers run
+above: **14 of 63 villager votes** were blind, giving a CI of [21.05%, 83.33%]
+around a 50.00% point estimate against 37.50% chance. That interval cannot show
+anything, whatever the model did.
+
+This is `cabal`'s thin-denominator problem again - and unlike `cabal`, it is
+affordable here. At ~1.6 min/game a 200-game run is ~5 hours and yields ~140 blind
+votes, which is the whole reason this rung was queued. Do not read a gate off 20
+games; on this rung the N is the cheap part.
+
 ## The chance baseline, MEASURED (2026-08-26)
 
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set
@@ -180,6 +192,55 @@ Three things fall out, and each one would have made a hardcoded fraction wrong:
   above a naive 1-in-4.
 - **2.8% of games have NO wolf seated at dawn, and the village cannot win them.**
   See below - this is a defect in the deal constraint, not a property of play.
+
+### The public rules text has to state what each card DOES (measured 2026-08-27)
+
+The first live game shipped a preamble that listed the deck **by name only**. That
+looked complete and was not: the central deduction of this game is counting claims
+against the multiset, and a seat that does not know what a card does cannot
+evaluate anyone's claim about holding one. So the models invented powers and
+reasoned from the inventions.
+
+Two misconceptions recurred, both rules errors rather than bad play:
+
+- **"my card did not move."** A seat asserting certainty about its own dawn card,
+  which negates the belief/truth split outright - a seat that believes its belief
+  IS its truth is playing `cabal` in its head.
+- **The switcher believing it swapped its OWN card.** It exchanges two other seats'
+  cards and its own is untouched, so it is the one seat that always knows what it
+  holds. Exactly inverted.
+
+Fixed by listing the deck **in night order, with each card's power**. The order is
+public rules and does real work: it is what lets a seat reason about whether a
+reading could since have gone stale. Powers are written without naming any other
+card, so the text stays byte-identical across seats and carries no association a
+leak could ride on - the audit exclusion in the previous section still holds, and
+`audit_all` is clean over 500 deals with it in.
+
+**Measured, same seeds, one variable** - 20 games, `qwen36-35b-a3b-iq3`,
+`--no-thinking`, seed 1000, deals confirmed identical across arms:
+
+| | before | after |
+|---|---|---|
+| utterances claiming own card unmoved | 18/200 = 9.0% | 2/200 = **1.0%** |
+| utterances with the switcher self-swap error | 4/200 = 2.0% | 0/200 = **0.0%** |
+| **either** | **11.0%** | **1.0%** |
+| villager accuracy | 38.10% | 55.56% |
+| village win rate (18 scored games) | 33.33% | 55.56% |
+| fallback rate | 0/300 | 1/300 |
+| wall clock | 1631.7s | 1896.2s (+16%) |
+
+**The rule-error rate is what justifies the change**: -10pp, 95% CI [-18.3pp,
+-1.7pp], 99.1% of resamples showing a decrease, on a 200-utterance denominator.
+
+**The accuracy gain is NOT claimed.** +17.46pp looks large and is in the predicted
+direction, but a paired bootstrap over games gives 95% CI [-1.56pp, +36.07pp] - the
+floor touches zero at n=18 games. This repo watched `hunt20b`'s +8.82% [+0.94%]
+invert to `hunt20c`'s +9.00% [-0.25%] on identical code the same week. A floor
+within 2pp of zero is the number that flips on redraw, so it is recorded and not
+banked.
+
+Cost of the fix is 16% wall clock, from the longer preamble on every call.
 
 ### The deal constraint does not do what it was written to do
 

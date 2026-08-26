@@ -52,6 +52,17 @@ class Card:
     side: Side
     act: Act
     knowledge_class: str
+    #: What this card does at night, in one clause, for the PUBLIC rules text.
+    #:
+    #: Public because the central deduction of this game is counting claims against
+    #: the multiset, and a seat that does not know what a card DOES cannot evaluate
+    #: anyone's claim about holding one. Measured 2026-08-26 on the first live game:
+    #: with the deck listed by name only, seats invented powers - one asserted "the
+    #: Meddler swaps with only one person" (it swaps two) and reasoned from it.
+    #:
+    #: Deliberately written without naming any other card, so this text is the same
+    #: for every seat and carries no association a leak could ride on.
+    power: str = ""
     #: Does this card's holder look at what it ends up with? The whole belief/truth
     #: split lives in this one flag. ``TAKE`` looks and so keeps belief == truth;
     #: ``DRINK`` does not, and is wrong about itself from the moment it acts.
@@ -60,12 +71,22 @@ class Card:
     meets_own_kind: bool = False
 
 
-PACK = Card("pack", Side.PACK, Act.MEET, "identity", meets_own_kind=True)
-SPOTTER = Card("spotter", Side.VILLAGE, Act.LOOK, "identity")
-SWAPPER = Card("swapper", Side.VILLAGE, Act.TAKE, "identity", looks_after_acting=True)
-SWITCHER = Card("switcher", Side.VILLAGE, Act.SWITCH, "positional")
-DECEIVED = Card("deceived", Side.VILLAGE, Act.DRINK, "false")
-BYSTANDER = Card("bystander", Side.VILLAGE, Act.NONE, "none")
+PACK = Card("pack", Side.PACK, Act.MEET, "identity", meets_own_kind=True,
+            power="wakes first and sees every other seat holding this same card")
+SPOTTER = Card("spotter", Side.VILLAGE, Act.LOOK, "identity",
+               power="looks at one other seat's card, or at two centre cards")
+SWAPPER = Card("swapper", Side.VILLAGE, Act.TAKE, "identity",
+               looks_after_acting=True,
+               power=("takes one other seat's card and leaves its own in exchange, "
+                      "then looks at what it took. The other seat is not told"))
+SWITCHER = Card("switcher", Side.VILLAGE, Act.SWITCH, "positional",
+                power=("exchanges the cards of two OTHER seats without looking at "
+                       "either. Neither of them is told"))
+DECEIVED = Card("deceived", Side.VILLAGE, Act.DRINK, "false",
+                power=("exchanges its own card for a centre card without looking, "
+                       "so it does not know what it ends the night holding"))
+BYSTANDER = Card("bystander", Side.VILLAGE, Act.NONE, "none",
+                 power="sleeps through the night and does nothing")
 
 #: The order the night resolves in. It is a knowledge-invalidating device, not
 #: ceremony: every step acts on the state the previous one left, so a card seen at

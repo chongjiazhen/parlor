@@ -30,8 +30,8 @@ from enum import Enum
 from core.observability import Knowledge, SeatView, find_leaks
 from games.changeling.night import (NightResult, is_centre, centre_slot,
                                     resolve_night)
-from games.changeling.roles import (DEFAULT_THEME, SETUPS, Card, Setup, Side,
-                                    Theme)
+from games.changeling.roles import (DEFAULT_THEME, NIGHT_ORDER, SETUPS, Card,
+                                    Setup, Side, Theme)
 
 
 class Phase(Enum):
@@ -189,14 +189,28 @@ class ChangelingReferee:
         invariance rather than trusting this docstring - the moment a seat fact is
         interpolated in here, that assertion is what catches it.
         """
-        deck = ", ".join(self.theme.card_names[c.key]
-                         for c in sorted(self.setup.deck, key=lambda c: c.key))
+        counts: dict[str, int] = {}
+        for card in self.setup.deck:
+            counts[card.key] = counts.get(card.key, 0) + 1
+        # Listed in NIGHT ORDER, which is public rules and is doing real work: it
+        # is what lets a seat reason about whether a reading could since have gone
+        # stale. A seat that cannot tell whether the looking happened before or
+        # after the moving cannot evaluate its own knowledge, let alone a claim.
+        order = {act: i for i, act in enumerate(NIGHT_ORDER)}
+        deck_lines = [
+            f"  {counts[c.key]}x {self.theme.card_names[c.key]} - {c.power}."
+            for c in sorted({c.key: c for c in self.setup.deck}.values(),
+                            key=lambda c: (order.get(c.act, len(order)), c.key))
+        ]
         lines: list[str] = []
         if self.theme.blurb:
             lines += [self.theme.blurb, ""]
         lines += [
             f"Players: {self.n} seats, numbered 0..{self.n - 1}.",
-            f"The deck, all of it, in hands or in the centre: {deck}.",
+            "The deck, all of it, in hands or in the centre, and what each card "
+            "does. They act in this order, each one on whatever the one before it "
+            "left behind:",
+            *deck_lines,
             f"{self.setup.centre} of those cards lie face down in the centre and "
             f"belong to nobody.",
             # Positive framing, per .claude/rules/model-facing-text.md: state the
