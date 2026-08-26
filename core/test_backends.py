@@ -84,5 +84,33 @@ class TestTransportRetry(unittest.TestCase):
         self.assertNotIn(400, RETRY_CODES)
 
 
+class TestSamplerSeed(unittest.TestCase):
+    """``--seed`` fixed the deal and left the model free, so a re-run was a
+    different draw. Measured 2026-08-26: the same 20 games at seed 1000 produced
+    63 missions and 9 hunts one night, 74 and 11 the next - and the gate metric
+    moved with them. A comparison cannot have one variable while its instrument
+    has an unmeasured one."""
+
+    def sent(self, **kw) -> dict:
+        import json
+        backend = Backend.named("clean", "m", **kw)
+        with mock.patch("urllib.request.urlopen", return_value=reply()) as opened:
+            backend.complete("ctx")
+        return json.loads(opened.call_args[0][0].data)
+
+    def test_a_pinned_seed_reaches_the_provider(self):
+        self.assertEqual(self.sent(seed=1000)["seed"], 1000)
+
+    def test_seed_zero_is_a_seed_not_an_absence(self):
+        """The falsy-seed trap: 0 is a legal seed, and a truthiness check would
+        silently drop it and hand back an unseeded run wearing a seeded name."""
+        self.assertEqual(self.sent(seed=0)["seed"], 0)
+
+    def test_no_seed_asked_for_means_no_seed_claimed(self):
+        """An unpinned run must not send one. A default seed would make every run
+        secretly reproducible-looking while the records say nothing about it."""
+        self.assertNotIn("seed", self.sent())
+
+
 if __name__ == "__main__":
     unittest.main()

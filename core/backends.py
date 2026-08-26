@@ -109,6 +109,27 @@ class Backend:
     #: of poisoning the numbers.
     rate_retries: int = 4
     rate_backoff: float = 2.0
+    #: Sampler seed sent with every request, or ``None`` to let the server pick.
+    #:
+    #: Without it ``--seed`` is a much smaller promise than it reads as: it fixes
+    #: the deal and the fallback RNG, and NOTHING about the model, so two runs at
+    #: "seed 1000" are two different draws. Measured 2026-08-26: the same 20 games
+    #: at seed 1000 came back with 63 missions and 9 hunts one night and 74 and 11
+    #: the next. Every "same seeds, one variable" comparison in this repo was
+    #: therefore reading a difference of unknown size against a run-to-run spread
+    #: nobody had measured.
+    #:
+    #: Constant across a game's calls on purpose. It does not make two seats answer
+    #: alike - their contexts differ by seat number and role - and it cannot wedge
+    #: the retry loop, because a refused reply is re-asked with the referee's
+    #: complaint appended, so the prompt itself differs on every attempt.
+    #:
+    #: Honest about its reach: llama.cpp honours it, so a LOCAL run becomes
+    #: reproducible. On the cloud tiers ``seed`` is a best-effort hint the provider
+    #: may ignore, and under a routing alias the upstream can change between runs
+    #: anyway - so pin the model too, and treat cloud reproducibility as unproven
+    #: until a repeat run demonstrates it.
+    seed: int | None = None
 
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":
@@ -140,6 +161,8 @@ class Backend:
                 {"role": "user", "content": context},
             ],
         }
+        if self.seed is not None:
+            payload["seed"] = self.seed
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

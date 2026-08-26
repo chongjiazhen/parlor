@@ -222,10 +222,17 @@ LIVE_TEAMS: dict[str, set] = {
 }
 
 
-def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
+def build_policies(ref: CabalReferee, args, rng: random.Random,
+                   seed: int | None = None) -> dict:
     """Seat -> policy. Seats on the arm's live side get their own ``LLMPolicy``
     (each seat needs its own retry trace; a shared object would interleave
-    ``last_fell_back``); everyone else plays the random control."""
+    ``last_fell_back``); everyone else plays the random control.
+
+    ``seed`` is this game's seed, and it is handed to the BACKEND as well as to the
+    deal. That is the whole point: without it ``--seed`` fixed the roles and left
+    the model sampling free, so a re-run was a different draw and every
+    "same seeds, one variable" comparison was reading its variable against an
+    unmeasured spread."""
     fallback = RandomPolicy(rng=rng)
     live = LIVE_TEAMS[args.arm] if args.backend else set()
     if not live:
@@ -237,6 +244,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
         temperature=args.temperature,
         timeout=args.timeout,
         max_tokens=args.max_tokens,
+        seed=seed,
     )
     return {
         s: (LLMPolicy(backend=backend, retries=args.retries, fallback=fallback)
@@ -252,7 +260,7 @@ def one_game(index: int, args) -> GameRecord:
     ref = CabalReferee.new(5, seed=seed, theme=theme, discussion_rounds=args.rounds,
                            simultaneous=getattr(args, "simultaneous", False),
                            notebook=getattr(args, "notebook", False))
-    policies = build_policies(ref, args, rng)
+    policies = build_policies(ref, args, rng, seed=seed)
     try:
         return play_game(ref, policies, max_turns=args.max_turns)
     except Exception as exc:                     # one bad game must not kill the run

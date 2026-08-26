@@ -61,6 +61,65 @@ class TestArms(unittest.TestCase):
         self.assertEqual(set(LIVE_TEAMS), {"random", "llm", "llm-good", "llm-evil"})
 
 
+class TestGameSeedReachesTheModel(unittest.TestCase):
+    """The deal and the sampler must be seeded from the SAME number, per game.
+
+    Seeding only the deal is the failure that voided the 2026-08-26 re-run: the
+    roles repeated, the model did not, and the comparison read its one variable
+    against a run-to-run spread nobody had measured.
+    """
+
+    def backend_of(self, policies):
+        live = [p for p in policies.values() if isinstance(p, LLMPolicy)]
+        self.assertTrue(live, "fixture must seat at least one live policy")
+        return live[0].backend
+
+    def test_the_backend_is_seeded_with_this_game_s_seed(self):
+        ref = CabalReferee.new(5, seed=7)
+        p = build_policies(ref, make_args(), random.Random(0), seed=7)
+        self.assertEqual(self.backend_of(p).seed, 7)
+
+    def test_one_game_hands_the_sampler_the_same_seed_as_the_deal(self):
+        """Asserted through ``one_game``, not by calling ``build_policies`` with a
+        seed by hand - that version passed with the wiring deleted, which is a test
+        of the argument the test itself supplied. ``one_game`` offsets by the game
+        index, so game 3 of a seed-1000 run deals seed 1003 and must sample 1003."""
+        from unittest import mock
+        from eval import run_games as rg
+        seen = []
+
+        def spy(ref, args, rng, seed=None):
+            seen.append(seed)
+            return {s: RandomPolicy(rng=rng) for s in ref.assignment}
+
+        args = make_args(seed=1000, backend=None, arm="random", max_turns=400,
+                         theme=None, simultaneous=False, notebook=False)
+        with mock.patch.object(rg, "build_policies", spy):
+            for index in range(4):
+                rg.one_game(index, args)
+        self.assertEqual(seen, [1000, 1001, 1002, 1003])
+
+    def test_an_unseeded_run_reaches_one_game_unseeded_too(self):
+        from unittest import mock
+        from eval import run_games as rg
+        seen = []
+
+        def spy(ref, args, rng, seed=None):
+            seen.append(seed)
+            return {s: RandomPolicy(rng=rng) for s in ref.assignment}
+
+        args = make_args(seed=None, backend=None, arm="random", max_turns=400,
+                         theme=None, simultaneous=False, notebook=False)
+        with mock.patch.object(rg, "build_policies", spy):
+            rg.one_game(0, args)
+        self.assertEqual(seen, [None])
+
+    def test_an_unseeded_run_stays_unseeded(self):
+        ref = CabalReferee.new(5, seed=None)
+        p = build_policies(ref, make_args(seed=None), random.Random(0), seed=None)
+        self.assertIsNone(self.backend_of(p).seed)
+
+
 class TestReportRefusals(unittest.TestCase):
     """The report must not read a gate off a side that played at random - the
     numbers are there either way, and they are the baseline, not a result."""

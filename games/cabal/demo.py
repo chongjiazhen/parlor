@@ -37,6 +37,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
         args.model,
         api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
         system_prompt=REGISTERS[args.register],
+        seed=args.seed,
     )
     llm = LLMPolicy(backend=backend, retries=args.retries, fallback=fallback)
     if args.speaker:
