@@ -527,11 +527,21 @@ class CabalReferee:
         if p is Phase.MISSION:
             # Tailored by the seat's OWN role, which that seat already knows - a
             # human player would not need reminding what their win condition is.
+            need = self.setup.fails_required[self.mission_index]
+            size = len(self.proposal) if self.proposal else 0
+            # How many fails sink a mission is PUBLIC rules information - a human
+            # reads it off the board before choosing a card. It reached the seats
+            # only in the post-resolution event, so a seat was asked to weigh a
+            # fail against a threshold it had never been given. Restoring it is a
+            # rules fix, not a hint; it says nothing about who else is on the team.
+            rule = (f"This mission fails if {need} or more of the {size} cards "
+                    f"played are fails, and succeeds otherwise.")
             if self.assignment[seat].team is Team.EVIL:
                 stake = (
                     "Your side wins by making three missions fail, and nobody learns "
-                    "who played which card. Weigh sabotage now against the suspicion "
-                    "a fail here would put on this team."
+                    f"who played which card - only the count. {need} fail card(s) "
+                    "sink this one. Weigh what a fail here buys your side against "
+                    "the suspicion the count would put on this team."
                 )
             else:
                 stake = (
@@ -540,7 +550,7 @@ class CabalReferee:
                 )
             return (
                 f"{head}\nYou are on the mission. Play a card in secret - only the "
-                f"number of fails becomes public. {stake}\n"
+                f"number of fails becomes public. {rule} {stake}\n"
                 'Format: {"think": "...", "card": "success"|"fail"}'
             )
         if p is Phase.HUNT:

@@ -478,3 +478,42 @@ class TestHuntCannotNameYourOwnSide(unittest.TestCase):
         ref = self.reached_hunt()
         ref.hunt(4, 1)                          # watcher, not the seer
         self.assertIs(ref.winner, Team.GOOD)
+
+
+class TestMissionAskStatesTheThreshold(unittest.TestCase):
+    """How many fails sink a mission is public rules information.
+
+    A human reads it off the board before choosing a card. It reached the seats
+    only in the post-resolution event, so a seat was asked to weigh a fail against
+    a threshold it had never been given - an information asymmetry against the
+    game's own rules, not a missing hint. Restoring it says nothing about who else
+    is on the team, which is the separate (and evidence-against) change.
+    """
+
+    def reached_mission(self):
+        ref = fixed_ref()                       # 3 mimic, 4 hunter, 0 seer
+        ref.propose(ref.leader, [0, 3])         # seat 3 is evil, so both sides ask
+        ref.vote({s: True for s in ref.assignment})
+        self.assertIs(ref.phase, Phase.MISSION)
+        return ref
+
+    def test_both_sides_are_told_how_many_fails_sink_it(self):
+        ref = self.reached_mission()
+        for seat in sorted(ref.proposal):
+            ask = ref.action_prompt(seat)
+            self.assertIn("fails if 1 or more", ask,
+                          msg=f"seat {seat} was not told the threshold")
+
+    def test_the_ask_does_not_name_the_seat_s_partner(self):
+        """The threshold is rules information; naming which teammates are your own
+        is a HINT, and the one measurement on that move (the seer salience line,
+        +80% without vs +72% with on this model) says it hurts. Keep them apart so
+        neither is ever measured through the other."""
+        ref = self.reached_mission()
+        evil_on_team = [s for s in sorted(ref.proposal)
+                        if ref.assignment[s].team is Team.EVIL]
+        self.assertTrue(evil_on_team, "fixture must put an evil seat on the team")
+        ask = ref.action_prompt(evil_on_team[0]).lower()
+        for other in ref.evil_seats():
+            if other != evil_on_team[0]:
+                self.assertNotIn(f"seat {other}", ask)

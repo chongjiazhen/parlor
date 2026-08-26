@@ -284,12 +284,20 @@ def report(s: dict, args, elapsed: float) -> str:
         f"(n={g3['votes_clean']})",
         f"  good approve tainted team  {g3['good_approve_tainted']:.2%} "
         f"(n={g3['votes_tainted']})",
-        f"  discrimination             {g3['discrimination']:+.2%}  "
-        "(>0 means good seats smell the evil team)",
-        f"  ...blind seats only        {g3['discrimination_blind']:+.2%} "
+        # The BLIND number is the gate. It is the only one of the three free of
+        # both biases the pooled figure carries: inflated by handed knowledge (a
+        # seer rejecting a seat it was TOLD about is obeying a fact, not deducing)
+        # and deflated by concealment (a seer that approves a tainted team to hide
+        # from the hunter is playing well and scores as a bad deducer). Blind seats
+        # have nothing handed and nothing to hide. Reporting the flattering pooled
+        # number as the headline was the same class of error as quoting a result
+        # without its fallback rate.
+        f"  DISCRIMINATION (blind)     {g3['discrimination_blind']:+.2%} "
         f"(n={g3['votes_tainted_blind']} tainted votes by seats the night told "
-        "nothing about that team - this half is deduction, the rest is a seer "
-        "acting on what it was handed)",
+        "nothing about that team - this is deduction, and it is the gate)",
+        f"  ...pooled, all good seats  {g3['discrimination']:+.2%} "
+        "(includes seats acting on handed knowledge, so it reads higher; also "
+        "penalises a seer that approves a tainted team to stay hidden)",
         f"  hunter accuracy            {g3['hunter_accuracy']:.2%} "
         f"({g3['hunter_hits']}/{g3['hunts']}, 95% CI "
         f"{g3['hunter_ci95'][0]:.2%}-{g3['hunter_ci95'][1]:.2%}, chance 33.33%)",
@@ -323,7 +331,10 @@ def report(s: dict, args, elapsed: float) -> str:
     # can carry the gate.
     live = LIVE_TEAMS[args.arm] if args.backend else set()
     good_is_live, evil_is_live = Team.GOOD in live, Team.EVIL in live
-    n_3a = g3["discrimination"] > 0
+    # Graded on the BLIND half, not the pooled one - see the report note above.
+    # A gate that can be cleared by one informed seat carrying a table voting at
+    # chance is not measuring deduction.
+    n_3a = g3["discrimination_blind"] > 0
     n_3b = g3["hunter_ci95"][0] > 1 / 3
     verdict_3a, verdict_3b = n_3a and good_is_live, n_3b and evil_is_live
     verdict_3 = verdict_3a and verdict_3b
@@ -331,7 +342,7 @@ def report(s: dict, args, elapsed: float) -> str:
     lines += [
         "",
         f"gate #3 {'PASS' if verdict_3 else 'not shown'} - "
-        f"vote discrimination {'>0' if n_3a else 'at/below 0'}, hunter "
+        f"blind-seat discrimination {'>0' if n_3a else 'at/below 0'}, hunter "
         f"{'beats' if n_3b else 'does not beat'} chance at the CI floor",
     ]
     if not good_is_live:

@@ -119,8 +119,12 @@ class TestReportRefusals(unittest.TestCase):
         random run this would pass for the wrong reason, so the numbers are
         synthetic and deliberately good."""
         s = dict(self.s)
+        # discrimination_blind is what grades the gate; setting only the pooled
+        # figure would leave the fixture failing for the wrong reason and this
+        # test would pass without ever exercising the arm refusal.
         s["gate3_deduction"] = dict(s["gate3_deduction"],
-                                    discrimination=0.4, hunter_ci95=(0.5, 0.9))
+                                    discrimination=0.4, discrimination_blind=0.4,
+                                    hunter_ci95=(0.5, 0.9))
         s["gate2_deception"] = dict(s["gate2_deception"],
                                     ci95=(0.2, 0.6), evil_win_rate=0.4)
         self.assertIn("gate #3 PASS", report(s, make_args(arm="llm"), 1.0))
@@ -152,13 +156,20 @@ class TestBlindSplit(unittest.TestCase):
         rec.winner, rec.error = "good", None
         return [rec]
 
-    def test_a_seer_carrying_the_table_does_not_read_as_deduction(self):
+    def test_a_seer_carrying_the_table_cannot_pass_the_gate(self):
+        """This used to assert only that the blind figure was DISPLAYED. Showing a
+        number beside a verdict that ignores it is not a guard - the pooled figure
+        graded the gate, so a table voting at chance with one informed seat still
+        read as deduction. The blind half now grades it.
+        """
         s = score(self.records(blind_approves=10, blind_total=10))
         g3 = s["gate3_deduction"]
         self.assertGreater(g3["discrimination"], 0)        # the average looks fine
         self.assertEqual(g3["discrimination_blind"], 0.0)  # the blind half is chance
-        self.assertIn("blind seats only        +0.00%",
-                      report(s, make_args(arm="llm"), 1.0))
+        text = report(s, make_args(arm="llm"), 1.0)
+        self.assertIn("DISCRIMINATION (blind)     +0.00%", text)
+        self.assertIn("gate #3 not shown", text)
+        self.assertIn("blind-seat discrimination at/below 0", text)
 
     def test_blind_seats_that_do_discriminate_show_it(self):
         g3 = score(self.records(blind_approves=2, blind_total=10))["gate3_deduction"]
