@@ -217,6 +217,25 @@ Queue only. Done work leaves to git log. What's next:
       - **The spread is the ONUW/cloud decision variable.** Wider than the ~+9pp
         effect -> 5-seat cabal cannot show gate #3a at an affordable N. See the
         Spike #1.5 item.
+- [ ] **The JSONL records no REASON for a fallback.** Every `fell_back` entry in
+      `decision_log` carries `note: ""` and `served_by: ""`, so a run's refusal
+      diagnosis exists only in `trace_sample` (sampled, 8/game) and the log's final
+      report block (deduped, capped at 6 lines) - neither of which is a census, and
+      the second of which does not exist until the run ends. Diagnosing the
+      `hunt20c` fallback drift mid-run meant bucketing sampled traces and saying so
+      out loud; the next reader may not add the caveat. Populate `note` on the
+      fallback path, where the refusal string is already in hand.
+- [ ] **The scorer steers readers to the mis-specified statistic - do NOT fix this
+      until `hunt20d`.** `_blind_line` prints "superseded by the graded slope above,
+      which uses every taint level" (`eval/run_games.py`), but the taint response
+      looks like a STEP in both runs that have the table (`hunt20b` 93/70/77,
+      `hunt20c` 82/64/64), and an OLS slope through a step is the wrong summary.
+      **The reason to wait**: retargeting that note would rest on two draws of n=20
+      whose 1->2 legs sit inside noise - the same evidence quality this file just
+      finished voiding a gate verdict over. Fixing it now would be the `hunt20b`
+      error wearing a different hat. `hunt20d`'s table is the trigger: a third flat
+      or rising 1->2 leg makes it a shape, and then change the note AND make
+      `taint_sensitivity` say the slope is fitted to a non-monotone table.
 - [ ] **The local launcher loses its own completion marker.** `hunt20b` finished
       cleanly - full report, complete JSON, 20 JSONL lines, zero errors - and wrote
       no `DONE rc=` line, because `cmd.exe` did not survive to echo it after python

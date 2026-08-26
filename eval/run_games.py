@@ -51,7 +51,8 @@ from dataclasses import asdict
 
 from core.backends import ENDPOINTS, REGISTERS, Backend
 from games.cabal import transcript
-from games.cabal.player import GameRecord, LLMPolicy, RandomPolicy, play_game
+from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
+                                play_game)
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import DEFAULT_THEME, THEMES, Team
 
@@ -306,14 +307,76 @@ def land(index: int, rec: GameRecord, args) -> None:
                          transcript.render(rec, vars(args)))
 
 
+#: The fields the gate #3 strata are cut on. A record missing any of them is not
+#: a worse record - it is one the scorer cannot read at all.
+SCORER_VOTE_FIELDS = ("seat_is_evil", "team_has_evil", "knowledge_class",
+                      "team_evil_count")
+
+
+def assert_scoreable(path: str) -> None:
+    """Read the FIRST landed game back off disk and score it, or abort the run.
+
+    `hunt20` spent a full run and was then unscoreable: its JSONL predates
+    ``knowledge_class`` and ``team_evil_count``, so the current ``score()`` cannot
+    read it at all, and the numbers it contributed came from a hand reconstruction
+    rather than from the scorer every other run used. Nothing announced that. On a
+    local reasoning model the discovery lands six hours after the mistake, and the
+    GPU-hours are already spent.
+
+    The round trip is the thing that has to hold, so this asserts on the BYTES ON
+    DISK rather than on the in-memory record they came from: ``land()`` writes and
+    nothing in the run ever reads back, which is exactly the gap a record/scorer
+    drift hides in. Cost is one game; it buys the other nineteen.
+    """
+    with open(path, encoding="utf-8") as fh:
+        first = fh.readline()
+    if not first.strip():
+        raise RuntimeError(f"scoreability check: {path} landed no readable game")
+
+    raw = json.loads(first)
+    raw.pop("game", None)
+    raw_votes = raw.pop("votes", [])
+
+    missing = sorted({f for v in raw_votes for f in SCORER_VOTE_FIELDS if f not in v})
+    if missing:
+        raise RuntimeError(
+            f"scoreability check FAILED on {path}: vote rows are missing {missing}. "
+            "The current score() cannot stratify this run. Fix the record now - "
+            "the remaining games would land just as unreadable.")
+
+    try:
+        rec = GameRecord(**raw, votes=[VoteRecord(**v) for v in raw_votes])
+    except TypeError as exc:
+        raise RuntimeError(
+            f"scoreability check FAILED on {path}: the landed record does not "
+            f"round-trip into GameRecord/VoteRecord ({exc}). Record and scorer "
+            "have drifted apart.") from None
+
+    if rec.error is not None or not rec.votes:
+        return                      # nothing to stratify; the field check stands
+
+    blind = score([rec])["gate3_deduction"]["strata"]["none"]
+    if blind["n_clean"] + blind["n_tainted"] == 0:
+        raise RuntimeError(
+            f"scoreability check FAILED on {path}: the blind stratum is empty on a "
+            "completed game, so THE GATE would be refused for every game this run "
+            "lands. Check knowledge_class assignment before spending the rest.")
+
+
 def run_games(args, workers: int, started: float) -> list[GameRecord]:
     """All N games, reporting each as it lands. Order is preserved regardless of
     completion order - a seeded run must produce the same records either way."""
     total = args.games
     records: list[GameRecord] = [None] * total          # type: ignore[list-item]
 
+    checked = False
+
     def landed(done: int, index: int) -> None:
+        nonlocal checked
         land(index, records[index], args)
+        if not checked and args.out:
+            assert_scoreable(f"{args.out}.jsonl")
+            checked = True
         print(progress_line(done, total, index, records[index],
                             time.time() - started), file=sys.stderr, flush=True)
 

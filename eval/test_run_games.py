@@ -9,10 +9,16 @@ identical either way.
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import random
+import shutil
+import tempfile
 import unittest
+from dataclasses import asdict
 
-from eval.run_games import LIVE_TEAMS, build_policies, report, score
+from eval.run_games import (LIVE_TEAMS, assert_scoreable, build_policies, report,
+                            score)
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import Team
@@ -294,6 +300,73 @@ class TestBlindSplit(unittest.TestCase):
         self.assertIn("blind-seat taint sensitivity REFUSED", text)
         self.assertNotIn("TAINT SENSITIVITY (blind)  +0.00%", text)
         self.assertIn("gate #3 not shown", text)
+
+
+class TestScoreable(unittest.TestCase):
+    """The run aborts on a record the scorer cannot read, at game one.
+
+    hunt20 landed twenty games and was then found unscoreable - its JSONL predates
+    knowledge_class and team_evil_count. Six hours of GPU bought a dataset that had
+    to be hand-reconstructed to say anything. The guard reads the first landed game
+    back OFF DISK, because land() writes and nothing in the run ever reads back.
+    """
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.path = os.path.join(self.dir, "run.jsonl")
+
+    def tearDown(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def write(self, rec, **overrides):
+        row = {"game": 0, **asdict(rec)}
+        row.update(overrides)
+        with open(self.path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(row) + "\n")
+
+    def played_record(self):
+        ref = CabalReferee.new(5, seed=4)
+        rng = random.Random(0)
+        policies = {s: RandomPolicy(rng) for s in ref.assignment}
+        return play_game(ref, policies)
+
+    def test_a_healthy_record_passes(self):
+        """The control. Without this the failure cases below prove nothing - a
+        guard that rejects everything passes every rejection test."""
+        self.write(self.played_record())
+        assert_scoreable(self.path)                     # must not raise
+
+    def test_vote_rows_missing_a_scorer_field_are_REFUSED(self):
+        """The hunt20 shape exactly: rows that look complete and are not."""
+        rec = self.played_record()
+        stripped = [{k: v for k, v in asdict(vr).items() if k != "knowledge_class"}
+                    for vr in rec.votes]
+        self.write(rec, votes=stripped)
+        with self.assertRaises(RuntimeError) as cm:
+            assert_scoreable(self.path)
+        self.assertIn("knowledge_class", str(cm.exception))
+
+    def test_a_field_the_record_cannot_accept_is_REFUSED(self):
+        """Drift the other way: the JSONL grew a key GameRecord does not take."""
+        self.write(self.played_record(), unexpected_new_field=1)
+        with self.assertRaises(RuntimeError) as cm:
+            assert_scoreable(self.path)
+        self.assertIn("drifted apart", str(cm.exception))
+
+    def test_an_empty_blind_stratum_is_REFUSED(self):
+        """THE GATE is cut on the blind stratum. A run that lands games with none
+        of it scores nothing, and would do so silently for every later game."""
+        rec = self.played_record()
+        votes = [dict(asdict(v), knowledge_class="identity") for v in rec.votes]
+        self.write(rec, votes=votes)
+        with self.assertRaises(RuntimeError) as cm:
+            assert_scoreable(self.path)
+        self.assertIn("blind stratum is empty", str(cm.exception))
+
+    def test_an_empty_file_is_REFUSED(self):
+        open(self.path, "w").close()
+        with self.assertRaises(RuntimeError):
+            assert_scoreable(self.path)
 
 
 if __name__ == "__main__":
