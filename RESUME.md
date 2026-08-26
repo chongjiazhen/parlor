@@ -193,10 +193,25 @@ Queue only. Done work leaves to git log. What's next:
       23:10 after 72 minutes alive with zero games written: it pinned
       `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
       a tier where 7 of that model's 8 routes were cooled, so every call was refused
-      in 40ms. Burst-probe evidence in §Backend notes. Re-planning the cloud arm is
-      a separate decision - the honest options are wait for an uncontrollable
-      cooldown, run `auto` and accept a population that is currently 20B/30B-nano,
-      or spend the effort on ONUW instead. Third one is preferred; see its item.
+      in 40ms. Burst-probe evidence in §Backend notes.
+      - **ONUW is not an option on this list.** An earlier version of this line
+        offered "spend the effort on ONUW instead" as the preferred third choice.
+        It is not an alternative to fixing cloud - it is concurrent work on a
+        different game, and cabal still needs its N from somewhere. See its item.
+      - **Do not run `auto` to get games moving.** The tier's population is
+        currently 20B/30B-nano, and gate #3 is known to be model-capability-bound:
+        identical prompts scored -0.2% on the 12B and +66% on cloud. A null from
+        that population is a fact about the model, not about the game, and it would
+        be indistinguishable in the records from a real negative result.
+      - **The only real option is a pinned known-good model once its routes cool.**
+        `gpt-oss-120b` answers in 80-125 chars, 4/4 at both caps (§Backend notes) -
+        pin it, never `auto`. Unblock condition is mechanical: a burst probe passes
+        on it. Until then this item is parked, not pending.
+      - **It may not be needed at all.** Cloud was wanted because gate #3 reads as
+        a cloud-scale job, but that predates any measurement of the run-to-run
+        spread. The anchor pair settles whether local N suffices; gate #3b already
+        looks like 2-4 overnight local runs. Decide the cloud arm after the pair,
+        not before.
 - [ ] **Move `run-hunt20.cmd` into `eval/runs/` once the run lands.** The cloud
       launcher moved there 2026-08-26 and is now tracked and probe-gated
       (`eval/runs/hunt-cloud.cmd`); the local one is still the untracked copy in
@@ -256,8 +271,12 @@ Queue only. Done work leaves to git log. What's next:
 - [ ] **Gate #3 needs N far past 8 games.** Hunter accuracy is 1-in-5 to 3-in-6 at
       n<=6 hunts; the CI floor cannot clear 1/3 at that size whatever the truth is.
       And `good approve clean team` runs on ~12 votes a run, because most teams in a
-      5-seat game carry an evil - that denominator is too thin to gate on. This is a
-      cloud-scale job, so it waits on quota, not on the GPU.
+      5-seat game carry an evil - that denominator is too thin to gate on.
+      "This is a cloud-scale job, so it waits on quota, not on the GPU" is what this
+      line used to say, and it was written before anything measured the run-to-run
+      spread or the local per-game cost. Gate #3b now looks like 2-4 overnight local
+      runs. Whether cloud is needed is a question the anchor pair answers - see the
+      cloud-arm item.
 - [ ] **Larger setups (6/7p) + the two information-degrading evils.** Package them
       together, because both only make sense at 3 evil seats.
       - The engine already supports both, and has since the first commit: `Role`
