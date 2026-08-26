@@ -28,6 +28,12 @@ Change them against a measurement, and change them HERE.
 - **Every number ships beside its fallback rate**, and the scorer voids verdicts
   above 10%. A decision no model could make legally is played at random and counted
   - a run that hides that is the random policy wearing a model's name.
+- **`--seed` seeds the SAMPLER as well as the deal, or it is not a seed.**
+  `Backend.seed` rides in the payload and `one_game` hands each game the number it
+  deals with. Seeding only the deal made "same seeds, one variable" a claim about
+  the roles while the model drew freely, and two seed-1000 runs came back with 63
+  missions and 74. An unpinned run still sends no seed - a default would make every
+  run look reproducible while the records say nothing about it.
 - **Gate #2 is conditional on gate #3.** Measured: with good voting at chance, evil
   wins ~65% with no deception at all.
 - **`core/` is what game #2 inherits; `games/<name>/` is what is about that game.**

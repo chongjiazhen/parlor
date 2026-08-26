@@ -130,19 +130,42 @@ Queue only. Done work leaves to git log. What's next:
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [ ] **NEXT: re-run seed 1000 now that `validate_hunt` refuses self-targeting.**
-      The fix landed 2026-08-26: the hunter's own seat is now in the same refusal
-      as its known ally (`own | {hunter}`), so the legal candidate set is exactly
-      `RandomPolicy`'s three. Two tests, both mutation-checked against a compiling
-      mutant. The prior number stands until re-measured - **this is a measured
-      change and the 33.33% was scored under the old rule.**
-      - It does NOT rescue gate #3b and must not be sold as if it might: dropping
-        the one self-target hunt from the old run gives 3/8 = 37.5%, still short of
-        the 1/3 floor. The reason to fix it is that the COMPARISON was wrong - the
-        model chose from 4 targets while the control chose from 3, so a 25% guess
-        was being scored against a 33% baseline.
-      - Expect the re-run to shift hunter accuracy slightly and nothing else. If it
-        moves anything other than the hunt, something else changed too.
+- [x] **Seed 1000 re-run landed 2026-08-26 (`hunt20b`) - and it is VOID as a
+      comparison. The tripwire fired and it was right.** 20/20 games, 4h42m, 0.54%
+      fallback (11/2033), 100% pinned `qwen36-35b-a3b-iq3`, zero errors. The item
+      predicted "hunter shifts slightly and nothing else; if anything else moves,
+      something else changed too". Everything moved, and **three** things had
+      changed, not one:
+      1. **`c43274e` put the `need` disclosure in the MISSION ask at 08:13**, 43
+         minutes before launch. This file says that change "must land first and
+         alone or the two are confounded". It did not. (It also did not do its job:
+         over-sabotage is 41% of sunk missions in BOTH runs - 12/29 then 15/37 - so
+         the focal-point problem was never threshold ignorance, exactly as the
+         over-sabotage item argued.)
+      2. **The sampler was never seeded.** `--seed` fixed the deal and the fallback
+         RNG and nothing about the model, so the two runs are two different draws:
+         63 missions and 9 hunts one night, 74 and 11 the next. Fixed since
+         (`2cfe9d5`, see §Measured), but it fixes nothing retroactively.
+      3. **The two runs were scored by different code.** `hunt20`'s JSONL predates
+         both `knowledge_class` and `team_evil_count`, so the current `score()`
+         cannot read it at all - its "+2.53% / +1.20%" line in this file came from a
+         separate reconstruction pass, not from the scorer the new run used.
+      - **Gate #3b still not shown, and that verdict IS safe** - it is a floor test
+        computed inside one run: hunter 6/11 = 54.55%, Wilson floor 28.01%, short of
+        the 1/3 bar. Per the pre-committed criterion the answer is "not shown at
+        this N", not "run more games until it clears".
+      - **Gate #3a's movement is NOT bankable.** Blind taint sensitivity went
+        +1.20% -> +8.82% with a floor clearing 0 for the first time. That is one
+        draw, against three uncontrolled differences, with intervals that overlap
+        heavily. Reporting it as "gate #3a holds" would repeat the exact error this
+        file caught a week ago - a real number pooled or drawn from the wrong
+        population and quoted as a finding.
+- [ ] **NEXT: re-run seed 1000 under the pinned sampler, as the first reproducible
+      anchor.** Nothing before `2cfe9d5` is reproducible, so there is currently no
+      run that a later run can be compared against. Two runs of the SAME code are
+      also the only way to learn the run-to-run spread, which is the number every
+      "+X% vs +Y%" claim in this file has been implicitly assuming and never
+      measured. ~4h45m local, serial. Do it before any further prompt arm.
 - [ ] **Re-plan the cloud arm - it is dead, not pending.** `huntcloud` was killed 2026-08-25
       23:10 after 72 minutes alive with zero games written: it pinned
       `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
@@ -395,6 +418,28 @@ random policy wearing a model's name.
 | same model, seer bench | +80% as-is vs +72% with the salience line | the salience line is now HARMFUL - it competes with reasoning a capable model already does |
 | hunts across ALL live runs | 8/26 = 31%, and **5 of 26 named the hunter's own ally** | fixed in `hunt()`: a seat the night named as yours cannot be the seer, so the referee refuses it |
 | cost, `q36` local | ~14.6 min/game (reasoning distill, long generations) | a 50-game hunter run is ~12h overnight; cloud is ~3 min/game when quota allows |
+
+Added 2026-08-26, all `qwen36-35b-a3b-iq3`, seed 1000, 20 games, 2 rounds. The two
+columns are NOT a controlled comparison - see the `hunt20b` item above for the three
+differences between them. They are here as two draws, which is all they are.
+
+| what | `hunt20` (08-25 19:54) | `hunt20b` (08-26 08:56) |
+|---|---|---|
+| blind taint sensitivity - THE GATE | +1.20% [-8.44%, +9.63%] | +8.82% [+0.94%, +16.82%] |
+| blind, binary (superseded) | +2.53% [-13.45%, +18.04%] | +19.94% [+6.27%, +32.02%] |
+| approval by taint level, blind | - | 93% / 70% / 77% (41/44, 28/40, 24/31) |
+| hunter | 3/9 = 33.33%, floor 12.06% | 6/11 = 54.55%, floor 28.01% |
+| evil win rate | 70%, 5 of 14 by `five_rejects` | 75%, **0** by `five_rejects` |
+| evil win paths | 6 missions / 5 rejects / 3 hunts | 9 missions / 0 rejects / 6 hunts |
+| missions, fail-card distribution | 63, `{0:34, 1:17, 2:12}` | 74, `{0:37, 1:22, 2:15}` |
+| over-sabotage, share of sunk (unconditioned - see the open item) | 12/29 = 41% | 15/37 = 41% |
+| fallback rate | 0.49% (11/2231) | 0.54% (11/2033) |
+
+| what | result | 2026-08-26 |
+|---|---|---|
+| **the sampler was never seeded** | same 20 games, seed 1000, twice: 63 missions / 9 hunts vs 74 / 11 | **`--seed` fixed the deal and the fallback RNG and NOTHING about the model.** Every "same seeds, one variable" number in this file was read against an unmeasured run-to-run spread |
+| sampler pinned (`2cfe9d5`), verified on the instrument | two calls at seed 1000 to local `q36` byte-identical; seed 7 differs | llama.cpp honours `seed`; on cloud it is a best-effort hint and unproven until a repeat run shows it |
+| `need` disclosure vs over-sabotage | 41% of sunk missions in both runs | disclosing the threshold did NOT reduce redundant sabotage - the problem is the missing focal point, not missing rules |
 
 ## Decisions already locked
 
