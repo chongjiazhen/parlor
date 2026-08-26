@@ -160,12 +160,28 @@ Queue only. Done work leaves to git log. What's next:
         heavily. Reporting it as "gate #3a holds" would repeat the exact error this
         file caught a week ago - a real number pooled or drawn from the wrong
         population and quoted as a finding.
-- [ ] **NEXT: re-run seed 1000 under the pinned sampler, as the first reproducible
-      anchor.** Nothing before `2cfe9d5` is reproducible, so there is currently no
-      run that a later run can be compared against. Two runs of the SAME code are
-      also the only way to learn the run-to-run spread, which is the number every
-      "+X% vs +Y%" claim in this file has been implicitly assuming and never
-      measured. ~4h45m local, serial. Do it before any further prompt arm.
+- [ ] **NEXT: `hunt20c` IS IN FLIGHT - the first reproducible anchor.** Launched
+      2026-08-26 14:52 SGT off commit `f8c5f71`, clean tree, ETA ~19:40. 20 games,
+      seed 1000, 2 rounds, pinned `qwen36-35b-a3b-iq3`, notebook OFF, detached
+      (pid 16440, `eval\runs\hunt-local.cmd hunt20c 20 1000`). Log + JSONL:
+      `eval/records/hunt20c.*`. Judge it by those two only.
+      - Nothing before `2cfe9d5` is reproducible, so there is currently no run a
+        later run can be compared against. This one becomes that run.
+      - **It is an anchor, not a result.** Its own numbers are a third draw and
+        settle nothing on their own; what it buys is that the NEXT run can be a
+        pair. Two runs of the same code are also the only way to learn the
+        run-to-run spread, which every "+X% vs +Y%" claim in this file has been
+        assuming and none has measured.
+      - Before launching anything that compares against it: `git log` since its
+        commit. `hunt20b` was voided by a prompt change that landed 43 minutes
+        before launch and went unnoticed because nobody looked.
+- [ ] **The local launcher loses its own completion marker.** `hunt20b` finished
+      cleanly - full report, complete JSON, 20 JSONL lines, zero errors - and wrote
+      no `DONE rc=` line, because `cmd.exe` did not survive to echo it after python
+      exited. That line is the one thing distinguishing "finished" from "killed at
+      hour four", which is exactly the judgement the detached-run invariant says to
+      make from the log alone. Have `run_games.py` write its own terminal marker
+      rather than trusting the wrapper to outlive it.
 - [ ] **Re-plan the cloud arm - it is dead, not pending.** `huntcloud` was killed 2026-08-25
       23:10 after 72 minutes alive with zero games written: it pinned
       `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
