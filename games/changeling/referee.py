@@ -241,6 +241,38 @@ class ChangelingReferee:
         here is invisible to that agent."""
         return self.preamble() + "\n" + self.seat_lines(seat, include_speech)
 
+    # ---- the ask -------------------------------------------------------------
+
+    def acting_seats(self) -> tuple[int, ...]:
+        """Whose turn it is. Used by the gate #1 audit, which must see the ASK as
+        well as the context - a card name added to a prompt string is bytes leaving
+        for the model like any other, and exactly the regression that would
+        otherwise go unseen."""
+        if self.phase is Phase.DISCUSS:
+            return tuple(range(self.n))
+        if self.phase is Phase.VOTE:
+            return tuple(s for s in range(self.n) if s not in self.votes)
+        return ()
+
+    def ask(self, seat: int) -> str:
+        """The question put to one seat, phrased positively per
+        ``.claude/rules/model-facing-text.md``."""
+        if self.phase is Phase.DISCUSS:
+            return ("Speak to the table. Reply as one JSON object: "
+                    '{"think": "your private reasoning", '
+                    '"say": "what the table hears"}. '
+                    f"Keep `say` under {MAX_UTTERANCE_CHARS} characters.")
+        if self.phase is Phase.VOTE:
+            legal = ", ".join(str(s) for s in self.legal_votes(seat))
+            return ("Point at one seat. Everyone points at once, and the seat with "
+                    "the most fingers is accused. Reply as one JSON object: "
+                    '{"think": "your private reasoning", "vote": <seat number>}. '
+                    f"Choose from: {legal}.")
+        raise IllegalAction(f"nothing to ask in phase {self.phase.value}")
+
+    def prompt_for(self, seat: int, include_speech: bool = True) -> str:
+        return self.render_context(seat, include_speech) + "\n\n" + self.ask(seat)
+
     # ---- the day -------------------------------------------------------------
 
     def speaking_order(self) -> list[int]:

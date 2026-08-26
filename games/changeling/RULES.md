@@ -154,16 +154,49 @@ before dawn wins with the village, having spent the day lying for the wolves. A
 `bystander` handed `pack` by the switcher loses with the wolves, having never been
 told and never woken.
 
-## No chance baseline is asserted here
+## The chance baseline, MEASURED (2026-08-26)
 
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set
-is a closed derivation. **This game's accusation baseline is not derivable that
-way** - it depends on the tie rule, on how many seats hold `pack` at dawn (one or
-two, and the deal constraint bounds but does not fix it), and on the vote
-distribution a policy produces. Any number quoted as "chance" here must come from a
-measured `--arm random` run, not from arithmetic in this file. Writing a plausible
-fraction here and scoring against it is the exact failure the `cabal` gate #3a
-strata were rebuilt to remove.
+is a closed derivation. This game's accusation baseline is not derivable that way -
+it depends on the tie rule, on how many seats hold `pack` at dawn, and on the vote
+distribution a policy produces. So it was measured, never asserted.
+
+**`--arm random`, 5 seats, 1 round, n=4000 games, uniform random votes:**
+
+| | |
+|---|---|
+| **village wins** | **38.50%**, 95% CI [37.00%, 40.02%] |
+| multi-seat accusations (ties) | 32.4% of games |
+| dawn wolves: 0 / 1 / 2 seats | 112 / 1908 / 1980 |
+| village wins by dawn-wolf count | 0.0% / 28.2% / **50.6%** |
+
+Three things fall out, and each one would have made a hardcoded fraction wrong:
+
+- **The baseline is not one number.** It nearly doubles between a one-wolf and a
+  two-wolf dawn, and which of those a game is cannot be known in advance. Any
+  deduction claim must condition on it or report the mix.
+- **A third of games end in a tie**, and every tied seat is accused, so the random
+  arm gets several draws at the wolf. That is a large part of why 38.5% sits so far
+  above a naive 1-in-4.
+- **2.8% of games have NO wolf seated at dawn, and the village cannot win them.**
+  See below - this is a defect in the deal constraint, not a property of play.
+
+### The deal constraint does not do what it was written to do
+
+`require_seated_pack` guarantees a `pack` is **dealt**. It does not guarantee one is
+**held at dawn**, because the night can move a wolf card into the centre: the
+`DRINK` seat swaps whatever it is holding by then - which the `TAKE` or `SWITCH`
+step may have made `pack` - for a centre card, and `DRINK` is last.
+
+Measured residual: **112/4000 = 2.8%** of games, down from the 10.7% an
+unconstrained deal would give. Those games are unwinnable by the village however
+well it plays, so they belong in a deduction denominator the way a fallback belongs
+in a gate number: **excluded, and reported.** Do not quietly average them in.
+
+The honest options are to accept and exclude (current), or to make `DRINK` refuse to
+send a `pack` to the centre - which is a rule the seat could not know it was
+following, so it changes the game rather than fixing it. Left as is, on the record,
+until a measurement says the 2.8% matters.
 
 ## The two public channels, and the line between them
 
