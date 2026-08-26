@@ -119,11 +119,13 @@ class TestReportRefusals(unittest.TestCase):
         random run this would pass for the wrong reason, so the numbers are
         synthetic and deliberately good."""
         s = dict(self.s)
-        # discrimination_blind is what grades the gate; setting only the pooled
-        # figure would leave the fixture failing for the wrong reason and this
-        # test would pass without ever exercising the arm refusal.
+        # The gate reads the blind stratum's CI FLOOR, so the fixture has to set
+        # that - twice now this test has been left pinned to a field the verdict
+        # stopped reading, which makes it fail for the wrong reason and stop
+        # exercising the arm refusal it exists for.
         s["gate3_deduction"] = dict(s["gate3_deduction"],
                                     discrimination=0.4, discrimination_blind=0.4,
+                                    discrimination_blind_ci95=(0.2, 0.6),
                                     hunter_ci95=(0.5, 0.9))
         s["gate2_deception"] = dict(s["gate2_deception"],
                                     ci95=(0.2, 0.6), evil_win_rate=0.4)
@@ -136,45 +138,96 @@ class TestReportRefusals(unittest.TestCase):
 
 
 class TestBlindSplit(unittest.TestCase):
-    """Vote discrimination averages two different things: a seer acting on a fact
-    it was handed, and a seat with nothing reasoning from play. Only the second is
-    deduction, so the report shows it separately."""
+    """Vote discrimination averages three different populations: a seer acting on
+    a fact it was handed, a watcher acting on an aura pair that certifies taint on
+    some team shapes, and a seat the night told nothing. Only the third is
+    deduction, and BOTH terms of the difference must come from it - filtering only
+    the tainted side leaves the seer's clean-team certification in p_clean, which
+    is how the first version of this split read +13.57% where the honest figure
+    was +2.53%.
+    """
 
-    def records(self, blind_approves: int, blind_total: int):
+    def records(self, blind_approves: int, blind_total: int, blind_clean: int = 10):
         from games.cabal.player import VoteRecord
         rec = play_game(CabalReferee.new(5, seed=1),
                         {s: RandomPolicy(rng=random.Random(1)) for s in range(5)})
         rec.votes = (
-            # informed seats: always reject a tainted team
-            [VoteRecord(0, False, False, True, True) for _ in range(10)]
+            # seer on a tainted team: always rejects, on handed knowledge
+            [VoteRecord(0, False, False, True, True, "identity") for _ in range(10)]
             # blind seats on a tainted team: as told
-            + [VoteRecord(1, i < blind_approves, False, True, False)
+            + [VoteRecord(1, i < blind_approves, False, True, False, "none")
                for i in range(blind_total)]
-            # everyone on a clean team: always approve
-            + [VoteRecord(2, True, False, False, False) for _ in range(10)]
+            # blind seats on a clean team: always approve
+            + [VoteRecord(2, True, False, False, False, "none")
+               for _ in range(blind_clean)]
+            # seer on a clean team: certifies it, always approves. Belongs to
+            # p_clean only in the POOLED figure - never in the gate.
+            + [VoteRecord(0, True, False, False, False, "identity") for _ in range(10)]
         )
         rec.winner, rec.error = "good", None
         return [rec]
 
     def test_a_seer_carrying_the_table_cannot_pass_the_gate(self):
-        """This used to assert only that the blind figure was DISPLAYED. Showing a
-        number beside a verdict that ignores it is not a guard - the pooled figure
-        graded the gate, so a table voting at chance with one informed seat still
-        read as deduction. The blind half now grades it.
-        """
+        """Blind seats at chance, seer perfect. The pooled figure looks healthy and
+        the gate must still refuse - this is the whole reason for the split."""
         s = score(self.records(blind_approves=10, blind_total=10))
         g3 = s["gate3_deduction"]
         self.assertGreater(g3["discrimination"], 0)        # the average looks fine
         self.assertEqual(g3["discrimination_blind"], 0.0)  # the blind half is chance
+        self.assertAlmostEqual(g3["strata"]["identity"]["discrimination"], 1.0)
         text = report(s, make_args(arm="llm"), 1.0)
-        self.assertIn("DISCRIMINATION (blind)     +0.00%", text)
         self.assertIn("gate #3 not shown", text)
-        self.assertIn("blind-seat discrimination at/below 0", text)
+        self.assertIn("blind-seat CI floor includes 0", text)
 
     def test_blind_seats_that_do_discriminate_show_it(self):
         g3 = score(self.records(blind_approves=2, blind_total=10))["gate3_deduction"]
         self.assertAlmostEqual(g3["discrimination_blind"], 0.8)
         self.assertEqual(g3["votes_tainted_blind"], 10)
+        self.assertEqual(g3["votes_clean_blind"], 10)
+
+    def test_the_gate_is_the_ci_floor_not_the_point_estimate(self):
+        """A point estimate >0 is a sign test. Gate #3b next door demands a Wilson
+        floor above baseline; 3a used to pass on +0.5% from a handful of votes.
+
+        Asserted on the VERDICT with a synthetic interval, not on a computed one:
+        a healthy point estimate whose floor straddles zero must not pass, and
+        that is a statement about the verdict logic, not about the bootstrap.
+        """
+        s = score(self.records(blind_approves=2, blind_total=10))
+        healthy_point_straddling_floor = dict(
+            s["gate3_deduction"],
+            discrimination_blind=0.30, discrimination_blind_ci95=(-0.05, 0.62),
+            hunter_ci95=(0.5, 0.9))
+        text = report(dict(s, gate3_deduction=healthy_point_straddling_floor),
+                      make_args(arm="llm"), 1.0)
+        self.assertIn("blind-seat CI floor includes 0", text)
+        self.assertIn("gate #3 not shown", text)
+
+        clears = dict(healthy_point_straddling_floor,
+                      discrimination_blind_ci95=(0.05, 0.62))
+        text = report(dict(s, gate3_deduction=clears), make_args(arm="llm"), 1.0)
+        self.assertIn("blind-seat CI floor clears 0", text)
+
+    def test_no_blind_votes_is_REFUSED_not_passed(self):
+        """The fail-open this replaced: p_blind defaulted to 0.0, so a run with no
+        blind votes scored p_clean - 0 > 0 and PASSED on no data. A refusal must be
+        distinguishable from a failure - a fail invites tuning, a refusal invites
+        more data."""
+        from games.cabal.player import VoteRecord
+        recs = self.records(blind_approves=2, blind_total=10)
+        recs[0].votes = [v for v in recs[0].votes if v.knowledge_class != "none"]
+        s = score(recs)
+        g3 = s["gate3_deduction"]
+        self.assertIsNone(g3["discrimination_blind"])
+        self.assertEqual(g3["votes_tainted_blind"], 0)
+        text = report(s, make_args(arm="llm"), 1.0)
+        # Two INDEPENDENT paths must both refuse - the metric line and the verdict
+        # line. A bare assertIn("REFUSED") passes when either one still fires, so
+        # it survived a mutation that made the metric line render +0.00%.
+        self.assertIn("DISCRIMINATION (blind)     REFUSED", text)
+        self.assertIn("blind-seat discrimination REFUSED", text)
+        self.assertNotIn("DISCRIMINATION (blind)     +0.00%", text)
+        self.assertIn("gate #3 not shown", text)
 
 
 if __name__ == "__main__":

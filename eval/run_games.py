@@ -56,6 +56,34 @@ from games.cabal.referee import CabalReferee
 from games.cabal.roles import DEFAULT_THEME, THEMES, Team
 
 
+def _blind_line(g3: dict) -> str:
+    """The gate's own line. A missing stratum is REFUSED, never rendered as 0."""
+    d, ci = g3["discrimination_blind"], g3.get("discrimination_blind_ci95")
+    if d is None:
+        return ("  DISCRIMINATION (blind)     REFUSED - no votes from seats the "
+                "night told nothing (clean "
+                f"n={g3.get('votes_clean_blind', 0)}, tainted "
+                f"n={g3.get('votes_tainted_blind', 0)})")
+    band = f"  95% CI [{ci[0]:+.2%}, {ci[1]:+.2%}]" if ci else "  (CI unavailable)"
+    return (f"  DISCRIMINATION (blind)     {d:+.2%} "
+            f"(n={g3['votes_clean_blind']} clean / {g3['votes_tainted_blind']} "
+            f"tainted, seats the night told NOTHING - this is the gate){band}")
+
+
+def _strata_lines(g3: dict) -> str:
+    """Every stratum beside the gate, so the reader sees where the signal lives."""
+    names = {"none": "none     (blind)", "aura": "aura     (pair only)",
+             "identity": "identity (named)"}
+    out = []
+    for cls in ("none", "aura", "identity"):
+        s = g3["strata"].get(cls) or {}
+        d = s.get("discrimination")
+        shown = f"{d:+.2%}" if d is not None else "n/a"
+        out.append(f"    by knowledge: {names[cls]:<18}{shown:>9} "
+                   f"(n={s.get('n_clean', 0)}/{s.get('n_tainted', 0)})")
+    return "\n".join(out)
+
+
 def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
     """95% Wilson interval. Small-N proportions need their error bars visible or
     a 3-of-5 run reads as a result."""
@@ -66,6 +94,46 @@ def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
     centre = (p + z * z / (2 * total)) / d
     half = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / d
     return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def bootstrap_discrimination(records, cls: str, resamples: int = 4000,
+                             seed: int = 7) -> tuple[float, float] | None:
+    """95% percentile CI for one stratum's discrimination, resampling GAMES.
+
+    The clustering unit is the game: seats nest inside games (seat 3 of game 1
+    shares nothing with seat 3 of game 2), so resampling game indices handles
+    seat- and game-level correlation at once. Treating ~150 votes as independent
+    Bernoulli overstates the evidence - at ~7.5 votes per game and modest
+    within-game correlation the design effect is ~2x, which is the difference
+    between an interval that clears zero and one that straddles it.
+
+    Percentile bootstrap on 20 clusters is itself rough; its own coverage is
+    approximate. It is the least-wrong option at this N, and the honest fix for
+    the width is more games or a graded metric, not a narrower method.
+    """
+    rng = random.Random(seed)
+    n = len(records)
+    if n == 0:
+        return None
+    out: list[float] = []
+    for _ in range(resamples):
+        c_hits = c_n = t_hits = t_n = 0
+        for _ in range(n):
+            for v in records[rng.randrange(n)].votes:
+                if v.seat_is_evil or v.knowledge_class != cls:
+                    continue
+                if v.team_has_evil:
+                    t_n += 1
+                    t_hits += v.approved
+                else:
+                    c_n += 1
+                    c_hits += v.approved
+        if c_n and t_n:
+            out.append(c_hits / c_n - t_hits / t_n)
+    if len(out) < resamples // 2:      # too many degenerate resamples to trust
+        return None
+    out.sort()
+    return (out[int(0.025 * len(out))], out[int(0.975 * len(out))])
 
 
 #: which side runs on a model, per arm. The mixed arms exist because ``llm`` on
@@ -204,13 +272,26 @@ def score(records: list[GameRecord]) -> dict:
     p_tainted = appr_tainted / len(tainted) if tainted else 0.0
     p_clean = appr_clean / len(clean) if clean else 0.0
 
-    # ...and the same question for the seats that were NOT handed the answer. A
-    # seer rejecting a team the night named for it is acting on knowledge; only a
-    # blind seat rejecting one is deducing. Averaged together, one informed seat
-    # can carry a table that is otherwise voting at chance.
-    blind_tainted = [v for v in tainted if not v.knew_evil_on_team]
-    p_blind = (sum(1 for v in blind_tainted if v.approved) / len(blind_tainted)
-               if blind_tainted else 0.0)
+    # ...and the same question for the seats the night told NOTHING. Both terms
+    # come from that population, which the first version of this split got wrong:
+    # it filtered only the TAINTED side, leaving p_clean carrying the seer's
+    # clean-team certification (94.3% vs the loyalist's 73.6% on seed 1000). It
+    # also counted the watcher as blind, though its aura pair certifies taint
+    # outright on some team shapes. Re-scored on seed 1000, correcting both took
+    # the figure from +13.57% to +2.53% - the whole gate had been the seer.
+    strata = {}
+    for cls in ("none", "aura", "identity"):
+        c = [v for v in clean if v.knowledge_class == cls]
+        t = [v for v in tainted if v.knowledge_class == cls]
+        strata[cls] = {
+            "n_clean": len(c),
+            "n_tainted": len(t),
+            "discrimination": ((sum(1 for v in c if v.approved) / len(c)
+                                - sum(1 for v in t if v.approved) / len(t))
+                               if c and t else None),
+            "ci95": bootstrap_discrimination(played, cls) if c and t else None,
+        }
+    blind = strata["none"]
 
     # gate #3b - does the hunter beat 1-in-3?
     hunts = [r.hunt for r in played if r.hunt]
@@ -238,9 +319,11 @@ def score(records: list[GameRecord]) -> dict:
             "discrimination": p_clean - p_tainted,
             "votes_tainted": len(tainted),
             "votes_clean": len(clean),
-            "good_approve_tainted_blind": p_blind,
-            "discrimination_blind": p_clean - p_blind,
-            "votes_tainted_blind": len(blind_tainted),
+            "strata": strata,
+            "discrimination_blind": blind["discrimination"],
+            "discrimination_blind_ci95": blind["ci95"],
+            "votes_tainted_blind": blind["n_tainted"],
+            "votes_clean_blind": blind["n_clean"],
             "hunter_accuracy": hits / len(hunts) if hunts else 0.0,
             "hunter_hits": hits,
             "hunts": len(hunts),
@@ -292,12 +375,11 @@ def report(s: dict, args, elapsed: float) -> str:
         # have nothing handed and nothing to hide. Reporting the flattering pooled
         # number as the headline was the same class of error as quoting a result
         # without its fallback rate.
-        f"  DISCRIMINATION (blind)     {g3['discrimination_blind']:+.2%} "
-        f"(n={g3['votes_tainted_blind']} tainted votes by seats the night told "
-        "nothing about that team - this is deduction, and it is the gate)",
+        _blind_line(g3),
+        _strata_lines(g3),
         f"  ...pooled, all good seats  {g3['discrimination']:+.2%} "
-        "(includes seats acting on handed knowledge, so it reads higher; also "
-        "penalises a seer that approves a tainted team to stay hidden)",
+        "(averages all three strata, so the seer carries it; kept visible because "
+        "it is what earlier runs reported, not because it means anything)",
         f"  hunter accuracy            {g3['hunter_accuracy']:.2%} "
         f"({g3['hunter_hits']}/{g3['hunts']}, 95% CI "
         f"{g3['hunter_ci95'][0]:.2%}-{g3['hunter_ci95'][1]:.2%}, chance 33.33%)",
@@ -331,10 +413,18 @@ def report(s: dict, args, elapsed: float) -> str:
     # can carry the gate.
     live = LIVE_TEAMS[args.arm] if args.backend else set()
     good_is_live, evil_is_live = Team.GOOD in live, Team.EVIL in live
-    # Graded on the BLIND half, not the pooled one - see the report note above.
-    # A gate that can be cleared by one informed seat carrying a table voting at
-    # chance is not measuring deduction.
-    n_3a = g3["discrimination_blind"] > 0
+    # Graded on the blind stratum's CI FLOOR, not on a point estimate, and never
+    # on a missing stratum. Three ways this used to be wrong, all fixed here:
+    #   - pooled figure graded it, so one informed seat carried a chance table
+    #   - a point estimate `> 0` is a sign test: +0.5% on 40 votes "passed",
+    #     while gate #3b next door demanded a Wilson floor. Same bar now.
+    #   - an absent stratum defaulted p to 0.0, so a run with no blind votes
+    #     scored `p_clean - 0 > 0` and PASSED on no data. Refused now, and the
+    #     refusal is distinguishable from a failure: a fail invites tuning, a
+    #     refusal invites more data.
+    blind_ci = g3.get("discrimination_blind_ci95")
+    n_3a = bool(blind_ci) and blind_ci[0] > 0
+    a_refused = g3["discrimination_blind"] is None
     n_3b = g3["hunter_ci95"][0] > 1 / 3
     verdict_3a, verdict_3b = n_3a and good_is_live, n_3b and evil_is_live
     verdict_3 = verdict_3a and verdict_3b
@@ -342,7 +432,9 @@ def report(s: dict, args, elapsed: float) -> str:
     lines += [
         "",
         f"gate #3 {'PASS' if verdict_3 else 'not shown'} - "
-        f"blind-seat discrimination {'>0' if n_3a else 'at/below 0'}, hunter "
+        + ("blind-seat discrimination REFUSED (no blind votes)" if a_refused
+           else f"blind-seat CI floor {'clears 0' if n_3a else 'includes 0'}")
+        + ", hunter "
         f"{'beats' if n_3b else 'does not beat'} chance at the CI floor",
     ]
     if not good_is_live:

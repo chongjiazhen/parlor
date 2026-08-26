@@ -220,12 +220,32 @@ class VoteRecord:
     approved: bool
     seat_is_evil: bool
     team_has_evil: bool
-    #: did this seat KNOW, from the night, that one of these seats is evil? A seer
-    #: rejecting a team it was handed the answer about is not deduction; a seat with
-    #: no such knowledge rejecting one is. Scored apart, because averaging them
-    #: reports "good play beats chance" for a table where only the informed seat
-    #: does anything.
+    #: did this seat KNOW, from the night, that one of THESE seats is evil? Kept
+    #: for the decision audit. It is team-conditional, so it is the wrong field to
+    #: stratify a gate on: a seat can be "blind" about this team while still
+    #: holding night knowledge that shapes how it votes on every other one.
     knew_evil_on_team: bool = False
+    #: what the night told this SEAT, regardless of team - the field the gate
+    #: stratifies on.
+    #:
+    #: Deliberately NOT the good/evil vocabulary. Those are orthogonal axes: which
+    #: side a seat wins with (``seat_is_evil``) versus what it was told. A GOOD
+    #: seat can hold identity knowledge - the seer does - so labelling its class
+    #: "evil" put two opposite meanings of the word on one seat in the scorer, and
+    #: `find_leaks` is naive substring matching by design.
+    #:
+    #:   ``"identity"`` - the night NAMED specific seats' allegiance: the seer, and
+    #:      each evil seat, which is named its partner.
+    #:   ``"aura"`` - an ambiguous pair only. The watcher learns two seats of which
+    #:      exactly one is evil; at 5 seats that certifies taint outright on some
+    #:      team shapes and bounds it on the rest, so it is NOT blind.
+    #:   ``"none"`` - the night said nothing. The only population whose votes are
+    #:      deduction, and the only one gate #3a is scored on.
+    #:
+    #: A CLASS, not a bool, so the strata, the watcher question, and every future
+    #: knowledge variant fall out of one field without a schema change - the same
+    #: trap as a hardcoded baseline, avoided once.
+    knowledge_class: str = "none"
 
 
 @dataclass
@@ -359,8 +379,17 @@ def play_game(
             team_has_evil = any(ref.assignment[s].team is Team.EVIL for s in team)
             votes = {}
             for seat in sorted(ref.assignment):
+                labels = {k.label for k in ref.entitled_knowledge(seat)}
                 known_evil = {k.seat for k in ref.entitled_knowledge(seat)
                               if k.label in ("evil", "fellow-evil")}
+                # derived from entitled_knowledge, never from the role key, so a
+                # variant that changes what a role learns changes the class too
+                if labels & {"evil", "fellow-evil"}:
+                    knowledge_class = "identity"
+                elif "magic" in labels:
+                    knowledge_class = "aura"
+                else:
+                    knowledge_class = "none"
                 votes[seat] = decide(seat)["vote"]
                 rec.votes.append(VoteRecord(
                     seat=seat,
@@ -368,6 +397,7 @@ def play_game(
                     seat_is_evil=ref.assignment[seat].team is Team.EVIL,
                     team_has_evil=team_has_evil,
                     knew_evil_on_team=bool(known_evil & set(team)),
+                    knowledge_class=knowledge_class,
                 ))
             ref.vote(votes)
         elif ref.phase is Phase.MISSION:

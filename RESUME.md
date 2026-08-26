@@ -2,16 +2,88 @@
 
 Queue only. Done work leaves to git log. What's next:
 
-- [x] **`hunt20` landed and was scored against the pre-committed criterion.**
-      20/20 games, rc=0, 0.49% fallback (11/2231), 100% served by the pinned
-      `qwen36-35b-a3b-iq3`. **Gate #3b NOT SHOWN**: hunter 33.33% (3/9, CI
-      12.06%-64.58%) - exactly chance, floor nowhere near 1/3. Gate #3a held and
-      REPRODUCED: +31.55% (n=387) against +30.7% on the earlier 12-game run, blind
-      seats +13.57%. Gate #2 unreadable by its own conditionality - evil 70% but 5
-      of 20 wins were `five_rejects`, so evil wins without deceiving anyone.
-      Per the criterion, the answer is **"not shown at this N"** and NOT "buy more
-      games": the power note predicted 9 hunts against the ~16 needed at a true
-      60%. Respecify the metric instead - see the graded-hunt item.
+- [x] **`hunt20` landed, was scored, and then the STATISTIC turned out to be
+      wrong. Gate #3a is NOT SHOWN.** 20/20 games, rc=0, 0.49% fallback
+      (11/2231), 100% pinned `qwen36-35b-a3b-iq3`. Re-scored 2026-08-26 on the
+      corrected metric, no new games needed - every input was already in the JSONL:
+
+      | stratum | discrimination | n clean/tainted | 95% CI (per-game bootstrap) |
+      |---|---|---|---|
+      | pooled, all good (old headline) | +31.55% | 159/228 | [+22.78%, +39.68%] |
+      | **`none` - loyalist - THE GATE** | **+2.53%** | 53/76 | **[-13.45%, +18.04%]** |
+      | `magic` - watcher | +7.00% | 53/76 | [-9.71%, +23.46%] |
+      | `evil` - seer | +85.13% | 53/76 | [+77.14%, +92.77%] |
+
+      - **The entire gate #3a signal was the seer spending handed knowledge.** The
+        seats that had to deduce sit at +2.53% with an interval straddling zero.
+        The earlier "+30.7% / +31.55%, gate #3a holds, reproduced" claim was an
+        artifact of pooling three populations.
+      - The intermediate `+13.57%` figure (headline for about an hour on
+        2026-08-26) was wrong two ways at once: `p_clean` was unfiltered, so it
+        carried the seer's clean-team certification (94.3% vs the loyalist's
+        73.6%), and the watcher sat in the "blind" pool while holding an aura pair
+        that certifies taint outright on some team shapes.
+      - **Gate #3b also not shown**: hunter 33.33% (3/9, CI 12.06%-64.58%), and
+        that 3/9 was scored under the old rule where the model chose from 4 targets
+        against a 3-target control.
+      - **Gate #2 stays unreadable** by its own conditionality - evil 70%, but 5 of
+        20 wins were `five_rejects`.
+      - Found by a modelling-logic review (Fable, 2026-08-26). Its full text and
+        the re-score are in `_review-modelling.md` (gitignored). Its remaining
+        unactioned findings are the items below.
+- [ ] **Residual confounds in the corrected metric - scope the CLAIM, do not
+      pretend they are fixed.**
+      - **Seer-originated public signal.** Clean teams are disproportionately
+        seer-proposed, and its votes and speech are public. A blind seat trusting
+        a seat it has learned to trust is doing real social deduction, but it is
+        the seer's knowledge one hop removed. Unremovable without removing the
+        game. So gate #3a-blind measures *information reaching blind seats through
+        play*, not *blind seats detecting evil unaided* - and the report must say
+        that rather than claiming the number is deconfounded.
+      - **Self-membership.** A seat votes differently on a team it is ON, and at 5
+        seats a clean 3-team contains ALL three good seats, so nearly every blind
+        clean vote is a self-vote. Measured on seed 1000: loyalist OFF-team
+        -13.83% (n=9/49) vs ON-team +3.20% (n=44/27). Only 9 off-team clean votes
+        exist at 5p, so it cannot be conditioned away here - report the split,
+        state the residual.
+      - Both push the honest number DOWN, not up.
+- [ ] **Graded taint is now the only route to a resolvable gate #3a**, not an
+      optimisation. The blind interval spans ~31 points at 20 games; binary
+      clean-vs-tainted discards ~82% of votes and the surviving population is one
+      seat per game at 5p. Grade taint continuously (how many evil on the proposed
+      team, against what that seat could know) so every vote is a sample. Same
+      insight as the graded hunt. Arithmetic: `docs/player-counts.md`.
+- [ ] **Derive the hunter baseline from the legal target set, not a hardcoded
+      1/3.** `run_games.py` hardcodes `hunter_baseline: 1/3` and prints "chance
+      33.33%". Both are correct ONLY at 5 seats with a hunter that knows its ally.
+      At 7p/3-evil the legal set is 4; under the queued blind-evil variant it is 4
+      at 5 seats too - and `RandomPolicy` and `validate_hunt` both derive from
+      `entitled_knowledge`, so they will silently agree on the new set while the
+      scorer keeps gating against 1/3, in the flattering direction. Compute it as
+      `1/len(legal_targets)` from the same source the policy uses.
+- [ ] **Condition over-sabotage on the game continuing before quoting 41%.** A
+      double fail on evil's THIRD failed mission is costless - the game ends there,
+      the identification is never paid for, and it weakly insures against a
+      miscount. Those rows are not coordination failures. `audit_decisions.py`
+      counts every `fails > need`.
+- [ ] **`outed_own_role_in_public` reads near-zero by construction, not by
+      virtue.** It matches functional keys (`seer`, `mimic`) against speech
+      rendered in the 1984 theme, where seats say "Thought Police" and
+      "Doublethinker". The reported 0/1290 supports nothing. Match theme names too,
+      or scope the check to `--theme plain` runs.
+- [ ] **`hunt_named_impossible` assumes the current knowledge model.** It derives
+      allies as "all other evils", correct at 5p but wrong under a future
+      `sees_fellow_evil=False` variant, where it would flag legal hunts as
+      regressions. Same trap as the hardcoded 1/3.
+- [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
+      `--arm llm` vs `--arm llm-good` on the same seeds isolates evil's
+      contribution against a fixed opponent population, using arms that already
+      exist. The conditionality then softens from a hard refusal to "the
+      unconditional headline rate is only quotable once #3 holds". Also: the ~65%
+      no-deception baseline is a property of `RandomPolicy(fail_rate, approve_rate)`,
+      not of the game - fine as an existence proof, wrong if quoted as the game's
+      intrinsic evil floor. And `rate_ok`'s 5% CI-floor bar is pre-declared
+      nowhere; it deserves a line in the pre-committed criterion the way 3b's did.
 - [ ] **Two behaviours the auditor prices, neither of them bugs** (steer
       2026-08-26 - my PROOF classification was wrong on both).
       - **A good seat approves a known-tainted team, 7/76 (9%).** Legal and
