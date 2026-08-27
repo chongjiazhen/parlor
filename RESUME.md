@@ -542,6 +542,15 @@ can re-run.
       its own and so poses the polarity question at 1/26th the GPU cost. `1984-en`
       remains cabal's shipping default and is the face of every committed
       transcript; nothing about cabal's theme changes.
+      **Arms built 2026-08-27**, on cabal, as themes only: `1984-inv` (arm 3,
+      villainous - the 1984 skin inverted rather than a new fiction, so 2-vs-3
+      differs in valence and nothing else) and `drill-en` (arm 4, neutral - a
+      sanctioned drill with no victim). Unrun, `DEFAULT_THEME` untouched, so no
+      number moved. Two things to settle before spending GPU on them: whether the
+      run happens on cabal or on the re-homed changeling rung, and the `bnw-en`
+      blurb being 84 words against `1984-en`'s 53, which confounds the vocabulary
+      control with density. A `bnw-inv` was considered and rejected - reasoning in
+      the doc.
 - [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
       the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
       constraint: `docs/action-channel.md`.
@@ -710,7 +719,9 @@ queue, the dated measurements, and the route decisions.
   kernel/adjudicator split the RPG rung needs. Read before adding a second game's
   phases or touching `parse_action`.
 - `docs/moral-framing.md` - the theme-polarity experiment, its confound, and the
-  verified deception/framing prior work. Read before designing arm 3.
+  verified deception/framing prior work. Arms 3 (`1984-inv`) and 4 (`drill-en`)
+  are BUILT as of 2026-08-27 and unrun; read it before running any of them, and
+  for the `bnw-en` word-count confound that wants fixing first.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - `docs/prior-work.md` - AvalonBench and how to position against it. Read before

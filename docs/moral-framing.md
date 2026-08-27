@@ -1,6 +1,7 @@
 # Moral framing as a measured variable
 
-Written 2026-08-25. Unrun. Arrived sideways, out of a licensing question about the
+Written 2026-08-25. Arms 3 and 4 built 2026-08-27; still UNRUN, so every number
+below is absent rather than pending. Arrived sideways, out of a licensing question about the
 default theme, which is a bad provenance for a research direction - so it is
 written down narrowly rather than talked up.
 
@@ -18,10 +19,28 @@ it could be that any fiction beats no fiction. The arms that separate them:
 
   1. `plain` - no fiction. Floor.
   2. `1984-en` - rich fiction, sabotage HEROIC (what ships today).
-  3. a rich fiction of equal length and register with sabotage VILLAINOUS - the
-     saboteurs are the betrayers, the majority are the wronged. Same word count,
-     same density of loaded nouns.
-  4. optional: rich fiction, morally NEUTRAL - a sport, a heist with no victim.
+  3. `1984-inv` - rich fiction, sabotage VILLAINOUS. Built 2026-08-27; unrun.
+  4. `drill-en` - rich fiction, morally NEUTRAL. Built 2026-08-27; unrun.
+
+**Arms 3 and 4 exist as themes as of 2026-08-27** (`games/cabal/roles.py`), so this
+doc no longer describes them as things to design. `DEFAULT_THEME` is unchanged and
+no run has asked for either, so no recorded number moved.
+
+**Arm 3 is the 1984 skin INVERTED, not a new fiction, and that is the design.** The
+arm's whole job is to differ from arm 2 in valence and in nothing else, so a fresh
+setting would reintroduce the confound `bnw-en` was added to control. Same world,
+same register, same vocabulary shelf; only who-wrongs-whom moves. The trusting
+majority becomes an underground cell running five drops out of the city, and the
+informed minority are plants placed to lose each drop and give the cell up at the
+end. Its blurb ascribes no trait to the seat ("were placed here", not "are paid"),
+which is Hagendorff's constraint below rather than an editorial preference.
+
+**Arm 4 is a sanctioned exercise with no victim** - a readiness drill everyone
+signed for, where two seats were assigned to make each evolution fail so the
+weaknesses surface in port. Sabotage is neither heroic nor villainous, and nothing
+outside the drill is lost. It is the floor the 2-vs-3 contrast is read against:
+without it, "valence moved deception" and "valence in either direction moved
+deception away from neutral" produce the same number.
 
 `bnw-en` (added 2026-08-27) is a second arm-2: rich fiction, sabotage HEROIC, same
 polarity as `1984-en` and a different fiction. It is not arm 3 and does not
@@ -29,6 +48,31 @@ substitute for it. What it buys is the control arm 3 cannot supply - two heroic
 fictions differing only in vocabulary, so a 2-vs-3 gap can be read against a
 2-vs-2' gap, and "polarity moved it" separated from "this particular fiction moved
 it". Nothing has been run on it.
+
+**But `bnw-en` does not currently hold richness fixed, which is the one thing a
+vocabulary control has to do.** Measured 2026-08-27: `1984-en` is 53 words, `bnw-en`
+is 84, over half again as long. So a 2-vs-2' gap is confounded by blurb DENSITY -
+the same axis this doc asks the changeling enrichment to isolate separately. The
+three English arms are all exactly 53 words for that reason. Fixing it means
+trimming `bnw-en` to 53 or lengthening `1984-en`, one of them and not both, and
+either is a prompt edit that orphans any number recorded against that face. Do it
+before the arm is run, not after.
+
+**A `bnw-inv` was considered and rejected (2026-08-27).** It would give a 2x2 -
+{1984, bnw} x {heroic, villainous} - and so a polarity main effect estimable across
+two fictions rather than one. The reason not to: Brave New World does not invert
+cleanly. Orwell's world has an unambiguous oppressor, so flipping who the plants
+serve produces a fiction villainous in the same register and to the same degree.
+Huxley's horror is *consensual*, and the novel's premise is precisely that the
+conditioned majority is not free - so an inversion has to ask a seat to believe the
+majority genuinely chose their stability and the minority are stealing it, which the
+source fiction actively undercuts. That yields a mildly-villainous arm, a shrunken
+gap on the `bnw` row, and a 2x2 interaction whose null cannot be read: "polarity
+does not generalise across fictions" and "the second inversion was not much of an
+inversion" produce the same number. Same failure the fae skin was rejected for, one
+level up. If 2-vs-3 shows an effect and it needs to be shown to generalise, invert a
+fiction that inverts cleanly - not this one. Fourth in line regardless, behind
+running arms 1-4 at all.
 
 Polarity is arms 2 vs 3, and only 2 vs 3 - they differ in valence and in nothing
 else. Richness is 2+3 vs 1. Without arm 3 the experiment cannot make a claim about
