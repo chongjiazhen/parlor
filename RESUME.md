@@ -148,6 +148,22 @@ can re-run.
         `five_rejects` shift, and run-length degradation. Score those off the same
         records - they are free, and they are the reason the campaign is 2x20 at
         two seed bases rather than 40 at one.
+- [ ] **Seats DO name their own role in public, and nobody has read the lines yet**
+      (uncovered by S3, 2026-08-27). With the audit matching theme names instead of
+      functional keys, `hunt20c` shows 26 self-outings in 1580 utterances (1.6%)
+      against `hunt20b`'s 4 in 1150 - and `hunt20c`'s cluster on ONE seat, which
+      reads as deliberate cover ("I've opposed [1,4] publicly all round - that was
+      cover. As Inner Party, I now urge..."). It is a HEURISTIC count, so the number
+      decides nothing on its own; what it decides is that the lines are worth
+      reading, which the old zero said they were not.
+      - **The question it opens is a gate #3a confound.** A seat that announces its
+        role hands the table a fact, and good's discrimination on that game is then
+        measuring compliance with an announcement rather than deduction. Whether
+        that matters turns on how many games carry one and whether the announcement
+        is TRUE - a mimic claiming to be the watcher is deception working, not a
+        confound. The count cannot tell those apart; a human reading 26 lines can.
+      - Cheap: 26 lines, `--show 30` on the existing check. Do it before quoting
+        `hunt20c`'s vote numbers as deduction, not after.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds isolates evil's
       contribution against a fixed opponent population, using arms that already
