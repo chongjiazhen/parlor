@@ -7,6 +7,7 @@ cheap way to eyeball whether agents will actually deceive.
 
     python -m games.cabal.demo                       # random players, 1984-en face
     python -m games.cabal.demo --theme plain         # sterile functional names
+    python -m games.cabal.demo --theme bnw-en        # the other dystopia face
     python -m games.cabal.demo --rounds 2            # two discussion rounds
     python -m games.cabal.demo --backend local --model qwen36-35b-a3b-iq3
     python -m games.cabal.demo --backend clean --speaker   # only discussion is live
@@ -18,6 +19,7 @@ from __future__ import annotations
 import argparse
 import os
 import random
+import sys
 
 from core.backends import REGISTERS, Backend
 from games.cabal import transcript
@@ -71,6 +73,13 @@ class _SpeechOnly:
 
 
 def main() -> None:
+    # A CJK skin cannot be printed to the Windows console, whose default codec is
+    # cp1252: the game runs, the render is correct, and the process dies at the
+    # moment of writing it out. Both Chinese skins were unrunnable here without
+    # PYTHONIOENCODING set, which is a fact about the terminal, not the arena.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: 1984-en)")
