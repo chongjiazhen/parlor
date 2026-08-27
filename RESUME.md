@@ -2,6 +2,37 @@
 
 Queue only. Done work leaves to git log. What's next:
 
+## Session slices - what one `/new` should take
+
+The queue is 26 open items and a cold session cannot rank them. These are the
+units: each is one session's worth, has a stated entry condition, and ends in a
+thing that exists. **Take exactly one.** They are ordered by what unblocks what,
+not by appeal.
+
+The split that matters is GPU-bound versus attention-bound. A GPU run needs a
+launch and a log tail; it does not need a session watching it. So an S with a run
+in it should launch first and spend the wait on the paired CPU slice, and the
+table says which pairs.
+
+| # | slice | needs | entry condition | done when |
+|---|---|---|---|---|
+| **S1** | **Call cabal gate #3.** Decide on `hunt20c`'s own interval whether 5-seat cabal keeps spending GPU. | no GPU, ~1h | none - do this first | the decision and its reasoning are in this file, and the four items naming it are rewired |
+| **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). | GPU all session | none | `RULES.md` table is on clean numbers and a 200-game record exists |
+| **S3** | **cabal scorer honesty.** Hunter baseline derived from the legal target set; over-sabotage conditioned on the game continuing; `outed_own_role_in_public` matched against theme names; `hunt_named_impossible` off `entitled_knowledge`. | no GPU | none - **pair with S2's wait** | four derived numbers stop being wrong under a variant, with tests |
+| **S4** | **Ops hygiene.** `DONE rc=` written by `run_games.py` itself; `run-hunt20.cmd` moved to `eval/runs/`; cabal's fallback `note` populated the way changeling's is. | no GPU | no run in flight | a killed run is distinguishable from a finished one without the chain log |
+| **S5** | **changeling: read the 200-game run.** Gate #3 at a real N, the `false` stratum, the sleeper-decoy rate, diverged-vs-intact accuracy. | no GPU | S2 landed | a dated writeup in `RULES.md`, gates called or refused by their own rule |
+| **S6** | **The second draw.** cabal at `--seed 2000`, same code, compared against `hunt20c` - the only thing that resolves step-not-slope, the `five_rejects` shift, and run-length degradation. | GPU ~6.6h | **S1 said cabal continues** | three items resolved or a third draw says they are noise |
+| **S7** | **Measured prompt variables.** Negation pass, the notebook, theme polarity, mini-personas - each a paired run, one variable. | GPU per variable | S1 said cabal continues | each kept only if a number moved |
+| **S8** | **Next rung or publish.** 6/7p + information-degrading evils, Spike #2's faction heartbeat, or `docs/prior-work.md` and pre-public hygiene. | varies | S1 and S5 both done | scoped in its own session, not here |
+
+**S1 is the gate on half the queue.** S6, S7 and the cloud-arm item all assume
+cabal is worth more GPU, and that assumption has been unexamined since
+`hunt20c`'s interval landed. Do not start S6 or S7 without it.
+
+**Do not mix cabal and changeling in one session.** They have separate `RULES.md`
+files, separate scorers and separate baselines, and every number confusion in this
+file so far came from carrying one game's intuition into the other's denominator.
+
 - [x] **`hunt20` landed, was scored, and then the STATISTIC turned out to be
       wrong. Gate #3a is NOT SHOWN.** 20/20 games, rc=0, 0.49% fallback
       (11/2231), 100% pinned `qwen36-35b-a3b-iq3`. Re-scored 2026-08-26 on the
@@ -220,6 +251,17 @@ Queue only. Done work leaves to git log. What's next:
       1000. Budget ~6h40m; it checks whether the within-run bootstrap is honest, and
       it is a smaller prize than this file used to claim - `docs/reproducibility.md`
       says why.
+- [ ] **Re-run changeling's powers arms on the FIXED lane - the paired result
+      stands, the absolute rates do not.** Both arms of the 2026-08-27 comparison
+      ran with `run_changeling` sending the run's base seed as the sampler seed for
+      every game (fixed in `af7e6a0`), plus the game-weighted `_chance` and the
+      wrong-denominator random reference. Both arms carried all three identically on
+      identical deals, so the -10pp rule-error finding is unaffected; the villager
+      accuracy, village win rate and chance figures quoted in `RULES.md` are not
+      clean estimates of what this model does per game. ~30 min for 20 games each
+      arm at `--no-thinking`; re-run both, not just the after arm, or the pairing is
+      lost. Update the table in `games/changeling/RULES.md` and drop the caveat
+      block above it.
 - [ ] **The JSONL records no REASON for a fallback.** Every `fell_back` entry in
       `decision_log` carries `note: ""` and `served_by: ""`, so a run's refusal
       diagnosis exists only in `trace_sample` (sampled, 8/game) and the log's final
