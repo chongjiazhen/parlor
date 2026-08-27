@@ -282,19 +282,35 @@ THEME_FOLK = Theme(
 # you are while you are her guest - a seat whose card is exchanged by someone else.
 # Narcissus is the only one who looks at what he actually is, and looks last.
 #
+# PROPER NAMES REMOVED 2026-08-27, and the removal is the control working. As first
+# written this skin was 6 of 8 proper names - Empousa, Pythia, Hermes, Circe, Dioscuri,
+# Narcissus - while `folk` is 8 of 8 common nouns and so is every other skin here. That
+# made folk-vs-greek move vocabulary AND name TYPE at once, which is the same defect
+# `bnw-en` shipped with on cabal in a different currency: a control that moves two
+# things measures neither.
+#
+# Name type is not cosmetic. A proper name is an opaque token that pays off only from
+# the model's priors, and pays nothing to a model without them; a common noun restates
+# what the card does, in a preamble that already prints every power. So the two kinds
+# of name differ in how much they hand a weak model, which is precisely the sort of
+# difference that would show up as a behavioural gap and get read as vocabulary.
+#
+# The register survives the change - a hollow guest, an oracle, an enchantress and a
+# lotus-eater are the same corpus without the personal names.
+#
 # No published game's names or text appear here; these are public-domain myth.
 THEME_GREEK = Theme(
     "greek",
     {Side.VILLAGE: "The Household", Side.PACK: "The Devourers"},
     {
-        "pack": "Empousa",         # Hecate's shape-shifting man-eaters, and there are more than one
-        "spotter": "Pythia",
-        "swapper": "Hermes",       # takes what is yours and leaves something in its place
-        "switcher": "Circe",       # changes what two other guests are, without asking either
+        "pack": "Hollow Guest",    # wears the guest, is not the guest, and there are two
+        "spotter": "Oracle",
+        "swapper": "Trickster",    # takes what is yours and leaves something in its place
+        "switcher": "Enchantress",  # changes what two other guests are, without asking either
         "deceived": "Lotus-Eater",  # ate, forgot, and does not know what it is now
         "bystander": "Shepherd",
-        "kindred": "Dioscuri",     # the twins, and each knows the other
-        "waker": "Narcissus",      # the one who looks at himself, last of all
+        "kindred": "Twins",
+        "waker": "Pool-Gazer",     # the one who looks at his own reflection, last of all
     },
     blurb=(
         "A house on the road takes in every stranger, because the gods walk in "
@@ -455,6 +471,56 @@ THEME_MASQUERADE = Theme(
     centre_name="sideboard",
 )
 
+# The pure Journey to the West face, and the one skin here whose SOURCE states this
+# rung's premise outright rather than being fitted to it. The Six-Eared Macaque is an
+# impostor identical to the original: the companions who walked beside him for years
+# cannot separate them, and neither can the gods. That is belief-versus-truth in one
+# episode, and nothing in the other corpora comes as close.
+#
+# Polarity matches `folk` - the travellers are wronged, the copy is the wrong - so this
+# is NOT a new arm. It is a second candidate for the one vocabulary-control slot
+# `greek` holds, and the set has room for exactly one: two same-polarity rich fictions
+# in the arm set would be two 2' arms and no more information than one.
+#
+# `greek` keeps the slot on the merits, and the reason is worth stating because the
+# intuition runs the other way. JTTW is the better PREMISE fit and the worse CONTROL.
+# A control has to hold polarity fixed while moving vocabulary, and these two are not
+# the same polarity in kind: `folk` and `greek` both run on predator and prey - a
+# household eaten by what it let in - while this one runs on legitimate versus
+# counterfeit, where nobody is eaten and the wrong is that the wrong one is wearing the
+# face. That is a different moral axis, so a folk-vs-journey gap would carry it along
+# with the vocabulary, and the arm would confound the thing it exists to isolate.
+#
+# So this face ships to be READ - the skin to put in front of someone who asks what
+# parlor is for - and `greek` ships to be RUN. If that is ever reversed, it is a swap
+# and not an addition.
+#
+# Common nouns throughout, like every other skin here: "six-eared macaque" is a
+# species epithet, not a personal name. That was true of this set before it was a
+# stated rule, and noticing it was what caught `greek`.
+THEME_JOURNEY = Theme(
+    "journey",
+    {Side.VILLAGE: "The Pilgrims", Side.PACK: "The Impostors"},
+    {
+        "pack": "Six-Eared Macaque",  # the copy nobody, god or companion, can separate from the original
+        "spotter": "Fiery Eyes",   # the gaze out of the furnace, which sees the thing under the face
+        "swapper": "Hair Double",  # pluck a hair, breathe on it, leave the copy standing where you were
+        "switcher": "Yellow Wind",  # the gale that picks two up and puts them down elsewhere
+        "deceived": "River-Drinker",  # drank, and was changed before anyone explained what changed
+        "bystander": "Porter",     # carries the luggage while the others have the adventure
+        "kindred": "Vow-Bound",
+        "waker": "Cast-Off Body",  # the corpse that floats past at the crossing, and is told to be his
+    },
+    blurb=(
+        "Some of the company is not the company. Two travellers remember the road, "
+        "the quarrels and the promises, and answer to the names, and are not the ones "
+        "who set out. The gods have looked and cannot tell; the ones who walked "
+        "beside them the whole way cannot either. At dawn the road names one "
+        "traveller, and walks on."
+    ),
+    centre_name="baggage",
+)
+
 DEFAULT_THEME = THEME_FOLK
 
 THEMES: dict[str, Theme] = {
@@ -462,6 +528,7 @@ THEMES: dict[str, Theme] = {
     "folk-inv": THEME_FOLK_INV,
     "greek": THEME_GREEK,
     "investiture": THEME_INVESTITURE,
+    "journey": THEME_JOURNEY,
     "masquerade": THEME_MASQUERADE,
     "plain": THEME_PLAIN,
 }

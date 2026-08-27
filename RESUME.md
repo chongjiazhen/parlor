@@ -486,18 +486,32 @@ can re-run.
         it, colliding lexically rather than by ownership with `Yellow Wind`.
         `investiture`'s swapper/switcher/kindred are now Earth-Traveller / Duty
         Officer / Same List, the last two also pulling toward the bureaucratic frame.
-      - **Reserved for a pure-JTTW skin, so nobody re-collides with them:** pack =
-        Six-Eared Macaque, spotter = Fiery Eyes, swapper = Hair Double, switcher =
-        Yellow Wind, deceived = River-Drinker, bystander = Porter, kindred =
-        Vow-Bound, waker = Cast-Off Body (the corpse at the Lingyun crossing - looking
-        at what you actually are, after everything). Sides The Pilgrims / The
-        Impostors, pile `baggage`. **Not built, and if built it TAKES `greek`'s slot
-        rather than joining it** - both are same-polarity rich fictions competing for
-        one place. `greek` holds the slot on merit: its polarity maps onto `folk`'s
-        predator/prey axis, where JTTW's is legitimate-versus-counterfeit, a different
-        moral axis that would confound the 2-vs-2' gap it is supposed to measure.
-        JTTW's premise fit is the better of the two, so it is the face to ship if
-        parlor ever wants one skin that states what this rung is for.
+      - **`journey`, the pure-JTTW skin, BUILT 2026-08-27.** pack = Six-Eared
+        Macaque, spotter = Fiery Eyes, swapper = Hair Double, switcher = Yellow Wind,
+        deceived = River-Drinker, bystander = Porter, kindred = Vow-Bound, waker =
+        Cast-Off Body (the corpse at the Lingyun crossing - looking at what you
+        actually are, after everything). Sides The Pilgrims / The Impostors, pile
+        `baggage`. **It does not add an arm.** Its polarity matches `folk`, so it is a
+        second candidate for the ONE vocabulary-control slot `greek` holds, and two
+        2' arms carry no more information than one. `greek` keeps the slot: `folk` and
+        `greek` both run on predator and prey, where `journey` runs on legitimate
+        versus counterfeit - nobody is eaten, and the wrong is that the wrong one is
+        wearing the face. A different moral axis, which a control must not move. So
+        `journey` ships to be READ (the skin to put in front of someone asking what
+        parlor is for, since its source states this rung's premise outright) and
+        `greek` ships to be RUN. Reversing that is a swap, not an addition.
+      - **`greek` lost its proper names the same day, and that is the control
+        working.** It was 6-of-8 proper names - Empousa, Pythia, Hermes, Circe,
+        Dioscuri, Narcissus - while `folk` is 8-of-8 common nouns and so is every
+        other skin, `journey` included. So folk-vs-greek moved vocabulary AND name
+        type, the `bnw-en` word-count defect in a different currency. Name type is not
+        cosmetic: a proper name is an opaque token that pays off only from the model's
+        priors and pays nothing without them, while a common noun restates a power the
+        preamble already prints - so the two hand a weak model different amounts, and
+        that gap would have been read as vocabulary. Now Hollow Guest / Oracle /
+        Trickster / Enchantress / Lotus-Eater / Shepherd / Twins / Pool-Gazer, same
+        register, no personal names. **Check name type on any future skin**; nothing
+        tests it, because "is this a proper name" is not a property code can decide.
       - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
         language at once and cannot be read. The clean language control already
         exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
