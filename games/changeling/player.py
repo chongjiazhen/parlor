@@ -227,8 +227,12 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
                 if audit:
                     assert_no_leak(ref)
                 action = policies[seat].act(ref, seat)
-                ref.speak(seat, action["say"])
-                rec.utterances.append(action["say"])
+                # What `speak` PUBLISHED, not what the policy proposed. speak()
+                # normalises whitespace and truncates to MAX_UTTERANCE_CHARS, so
+                # storing the raw string left the record holding text no seat ever
+                # saw - anything reading `utterances` would then be analysing a
+                # different corpus from the one the models were shown.
+                rec.utterances.append(ref.speak(seat, action["say"]))
                 _record_decision(rec, policies[seat], turn, seat, "discuss",
                                  "speaks", action)
                 turn += 1
@@ -239,8 +243,18 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
                 assert_no_leak(ref)
             action = policies[seat].act(ref, seat)
             target = action["vote"]
-            if target == seat:                # a fallback can only pick legally
-                target = ref.legal_votes(seat)[0]
+            # NOT coerced. This used to rewrite a self-vote to the first legal seat
+            # and record the rewritten target, which contradicted this module's own
+            # contract one screen up and escaped the fallback count: a policy other
+            # than the two here - a model-driven night policy, a test double - got
+            # its illegal move laundered into the scored data with no trace.
+            # `ref.cast` refuses it below; let it.
+            # Cast FIRST, so the referee's refusal happens before anything is
+            # written down. Recording the vote and then casting meant an illegal
+            # move was already in `rec.votes` when cast raised - laundered into the
+            # scored data by ordering alone, which is the same defect the removed
+            # coercion had.
+            ref.cast(seat, target)
             _record_decision(rec, policies[seat], turn, seat, "vote",
                              f"points at seat {target}", action)
             turn += 1
@@ -253,7 +267,6 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
                 target_holds_pack=ref.holds(target).side is Side.PACK,
                 knowledge_class=ref.night.dealt[seat].knowledge_class,
             ))
-            ref.cast(seat, target)
     except Exception as exc:                  # a broken run is recorded, not hidden
         rec.error = f"{type(exc).__name__}: {exc}"
         if isinstance(exc, AssertionError):   # a leak is never scoreable

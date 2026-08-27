@@ -306,11 +306,18 @@ class ChangelingReferee:
     def speaking_order(self) -> list[int]:
         return list(range(self.n))
 
-    def speak(self, seat: int, text: str) -> None:
+    def speak(self, seat: int, text: str) -> str:
+        """Publish one utterance and RETURN what was published.
+
+        Returning it matters: the driver records what the table saw, and the only
+        alternative is re-deriving it by splitting the rendered event string, which
+        is a parser of this method's own formatting.
+        """
         if self.phase is not Phase.DISCUSS:
             raise IllegalAction(f"seat {seat} spoke during {self.phase.value}")
         said = " ".join(text.split())[:MAX_UTTERANCE_CHARS]
         self.public_events.append(("speech", f"Seat {seat}: {said}"))
+        return said
 
     def close_round(self) -> None:
         """One full pass of the table is done."""

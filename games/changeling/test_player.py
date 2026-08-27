@@ -200,5 +200,46 @@ class TestAuditRunsInsideTheDriver(unittest.TestCase):
         self.assertIs(sig.parameters["audit"].default, True)
 
 
+class TestReviewFixes(unittest.TestCase):
+    """Regressions for defects found by review 2026-08-27. Each asserts the FIXED
+    behaviour, so a revert fails here rather than going quiet."""
+
+    class SelfVoter:
+        """A policy that is neither of the two shipped ones - the case the coercion
+        laundered, since LLMPolicy retries a self-vote and RandomPolicy cannot make
+        one."""
+        def act(self, ref, seat):
+            if ref.phase is Phase.DISCUSS:
+                return {"say": "..."}
+            return {"vote": seat}
+
+    def test_a_self_vote_is_refused_not_laundered_into_the_record(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policies = {s: RandomPolicy(random.Random(s)) for s in range(5)}
+        policies[2] = self.SelfVoter()
+        rec = play_game(ref, policies)
+        self.assertIsNotNone(rec.error, "an illegal self-vote was scored silently")
+        self.assertIn("IllegalAction", rec.error)
+        self.assertFalse([v for v in rec.votes if v.seat == v.target])
+
+    def test_the_record_keeps_what_the_table_SAW_not_what_was_proposed(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+
+        class Rambler:
+            def act(self, ref, seat):
+                if ref.phase is Phase.DISCUSS:
+                    return {"say": "x  y" + "z" * 900}
+                return {"vote": ref.legal_votes(seat)[0]}
+
+        policies = {s: Rambler() for s in range(5)}
+        rec = play_game(ref, policies)
+        published = [t.split(": ", 1)[1] for tag, t in rec.public_events
+                     if tag == "speech"]
+        self.assertEqual(rec.utterances, published)
+        for u in rec.utterances:
+            self.assertLessEqual(len(u), 280)
+            self.assertNotIn("  ", u)
+
+
 if __name__ == "__main__":
     unittest.main()

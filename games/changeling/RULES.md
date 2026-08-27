@@ -177,9 +177,11 @@ distribution a policy produces. So it was measured, never asserted.
 
 | | |
 |---|---|
-| **village wins** | **38.50%**, 95% CI [37.00%, 40.02%] |
+| **village wins, scored denominator** | **39.51%** (winnable games only - the denominator every run reports on) |
+| village wins, all games | 38.45% (includes the unwinnable 2.7%; NOT comparable to a run figure) |
+| villager accuracy (per vote) | **35.95%**, against a computed chance of 35.93% |
 | multi-seat accusations (ties) | 32.4% of games |
-| dawn wolves: 0 / 1 / 2 seats | 112 / 1908 / 1980 |
+| dawn wolves: 0 / 1 / 2 seats | 107 / 1908 / 1985 |
 | village wins by dawn-wolf count | 0.0% / 28.2% / **50.6%** |
 
 Three things fall out, and each one would have made a hardcoded fraction wrong:
@@ -190,7 +192,7 @@ Three things fall out, and each one would have made a hardcoded fraction wrong:
 - **A third of games end in a tie**, and every tied seat is accused, so the random
   arm gets several draws at the wolf. That is a large part of why 38.5% sits so far
   above a naive 1-in-4.
-- **2.8% of games have NO wolf seated at dawn, and the village cannot win them.**
+- **2.7% of games have NO wolf seated at dawn, and the village cannot win them.**
   See below - this is a defect in the deal constraint, not a property of play.
 
 ### The public rules text has to state what each card DOES (measured 2026-08-27)
@@ -216,6 +218,11 @@ reading could since have gone stale. Powers are written without naming any other
 card, so the text stays byte-identical across seats and carries no association a
 leak could ride on - the audit exclusion in the previous section still holds, and
 `audit_all` is clean over 500 deals with it in.
+
+> **Both arms below predate the review fixes of 2026-08-27** - the sampler seed was
+> pinned to the run's base rather than each game's. Both arms carried it identically
+> on identical deals, so the PAIRED comparison stands; the absolute rates inherit it
+> and are not a clean estimate of what this model does per game.
 
 **Measured, same seeds, one variable** - 20 games, `qwen36-35b-a3b-iq3`,
 `--no-thinking`, seed 1000, deals confirmed identical across arms:
@@ -249,7 +256,7 @@ Cost of the fix is 16% wall clock, from the longer preamble on every call.
 `DRINK` seat swaps whatever it is holding by then - which the `TAKE` or `SWITCH`
 step may have made `pack` - for a centre card, and `DRINK` is last.
 
-Measured residual: **112/4000 = 2.8%** of games, down from the 10.7% an
+Measured residual: **107/4000 = 2.7%** of games, down from the 10.7% an
 unconstrained deal would give. Those games are unwinnable by the village however
 well it plays, so they belong in a deduction denominator the way a fallback belongs
 in a gate number: **excluded, and reported.** Do not quietly average them in.

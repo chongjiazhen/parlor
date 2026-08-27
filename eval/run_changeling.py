@@ -43,15 +43,33 @@ from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import DEFAULT_THEME, THEMES
 
-#: Measured on this game at 5 seats with uniform random votes, n=4000. Written here
-#: as a REFERENCE POINT, never as the thing a run is scored against - a run reports
-#: its own random arm or it reports nothing. See games/changeling/RULES.md.
-MEASURED_RANDOM_VILLAGE_WINS = 0.385
+#: Measured on this game at 5 seats with uniform random votes, n=4000, and on the
+#: SAME denominator the report prints beside it: games that seated a wolf at dawn.
+#:
+#: The first value here was 0.385, which is the rate over ALL games including the
+#: 2.7% that seat no wolf and cannot be won. Printing it next to a run figure scored
+#: on winnable games only put a ~1.1 point bias in the pack's favour - quietly
+#: averaging in the excluded games, in exactly the comparison RULES.md warns about.
+#: Found by review 2026-08-27; on the scored denominator it is 39.51%.
+#:
+#: A REFERENCE POINT, never the thing a run is scored against - a run reports its
+#: own random arm or it reports nothing.
+MEASURED_RANDOM_VILLAGE_WINS = 0.3951
+MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES = 0.3845
 
 ARMS = ("random", "llm", "llm-village", "llm-pack")
 
 
-def build_backend(args) -> Backend:
+def build_backend(args, seed: int | None) -> Backend:
+    """``seed`` is the GAME's seed, never the run's base.
+
+    `2cfe9d5` landed this invariant for cabal and CLAUDE.md records it: "Backend.seed
+    rides in the payload and one_game hands each game the number it deals with."
+    This lane shipped `seed=args.seed`, which pinned the sampler to one value for
+    every game in a run while the deal advanced - so cross-game variation came only
+    from the prompt, and the spread the invariant exists to make measurable was
+    collapsed silently. Found by review 2026-08-27.
+    """
     return Backend(
         endpoint=ENDPOINTS[args.backend],
         model=args.model,
@@ -60,12 +78,13 @@ def build_backend(args) -> Backend:
         temperature=args.temperature,
         timeout=args.timeout,
         max_tokens=args.max_tokens,
-        seed=args.seed,
+        seed=seed,
         enable_thinking=(False if args.no_thinking else None),
     )
 
 
-def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
+def build_policies(ref: ChangelingReferee, args, rng: random.Random,
+                   seed: int | None = None) -> dict:
     """Which seats are live. A mixed arm seats one side live against the random
     control, so the live side's contribution is the only thing moving.
 
@@ -76,14 +95,21 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
     """
     if args.arm == "random":
         return {s: RandomPolicy(rng) for s in range(ref.n)}
-    backend = build_backend(args)
-    live = LLMPolicy(backend=backend, retries=args.retries,
-                     fallback=RandomPolicy(rng))
+    backend = build_backend(args, seed)
+
+    # One LLMPolicy PER SEAT. Sharing one object across seats makes `upstreams` a
+    # single Counter that the record then sums once per seat, multiplying the
+    # census by the live-seat count - and in a mixed arm that count varies with the
+    # deal, so the reported model mix gets weighted by seats rather than by calls.
+    def live() -> LLMPolicy:
+        return LLMPolicy(backend=backend, retries=args.retries,
+                         fallback=RandomPolicy(rng))
+
     if args.arm == "llm":
-        return {s: live for s in range(ref.n)}
+        return {s: live() for s in range(ref.n)}
     from games.changeling.roles import Side
     want = Side.PACK if args.arm == "llm-pack" else Side.VILLAGE
-    return {s: (live if ref.holds(s).side is want else RandomPolicy(rng))
+    return {s: (live() if ref.holds(s).side is want else RandomPolicy(rng))
             for s in range(ref.n)}
 
 
@@ -94,7 +120,7 @@ def one_game(index: int, args) -> GameRecord:
     ref = ChangelingReferee.new(5, seed=seed, theme=theme,
                                 discussion_rounds=args.rounds)
     try:
-        return play_game(ref, build_policies(ref, args, rng))
+        return play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
         raise                                    # a leak is never scoreable
     except Exception as exc:                     # one bad game must not kill a run
@@ -329,8 +355,14 @@ def _chance(s: dict) -> float:
     for w, (_, n) in s["gate3_deduction"]["by_dawn_wolves"].items():
         if w == 0:
             continue
-        weighted += n * (w / 4)       # 4 seats a villager may point at
-        total += n
+        # Weight by VILLAGER VOTES, not by games. The rate this gates is per-vote,
+        # and a 2-wolf dawn contributes only 3 villager votes against a 1-wolf
+        # dawn's 4 - so game-weighting set the bar ~1.8 points too high and made
+        # gate #3 harder than chance. The instrument-control test cannot catch a
+        # bias this size: at 300 games the blind CI is +/-7pp. Review, 2026-08-27.
+        votes = n * (5 - w)
+        weighted += votes * (w / 4)   # 4 seats a villager may point at
+        total += votes
     return weighted / total if total else 0.0
 
 
@@ -382,11 +414,11 @@ def main() -> None:
             line += f"  ERROR {rec.error}"
         print(line, file=sys.stderr, flush=True)
 
-    text = report(score(records), args, time.time() - started)
-    print(text)
+    scored = score(records)
+    print(report(scored, args, time.time() - started))
     if args.out:
         with open(f"{args.out}.json", "w", encoding="utf-8") as fh:
-            json.dump({"score": score(records), "args": vars(args)}, fh, indent=2)
+            json.dump({"score": scored, "args": vars(args)}, fh, indent=2)
 
 
 if __name__ == "__main__":

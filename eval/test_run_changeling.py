@@ -10,6 +10,7 @@ plausible output.
 from __future__ import annotations
 
 import argparse
+import random
 import unittest
 
 from eval.run_changeling import (_chance, one_game, report, score,
@@ -144,6 +145,55 @@ class TestVillagerVotesAreKeyedOnTruth(unittest.TestCase):
                 if v.voter_believes_pack:
                     found = True
         self.assertTrue(found, "no sleeper villager in range - the night is inert")
+
+
+class TestReviewFixes(unittest.TestCase):
+    """Regressions for defects found by review 2026-08-27."""
+
+    def test_the_sampler_seed_is_the_GAMES_seed_not_the_runs(self):
+        """`2cfe9d5`'s invariant: Backend.seed rides in the payload and one_game
+        hands each game the number it deals with. This lane shipped seed=args.seed,
+        pinning the sampler to one value for every game in a run."""
+        from eval.run_changeling import build_backend
+        args = make_args(backend="local", model="m", seed=1000)
+        args.no_thinking = True
+        self.assertEqual(build_backend(args, 1007).seed, 1007)
+        self.assertEqual(build_backend(args, 1000).seed, 1000)
+
+    def test_chance_is_weighted_by_villager_VOTES_not_by_games(self):
+        """A 2-wolf dawn yields 3 villager votes against a 1-wolf dawn's 4, so the
+        two weightings disagree - 0.357 against 0.375 on an even mix. The rate
+        _chance gates is per-vote, so game-weighting set the bar ~1.8 points too
+        high and made gate #3 harder than chance."""
+        mixed = {"gate3_deduction": {"by_dawn_wolves": {1: (0, 100), 2: (0, 100)}}}
+        self.assertAlmostEqual(_chance(mixed), 250 / 700, places=6)
+        self.assertNotAlmostEqual(_chance(mixed), 0.375, places=3)
+
+    def test_the_random_reference_is_on_the_scored_denominator(self):
+        """It is printed beside a run figure computed over winnable games only."""
+        from eval.run_changeling import (MEASURED_RANDOM_VILLAGE_WINS,
+                                         MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES)
+        self.assertGreater(MEASURED_RANDOM_VILLAGE_WINS,
+                           MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES)
+        self.assertAlmostEqual(MEASURED_RANDOM_VILLAGE_WINS, 0.3951, places=4)
+
+    def test_an_empty_sample_yields_no_interval_rather_than_a_zero_width_one(self):
+        from core.stats import wilson
+        self.assertIsNone(wilson(0, 0))
+        self.assertIsNotNone(wilson(0, 5))
+
+    def test_each_live_seat_gets_its_own_policy_object(self):
+        """One shared LLMPolicy makes `upstreams` a single Counter that the record
+        sums once per seat, multiplying the census by the live-seat count."""
+        from eval.run_changeling import build_policies
+        from games.changeling.referee import ChangelingReferee
+        args = make_args(arm="llm", backend="local", model="m")
+        args.no_thinking = True
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policies = build_policies(ref, args, random.Random(0), seed=3)
+        live = [p for p in policies.values() if hasattr(p, "upstreams")]
+        self.assertEqual(len(live), 5)
+        self.assertEqual(len({id(p) for p in live}), 5, "seats share one policy")
 
 
 if __name__ == "__main__":

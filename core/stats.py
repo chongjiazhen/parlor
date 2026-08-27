@@ -14,11 +14,17 @@ import math
 import random
 
 
-def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float]:
+def wilson(hits: int, total: int, z: float = 1.96) -> tuple[float, float] | None:
     """95% Wilson interval. Small-N proportions need their error bars visible, or a
-    3-of-5 run reads as a result."""
+    3-of-5 run reads as a result.
+
+    ``None`` on an empty sample, never ``(0.0, 0.0)``. A zero-width interval renders
+    as "95% CI [0.00%, 0.00%]", which reads as a precise measurement of nothing -
+    the same fail-open shape this repo already refused for an empty gate stratum.
+    ``bootstrap_ci`` returns ``None`` here too, so both refuse the same way.
+    """
     if total == 0:
-        return (0.0, 0.0)
+        return None
     p = hits / total
     d = 1 + z * z / total
     centre = (p + z * z / (2 * total)) / d
