@@ -185,11 +185,22 @@ prints both rules side by side and is where every stratum size in
 termination-depth diagnostic needs the published threshold the off-repo ledger
 records, with its citation. It held up nothing and still does not.
 
-**Entry condition: no arm in flight.** Same self-check as always -
-`grep -L 'PARLOR DONE' eval/records/hunt6[ab].log`, empty means clear.
+**Entry condition: no arm in flight.** Same self-check as always, against
+whatever log is current - S6's arms and S2 are all down as of 2026-08-28:
+`grep -L 'PARLOR DONE' eval/records/*.log`, silence means clear.
 
 3. Adopt a **termination-depth diagnostic** against the published threshold the
    off-repo ledger records, with that citation.
+4. **The two eval drivers disagree on what `--out` means, and it cost a filename
+   on the first run that used both conventions.** `run_games` writes `args.out`
+   VERBATIM (`hunt6a.json`), while `run_changeling` composes `f"{args.out}.json"`
+   and `f"{args.out}.jsonl"` - so a launcher written from cabal's twin passes
+   `--out eval\records\s2.json` and gets `s2.json.json` beside `s2.json.jsonl`.
+   S2's records are named that way now, 2026-08-28. **Pick one convention in
+   `core/`, not one per game** - it is the same class as the integrity block and
+   the void bar, and the cheap wrong fix is editing one launcher and leaving the
+   drivers disagreeing. Whichever way it lands, the S2 files need renaming or the
+   scorer needs to accept both, so decide it BEFORE S5 quotes a path.
 5. ~~Fix the **scorer note** on the mis-specified statistic.~~ **CLOSED 2026-08-27,
    no code change.** The trigger required a third flat or RISING 1->2 leg in the
    blind taint table; arm 2's fell 6.8pp, the largest fall of the four runs (legs
