@@ -49,14 +49,23 @@ fictions differing only in vocabulary, so a 2-vs-3 gap can be read against a
 2-vs-2' gap, and "polarity moved it" separated from "this particular fiction moved
 it". Nothing has been run on it.
 
-**But `bnw-en` does not currently hold richness fixed, which is the one thing a
-vocabulary control has to do.** Measured 2026-08-27: `1984-en` is 53 words, `bnw-en`
-is 84, over half again as long. So a 2-vs-2' gap is confounded by blurb DENSITY -
-the same axis this doc asks the changeling enrichment to isolate separately. The
-three English arms are all exactly 53 words for that reason. Fixing it means
-trimming `bnw-en` to 53 or lengthening `1984-en`, one of them and not both, and
-either is a prompt edit that orphans any number recorded against that face. Do it
-before the arm is run, not after.
+**`bnw-en` did not hold richness fixed, which is the one thing a vocabulary control
+has to do, and it was trimmed 2026-08-27 to fix that.** As shipped it was 84 words
+against `1984-en`'s 53, over half again as long, so a 2-vs-2' gap would have been
+confounded with blurb DENSITY - the same axis this doc asks the changeling
+enrichment to isolate separately. It is now 53 words / 291 chars against 290, and
+its Chinese twin was re-rendered to follow, since "same skin, Chinese-rendered"
+stops being true if only one of the pair moves.
+
+**All four English faces are matched on both length axes**: 53 words each, 281-291
+chars, a 3.5% spread. Words alone are not enough - a same-count blurb ran 13%
+shorter in the bytes that actually reach the model, which is the quantity a
+richness confound is made of.
+
+The trim was safe only because nothing had been run on that face. A blurb is a
+prompt, so editing one that HAS a number recorded against it orphans that number.
+Check `eval/records/` before touching a blurb again; from here, these four are
+frozen, and a fifth arm matches them rather than moving them.
 
 **A `bnw-inv` was considered and rejected (2026-08-27).** It would give a 2x2 -
 {1984, bnw} x {heroic, villainous} - and so a polarity main effect estimable across

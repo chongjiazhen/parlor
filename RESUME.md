@@ -546,11 +546,13 @@ can re-run.
       villainous - the 1984 skin inverted rather than a new fiction, so 2-vs-3
       differs in valence and nothing else) and `drill-en` (arm 4, neutral - a
       sanctioned drill with no victim). Unrun, `DEFAULT_THEME` untouched, so no
-      number moved. Two things to settle before spending GPU on them: whether the
-      run happens on cabal or on the re-homed changeling rung, and the `bnw-en`
-      blurb being 84 words against `1984-en`'s 53, which confounds the vocabulary
-      control with density. A `bnw-inv` was considered and rejected - reasoning in
-      the doc.
+      number moved. `bnw-en` was 84 words against `1984-en`'s 53, confounding the
+      vocabulary control with density; trimmed the same day, and all four English
+      faces are now 53 words / 281-291 chars. Frozen from here - a blurb is a
+      prompt, so a later edit orphans whatever has been recorded against it. One
+      thing left to settle before spending GPU: whether the run happens on cabal or
+      on the re-homed changeling rung. A `bnw-inv` was considered and rejected -
+      reasoning in the doc.
 - [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
       the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
       constraint: `docs/action-channel.md`.
@@ -721,7 +723,8 @@ queue, the dated measurements, and the route decisions.
 - `docs/moral-framing.md` - the theme-polarity experiment, its confound, and the
   verified deception/framing prior work. Arms 3 (`1984-inv`) and 4 (`drill-en`)
   are BUILT as of 2026-08-27 and unrun; read it before running any of them, and
-  for the `bnw-en` word-count confound that wants fixing first.
+  before editing any blurb - the four English faces are length-matched on purpose
+  and frozen.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - `docs/prior-work.md` - AvalonBench and how to position against it. Read before
