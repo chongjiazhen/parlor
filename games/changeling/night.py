@@ -176,11 +176,20 @@ def resolve_night(setup: Setup, rng: random.Random, choose=None,
         actors = sorted(s for s in range(setup.n) if dealt[s].act is step)
 
         if step is Act.MEET:
+            # Grouped by dealt KEY, not by the act. Until a second meeting card
+            # existed the two were the same thing, and a village pair added under
+            # the old code would have woken up with the wolves - a leak the audit
+            # could not have caught, because the referee would have been telling
+            # each seat something the rules genuinely entitled it to.
             for seat in actors:
-                fellows = [s for s in actors if s != seat]
+                if not dealt[seat].meets_own_kind:
+                    continue
+                kind = dealt[seat].key
+                fellows = [s for s in actors
+                           if s != seat and dealt[s].key == kind]
                 for other in fellows:
-                    knowledge[seat].append(Knowledge(other, "fellow-pack"))
-                log.append(f"meet: seat {seat} sees {fellows or 'no one'}")
+                    knowledge[seat].append(Knowledge(other, f"fellow-{kind}"))
+                log.append(f"meet: seat {seat} ({kind}) sees {fellows or 'no one'}")
             continue
 
         for seat in actors:
@@ -220,6 +229,15 @@ def resolve_night(setup: Setup, rng: random.Random, choose=None,
                 knowledge[seat].append(Knowledge(b, "switched"))
                 log.append(f"switch: seat {seat} exchanges seats {a} and {b}, "
                            f"blind; neither is told")
+
+            elif step is Act.WAKE:
+                # Last of all, so what it sees is what it keeps. This is the only
+                # seat the night hands a belief that is guaranteed true at dawn -
+                # and the only one that learns it was moved, since the card it is
+                # shown is not the one it went to sleep as.
+                belief[seat] = truth[seat]
+                knowledge[seat].append(Knowledge(seat, truth[seat].key))
+                log.append(f"wake: seat {seat} looks and sees {truth[seat].key}")
 
             elif step is Act.DRINK:
                 _, slot = chosen

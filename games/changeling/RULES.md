@@ -70,6 +70,7 @@ family and it is here to keep a tenth of every run from being noise.
 3. `swapper` - takes, and looks at what it took.
 4. `switcher` - swaps two other seats, blind.
 5. `deceived` - swaps itself with a centre card, blind.
+6. `waker` - looks at its own card, after everything.
 
 **Order is a knowledge-invalidating device, not ceremony.** Each step acts on the
 state left by the one before, so earlier knowledge decays:
@@ -98,6 +99,12 @@ assigned from the DEALT card, because that is what determines the reveal.
 | `switcher` | `positional` | that seats A and B exchanged. **Not what either one is** |
 | `deceived` | `false` | a belief about itself that is wrong by construction |
 | `bystander` | `none` | nothing |
+| `kindred` | `identity` | every other seat dealt `kindred`, by identity |
+| `waker` | `identity` | the card it is holding once the night is over |
+
+The last two are expansion cards. `SETUP_5` deals neither - see below - but they
+are defined, skinned and resolved, so they belong in this table: it is the list of
+what a card tells its seat, not of what a particular deck happens to contain.
 
 Two classes here have no `cabal` analogue, and they are the reason this rung is
 worth building:
@@ -129,6 +136,67 @@ Not written into any prompt; a strong player finds it.
 - **A claimed `deceived`** is unfalsifiable from the inside and cheap to fake,
   which makes it the natural cover story for a wolf. That it is *also* the seat
   most likely to be a wolf without knowing it is the joke this game is built on.
+
+## Expansion cards - defined, resolved, dealt by nothing
+
+Two cards exist outside `SETUP_5`, on the same footing as `cabal`'s `lurker` and
+`stray`: fully implemented and skinned, seated by no shipped setup, because every
+recorded changeling number was played on the eight-card deck above and changing it
+re-baselines all of them. Both are here for what they add to the MODEL, not for
+variety.
+
+| card key | side | what the night lets it DO | what it buys |
+|---|---|---|---|
+| `kindred` | good | wakes with every other seat holding `kindred`, and they see one another | the pack's mirror on the village side |
+| `waker` | good | acts last of all, and looks at the card it is holding by then | the only seat whose belief is *guaranteed* true at dawn |
+
+- **`kindred`** made `meets_own_kind` mean what its name says. Until it existed,
+  MEET grouped actors by their ACT, so a second meeting card would have woken up
+  with the wolves and been told who they were - and the audit could not have caught
+  it, because the referee would have been telling each seat something the rules
+  genuinely entitled it to. Grouping is by dealt KEY.
+- **Two meetings need two sentences.** A shared "one of your own" produced a real
+  leak the day `kindred` landed: a stale village reveal is byte-identical to the
+  sentence that betrays a wolf the night has since moved into that seat, and the
+  audit called it - correctly, on the evidence it has. `Card.kin_form` is therefore
+  per-kind data, which is this repo's standing remedy for a substring collision:
+  rename the term. `pack` keeps the sentence it always rendered.
+- **`waker`** is an instrument. Every other seat has to infer whether the night
+  moved it; this one is shown. That makes it the cleanest available handle on
+  whether a model reasons about *having been moved* at all, as opposed to about who
+  is lying - which is the question this whole rung exists to ask.
+- **What a `waker` can DERIVE, and must:** the render tells it the card it holds,
+  not that it was dealt `waker`, because belief follows the look. It can recover
+  that. Only two cards produce a reveal about the seat's own card - `swapper` and
+  `waker` - and `swapper`'s comes with a second reveal about the seat it robbed. A
+  single self-reveal with no partner line is `waker`, uniquely. The same reasoning
+  the `swapper` already needs, one step shorter.
+
+### Notable expansions NOT built, and what each would cost
+
+Costed here rather than half-built, because each buys something real and none is
+data-only. In rough order of value per unit of engine surgery:
+
+1. **A third win condition** (a seat that wins only by being pointed at). The
+   cheapest *interesting* one: no night step at all, no new knowledge, one branch
+   in the win check. It is the only proposal here that tests whether a model models
+   another agent's OBJECTIVE rather than its information, and it breaks the binary
+   `village`/`pack` outcome that the scorer, the baselines and `Side` all assume -
+   which is the entire cost, and it lands on the scorer, not the night.
+2. **An evil seat that sees the pack while the pack does not see it.** Asymmetric
+   MEET: needs the `seen_by_own_kind` half that `meets_own_kind` currently has no
+   partner for, exactly as `cabal` needed `seen_by_seer` beside `sees_evil`. Buys
+   the honest version of the pack's coordination question - deception by a seat
+   that knows its allies and cannot be confirmed by them.
+3. **A card that copies another seat's card and then acts as it.** The game is
+   named for this one, and it is the most expensive: the night stops being a fixed
+   ordered pass and becomes recursive, since the copy must act at its copied step,
+   which may already be behind. Every knowledge-invalidation argument in this file
+   would need re-deriving.
+4. **A mass positional shuffle** (rotate every other seat's card one place).
+   Cheap - one act, no looking - and it stresses stale knowledge harder than
+   anything in the deck. Left out because it degrades information without
+   instrumenting anything, which is variety, and this file's bar is above variety.
 
 ## Day
 

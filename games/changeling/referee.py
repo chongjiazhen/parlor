@@ -30,8 +30,8 @@ from enum import Enum
 from core.observability import Knowledge, SeatView, find_leaks
 from games.changeling.night import (NightResult, is_centre, centre_slot,
                                     resolve_night)
-from games.changeling.roles import (DEFAULT_THEME, NIGHT_ORDER, SETUPS, Card,
-                                    Setup, Side, Theme)
+from games.changeling.roles import (CARDS, DEFAULT_THEME, NIGHT_ORDER, SETUPS,
+                                    Card, Setup, Side, Theme)
 
 
 class Phase(Enum):
@@ -156,8 +156,8 @@ class ChangelingReferee:
         """
         name = self.theme.card_names[key]
         forms = [f"Seat {seat} held the {name}."]
-        if key == "pack":
-            forms.append(f"Seat {seat} is one of your own.")
+        if CARDS[key].meets_own_kind:
+            forms.append(CARDS[key].kin_form.format(seat=seat, name=name))
         return forms
 
     def self_reveal_forms(self, key: str) -> list[str]:
@@ -175,8 +175,8 @@ class ChangelingReferee:
             where = self.theme.centre_name
             return (f"  - {where[:1].upper()}{where[1:]} card "
                     f"{centre_slot(k.seat) + 1} is the {name}.")
-        if k.label == "fellow-pack":
-            return "  - " + self.reveal_forms(k.seat, "pack")[1]
+        if k.label.startswith("fellow-"):
+            return "  - " + self.reveal_forms(k.seat, k.label[len("fellow-"):])[1]
         return "  - " + self.reveal_forms(k.seat, k.label)[0]
 
     def preamble(self) -> str:
@@ -427,8 +427,14 @@ class ChangelingReferee:
         for k in self.entitled_knowledge(viewer):
             if is_centre(k.seat):
                 continue
-            if k.label == "fellow-pack" and self.holds(k.seat).side is Side.PACK:
-                entitled.add(k.seat)
+            if k.label.startswith("fellow-"):
+                # The reveal says "one of your own", which is a claim about SIDE,
+                # so it survives the kind changing under it and dies with the side.
+                # A wolf robbed by a wolf is still one of your own; a wolf robbed
+                # by a villager is not, and the referee may not restate it.
+                kind = CARDS[k.label[len("fellow-"):]]
+                if self.holds(k.seat).side is kind.side:
+                    entitled.add(k.seat)
             elif k.label == self.holds(k.seat).key:
                 entitled.add(k.seat)
         if self.believes(viewer).key == self.holds(viewer).key:

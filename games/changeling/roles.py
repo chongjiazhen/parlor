@@ -33,6 +33,7 @@ class Act(Enum):
     TAKE = "take"        # take another seat's card, give yours, and look
     SWITCH = "switch"    # exchange two OTHER seats' cards, blind
     DRINK = "drink"      # exchange your own card with a centre card, blind
+    WAKE = "wake"        # last of all, look at what you are holding by now
 
 
 #: What the night tells the seat DEALT this card. The deduction gate stratifies on
@@ -76,9 +77,25 @@ class Card:
     looks_after_acting: bool = False
     #: Does this card see the other holders of its own key at ``MEET``?
     meets_own_kind: bool = False
+    #: How the referee names a fellow of this kind. A template over ``seat`` and
+    #: ``name`` (the theme's word for this card), used only by a card that meets.
+    #:
+    #: It is DATA because it has to differ per kind, and that is a gate #1 finding,
+    #: not taste. A second meeting card sharing one phrasing produced a real leak
+    #: the moment it landed: the audit matches strings, so a stale "Seat 1 is one of
+    #: your own." held by a village pair is byte-identical to the sentence that
+    #: would betray a wolf who has since been moved into that seat, and the audit
+    #: called it - correctly, on the evidence it has. The repo invariant's remedy
+    #: for a collision is to rename, so each kind says its own sentence.
+    #:
+    #: ``pack`` keeps the sentence it has always rendered. Not because it is
+    #: special: because it is the shipping deck's, and rewording it would be a
+    #: prompt edit under a queued 200-game run.
+    kin_form: str = "Seat {seat} woke when you did, holding the same {name}."
 
 
 PACK = Card("pack", Side.PACK, Act.MEET, "identity", meets_own_kind=True,
+            kin_form="Seat {seat} is one of your own.",
             power="wakes first and sees every other seat holding this same card")
 SPOTTER = Card("spotter", Side.VILLAGE, Act.LOOK, "identity",
                power="looks at one other seat's card, or at two {centre} cards")
@@ -95,11 +112,38 @@ DECEIVED = Card("deceived", Side.VILLAGE, Act.DRINK, "false",
 BYSTANDER = Card("bystander", Side.VILLAGE, Act.NONE, "none",
                  power="sleeps through the night and does nothing")
 
+# Expansion cards. Defined, named in every skin, resolved by the night, dealt by
+# nothing - the same footing cabal's LURKER and STRAY sit on, and for the same
+# reason: `SETUP_5` is what every recorded changeling number was played on, and a
+# deck change re-baselines all of them. What each one is FOR is in RULES.md; the
+# short version is that neither is variety.
+#
+# KINDRED is the first VILLAGE card with certain knowledge of another seat, and it
+# is the mirror the pack has never had: it makes `meets_own_kind` mean what its name
+# says, since until now MEET grouped by ACT and a second meeting card would have sat
+# down with the wolves. The pair is confirmed to each other and to nobody else, and
+# the night can still take it apart - a robbed kindred is not kindred at dawn while
+# its partner goes on believing it is, which is this game's whole subject stated in
+# two seats.
+#
+# WAKER acts after everything, so it is the only seat whose belief is guaranteed to
+# match its truth at dawn. That makes it the instrument this rung was built to want:
+# every other seat's divergence has to be inferred from the day, while this one is
+# TOLD, which is the cleanest available handle on whether a model reasons about
+# having been moved at all rather than merely about who is lying.
+KINDRED = Card("kindred", Side.VILLAGE, Act.MEET, "identity", meets_own_kind=True,
+               power=("wakes alongside every other seat holding this same card, "
+                      "and they see one another"))
+WAKER = Card("waker", Side.VILLAGE, Act.WAKE, "identity", looks_after_acting=True,
+             power=("wakes after everyone, alone, and sees the card it is holding "
+                    "by then"))
+
 #: The order the night resolves in. It is a knowledge-invalidating device, not
 #: ceremony: every step acts on the state the previous one left, so a card seen at
 #: step 2 can be somewhere else by step 5 and nothing tells its observer. Changing
 #: this tuple changes what every knowledge class is worth - see RULES.md.
-NIGHT_ORDER: tuple[Act, ...] = (Act.MEET, Act.LOOK, Act.TAKE, Act.SWITCH, Act.DRINK)
+NIGHT_ORDER: tuple[Act, ...] = (Act.MEET, Act.LOOK, Act.TAKE, Act.SWITCH,
+                                Act.DRINK, Act.WAKE)
 
 
 @dataclass(frozen=True)
@@ -132,7 +176,8 @@ SETUPS: dict[int, Setup] = {5: SETUP_5}
 #: is a KeyError the first time that card is dealt, and a variant deck is exactly
 #: when that happens. Listed rather than derived from a deck so the theme-coverage
 #: test cannot go quiet the moment a card exists that `SETUP_5` does not hold.
-ALL_CARDS = (PACK, SPOTTER, SWAPPER, SWITCHER, DECEIVED, BYSTANDER)
+ALL_CARDS = (PACK, SPOTTER, SWAPPER, SWITCHER, DECEIVED, BYSTANDER,
+             KINDRED, WAKER)
 
 CARDS: dict[str, Card] = {c.key: c for c in ALL_CARDS}
 
@@ -167,6 +212,8 @@ THEME_PLAIN = Theme(
         "switcher": "Switcher",
         "deceived": "Deceived",
         "bystander": "Bystander",
+        "kindred": "Kindred",
+        "waker": "Waker",
     },
 )
 
@@ -188,6 +235,8 @@ THEME_FOLK = Theme(
         "switcher": "Meddler",
         "deceived": "Sleepwalker",   # swapped in the night, never woke to see it
         "bystander": "Villager",
+        "kindred": "Cousin",         # two of them, and each knows the other
+        "waker": "Light Sleeper",    # the one who checks its own hands at dawn
     },
     blurb=(
         "One night in a village that has learned to sleep badly. The wolves know "

@@ -13,8 +13,8 @@ import unittest
 
 from games.changeling.night import (ImpossibleDeal, NightResult, centre_ref,
                                     deal, legal_targets, resolve_night)
-from games.changeling.roles import (BYSTANDER, DECEIVED, PACK, SPOTTER, SWAPPER,
-                                    SWITCHER, Act, Setup, Side)
+from games.changeling.roles import (BYSTANDER, DECEIVED, KINDRED, PACK, SPOTTER,
+                                    SWAPPER, SWITCHER, WAKER, Act, Setup, Side)
 
 
 def scripted(script: dict):
@@ -188,6 +188,82 @@ class TestPackMeeting(unittest.TestCase):
         r = night(deck=(PACK, BYSTANDER, PACK),
                   seats=(PACK, BYSTANDER), centre=(PACK,))
         self.assertEqual(r.knowledge[0], ())
+
+
+class TestKindredMeeting(unittest.TestCase):
+    """The village pair. Same step as the pack, and the whole point is that they
+    are not in the same meeting."""
+
+    DECK = (KINDRED, KINDRED, PACK, PACK, BYSTANDER)
+
+    def test_the_pair_see_each_other_and_the_wolves_see_each_other(self):
+        r = night(deck=self.DECK, seats=(KINDRED, KINDRED, PACK, PACK),
+                  centre=(BYSTANDER,))
+        self.assertEqual([(k.seat, k.label) for k in r.knowledge[0]],
+                         [(1, "fellow-kindred")])
+        self.assertEqual([(k.seat, k.label) for k in r.knowledge[2]],
+                         [(3, "fellow-pack")])
+
+    def test_neither_meeting_can_see_the_other(self):
+        """The regression this grouping exists to prevent: MEET used to group by
+        ACT, so a second meeting card would have sat down with the wolves and been
+        told who they were - entitled, unauditable, and wrong."""
+        r = night(deck=self.DECK, seats=(KINDRED, KINDRED, PACK, PACK),
+                  centre=(BYSTANDER,))
+        for seat, forbidden in ((0, {2, 3}), (1, {2, 3}), (2, {0, 1}), (3, {0, 1})):
+            seen = {k.seat for k in r.knowledge[seat]}
+            self.assertFalse(seen & forbidden,
+                             f"seat {seat} was told about {seen & forbidden}")
+
+    def test_a_lone_kindred_learns_nothing(self):
+        r = night(deck=(KINDRED, PACK, BYSTANDER, KINDRED),
+                  seats=(KINDRED, PACK, BYSTANDER), centre=(KINDRED,))
+        self.assertEqual(r.knowledge[0], ())
+
+
+class TestWakerActsLast(unittest.TestCase):
+    """The only seat whose belief is guaranteed to match its truth at dawn, which
+    is the one thing no other card in this deck can give a player."""
+
+    def test_it_sees_what_it_holds_after_the_night_not_what_it_was_dealt(self):
+        r = night(deck=(WAKER, SWAPPER, BYSTANDER, PACK),
+                  seats=(WAKER, SWAPPER, BYSTANDER), centre=(PACK,),
+                  script={Act.TAKE: ("seat", 0)})
+        self.assertEqual(r.truth[0].key, "swapper")
+        self.assertEqual(r.belief[0].key, "swapper")
+        self.assertEqual([(k.seat, k.label) for k in r.knowledge[0]],
+                         [(0, "swapper")])
+
+    def test_it_sees_a_move_made_by_a_step_that_tells_nobody(self):
+        """SWITCH is blind and its victims are never told - except this one, who
+        looks afterwards and finds a different card in its hands."""
+        r = night(deck=(WAKER, SWITCHER, BYSTANDER, PACK),
+                  seats=(WAKER, SWITCHER, BYSTANDER), centre=(PACK,),
+                  script={Act.SWITCH: ("seats", (0, 2))})
+        self.assertEqual(r.truth[0].key, "bystander")
+        self.assertEqual(r.belief[0].key, "bystander")
+
+    def test_an_untouched_waker_confirms_itself(self):
+        """A null result is a result: it ends the night certain, which no other
+        village card manages."""
+        r = night(deck=(WAKER, BYSTANDER, PACK, PACK),
+                  seats=(WAKER, BYSTANDER, PACK), centre=(PACK,))
+        self.assertEqual(r.truth[0].key, "waker")
+        self.assertEqual(r.belief[0].key, "waker")
+        self.assertEqual([(k.seat, k.label) for k in r.knowledge[0]],
+                         [(0, "waker")])
+
+    def test_belief_matches_truth_for_this_seat_on_every_random_night(self):
+        """The property, over nights nobody chose. It is what makes the card an
+        instrument rather than another source of noise."""
+        setup = Setup(n=4, deck=(WAKER, SWAPPER, SWITCHER, DECEIVED, PACK, PACK),
+                      centre=2, require_seated_pack=False)
+        for seed in range(200):
+            r = resolve_night(setup, random.Random(seed),
+                              dealt={0: WAKER, 1: SWAPPER, 2: SWITCHER,
+                                     3: DECEIVED},
+                              centre=[PACK, PACK])
+            self.assertEqual(r.belief[0].key, r.truth[0].key, f"seed {seed}")
 
 
 class TestLook(unittest.TestCase):

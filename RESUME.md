@@ -386,6 +386,29 @@ can re-run.
         identical by construction. A setup that repeats a role needs `secret_terms`
         keyed so identical-role seats do not audit against each other, and that is
         setup work, not theme work.
+- [ ] **Seat the changeling expansion cards, which means picking a deck.** The
+      cards themselves landed 2026-08-27: `kindred` (the pack's mirror on the
+      village side) and `waker` (acts last, so it is the only seat whose belief is
+      guaranteed true at dawn) are implemented, skinned, resolved and tested, and
+      `SETUP_5` deals neither - the same footing as cabal's `LURKER`/`STRAY`, for
+      the same reason: every recorded changeling number was played on the
+      eight-card deck, so a deck change re-baselines all of them. What is left is
+      the deck design and the measurement, not the code.
+      - **Do it after S2/S5**, and expect `waker` to be the one worth a run:
+        every other seat has to infer that the night moved it, and this one is
+        told, so it is the cleanest handle on whether a model reasons about
+        divergence at all rather than about who is lying.
+      - Landing `kindred` found a real gate #1 leak, now fixed and guarded: two
+        meeting kinds sharing the sentence "one of your own" made a stale village
+        reveal byte-identical to the one that betrays a wolf moved into that seat.
+        `Card.kin_form` is per-kind data; `pack` keeps its sentence, because
+        rewording it would be a prompt edit under the queued 200-game run.
+      - Four notable expansions costed and NOT built, in `RULES.md`: a third win
+        condition (cheapest interesting one, and it lands on the scorer, not the
+        night), an evil that sees the pack unseen, a card that copies another and
+        acts as it (the game is named for it, and it makes the night recursive), a
+        mass positional shuffle (cheap, but variety).
+
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-
       mission hidden-role deduction game" means nothing to anyone outside the

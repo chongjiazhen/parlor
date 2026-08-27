@@ -7,15 +7,19 @@ quietly makes the audit vacuous fails these instead of passing them.
 
 from __future__ import annotations
 
+import random
 import unittest
 from dataclasses import replace
 
 from core.observability import Knowledge
+from games.changeling.audit import leak_audit
 from games.changeling.night import centre_ref, resolve_night
 from games.changeling.referee import ChangelingReferee, IllegalAction, Phase
-from games.changeling.roles import (BYSTANDER, DECEIVED, PACK, SETUP_5, SPOTTER,
-                                    SWAPPER, SWITCHER, THEME_FOLK, THEME_PLAIN,
-                                    Act, Side, THEMES)
+from games.changeling.roles import (ALL_CARDS, BYSTANDER, DECEIVED, KINDRED,
+                                    PACK, SETUP_5,
+                                    SPOTTER, SWAPPER, SWITCHER, THEME_FOLK,
+                                    THEME_PLAIN, WAKER, Act, Setup, Side, THEMES)
+from games.changeling.test_night import scripted as scripted_choice
 
 
 def find_diverged_seed(limit: int = 200) -> int:
@@ -100,6 +104,91 @@ class TestThemedCentre(unittest.TestCase):
         ref = ChangelingReferee.new(5, seed=3, theme=self.SKINNED)
         line = ref._knowledge_line(Knowledge(centre_ref(0), "pack"))
         self.assertIn("Sideboard card 1 is the", line)
+
+
+class TestExpansionDeck(unittest.TestCase):
+    """The expansion cards against the referee, not just the night. `SETUP_5` deals
+    neither, so without these they are resolved code nobody renders."""
+
+    DECK = (PACK, PACK, KINDRED, KINDRED, WAKER, SPOTTER, SWITCHER, BYSTANDER)
+
+    def setup(self, n=5):
+        return Setup(n=n, deck=self.DECK, centre=len(self.DECK) - n)
+
+    def ref_from(self, seats, centre, script=None):
+        setup = Setup(n=len(seats), deck=tuple(seats) + tuple(centre),
+                      centre=len(centre), require_seated_pack=False)
+        night = resolve_night(setup, random.Random(0),
+                              scripted_choice(script or {}),
+                              dealt=dict(enumerate(seats)), centre=list(centre))
+        return ChangelingReferee(setup=setup, night=night)
+
+    def test_a_kindred_reveal_goes_stale_without_becoming_a_leak(self):
+        """A wolf is moved into the partner's seat. Two things must both hold, and
+        they pull opposite ways: the stale reveal is still rendered, because a
+        reveal that has stopped being true is this game's whole subject and the
+        seat is entitled to have been told it - while the audit stops counting that
+        seat as entitled, and nothing in seat 0's context says what seat 1 now is.
+        """
+        ref = self.ref_from(
+            seats=(KINDRED, KINDRED, SWITCHER, PACK),
+            centre=(BYSTANDER,),
+            script={Act.SWITCH: ("seats", (1, 3))})
+        rendered = ref.render_context(0)
+        self.assertIs(ref.holds(1).side, Side.PACK)
+        self.assertIn("Seat 1 woke when you did", rendered)   # still said
+        self.assertNotIn(1, ref.entitled_seats(0))            # no longer true
+        for term in ref.secret_terms()[1]:                    # and never betrayed
+            self.assertNotIn(term, rendered)
+        self.assertEqual(leak_audit(ref), [])
+
+    def test_a_kindred_pair_still_together_is_restated(self):
+        """The other half, so the test above cannot pass by the referee having
+        gone silent about kindred altogether."""
+        ref = self.ref_from(seats=(KINDRED, KINDRED, PACK, BYSTANDER),
+                            centre=(SWITCHER,))
+        self.assertIn(1, ref.entitled_seats(0))
+        self.assertIn("Seat 1 woke when you did", ref.render_context(0))
+
+    def test_each_meeting_kind_says_its_own_sentence(self):
+        """The collision that produced a real leak on seed 12 the day the second
+        meeting card landed: a stale village reveal was byte-identical to the
+        sentence that betrays a wolf moved into that seat, and the audit called it.
+        Two kinds, two sentences, checked in every skin - the invariant's remedy is
+        to rename, so this is the rename staying done."""
+        for name, theme in THEMES.items():
+            ref = ChangelingReferee(setup=SETUP_5, theme=theme,
+                                    night=resolve_night(SETUP_5, random.Random(0)))
+            meeting = [c for c in ALL_CARDS if c.meets_own_kind]
+            self.assertGreater(len(meeting), 1, "nothing to collide")
+            said = [ref.reveal_forms(3, c.key)[1] for c in meeting]
+            self.assertEqual(len(set(said)), len(said), f"{name}: {said}")
+
+    def test_gate_one_holds_over_deals_that_use_every_expansion_card(self):
+        for seed in range(40):
+            setup = self.setup()
+            night = resolve_night(setup, random.Random(seed))
+            ref = ChangelingReferee(setup=setup, night=night)
+            self.assertEqual(leak_audit(ref), [], f"leak on seed {seed}")
+
+    def test_a_waker_is_entitled_to_its_own_dawn_card(self):
+        """It looked last, so belief and truth agree and the seat may be told. The
+        `deceived` in the same deck must stay un-entitled, which is what keeps this
+        from being "the audit stopped checking"."""
+        seen_waker = seen_diverged = False
+        for seed in range(60):
+            setup = self.setup()
+            night = resolve_night(setup, random.Random(seed))
+            ref = ChangelingReferee(setup=setup, night=night)
+            for seat in range(ref.n):
+                if night.dealt[seat].key == "waker":
+                    seen_waker = True
+                    self.assertEqual(ref.believes(seat).key, ref.holds(seat).key)
+                    self.assertIn(seat, ref.entitled_seats(seat))
+                elif ref.believes(seat).key != ref.holds(seat).key:
+                    seen_diverged = True
+                    self.assertNotIn(seat, ref.entitled_seats(seat))
+        self.assertTrue(seen_waker and seen_diverged, "the sweep proved nothing")
 
 
 class TestSeatSeesBeliefNotTruth(unittest.TestCase):
