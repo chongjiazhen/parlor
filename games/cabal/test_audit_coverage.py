@@ -4,7 +4,8 @@ The other leak tests audit whatever state a game happens to reach. That is not a
 guarantee - a role name added to one phase's ask string (say, "name the seer") is
 invisible until a test walks that phase in the skin whose display name collides.
 So this file drives the referee to each phase deliberately and audits the full
-outgoing payload, ``prompt_for`` included, in all three skins.
+outgoing payload, ``prompt_for`` included, in every registered skin - the sweep
+reads ``THEMES``, so a skin added later is covered the day it lands.
 
 It also pins the driver's own guarantee: ``play_game`` audits by default, and a
 planted leak makes the game raise rather than be scored.
@@ -16,7 +17,7 @@ import unittest
 from games.cabal.audit import LeakDetected, assert_no_leak, leak_audit
 from games.cabal.player import RandomPolicy, play_game
 from games.cabal.referee import CabalReferee, Phase
-from games.cabal.roles import THEMES
+from games.cabal.roles import ALL_ROLES, THEMES
 
 
 def drive_to(phase: Phase, theme, seed: int = 0) -> CabalReferee:
@@ -90,6 +91,49 @@ class TestEveryPhaseInEverySkin(unittest.TestCase):
             self.assertTrue(ref.acting_seats(), f"{phase.value} asks nobody")
             for seat in ref.acting_seats():
                 self.assertTrue(ref.prompt_for(seat).strip())
+
+
+class TestEverySkinIsNamedAndCollisionFree(unittest.TestCase):
+    """The two properties a skin must have, checked as data rather than by playing.
+
+    The phase sweep above can only audit roles a shipped setup actually deals, so
+    it says nothing about the variant evils - which is exactly when a missing name
+    or a colliding one would first bite, on the run that introduces them.
+    """
+
+    def test_every_skin_names_every_role(self):
+        for name, theme in THEMES.items():
+            for role in ALL_ROLES:
+                self.assertIn(role.key, theme.role_names, f"{name} does not name {role.key}")
+
+    def test_no_two_roles_in_a_skin_collide_by_substring(self):
+        """`find_leaks` matches substrings, so one role's term inside another's
+        makes a legitimate reveal read as a leak - the plain-skin "Loyalist" case,
+        one rung further out. The invariant's remedy is to rename, so this fails
+        loudly at the theme rather than quietly at the audit.
+        """
+        for name, theme in THEMES.items():
+            terms = {r.key: [r.key.lower(), theme.role_names[r.key].lower()]
+                     for r in ALL_ROLES}
+            for key, mine in terms.items():
+                for other, theirs in terms.items():
+                    if key == other:
+                        continue
+                    for a in mine:
+                        for b in theirs:
+                            self.assertNotIn(a, b, f"{name}: {key} term '{a}' hides in {other}")
+
+    def test_no_blurb_contains_a_role_term(self):
+        """A blurb reaches every seat, so a role term inside it reports a leak on
+        every context the referee renders - in a skin, not in the engine, which is
+        the hardest place to look for it."""
+        for name, theme in THEMES.items():
+            blurb = theme.blurb.lower()
+            if not blurb:
+                continue
+            for role in ALL_ROLES:
+                for term in (role.key, theme.role_names[role.key]):
+                    self.assertNotIn(term.lower(), blurb, f"{name} blurb names {role.key}")
 
 
 class TestDriverAuditsByDefault(unittest.TestCase):

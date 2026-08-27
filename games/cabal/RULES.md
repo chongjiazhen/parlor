@@ -27,6 +27,22 @@ Five seats, three good, two evil. `SETUP_5` in `roles.py`.
 | `mimic` | evil | its partner (`hunter`). Also *carries* the aura, so the watcher cannot tell it from the seer | `identity` |
 | `hunter` | evil | its partner (`mimic`) | `identity` |
 
+### Two evils no shipped setup seats yet
+
+`agent` is generic evil for larger counts. Two more exist as data only - defined,
+named in every skin, dealt by nothing:
+
+| seat key | side | what the night tells it | and what it costs the others |
+|---|---|---|---|
+| `lurker` | evil | its fellow evil, as `agent` does | the **seer does not see it** (`seen_by_seer=False`) |
+| `stray` | evil | **nothing** (`sees_fellow_evil=False`) | its own side does not see it either; the seer still does |
+
+They are 7+ roles: at five seats the seer would see exactly one evil, or two evils
+would play knowing nothing of each other, and either is swing rather than signal.
+What they buy is stated in `RESUME.md` - they degrade information in a principled
+way, which is what turns the seer's measured edge into a claim about deduction and
+gate #2 into deception between agents that were never introduced.
+
 The knowledge class is what gate #3a stratifies on, and it is a different axis
 from side: a good seat can hold identity knowledge (the seer does). Naming the
 class `evil` put two opposite meanings of the word on one seat, so the classes are

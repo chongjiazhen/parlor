@@ -38,7 +38,13 @@ Fiction lives only in swappable **themes**, which are display-only and sit outsi
 that guarantee. `plain` is the sterile functional skin. The shipping default is a
 dystopia skin evoking Orwell's *Nineteen Eighty-Four* - public domain in the UK/EU
 since 2021, still under US copyright until 2045, so it is a flavour choice and not
-a licensing claim. Run `--theme plain` for a face that makes no reference at all.
+a licensing claim. `bnw-en` is a second dystopia face, evoking Huxley's *Brave New
+World*, whose terms run the other way round: US public domain in 2028, UK/EU in
+2034. Both dystopias ship in English and Chinese (`1984-cn`, `bnw-cn`). Neither
+date is load-bearing. What a theme carries is coined vocabulary and
+prose written here - single words and short phrases are not copyrightable, the
+novels' text is, and none of it is in this repo. Run `--theme plain` for a face
+that makes no reference at all.
 
 Full rules, the night-knowledge table, and what each seat can derive:
 `games/cabal/RULES.md`.
@@ -118,6 +124,7 @@ gate #3 holds, and voids both verdicts when too many decisions fell back to rand
 python -m unittest discover -s . -p "test_*.py"   # all tests, no dependencies
 python -m games.cabal.demo                         # watch a random game (default 1984-en face)
 python -m games.cabal.demo --theme plain           # sterile functional names
+python -m games.cabal.demo --theme bnw-en          # the other dystopia face
 python -m games.cabal.demo --rounds 2              # two discussion rounds per proposal
 
 # live players (needs a backend; PARLOR_API_KEY for the cloud tiers)

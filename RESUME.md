@@ -371,8 +371,21 @@ can re-run.
         its extra speakers. So a bigger table does not rescue gate #3a either, and
         these variants are worth building for what they degrade about INFORMATION,
         never as a sampling fix.
+      - **The roles themselves landed 2026-08-27** as `LURKER` (unseen by the seer)
+        and `STRAY` (neither knows nor is known by its own side), named in all five
+        skins, plus `ALL_ROLES` and three theme guards in `test_audit_coverage.py`.
+        Nothing deals them - what is left is the 6/7p setups and the measurement,
+        which was always the cost. Verified on a hand-built 7-seat deal: the seer
+        sees every evil but the lurker, and no evil sees the stray.
       - Watch role-name vs faction-name substring collisions in the leak audit (see
-        the plain-skin "Loyalist" case).
+        the plain-skin "Loyalist" case). **A sharper one found while checking the
+        above, and it is not about naming at all:** two seats holding the SAME role
+        break the audit outright. Each one's own role name is the other's secret
+        term, so the 7p deal with two `loyalist` seats reported a mutual leak in
+        every skin - a false positive no rename can fix, since the term is
+        identical by construction. A setup that repeats a role needs `secret_terms`
+        keyed so identical-role seats do not audit against each other, and that is
+        setup work, not theme work.
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-
       mission hidden-role deduction game" means nothing to anyone outside the

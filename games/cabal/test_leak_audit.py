@@ -15,6 +15,7 @@ from games.cabal.roles import (
     SETUP_5,
     THEME_1984_CN,
     THEME_1984_EN,
+    THEME_BNW_EN,
     THEME_PLAIN,
     WATCHER,
     Team,
@@ -47,6 +48,11 @@ class TestGate1NoLeak(unittest.TestCase):
 
     def test_clean_chinese_skin(self):
         self.assertEqual(leaks_for(ref(THEME_1984_CN)), [])
+
+    def test_clean_brave_new_world_skin(self):
+        # Short display names ("Beta") and a blurb in the same vocabulary as the
+        # role names are the collision risk here, and the audit is substring-naive.
+        self.assertEqual(leaks_for(ref(THEME_BNW_EN)), [])
 
     def test_clean_plain_skin(self):
         # "Loyalist" role vs "The Faithful" faction - a substring-collision risk

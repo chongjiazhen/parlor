@@ -23,6 +23,13 @@ it could be that any fiction beats no fiction. The arms that separate them:
      same density of loaded nouns.
   4. optional: rich fiction, morally NEUTRAL - a sport, a heist with no victim.
 
+`bnw-en` (added 2026-08-27) is a second arm-2: rich fiction, sabotage HEROIC, same
+polarity as `1984-en` and a different fiction. It is not arm 3 and does not
+substitute for it. What it buys is the control arm 3 cannot supply - two heroic
+fictions differing only in vocabulary, so a 2-vs-3 gap can be read against a
+2-vs-2' gap, and "polarity moved it" separated from "this particular fiction moved
+it". Nothing has been run on it.
+
 Polarity is arms 2 vs 3, and only 2 vs 3 - they differ in valence and in nothing
 else. Richness is 2+3 vs 1. Without arm 3 the experiment cannot make a claim about
 morality at all, and that is the difference between a result and an anecdote.
