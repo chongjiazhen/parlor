@@ -4,7 +4,7 @@ Queue only. Done work leaves to git log. What's next:
 
 ## Session slices - what one `/new` should take
 
-The queue is 26 open items and a cold session cannot rank them. These are the
+The queue is 25 open items and a cold session cannot rank them. These are the
 units: each is one session's worth, has a stated entry condition, and ends in a
 thing that exists. **Take exactly one.** They are ordered by what unblocks what,
 not by appeal.
@@ -16,117 +16,119 @@ table says which pairs.
 
 | # | slice | needs | entry condition | done when |
 |---|---|---|---|---|
-| ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict item below. | - | - | done |
+| ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict section below. | - | - | done |
 | **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). | GPU all session | none | `RULES.md` table is on clean numbers and a 200-game record exists |
 | **S3** | **cabal scorer honesty.** Hunter baseline derived from the legal target set; over-sabotage conditioned on the game continuing; `outed_own_role_in_public` matched against theme names; `hunt_named_impossible` off `entitled_knowledge`. | no GPU | none - **pair with S2's wait**; now BLOCKS S6 | four derived numbers stop being wrong under a variant, with tests |
 | **S4** | **Ops hygiene.** `DONE rc=` written by `run_games.py` itself; `run-hunt20.cmd` moved to `eval/runs/`; cabal's fallback `note` populated the way changeling's is. | no GPU | no run in flight | a killed run is distinguishable from a finished one without the chain log |
 | **S5** | **changeling: read the 200-game run.** Gate #3 at a real N, the `false` stratum, the sleeper-decoy rate, diverged-vs-intact accuracy. | no GPU | S2 landed | a dated writeup in `RULES.md`, gates called or refused by their own rule |
 | **S6** | **The gate #3b campaign - cabal's LAST GPU program.** 40 games, `--seed 2000` then `--seed 3000`, code frozen. Pre-committed bar below. Doubles as the second draw, so it also resolves step-not-slope, the `five_rejects` shift and run-length degradation. | GPU ~13.2h (2 nights) | **S3 landed** (the 1/3 bar is wrong until it does) | 3b called or refused by its own rule, and the three draw-dependent items resolved |
-| ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict item. | - | - | done |
+| ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict section. | - | - | done |
 | **S8** | **Next rung or publish.** 6/7p + information-degrading evils, Spike #2's faction heartbeat, or `docs/prior-work.md` and pre-public hygiene. | varies | S5 done (S1 is called) | scoped in its own session, not here |
 
 **S1 is called, and it freed half the queue.** S6 survives in a changed and
-bounded form; S7 and the cloud arm are dead. The verdict and its arithmetic are the
-first item below - read it before restarting any cabal run.
+bounded form; S7 and the cloud arm are dead. The verdict and its arithmetic are
+the section immediately below - read it before restarting any cabal run.
 
 **Do not mix cabal and changeling in one session.** They have separate `RULES.md`
 files, separate scorers and separate baselines, and every number confusion in this
 file so far came from carrying one game's intuition into the other's denominator.
 
-- [x] **S1 CALLED 2026-08-27 - gate #3a is ABANDONED at 5 seats and at every
-      other table size; gate #3b gets ONE pre-committed 40-game campaign and then
-      cabal stops.** Decided on `hunt20c`'s own interval plus arithmetic on the
-      records already in hand, with no new games. The instrument was controlled
-      first: the analysis pipeline reproduced `hunt20b`/`hunt20c`'s recorded
-      +8.82%/+9.00% slopes, their binary figures and all four CIs exactly, and
-      reconstructed every vote's team membership from `public_events` with
-      proposals x 5 == votes in 20 of 20 games. **Every number below is
-      recomputable**: `py -3 -m eval.gate3_arithmetic`, which prints its own
-      instrument control first and exits non-zero if the reconstruction stops
-      checking. A verdict that retires a gate should not rest on arithmetic nobody
-      can re-run.
-      - **The reason to stop is NOT that N is unaffordable. It is that the
-        affordable N buys precision on a quantity that is not the gate's.** This
-        file has said "cannot show gate #3a at an affordable N" since the `hunt20d`
-        item; that was written before anyone priced it, and it is wrong. Priced
-        against `hunt20c`'s own per-game bootstrap SD (4.75% on the graded slope):
+## Gate #3 called - 2026-08-27 (S1)
 
-        | target | games for a 95% floor above 0 | GPU at 19.85 min/game |
-        |---|---|---|
-        | at the raw +9.00% effect | ~22 | 7.3 h |
-        | if the honest effect is 75% of it | ~38 | 13 h |
-        | if the honest effect is 50% of it | ~86 | 28 h |
+**Gate #3a is ABANDONED at 5 seats and at every other table size; gate #3b gets
+ONE pre-committed 40-game campaign and then cabal stops.** Decided on `hunt20c`'s
+own interval plus arithmetic on the records already in hand, with no new games.
+The instrument was controlled first: the analysis pipeline reproduced the recorded
++8.82%/+9.00% slopes of `hunt20b`/`hunt20c`, their binary figures and all four CIs
+exactly, and
+reconstructed every vote's team membership from `public_events` with
+proposals x 5 == votes in 20 of 20 games. **Every number below is
+recomputable**: `py -3 -m eval.gate3_arithmetic`, which prints its own
+instrument control first and exits non-zero if the reconstruction stops
+checking. A verdict that retires a gate should not rest on arithmetic nobody
+can re-run.
+- **The reason to stop is NOT that N is unaffordable. It is that the
+  affordable N buys precision on a quantity that is not the gate's.** This
+  file said "cannot show gate #3a at an affordable N" from `hunt20d` onward;
+  that was written before anyone priced it, and it is wrong. Priced
+  against `hunt20c`'s own per-game bootstrap SD (4.75% on the graded slope):
 
-        Two to four overnight runs. Affordable. The problem is what arrives at the
-        end of them.
-      - **The deconfounded estimator accrues at ~0.3-0.4 votes per game, and no
-        table size fixes it.** The self-membership confound is not a bias to
-        correct, it is a sampling floor: at 5 seats a clean 3-team holds ALL three
-        good seats, so an off-team blind vote on a clean team can only occur on a
-        2-person clean team. Measured on both post-fix runs:
+  | target | games for a 95% floor above 0 | GPU at 19.85 min/game |
+  |---|---|---|
+  | at the raw +9.00% effect | ~22 | 7.3 h |
+  | if the honest effect is 75% of it | ~38 | 13 h |
+  | if the honest effect is 50% of it | ~86 | 28 h |
 
-        | blind stratum | `hunt20b` | `hunt20c` |
-        |---|---|---|
-        | all blind (the reported binary) | +19.94% (n=44/71) | +18.11% (n=50/108) |
-        | ON-team | +22.01% (n=38/33) | +8.91% (n=42/43) |
-        | **OFF-team - the only unconfounded cell** | **+9.65% (n=6/38)** | **+18.08% (n=8/65)** |
+  Two to four overnight runs. Affordable. The problem is what arrives at the
+  end of them.
+- **The deconfounded estimator accrues at ~0.3-0.4 votes per game, and no
+  table size fixes it.** The self-membership confound is not a bias to
+  correct, it is a sampling floor: at 5 seats a clean 3-team holds ALL three
+  good seats, so an off-team blind vote on a clean team can only occur on a
+  2-person clean team. Measured on both post-fix runs:
 
-        **The two runs put the split in OPPOSITE directions** - `hunt20b` says the
-        confounded cell is the flattering one, `hunt20c` says the reverse - on 6
-        and 8 off-team clean votes respectively (9 in `hunt20`). That instability
-        IS the finding: the cell that would answer gate #3a is too thin to hold a
-        sign across two draws, so no amount of reasoning about the direction of the
-        confound rescues the headline. Forty such votes is ~100-134 games (33-44 h)
-        and a hundred is ~250-330 games, and that is the raw sample count before
-        any interval is asked of it. The metric that would actually answer gate #3a
-        costs an order of magnitude more than the confounded one, and the
-        confounded one is all any affordable run measures.
-      - **7p and 8p do not reopen it - checked, not assumed.** Off-team-clean good
-        votes per vote event, random teams, official mission sizes: 5p **0.120**,
-        7p **0.160**, 8p **0.100**. 7p's +33% raw yield is eaten by 40% more
-        speaking seats (0.0229 vs 5p's 0.0240 per unit speaking cost) and 8p is
-        half as good. This closes the door the 6/7p item left ajar: there is no
-        cabal configuration where the honest gate-#3a number gets cheaper.
-        Consistent with `docs/player-counts.md`, which reached the same conclusion
-        from the clean-team side.
-      - **A second, independent reason: the declared statistic cannot be repaired
-        after the fact.** The scorer calls the graded slope THE GATE, and its floor
-        is decided by noise at this N (+0.94% then -0.25% on a point estimate that
-        barely moved). The binary blind figure clears 0 in both runs that have it
-        (`hunt20b` +19.94% [+6.27%, +32.02%], `hunt20c` +18.11% [+3.52%, +33.53%])
-        and is better-specified for a step-shaped response - but promoting it now
-        would be choosing the statistic with the results in view, which is the
-        `hunt20b` error wearing a third hat. So the strongest 3a evidence in the
-        repo sits on a statistic that cannot honestly be declared the gate, and
-        buying N does not change that either.
-      - **What gate #3a is allowed to be reported as, and it is not nothing.**
-        "Blind seats approve clean teams more than tainted ones by ~+18pp (binary,
-        two runs agreeing), and ~+9pp per additional saboteur; both figures pool
-        self-votes with off-team votes and are downstream of seer-originated public
-        signal, so they measure *information reaching blind seats through play*,
-        not *blind seats detecting evil unaided*. The unaided estimator exists
-        (off-team, clean-vs-tainted) but its sample accrues at 0.4 votes/game and
-        is unaffordable at this rung." That paragraph is publishable and it is the
-        end of the matter - the honest claim was already reachable, and more GPU
-        was only ever going to narrow an interval around the wrong quantity.
-      - **Gate #3b is the exception, because it has no confound of this kind.** One
-        hunt per game, a legal target set, one bit. Post-fix runs: `hunt20b` 6/11,
-        `hunt20c` 5/9. Pooled 11/20 = 55.00%, Wilson [34.21%, 74.18%] - **which
-        clears 1/3 by 0.9pp, and that is peeking, not a result.** The criterion is
-        a floor inside one run and three runs pooled after the fact is exactly the
-        stopping rule this repo refuses. It is quoted here only to show the
-        campaign below is not hopeless.
-      - **The negation pass, the notebook, theme polarity and mini-personas are
-        re-homed, not cancelled.** Each is a prompt change and so a measured
-        change; a paired cabal arm now costs 13.2 h to move a number 3a no longer
-        spends precision on. They belong on changeling, where a paired 20-game arm
-        is ~30 min, or they land nowhere. None may land before the S6 campaign
-        finishes - a prompt edit mid-campaign confounds it the way `c43274e`
-        confounded `hunt20b`.
-      - **The cloud arm dies with 3a.** Cloud was wanted because gate #3 read as a
-        cloud-scale job. 3b at 40 games is 13.2 h on a pinned local model with
-        known attribution, which is strictly better evidence than a time-varying
-        `auto` mix. There is no longer a condition worth watching for.
+  | blind stratum | `hunt20b` | `hunt20c` |
+  |---|---|---|
+  | all blind (the reported binary) | +19.94% (n=44/71) | +18.11% (n=50/108) |
+  | ON-team | +22.01% (n=38/33) | +8.91% (n=42/43) |
+  | **OFF-team - the only unconfounded cell** | **+9.65% (n=6/38)** | **+18.08% (n=8/65)** |
+
+  **The two runs put the split in OPPOSITE directions** - `hunt20b` says the
+  confounded cell is the flattering one, `hunt20c` says the reverse - on 6
+  and 8 off-team clean votes respectively (9 in `hunt20`). That instability
+  IS the finding: the cell that would answer gate #3a is too thin to hold a
+  sign across two draws, so no amount of reasoning about the direction of the
+  confound rescues the headline. Forty such votes is ~100-134 games (33-44 h)
+  and a hundred is ~250-330 games, and that is the raw sample count before
+  any interval is asked of it. The metric that would actually answer gate #3a
+  costs an order of magnitude more than the confounded one, and the
+  confounded one is all any affordable run measures.
+- **7p and 8p do not reopen it - checked, not assumed.** Off-team-clean good
+  votes per vote event, random teams, official mission sizes: 5p **0.120**,
+  7p **0.160**, 8p **0.100**. 7p's +33% raw yield is eaten by 40% more
+  speaking seats (0.0229 vs 5p's 0.0240 per unit speaking cost) and 8p is
+  half as good. This closes the door the 6/7p item left ajar: there is no
+  cabal configuration where the honest gate-#3a number gets cheaper.
+  Consistent with `docs/player-counts.md`, which reached the same conclusion
+  from the clean-team side.
+- **A second, independent reason: the declared statistic cannot be repaired
+  after the fact.** The scorer calls the graded slope THE GATE, and its floor
+  is decided by noise at this N (+0.94% then -0.25% on a point estimate that
+  barely moved). The binary blind figure clears 0 in both runs that have it
+  (`hunt20b` +19.94% [+6.27%, +32.02%], `hunt20c` +18.11% [+3.52%, +33.53%])
+  and is better-specified for a step-shaped response - but promoting it now
+  would be choosing the statistic with the results in view, which is the
+  `hunt20b` error wearing a third hat. So the strongest 3a evidence in the
+  repo sits on a statistic that cannot honestly be declared the gate, and
+  buying N does not change that either.
+- **What gate #3a is allowed to be reported as, and it is not nothing.**
+  "Blind seats approve clean teams more than tainted ones by ~+18pp (binary,
+  two runs agreeing), and ~+9pp per additional saboteur; both figures pool
+  self-votes with off-team votes and are downstream of seer-originated public
+  signal, so they measure *information reaching blind seats through play*,
+  not *blind seats detecting evil unaided*. The unaided estimator exists
+  (off-team, clean-vs-tainted) but its sample accrues at 0.4 votes/game and
+  is unaffordable at this rung." That paragraph is publishable and it is the
+  end of the matter - the honest claim was already reachable, and more GPU
+  was only ever going to narrow an interval around the wrong quantity.
+- **Gate #3b is the exception, because it has no confound of this kind.** One
+  hunt per game, a legal target set, one bit. Post-fix runs: `hunt20b` 6/11,
+  `hunt20c` 5/9. Pooled 11/20 = 55.00%, Wilson [34.21%, 74.18%] - **which
+  clears 1/3 by 0.9pp, and that is peeking, not a result.** The criterion is
+  a floor inside one run and three runs pooled after the fact is exactly the
+  stopping rule this repo refuses. It is quoted here only to show the
+  campaign below is not hopeless.
+- **The negation pass, the notebook, theme polarity and mini-personas are
+  re-homed, not cancelled.** Each is a prompt change and so a measured
+  change; a paired cabal arm now costs 13.2 h to move a number 3a no longer
+  spends precision on. They belong on changeling, where a paired 20-game arm
+  is ~30 min, or they land nowhere. None may land before the S6 campaign
+  finishes - a prompt edit mid-campaign confounds it the way `c43274e`
+  confounded `hunt20b`.
+- **The cloud arm dies with 3a.** Cloud was wanted because gate #3 read as a
+  cloud-scale job. 3b at 40 games is 13.2 h on a pinned local model with
+  known attribution, which is strictly better evidence than a time-varying
+  `auto` mix. There is no longer a condition worth watching for.
 - [ ] **PRE-COMMITTED CRITERION for the S6 gate-#3b campaign (written 2026-08-27,
       BEFORE the run).** Same discipline as the 2026-08-25 criterion, which held.
       - **40 games total: `--seed 2000` (20) then `--seed 3000` (20), code frozen
@@ -146,82 +148,6 @@ file so far came from carrying one game's intuition into the other's denominator
         `five_rejects` shift, and run-length degradation. Score those off the same
         records - they are free, and they are the reason the campaign is 2x20 at
         two seed bases rather than 40 at one.
-- [x] **`hunt20` landed, was scored, and then the STATISTIC turned out to be
-      wrong. Gate #3a is NOT SHOWN.** 20/20 games, rc=0, 0.49% fallback
-      (11/2231), 100% pinned `qwen36-35b-a3b-iq3`. Re-scored 2026-08-26 on the
-      corrected metric, no new games needed - every input was already in the JSONL:
-
-      | stratum | discrimination | n clean/tainted | 95% CI (per-game bootstrap) |
-      |---|---|---|---|
-      | pooled, all good (old headline) | +31.55% | 159/228 | [+22.78%, +39.68%] |
-      | **`none` - loyalist - THE GATE** | **+2.53%** | 53/76 | **[-13.45%, +18.04%]** |
-      | `magic` - watcher | +7.00% | 53/76 | [-9.71%, +23.46%] |
-      | `evil` - seer | +85.13% | 53/76 | [+77.14%, +92.77%] |
-
-      - **The entire gate #3a signal was the seer spending handed knowledge.** The
-        seats that had to deduce sit at +2.53% with an interval straddling zero.
-        The earlier "+30.7% / +31.55%, gate #3a holds, reproduced" claim was an
-        artifact of pooling three populations.
-      - The intermediate `+13.57%` figure (headline for about an hour on
-        2026-08-26) was wrong two ways at once: `p_clean` was unfiltered, so it
-        carried the seer's clean-team certification (94.3% vs the loyalist's
-        73.6%), and the watcher sat in the "blind" pool while holding an aura pair
-        that certifies taint outright on some team shapes.
-      - **Gate #3b also not shown**: hunter 33.33% (3/9, CI 12.06%-64.58%), and
-        that 3/9 was scored under the old rule where the model chose from 4 targets
-        against a 3-target control.
-      - **Gate #2 stays unreadable** by its own conditionality - evil 70%, but 5 of
-        20 wins were `five_rejects`.
-      - Found by a modelling-logic review (Fable, 2026-08-26). Its full text and
-        the re-score are in `_review-modelling.md` (gitignored). Its remaining
-        unactioned findings are the items below.
-- [x] **Residual confounds in the corrected metric - scope the CLAIM, do not
-      pretend they are fixed. CLOSED 2026-08-27 by the S1 verdict**, which measured
-      the self-membership split on both post-fix runs and found it pointing in
-      OPPOSITE directions (`hunt20b` ON +22.01% / OFF +9.65%; `hunt20c` ON +8.91% /
-      OFF +18.08%), on 6 and 8 off-team clean votes. That turned it from a caveat
-      into the reason 3a stops: the unconfounded cell accrues at 0.3-0.4 votes/game
-      at 5 seats, cannot hold a sign across two draws, and gets no better at 7p or
-      8p. The scoping paragraph the verdict item quotes is the claim this
-      repo makes about gate #3a. Both confounds below stand as written; nothing
-      here was fixed, and that is the point.
-      - **Seer-originated public signal.** Clean teams are disproportionately
-        seer-proposed, and its votes and speech are public. A blind seat trusting
-        a seat it has learned to trust is doing real social deduction, but it is
-        the seer's knowledge one hop removed. Unremovable without removing the
-        game. So gate #3a-blind measures *information reaching blind seats through
-        play*, not *blind seats detecting evil unaided* - and the report must say
-        that rather than claiming the number is deconfounded.
-      - **Self-membership.** A seat votes differently on a team it is ON, and at 5
-        seats a clean 3-team contains ALL three good seats, so nearly every blind
-        clean vote is a self-vote. Measured on seed 1000: loyalist OFF-team
-        -13.83% (n=9/49) vs ON-team +3.20% (n=44/27). Only 9 off-team clean votes
-        exist at 5p, so it cannot be conditioned away here - report the split,
-        state the residual.
-      - Both push the honest number DOWN, not up.
-- [x] **Graded taint landed 2026-08-26 - and it does NOT rescue gate #3a, it
-      sharpens the null.** I called it "the only route to a resolvable gate";
-      that oversold it. What it actually buys is precision, measured on the same
-      seed-1000 records with no new games:
-
-      | metric | estimate | 95% CI | width |
-      |---|---|---|---|
-      | binary clean-vs-tainted | +2.53% | [-13.45%, +18.04%] | 31.5 pts |
-      | **graded, per extra saboteur** | **+1.20%** | **[-8.44%, +9.63%]** | **18.1 pts** |
-
-      Interval width nearly halved at the same N. The dose-response is flat -
-      approval by taint level runs **74% / 71% / 71%** - and the 1-to-2 step goes
-      marginally the WRONG way, so there is no signal to find rather than a weak
-      one being lost in noise.
-      - Slope = OLS of approval on the evil count, sign-flipped so positive means
-        "approves less as the team gets dirtier". It DEGENERATES to the binary
-        figure when only two levels occur, so it is a better estimator of the same
-        quantity, not a different claim - there is a test asserting exactly that.
-      - The per-level table ships beside the slope, because a slope alone hides
-        non-monotonicity, and a seat that rejects one saboteur but approves two is
-        not a weak deducer - it is responding to something other than taint.
-      - Binary figure still printed, marked superseded. Kept because earlier runs
-        reported it, not because it means anything.
 - [ ] **Derive the hunter baseline from the legal target set, not a hardcoded
       1/3.** `run_games.py` hardcodes `hunter_baseline: 1/3` and prints "chance
       33.33%". Both are correct ONLY at 5 seats with a hunter that knows its ally.
@@ -282,94 +208,25 @@ file so far came from carrying one game's intuition into the other's denominator
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [x] **Seed 1000 re-run landed 2026-08-26 (`hunt20b`) - and it is VOID as a
-      comparison. The tripwire fired and it was right.** 20/20 games, 4h42m, 0.54%
-      fallback (11/2033), 100% pinned `qwen36-35b-a3b-iq3`, zero errors. The item
-      predicted "hunter shifts slightly and nothing else; if anything else moves,
-      something else changed too". Everything moved, and **three** things had
-      changed, not one:
-      1. **`c43274e` put the `need` disclosure in the MISSION ask at 08:13**, 43
-         minutes before launch. This file says that change "must land first and
-         alone or the two are confounded". It did not. (It also did not do its job:
-         over-sabotage is 41% of sunk missions in BOTH runs - 12/29 then 15/37 - so
-         the focal-point problem was never threshold ignorance, exactly as the
-         over-sabotage item argued.)
-      2. **The sampler was never seeded.** `--seed` fixed the deal and the fallback
-         RNG and nothing about the model, so the two runs are two different draws:
-         63 missions and 9 hunts one night, 74 and 11 the next. Fixed since
-         (`2cfe9d5`, see §Measured), but it fixes nothing retroactively.
-      3. **The two runs were scored by different code.** `hunt20`'s JSONL predates
-         both `knowledge_class` and `team_evil_count`, so the current `score()`
-         cannot read it at all - its "+2.53% / +1.20%" line in this file came from a
-         separate reconstruction pass, not from the scorer the new run used.
-      - **Gate #3b still not shown, and that verdict IS safe** - it is a floor test
-        computed inside one run: hunter 6/11 = 54.55%, Wilson floor 28.01%, short of
-        the 1/3 bar. Per the pre-committed criterion the answer is "not shown at
-        this N", not "run more games until it clears".
-      - **Gate #3a's movement is NOT bankable.** Blind taint sensitivity went
-        +1.20% -> +8.82% with a floor clearing 0 for the first time. That is one
-        draw, against three uncontrolled differences, with intervals that overlap
-        heavily. Reporting it as "gate #3a holds" would repeat the exact error this
-        file caught a week ago - a real number pooled or drawn from the wrong
-        population and quoted as a finding.
-- [x] **`hunt20c` LANDED 2026-08-26 21:29:52 SGT - the anchor exists.** 20/20
-      games, 6h37m (23818.2s), off commit `f8c5f71`, clean tree, seed 1000, 2
-      rounds, pinned `qwen36-35b-a3b-iq3` (100% served), notebook OFF, zero errors,
-      1.78% fallback (48/2691). It is the first run in the repo a later run can be
-      compared against.
-      - **Both gates not shown, and both verdicts are safe.** Blind taint
-        sensitivity +9.00% [-0.25%, +18.18%] - the floor INCLUDES 0. Hunter 5/9 =
-        55.56%, floor 26.66%, short of the 1/3 bar for the third run running. Evil
-        80.00% [58.40%, 91.93%], unreadable per the gate-#2-is-conditional rule.
-      - **The result of the day is a negative, and it is about the INSTRUMENT.**
-        `hunt20b` reported +8.82% [+0.94%, +16.82%]; `hunt20c` reports +9.00%
-        [-0.25%, +18.18%]. The point estimates are effectively the same and the
-        floor verdict INVERTS. At n=20 the floor's position relative to 0 is being
-        decided by noise, not by signal - so "the CI floor cleared 0" is not a
-        finding at this N, and anyone reading `hunt20b`'s floor as "gate #3a holds"
-        would have had to unread it tonight. Second independent reason the `hunt20b`
-        void was correct.
-      - **This is still NOT the spread measurement.** `hunt20b` ran pre-`2cfe9d5`
-        with an unseeded sampler; `hunt20c` is post. One uncontrolled variable
-        remains between them, so the above is suggestive, not measured. The pair
-        that measures spread is a run at a DIFFERENT seed base - `hunt20c` +
-        `hunt20d` at one seed came back byte-identical
-        (`docs/reproducibility.md`).
-      - **The graded slope is fitting a step function - two runs now agree.**
-        Approval by taint level: `hunt20b` 93/70/77, `hunt20c` 82/64/64. Both show a
-        real 0->1 drop and NO further response at 2; `hunt20c`'s 1->2 leg is exactly
-        flat. A linear "+X% per extra saboteur" through a step is the wrong
-        statistic, and in both runs the binary clean-vs-tainted split is the
-        better-behaved one (`hunt20c`: +18.11% [+3.52%, +33.53%]). The scorer's
-        "superseded by the graded slope above" note has it backwards; fix that
-        before the next scoring pass, and see the taint-level item.
-      - **`llama-server` degrades over a long run - the fallback rate is partly a
-        function of RUN LENGTH.** Games 0-6 ran 0.83% (8/968); games 7-19 ran 2.32%
-        (40/1723); the last five ran 2.73% (15/549). Bucketing the refusal traces
-        mid-run: EMPTY replies (`reply: ''`) grew 22 -> 32 while every parse-failure
-        bucket stayed flat or fell, and `3 attempts failed, playing random` more
-        than doubled. Empties are the server returning nothing, not the model
-        answering badly. `hunt20d` reproduced it exactly, which says nothing new -
-        a same-seed re-run replays the same calls. A different seed base at the same
-        length is what would separate run-length degradation from this deal.
-      - **Evil's win PATH moved a lot**: `five_rejects` 0/20 in `hunt20b` -> 6/20
-        here, now the single most common path (vs missions_failed 5, hunt_hit 5).
-        Deadlocking the table is not sabotage. `hunt20d` reproduced it identically,
-        so it is still one draw; a different seed base is what tests it.
-- [x] **`hunt20d` landed 2026-08-27 07:38 and is BYTE-IDENTICAL to `hunt20c`.** A
-      same-seed re-run cannot measure spread, so the pair this item was queued to
-      make does not exist and never could. Full finding, evidence and what to do
-      instead: `docs/reproducibility.md`.
-      - The spread was already in `hunt20c`'s own report: blind taint sensitivity
-        **+9.00%, 95% CI [-0.25%, +18.18%]**, from the bootstrap over games. Read
-        that, not a second run.
-      - **So the ONUW/cloud decision is answerable now**, on evidence in hand:
-        ±9pp around a +9.00% effect at n=20 means a 5-seat cabal run of this size
-        cannot show gate #3a. See the Spike #1.5 item.
-- [x] **Decide cabal's gate #3 on `hunt20c`'s interval, not on a new run. DONE
-      2026-08-27** - the verdict is the S1 item at the top of this list. The second
-      draw it asked for still happens, but as a by-product of the S6 gate-#3b
-      campaign rather than as a run of its own.
+- [ ] **Three questions wait on the S6 second draw, and only a DIFFERENT seed base
+      answers them.** All three are `hunt20c` observations that `hunt20d`
+      reproduced byte for byte, which says nothing - a same-seed re-run replays the
+      same calls (`docs/reproducibility.md`). Score all three off S6's records.
+      - **Step, not slope.** Approval by taint level ran 93/70/77 (`hunt20b`) and
+        82/64/64 (`hunt20c`): a real 0->1 drop and no further response at 2, with
+        `hunt20c`'s 1->2 leg exactly flat. A third flat or rising leg makes it a
+        shape - then fix the scorer note (its own item below).
+      - **`five_rejects` as evil's main win path.** 0/20 in `hunt20b`, 6/20 in
+        `hunt20c`, where it became the single most common path (vs missions_failed
+        5, hunt_hit 5). Deadlocking the table is not sabotage, and one draw cannot
+        tell a real shift from noise.
+      - **`llama-server` degrades over a long run, so the fallback rate is partly a
+        function of RUN LENGTH.** `hunt20c` ran 0.83% (8/968) over games 0-6 and
+        2.32% (40/1723) over games 7-19; the last five ran 2.73% (15/549).
+        Bucketing refusal traces mid-run, EMPTY replies (`reply: ''`) grew 22 -> 32
+        while every parse-failure bucket stayed flat or fell. Empties are the
+        server returning nothing, not the model answering badly. A different seed
+        base at the same length separates run-length degradation from this deal.
 - [ ] **Re-run changeling's powers arms on the FIXED lane - the paired result
       stands, the absolute rates do not.** Both arms of the 2026-08-27 comparison
       ran with `run_changeling` sending the run's base seed as the sampler seed for
@@ -413,36 +270,6 @@ file so far came from carrying one game's intuition into the other's denominator
       hour four", which is exactly the judgement the detached-run invariant says to
       make from the log alone. Have `run_games.py` write its own terminal marker
       rather than trusting the wrapper to outlive it.
-- [x] **Re-plan the cloud arm - CLOSED 2026-08-27, and the answer is "never, for
-      this game".** The S1 verdict retires the only job cloud was wanted for: gate
-      #3a is abandoned, and gate #3b's 40 games are 13.2 h on a pinned local model
-      whose attribution is known, which beats a time-varying `auto` mix outright.
-      There is no unblock condition left to watch. The burst-probe discipline below
-      is the durable part and moves to §Backend notes' territory - keep reading it
-      before trusting ANY tier, cloud work or not. Post-mortem kept verbatim:
-      `huntcloud` was killed 2026-08-25
-      23:10 after 72 minutes alive with zero games written: it pinned
-      `gpt-oss-120b` (not `auto`, whatever an earlier version of this line said) on
-      a tier where 7 of that model's 8 routes were cooled, so every call was refused
-      in 40ms. Burst-probe evidence in §Backend notes.
-      - **ONUW is not an option on this list.** An earlier version of this line
-        offered "spend the effort on ONUW instead" as the preferred third choice.
-        It is not an alternative to fixing cloud - it is concurrent work on a
-        different game, and cabal still needs its N from somewhere. See its item.
-      - **Do not run `auto` to get games moving.** The tier's population is
-        currently 20B/30B-nano, and gate #3 is known to be model-capability-bound:
-        identical prompts scored -0.2% on the 12B and +66% on cloud. A null from
-        that population is a fact about the model, not about the game, and it would
-        be indistinguishable in the records from a real negative result.
-      - **The only real option is a pinned known-good model once its routes cool.**
-        `gpt-oss-120b` answers in 80-125 chars, 4/4 at both caps (§Backend notes) -
-        pin it, never `auto`. Unblock condition is mechanical: a burst probe passes
-        on it. Until then this item is parked, not pending.
-      - **It may not be needed at all.** Cloud was wanted because gate #3 reads as
-        a cloud-scale job, but that predates any measurement of the run-to-run
-        spread. The anchor pair settles whether local N suffices; gate #3b already
-        looks like 2-4 overnight local runs. Decide the cloud arm after the pair,
-        not before.
 - [ ] **Move `run-hunt20.cmd` into `eval/runs/` once the run lands.** The cloud
       launcher moved there 2026-08-26 and is now tracked and probe-gated
       (`eval/runs/hunt-cloud.cmd`); the local one is still the untracked copy in
@@ -509,23 +336,6 @@ file so far came from carrying one game's intuition into the other's denominator
       independent (§Measured), so this buys nothing until the talk carries evidence.
       **Re-homed 2026-08-27 (S1)** to changeling if built at all - its trigger was
       never met on cabal and cabal no longer buys measured prompt variables.
-- [x] **Gate #3 needs N far past 8 games - SUPERSEDED 2026-08-27 by the measured
-      N.** The S1 verdict prices both halves off `hunt20c`'s own bootstrap: 3a
-      needs 22-86 games depending on how much the confounds cost, which is
-      affordable and buys the wrong quantity; 3b needs 36-114 depending on the true
-      hunter rate, which is why the campaign is budgeted at 40 and pre-committed to
-      stop. The line below guessing that this is "a cloud-scale job" is wrong and
-      is kept only to date the guess. Original text:
-
-      Hunter accuracy is 1-in-5 to 3-in-6 at
-      n<=6 hunts; the CI floor cannot clear 1/3 at that size whatever the truth is.
-      And `good approve clean team` runs on ~12 votes a run, because most teams in a
-      5-seat game carry an evil - that denominator is too thin to gate on.
-      "This is a cloud-scale job, so it waits on quota, not on the GPU" is what this
-      line used to say, and it was written before anything measured the run-to-run
-      spread or the local per-game cost. Gate #3b now looks like 2-4 overnight local
-      runs. Whether cloud is needed is a question the anchor pair answers - see the
-      cloud-arm item.
 - [ ] **Larger setups (6/7p) + the two information-degrading evils.** Package them
       together, because both only make sense at 3 evil seats.
       - The engine already supports both, and has since the first commit: `Role`
@@ -547,9 +357,9 @@ file so far came from carrying one game's intuition into the other's denominator
         seeing exactly one and the blind variant leaves two evils who know nothing
         of each other - swingy to the point of noise. These are 7+ roles.
       - **A bigger table does NOT fix the thin denominator - it makes it worse.**
-        The gate-#3-needs-N item above blames the ~12-votes-a-run sample on the
-        5-seat size ("because most teams in a 5-seat game carry an evil"), which
-        implies a larger table would help. It would not. Clean teams get
+        This file used to blame the ~12-votes-a-run sample on the 5-seat size
+        ("because most teams in a 5-seat game carry an evil"), which implies a
+        larger table would help. It would not. Clean teams get
         combinatorially rarer as seats grow, faster than the extra good voters
         compensate; gate #3b is untouched at any size since hunts are one per game.
         Arithmetic, table, and the graded-taint fix that DOES work:
@@ -563,68 +373,21 @@ file so far came from carrying one game's intuition into the other's denominator
         never as a sampling fix.
       - Watch role-name vs faction-name substring collisions in the leak audit (see
         the plain-skin "Loyalist" case).
-- [ ] **Naming discipline, for when ONUW gets built.** Prose may NAME the games a
-      rung is modelled on - README has done that since commit #1 and that is
-      nominative reference, not passing off. What must never enter the canonical
-      layer is a game's expression: its role names, art, or text. So ONUW's roles
-      arrive as functional keys (`swapper`, `switcher`, `deceived`), never as the
-      published character names, exactly as this game uses seer/watcher/mimic.
-- [x] **Spike #1.5: One Night Ultimate Werewolf - BUILT, as `games/changeling/`.**
-      It has its own `RULES.md`, conformance and night-invariant tests, a measured
-      powers table and a queued 200-game run (S2/S5). The reasoning below is kept
-      because it is why the rung exists and it now carries the GPU that cabal's
-      gate #3a gave up (S1). What is still open is the run and its reading, not the
-      build. Two reasons, both structural:
-      - **Belief != truth.** Robber/troublemaker/drunk swap roles during the night,
-        so a seat's knowledge of ITS OWN role can be stale and false. `SeatView`
-        renders truth today; ONUW forces the split between what is true and what
-        this seat believes, and makes gate #1 strictly harder - the referee must
-        maintain a false belief without correcting it and without leaking the swap.
-        Sharper test of independent context than cabal can pose, where every seat's
-        knowledge is both true and static.
-      - **It fixes the N bottleneck.** One night, one discussion, one vote: ~10-15
-        model calls against cabal's 80-220, so 10-20x the games per hour. Every hard
-        question this session was gated on games-per-hour (14 min/game local, 5
-        hunts per 12 games, a gate needing 30+). ONUW turns "cannot afford the N"
-        into "run 200 overnight".
-      Also no elimination, which is the point of preferring this family. Secret
-      Hitler stays the better LADDER step (forced reveals, a deck the referee
-      controls) but ONUW is the better ENGINE step.
-      - **The constraint is "do not change cabal's RULES mid-measurement", NOT "do
-        not build game #2".** This line used to read "do it only once gate #3 is
-        called", which contradicts the N argument directly above it: it pays the
-        expensive N in the game that is worst at producing it, before building the
-        thing that makes N cheap. They do not compete for the same resource either -
-        cabal's remaining cost is GPU wall-clock, ONUW's is attention, and the card
-        is booked either way. So ONUW is buildable NOW, alongside a running hunt.
-        What must not happen concurrently is an edit to what a cabal seat knows or
-        is asked; that is the 6/7p item's block and it stands.
-      - **ONUW does not retire cabal's gates.** Different rung, different deduction
-        task. Building it decides which game's numbers get published first. It
-        settles nothing about gate #3, and a cabal gate left uncalled stays uncalled.
-      - **ANSWERED 2026-08-27, and the decision rule this bullet proposed was the
-        wrong one.** It made the call turn on run-to-run spread vs effect size. The
-        spread turned out not to be the binding constraint - the affordable N is
-        22-86 games - and the real constraint is that the unconfounded estimator
-        accrues at 0.4 votes/game at every table size. So gate #3a stops, gate #3b
-        gets 40 pre-committed games, and the GPU goes to changeling. Full
-        arithmetic: the S1 verdict item.
-      - It is also the pressure test for what really belongs in `core/`, and that
-        question wants evidence, not a guess - an argument for building it while the
-        cabal answer is open, not after.
-      - **Ship a werewolf-vocabulary theme on this rung, and that is the whole
-        answer to public legibility.** A public repo has a real problem that "team-
-        mission hidden-role deduction game" means nothing to anyone outside the
-        hobby, while "werewolf / seer / villager" means something to nearly
-        everyone. That vocabulary is public-domain folk-game vocabulary (Mafia,
-        Davidoff 1986) carrying no branding question, and it lands free on a rung
-        already queued on engine grounds. **This is why a vanilla Werewolf rung is
-        NOT worth building for legibility**: it sits on the same rung as cabal
-        (deterministic referee, bounded actions, no judgment), so it buys
-        recognition and no engine progress, and it has elimination - a shrinking
-        table, variable agent count per game, dead seats contributing no decisions,
-        i.e. the N problem from the wrong side. Legibility is a theme and a README
-        paragraph, not a spike.
+- [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
+      answer to public legibility.** A public repo has a real problem that "team-
+      mission hidden-role deduction game" means nothing to anyone outside the
+      hobby, while "werewolf / seer / villager" means something to nearly everyone.
+      That is public-domain folk-game vocabulary (Mafia, Davidoff 1986), carries no
+      branding question, and lands on a rung that is already built.
+      - **This is why a vanilla Werewolf RUNG is not worth building**: it sits on
+        the same rung as cabal (deterministic referee, bounded actions, no
+        judgment), so it buys recognition and no engine progress, and it has
+        elimination - a shrinking table, variable agent count per game, dead seats
+        contributing no decisions, i.e. the N problem from the wrong side.
+        Legibility is a theme and a README paragraph, not a spike.
+      - **changeling does not retire cabal's gates.** Different rung, different
+        deduction task. Which game's numbers get published first is the only thing
+        it settles; a cabal gate left uncalled stays uncalled.
 - [ ] Spike #2: off-map faction heartbeat - factions acting on their own clock,
       driven by a long-running agent process outside the game loop.
 - [ ] **Evil over-sabotages, and it is the seer-salience bug wearing the other
