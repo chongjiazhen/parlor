@@ -5,7 +5,7 @@ machine and the leak audit run with no model at all. ``--backend`` swaps in live
 players; ``--speaker`` puts a model on the discussion phase only, which is the
 cheap way to eyeball whether agents will actually deceive.
 
-    python -m games.cabal.demo                       # random players, 1984-en face
+    python -m games.cabal.demo                       # random players, plain face
     python -m games.cabal.demo --theme plain         # sterile functional names
     python -m games.cabal.demo --theme bnw-en        # the other dystopia face
     python -m games.cabal.demo --rounds 2            # two discussion rounds
@@ -121,7 +121,7 @@ def main() -> None:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=None)
-    ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: 1984-en)")
+    ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: plain)")
     ap.add_argument("--rounds", type=int, default=1, help="discussion rounds per proposal")
     ap.add_argument("--backend", choices=["local", "clean", "gray"],
                     help="run live players (default: random policy, no model)")

@@ -42,7 +42,9 @@ No dependencies, no API key, no GPU. The referee and the leak audit are stdlib
 Python; a backend is only needed to put models in the other seats.
 
 A rendered game to read instead:
-[`transcripts/local-q36-2rounds-game0.md`](transcripts/local-q36-2rounds-game0.md).
+[`transcripts/local-q36-2rounds-game0.md`](transcripts/local-q36-2rounds-game0.md)
+- played on the `1984-en` skin, which the header states, so it does not look like
+the sterile default the commands above produce.
 
 **`--human SEAT` hands a person exactly the bytes that seat's model would have
 received and nothing else** - so the isolation property is not something you take
@@ -221,7 +223,8 @@ evidences a claim is what gets committed.
 **Register** is a separate dial from the fiction skin. `--register character`
 (default) plays the theme; `--register plain` keeps the same rules and asks for
 the argument instead of the performance - name seats, cite which missions failed
-and who was on them, no slogans. On the 1984 skin agents answered each other in
+and who was on them, no slogans. It bites hardest on a fictional skin: on `1984-en`
+agents answered each other in
 Party rhetoric for a whole game without once naming who was on the mission that
 failed, which is a table that never starts deducing.
 
@@ -241,11 +244,18 @@ on is reference, not reliance: nothing here needs a licence from anyone.
 
 Fiction lives only in swappable **themes**, which are display-only and sit outside
 that guarantee. `plain` is the sterile functional skin in both games. cabal ships
-7 (default `1984-en`, a dystopia skin evoking Orwell's *Nineteen Eighty-Four*);
+7 (default `plain`; `1984-en` is a dystopia skin evoking Orwell's *Nineteen
+Eighty-Four*);
 changeling ships 8 (default `folk`, plain folk-game vocabulary). What a theme
 carries is coined vocabulary and prose written here - single words and short
 phrases are not copyrightable, the novels' text is, and none of it is in this
-repo. Run `--theme plain` for a face that makes no reference at all.
+repo.
+
+**cabal defaulted to `1984-en` until 2026-08-28 and now defaults to `plain`.**
+Nothing about the reasoning above changed; the skin is still shipped and still
+supported. It is simply surface a public tree carries for no benefit when the face
+that references nothing costs the same. **Every recorded cabal number was played on
+`1984-en`**, so a run meant to compare against one passes `--theme 1984-en`.
 
 Themes are also an experimental dial, not just decoration - length-matched arms
 exist for polarity and vocabulary controls. Design and the confounds:

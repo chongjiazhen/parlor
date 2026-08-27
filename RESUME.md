@@ -300,9 +300,9 @@ is not free. Item 6 of the code-debt batch, its other blocker, landed in S10.
 done except item 3, which is gated outside the tree and holds up nothing, so S2's
 200 games can now be run once and scored once. The three cabal items that used to
 sit behind the freeze - the solver arm, the mixed heuristic/LLM table,
-`DEFAULT_THEME` off `1984-en` - are unblocked and still not next: all three are
-downstream of a GPU program cabal no longer has, so they queue behind changeling
-or land at the publish boundary.
+`DEFAULT_THEME` off `1984-en` - were unblocked when the freeze lifted. The theme
+move landed 2026-08-28; the other two need GPU cabal no longer has, so they queue
+behind changeling or land at the publish boundary.
 
 **Publish hygiene is DONE for this round, 2026-08-28.** The tree states what parlor
 does and what its numbers mean; the scope rule for everything else is the invariant
@@ -956,8 +956,10 @@ can re-run.
       **Arms built 2026-08-27**, on cabal, as themes only: `1984-inv` (arm 3,
       villainous - the 1984 skin inverted rather than a new fiction, so 2-vs-3
       differs in valence and nothing else) and `drill-en` (arm 4, neutral - a
-      sanctioned drill with no victim). Unrun, `DEFAULT_THEME` untouched, so no
-      number moved. `bnw-en` was 84 words against `1984-en`'s 53, confounding the
+      sanctioned drill with no victim). Unrun, and adding them moved no number
+      because nothing runs on a face until a run asks for it by name. (cabal's
+      `DEFAULT_THEME` did later move, `1984-en` -> `plain` on 2026-08-28, for
+      publish-surface reasons and not as an arm - see the closed item above.) `bnw-en` was 84 words against `1984-en`'s 53, confounding the
       vocabulary control with density; trimmed the same day, and all four English
       faces are now 53 words / 281-291 chars. Frozen from here - a blurb is a
       prompt, so a later edit orphans whatever has been recorded against it. One
@@ -984,15 +986,28 @@ can re-run.
       all-heuristic arm's 99.5% hunter is a deterministic twin reading its own tell,
       and a mixed table is where that stops being a confound and starts being the
       measurement.
-- [ ] **Move `DEFAULT_THEME` off `1984-en` at the publish boundary - it
-      re-baselines every cabal number.** The novel is under US copyright to
-      2045 and the default skin is the face of every committed transcript. The
-      `README.md` reasoning is sound (mechanics uncopyrightable, single words and
-      short phrases too, none of the text in the repo) but it is surface area
-      carried for no benefit; `plain` costs nothing and deletes the question,
-      with `1984-en` kept as a theme. **It is a prompt change** and every recorded
-      cabal number was played on `1984-en` - so do it deliberately at the publish
-      boundary, never as tidying.
+- [x] **`DEFAULT_THEME` moved off `1984-en` to `plain` - DONE 2026-08-28.** The
+      `README.md` reasoning was and is sound (mechanics uncopyrightable, single
+      words and short phrases too, none of the novel's text in the repo); it was
+      surface a public tree carried for no benefit when the face that references
+      nothing costs the same. `1984-en` stays shipped and supported.
+      - **The gate it was queued behind had already passed, and the item sat
+        mis-gated.** It read "cannot land during S6" and "re-baselines every cabal
+        number". S6 is called, and the re-baselining cost went to ZERO when gate
+        #3b came back NOT SHOWN and cabal's GPU program stopped - there is no
+        future cabal run for the new default to be incomparable with. **An item
+        priced by a cost that a later decision deleted stays expensive until
+        someone re-reads it**; nothing in the queue recomputes itself.
+      - **EVERY recorded cabal number was played on `1984-en`.** `hunt20*`,
+        `hunt6*` and all four committed transcripts. A run meant to compare
+        against any of them passes `--theme 1984-en` explicitly. Recorded in
+        `games/cabal/roles.py` beside both theme constants, which is where a
+        reader of a number will be.
+      - The committed transcripts were NOT re-rendered - speech is model-authored
+        in the skin's vocabulary, so a record cannot be re-skinned after the fact,
+        and re-rendering one needs a GPU run cabal no longer has budget for. Each
+        transcript states its theme in its own header, and `README.md` says so at
+        the link.
 - [ ] **Group-sequential design instead of a pre-committed fixed N.** S6 commits
       40 games and forbids a third campaign, because stopping when a floor happens
       to cross is peeking - correct, and the named fix is not "don't look". It is

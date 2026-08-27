@@ -143,19 +143,24 @@ THEME_PLAIN = Theme(
     },
 )
 
-# The shipping face: a dystopia skin evoking Orwell's *Nineteen Eighty-Four*. Public
-# domain in the UK/EU since 2021 (life+70); still under US copyright until 2045
-# (published 1949, 95-year term). So this is a flavour choice, not a licensing claim -
+# The face every recorded cabal number was played on, and the default until
+# 2026-08-28: a dystopia skin evoking Orwell's *Nineteen Eighty-Four*. Public domain
+# in the UK/EU since 2021 (life+70); still under US copyright until 2045 (published
+# 1949, 95-year term). So this is a flavour choice rather than a licensing claim -
 # a theme is display-only and deliberately outside the engine's branding-free
 # guarantee, which covers the canonical layer. Coined vocabulary is not copyrightable
 # (words and short phrases never are); the novel's TEXT is, and none of it is here.
-# `plain` is the skin that references nothing.
+# `plain` is the skin that references nothing, and it is now the default.
+#
+# **Still shipped and still supported.** Pass `--theme 1984-en` to reproduce or
+# compare against any recorded run - `hunt20*`, `hunt6*`, and every committed
+# transcript from before 2026-08-28 were played on this face.
 #
 # The blurb inverts moral polarity - sabotage is heroic, deceit is survival - and
-# that is a variable, not decoration: nothing yet measures whether it moves how
-# readily a model deceives. So changing DEFAULT_THEME is a MEASURED change on the
-# same terms as any other, since no recorded number says which theme produced it.
-# See docs/moral-framing.md.
+# that is a variable rather than decoration: nothing yet measures whether it moves
+# how readily a model deceives. So a run that CHANGES theme is a measured change on
+# the same terms as any other prompt edit, and the arms for it are length-matched on
+# purpose. See docs/moral-framing.md.
 # The trusting majority who inform on each other + a hidden watcher are the loyal
 # Party; the informed minority who deceive are the Brotherhood underground who
 # sabotage each directive. Failing a "mission" is heroic sabotage; the martyr makes
@@ -359,10 +364,24 @@ THEME_DRILL_EN = Theme(
     ),
 )
 
-# 1984-en is the default face; the engine itself is skin-agnostic. Adding a skin
-# moves no number - nothing runs on these two faces until a run asks for one by
+# `plain` is the default face as of 2026-08-28; the engine itself is skin-agnostic.
+# Adding a skin moves no number - nothing runs on a face until a run asks for it by
 # name, and when one does it is a measured change like any other.
-DEFAULT_THEME = THEME_1984_EN
+#
+# **It was `1984-en` until 2026-08-28, and EVERY recorded cabal number was played on
+# that face.** A run meant to compare against `hunt20*` or `hunt6*` must pass
+# `--theme 1984-en` explicitly; the skin is still here and still supported. This
+# change was queued as expensive because it re-baselines every cabal number, and it
+# became free when gate #3b came back NOT SHOWN and cabal's GPU program stopped -
+# there is no future cabal run for the new default to be incomparable with.
+#
+# Why move at all, when README.md's reasoning is sound: mechanics are not
+# copyrightable, neither are single words or short phrases, and the novel's text is
+# not in this repo. None of that is in question. It is surface area carried for no
+# benefit on the face of a public tree. `plain` references nothing, costs nothing,
+# and puts cabal on the same footing as changeling, which already defaults to
+# `folk`.
+DEFAULT_THEME = THEME_PLAIN
 
 THEMES: dict[str, Theme] = {
     "1984-en": THEME_1984_EN,

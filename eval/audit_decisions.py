@@ -254,7 +254,8 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
 
     **Matches the THEME name as well as the functional key, and that is the whole
     point of the check working at all.** Speech is rendered in whatever skin the run
-    used: on the shipping `1984-en` face a seat outing itself says "Thought Police"
+    used: on the `1984-en` face every recorded run used, a seat outing itself says
+    "Thought Police"
     or "Doublethinker" and never once says "seer" or "mimic". The reported 0/1290
     on the seed-1000 runs was near-zero BY CONSTRUCTION - it was matching vocabulary
     the players had no way to produce - and supported nothing. A run's theme is on
