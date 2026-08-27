@@ -93,10 +93,18 @@ class LLMPolicy:
     #: line - that is the "N attempts failed, playing random" summary, which says a
     #: fallback happened and nothing about why.
     last_refusal: str = ""
+    #: how many attempts on the most recent decision were refused, and how many of
+    #: those the PARSER or the RULES refused rather than the network. Same fields
+    #: and the same meaning as cabal's, because the integrity block that reads them
+    #: is shared (``core/integrity.py``).
+    last_refusals: int = 0
+    last_rule_refusals: int = 0
 
     def act(self, ref: ChangelingReferee, seat: int) -> dict:
         self.last_fell_back = False
         self.last_refusal = ""
+        self.last_refusals = 0
+        self.last_rule_refusals = 0
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -109,7 +117,7 @@ class LLMPolicy:
                 self.last_upstream = served_by
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
-                self._refused(seat, attempt, complaint)
+                self._refused(seat, attempt, "transport", complaint)
                 if self.backoff and attempt < self.retries:
                     time.sleep(self.backoff * (2 ** attempt))
                 continue
@@ -117,12 +125,12 @@ class LLMPolicy:
                 action = parse_action(reply, ref, seat)
             except ParseError as exc:
                 complaint = str(exc)
-                self._refused(seat, attempt, f"unparsed - {exc}")
+                self._refused(seat, attempt, "unparsed", str(exc))
                 continue
             if ref.phase is Phase.VOTE and action["vote"] == seat:
                 complaint = (f"seat {seat} cannot point at itself; choose from "
                              f"{ref.legal_votes(seat)}")
-                self._refused(seat, attempt, f"illegal - {complaint}")
+                self._refused(seat, attempt, "illegal", complaint)
                 continue
             return action
         self.trace.append(
@@ -131,10 +139,21 @@ class LLMPolicy:
         self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
 
-    def _refused(self, seat: int, attempt: int, complaint: str) -> None:
-        """One place writes a refusal, so the trace and the per-decision census can
-        never disagree about what happened."""
-        self.last_refusal = f"seat {seat} attempt {attempt}: {complaint}"
+    def _refused(self, seat: int, attempt: int, kind: str, detail: str) -> None:
+        """One place writes a refusal, so the trace, the per-decision census and the
+        integrity block can never disagree about what happened.
+
+        ``kind`` is ``transport`` | ``unparsed`` | ``illegal``, carried as an
+        argument rather than parsed back off the rendered text: the clean-game count
+        turns on whether the model or the network was at fault, and recovering that
+        by string match against a human-facing message drifts the next time somebody
+        rewords one. The rendered line is unchanged.
+        """
+        self.last_refusals += 1
+        if kind != "transport":
+            self.last_rule_refusals += 1
+        text = detail if kind == "transport" else f"{kind} - {detail}"
+        self.last_refusal = f"seat {seat} attempt {attempt}: {text}"
         self.trace.append(self.last_refusal)
 
 
@@ -156,9 +175,11 @@ class VoteRecord:
     voter_believes_pack: bool
     voter_diverged: bool
     target_holds_pack: bool
-    #: What the NIGHT told this seat, keyed on its DEALT card - the reveal is a
-    #: historical fact and the deal is what produced it. One of
-    #: ``identity`` / ``positional`` / ``false`` / ``none``; see RULES.md.
+    #: What the NIGHT actually TOLD this seat. Keyed on the DEALT card - the reveal
+    #: is a historical fact and the deal is what produced it - but conditional on a
+    #: reveal having happened, so a MEET card that met nobody is ``none`` rather
+    #: than ``identity``. One of ``identity`` / ``positional`` / ``false`` /
+    #: ``none``; derived by ``NightResult.knowledge_class``, argued in RULES.md.
     knowledge_class: str = "none"
 
 
@@ -169,14 +190,22 @@ class Decision:
     phase: str
     played: str
     think: str = ""
-    #: why this decision was refused, when it was - the last trace line the policy
-    #: wrote before giving up. Empty on a decision the model actually made.
+    #: why the last refused ATTEMPT on this decision was refused. Empty on a
+    #: decision the model got right first time.
     #:
     #: Named ``refused`` rather than ``note`` so it means the same thing in both
     #: games: cabal's ``note`` is a seat's NOTEBOOK entry, a different field with a
     #: different life, and one name over two meanings is how a JSONL reader ends up
     #: counting notebook lines as refusals.
+    #:
+    #: **Widened 2026-08-27 (S9)** to a RECOVERED decision too, in step with cabal.
+    #: Read it with ``fell_back``: set and False is recovered, set and True is a
+    #: fallback, empty is clean.
     refused: str = ""
+    #: attempts refused before this decision landed, and the subset the parser or
+    #: the rules refused rather than the network.
+    refusals: int = 0
+    rule_refusals: int = 0
     fell_back: bool = False
     served_by: str = ""
 
@@ -197,6 +226,12 @@ class GameRecord:
     votes: list[VoteRecord] = field(default_factory=list)
     decisions: int = 0
     fallbacks: int = 0
+    #: decisions the parser or the rules sent back at least once and the model then
+    #: got RIGHT - the third outcome. Same three-way partition as cabal's, read by
+    #: the shared ``core/integrity.py``.
+    recovered: int = 0
+    refused_attempts: int = 0
+    rule_refused_attempts: int = 0
     utterances: list[str] = field(default_factory=list)
     decision_log: list[Decision] = field(default_factory=list)
     public_events: list[tuple[str, str]] = field(default_factory=list)
@@ -210,8 +245,14 @@ class GameRecord:
 def _record_decision(rec: GameRecord, policy, turn: int, seat: int, phase: str,
                      played: str, action: dict) -> None:
     fell_back = getattr(policy, "last_fell_back", False)
+    refusals = int(getattr(policy, "last_refusals", 0) or 0)
+    rule_refusals = int(getattr(policy, "last_rule_refusals", 0) or 0)
     rec.decisions += 1
     rec.fallbacks += int(fell_back)
+    if not fell_back and rule_refusals:
+        rec.recovered += 1
+    rec.refused_attempts += refusals
+    rec.rule_refused_attempts += rule_refusals
     rec.decision_log.append(Decision(
         turn=turn, seat=seat, phase=phase, played=played,
         think=action.get("think", ""),
@@ -219,8 +260,9 @@ def _record_decision(rec: GameRecord, policy, turn: int, seat: int, phase: str,
         # the reason is a CENSUS in the JSONL rather than a sampled trace and an
         # end-of-run report - neither of which is readable mid-run. cabal does the
         # same on the same field name since 2026-08-27 (S4).
-        refused=(str(getattr(policy, "last_refusal", "") or "") if fell_back
+        refused=(str(getattr(policy, "last_refusal", "") or "") if refusals
                  else ""),
+        refusals=refusals, rule_refusals=rule_refusals,
         fell_back=fell_back,
         served_by=getattr(policy, "last_upstream", ""),
     ))
@@ -282,7 +324,7 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
                 voter_believes_pack=ref.believes(seat).side is Side.PACK,
                 voter_diverged=seat in ref.night.diverged(),
                 target_holds_pack=ref.holds(target).side is Side.PACK,
-                knowledge_class=ref.night.dealt[seat].knowledge_class,
+                knowledge_class=ref.night.knowledge_class(seat),
             ))
     except Exception as exc:                  # a broken run is recorded, not hidden
         rec.error = f"{type(exc).__name__}: {exc}"

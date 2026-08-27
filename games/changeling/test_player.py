@@ -90,17 +90,71 @@ class TestOutcomeIsReadFromTruth(unittest.TestCase):
 
 
 class TestVoteRecordStrata(unittest.TestCase):
-    def test_knowledge_class_is_keyed_on_the_DEALT_card(self):
-        """The reveal is a historical fact, so the class comes from the deal. Using
-        the dawn card would relabel a seat by something that happened after it was
-        told - and would put `false` on a seat that was never deceived."""
-        for seed in range(120):
+    def games(self, seeds=range(120)):
+        for seed in seeds:
             ref = ChangelingReferee.new(5, seed=seed, discussion_rounds=1)
             rng = random.Random(seed)
-            rec = play_game(ref, {s: RandomPolicy(rng) for s in range(5)})
+            yield ref, play_game(ref, {s: RandomPolicy(rng) for s in range(5)})
+
+    def test_knowledge_class_is_keyed_on_what_the_seat_was_TOLD(self):
+        """**Replaces `test_knowledge_class_is_keyed_on_the_DEALT_card`, S10,
+        2026-08-28.** The old pin asserted the class equalled the dealt card's
+        outright, which labelled a `pack` seat that met nobody `identity` while it
+        had been told nothing. A MEET card's reveal is conditional on ANOTHER
+        seat's deal; the label is now conditional on the reveal.
+
+        The half of the old pin that still holds is the next test: still the DEALT
+        card, never the dawn one.
+        """
+        for ref, rec in self.games():
             for v in rec.votes:
-                self.assertEqual(v.knowledge_class,
-                                 ref.night.dealt[v.seat].knowledge_class)
+                dealt = ref.night.dealt[v.seat].knowledge_class
+                if dealt == "false":
+                    self.assertEqual(v.knowledge_class, "false")
+                elif ref.night.knowledge[v.seat]:
+                    self.assertEqual(v.knowledge_class, dealt)
+                else:
+                    self.assertEqual(v.knowledge_class, "none")
+
+    def test_no_seat_is_labelled_with_knowledge_it_was_never_given(self):
+        """The property, stated without reference to the implementation - a seat
+        the night handed no ``Knowledge`` cannot be in the ``identity`` or
+        ``positional`` stratum. This is what item 6 was about, and it fails against
+        the pre-S10 rule."""
+        for ref, rec in self.games():
+            for v in rec.votes:
+                if not ref.night.knowledge[v.seat]:
+                    self.assertIn(v.knowledge_class, ("none", "false"),
+                                  f"seat {v.seat} was told nothing and is labelled "
+                                  f"{v.knowledge_class!r}")
+
+    def test_the_class_still_comes_from_the_DEALT_card_never_the_DAWN_card(self):
+        """The surviving half of the old pin. Relabelling by the card a seat ended
+        the night holding would score it for knowledge it never had, and would put
+        ``false`` on a seat that was never deceived."""
+        for ref, rec in self.games():
+            for v in rec.votes:
+                dealt = ref.night.dealt[v.seat]
+                dawn = ref.night.truth[v.seat]
+                if v.knowledge_class == "false":
+                    self.assertEqual(dealt.knowledge_class, "false",
+                                     "a seat that never drank was labelled false")
+                if v.knowledge_class != "none" and dawn.key != dealt.key:
+                    self.assertEqual(v.knowledge_class, dealt.knowledge_class)
+
+    def test_a_MEET_seat_with_no_fellow_lands_in_the_blind_stratum(self):
+        """The case the change exists for, asserted by name rather than left to the
+        aggregate. It occurs in 42.6% of seated `pack` seats, so a sweep this size
+        cannot miss it - and if it ever does, that is a deal bug, not a flaky
+        test."""
+        found = 0
+        for ref, rec in self.games():
+            for v in rec.votes:
+                if (ref.night.dealt[v.seat].meets_own_kind
+                        and not ref.night.knowledge[v.seat]):
+                    found += 1
+                    self.assertEqual(v.knowledge_class, "none")
+        self.assertGreater(found, 0, "no lone MEET seat in 120 games - check the deal")
 
     def test_the_three_voter_booleans_come_apart(self):
         """holds / believes / diverged are separate columns because in this game
@@ -184,6 +238,70 @@ class TestRetryLoop(unittest.TestCase):
                                                 '{"say": "ok"}']), backoff=0)
         policy.act(ref, 0)
         self.assertTrue(any("call failed" in t for t in policy.trace))
+
+
+class TestRefusalIsAThirdOutcome(unittest.TestCase):
+    """S9, item 4, mirrored from cabal because ``core/integrity.py`` reads the same
+    fields from both. A decision the referee sent back and the model then got right
+    is neither a fallback nor a clean decision."""
+
+    def test_a_recovered_decision_is_not_a_fallback_and_not_clean(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policy = LLMPolicy(backend=FakeBackend(['{"nope": 1}', '{"say": "here"}']),
+                           backoff=0)
+        policy.act(ref, 0)
+        self.assertFalse(policy.last_fell_back)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (1, 1))
+
+    def test_a_transport_failure_is_a_refusal_but_not_a_RULE_refusal(self):
+        """The clean-game count turns on this split: a 429 is not a seat failing to
+        follow the rules."""
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policy = LLMPolicy(backend=FakeBackend([RuntimeError("boom"),
+                                                '{"say": "ok"}']), backoff=0)
+        policy.act(ref, 0)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (1, 0))
+
+    def test_the_counters_reset_between_decisions(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policy = LLMPolicy(backend=FakeBackend(['{"nope": 1}', '{"say": "a"}',
+                                                '{"say": "b"}']), backoff=0)
+        policy.act(ref, 0)
+        self.assertEqual(policy.last_refusals, 1)
+        policy.act(ref, 0)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (0, 0))
+
+    def test_a_transport_only_retry_does_not_make_the_decision_RECOVERED(self):
+        """Keyed on the rule count, not the raw one - otherwise a flaky endpoint
+        turns every game dirty and the clean-game figure measures the network."""
+        class Flaked(RandomPolicy):
+            last_fell_back = False
+            last_refusals = 2
+            last_rule_refusals = 0
+            last_refusal = "seat 0 attempt 1: the call failed (RuntimeError: boom)"
+            last_upstream = "fake-model"
+
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        rec = play_game(ref, {s: Flaked(random.Random(s)) for s in range(5)})
+        self.assertGreater(rec.decisions, 0)
+        self.assertEqual((rec.fallbacks, rec.recovered), (0, 0))
+        self.assertEqual(rec.refused_attempts, 2 * rec.decisions)
+        self.assertEqual(rec.rule_refused_attempts, 0)
+
+    def test_a_recovered_decision_records_WHY_it_was_sent_back(self):
+        class Recovers(RandomPolicy):
+            last_fell_back = False
+            last_refusals = 1
+            last_rule_refusals = 1
+            last_refusal = "seat 0 attempt 0: unparsed - no JSON object"
+            last_upstream = "fake-model"
+
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        rec = play_game(ref, {s: Recovers(random.Random(s)) for s in range(5)})
+        self.assertEqual((rec.fallbacks, rec.recovered), (0, rec.decisions))
+        recovered = [d for d in rec.decision_log if d.refused and not d.fell_back]
+        self.assertEqual(len(recovered), rec.decisions)
+        self.assertIn("unparsed", recovered[0].refused)
 
 
 class TestAuditRunsInsideTheDriver(unittest.TestCase):

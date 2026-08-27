@@ -1,0 +1,137 @@
+{
+  "scenario_id": "hollow-barrow",
+  "ruleset": "DURF 2.2 (2021), Emiel Boven, CC BY 4.0",
+  "note": "Fixed state. No declaration may depend on standing state not written here.",
+
+  "slot_costs": {
+    "rule": "DURF 2.2: slots = 10 + STR. Most items take one slot. A PC cannot carry more items or Stress than they have inventory slots.",
+    "most_items": 1,
+    "light_armor": 1,
+    "medium_armor": 2,
+    "heavy_armor": 3,
+    "two_handed_weapon": "+1 or +2 as the item states",
+    "stress": 1,
+    "wounds": 0,
+    "gp": 0,
+    "spell_known": 0,
+    "note": "Added 2026-08-27. Every slots_used below is derivable from the carried list plus stress with these costs - re-derive before trusting it. The two slot traps (d013, d017) and the push-count trap (d018) turn on that arithmetic, so a slots_used a reader cannot reproduce makes them arguable rather than floor."
+  },
+
+  "pcs": [
+    {
+      "seat": 0,
+      "name": "Vesh",
+      "STR": 3, "DEX": 1, "WIL": 2,
+      "HD": 1,
+      "slots_total": 13,
+      "slots_used": 13,
+      "slots_free": 0,
+      "armor_worn": "Light",
+      "armor_points": 3,
+      "armor_points_max": 3,
+      "wounds": 0,
+      "stress": 2,
+      "carried": ["sword (4 dmg, +1 slot)", "shield", "light armor (3 Armor)", "2 Supply", "rope", "torch", "hammer", "iron spikes", "waterskin"],
+      "spells": [],
+      "slots_derivation": "sword 2 + shield 1 + light armor 1 + 2 Supply 2 + rope 1 + torch 1 + hammer 1 + iron spikes 1 + waterskin 1 = 11 items, + 2 Stress = 13 of 13.",
+      "note": "Zero free slots. Cannot push, cannot cast, cannot take an item without dropping one."
+    },
+    {
+      "seat": 1,
+      "name": "Ola",
+      "STR": 1, "DEX": 3, "WIL": 2,
+      "HD": 1,
+      "slots_total": 11,
+      "slots_used": 7,
+      "slots_free": 4,
+      "armor_worn": null,
+      "armor_points": 0,
+      "armor_points_max": 0,
+      "wounds": 1,
+      "stress": 0,
+      "carried": ["bow (3 dmg, two hands, +1 slot)", "Ammo", "dagger (3 dmg)", "1 Supply", "lantern", "waterskin"],
+      "spells": [],
+      "slots_derivation": "bow 2 + Ammo 1 + dagger 1 + 1 Supply 1 + lantern 1 + waterskin 1 = 7 items, + 0 Stress = 7 of 11. Her Wound occupies no slot.",
+      "note": "Has Ammo. Wounded once. Exactly four free slots, which is what d018 turns on."
+    },
+    {
+      "seat": 2,
+      "name": "Prin",
+      "STR": 1, "DEX": 2, "WIL": 3,
+      "HD": 1,
+      "slots_total": 11,
+      "slots_used": 5,
+      "slots_free": 6,
+      "armor_worn": null,
+      "armor_points": 0,
+      "armor_points_max": 0,
+      "wounds": 0,
+      "stress": 0,
+      "carried": ["dagger (3 dmg)", "1 Supply", "vial of poison (if ingested, STR save or die)", "serpent scale cloak", "chalk"],
+      "spells": ["Pippi's Slumber"],
+      "slots_derivation": "dagger 1 + 1 Supply 1 + vial 1 + cloak 1 + chalk 1 = 5 items, + 0 Stress = 5 of 11. A known spell occupies no slot; casting needs one empty.",
+      "note": "Serpent Scale Cloak grants a Buff on saves vs. magical effects."
+    }
+  ],
+
+  "hireling": {
+    "name": "Grelk",
+    "Skill": 2, "HD": 1, "armor_points": 0, "ML": 7,
+    "attack": "club, 3 dmg",
+    "slots_total": 10,
+    "note": "Hired by Prin. NPCs cannot push and take no Stress."
+  },
+
+  "npcs": [
+    {
+      "group": "barrow-rats",
+      "count": 3,
+      "Skill": 2, "HD": 0, "armor_points": 0, "ML": 6,
+      "attack": "bite, 2 dmg",
+      "location": "R3",
+      "note": "0 HD: dies to any Wound."
+    },
+    {
+      "group": "barrow-wight",
+      "count": 1,
+      "Skill": 6, "HD": 3, "armor_points": 3, "ML": 10,
+      "attack": "chill touch, 4 dmg dealt directly as Wounds, ignores Armor",
+      "location": "R4",
+      "note": "High ML. Undead."
+    }
+  ],
+
+  "rooms": [
+    {
+      "id": "R1",
+      "name": "Entry slope",
+      "contents": "A steep scree slope down into the barrow. Loose stone underfoot. Daylight behind, dark ahead.",
+      "hidden": []
+    },
+    {
+      "id": "R2",
+      "name": "Antechamber",
+      "contents": "Bare stone. A low stone bier, empty. An iron door to R3, closed but not locked.",
+      "hidden": ["A loose flagstone by the bier covers a shallow cavity holding 40 GP."]
+    },
+    {
+      "id": "R3",
+      "name": "Gallery",
+      "contents": "A twenty-foot chasm spanned by an old rope bridge. Three barrow-rats on the far side. A rusted brazier on a chain hangs over the chasm.",
+      "hidden": ["The bridge's far anchor is rotted and will fail under two people at once."]
+    },
+    {
+      "id": "R4",
+      "name": "Tomb",
+      "contents": "A sealed stone sarcophagus. The barrow-wight stands over it. Grave goods worth 300 GP.",
+      "hidden": ["The sarcophagus lid is counterweighted and opens easily once the catch is found."]
+    }
+  ],
+
+  "clock": {
+    "unit": "turn (10 minutes)",
+    "elapsed_turns": 4,
+    "encounter_check": "d6 each turn; on a 1, roll the encounter table",
+    "light": "Ola's lantern is lit, 18 turns of oil, 14 remaining"
+  }
+}

@@ -29,6 +29,21 @@ def secret_terms(ref: CabalReferee) -> dict[int, list[str]]:
     }
 
 
+def self_line(ref: CabalReferee, seat: int) -> str:
+    """The one line of a seat's render where its OWN role and faction legitimately
+    appear, verbatim.
+
+    It is reconstructed here rather than exported by the referee because the
+    referee's strings are the prompt: lifting that line into a helper would be a
+    render refactor, and this is an audit-side concern. The duplication is held
+    honest by a test asserting the line is actually present in every seat's payload
+    under every shipped theme - so a render that moves it fails loudly instead of
+    letting the strip below quietly match nothing.
+    """
+    v = ref.seat_view(seat)
+    return f"You are seat {v.seat}. Your role: {v.own_role} ({v.own_team})."
+
+
 def leak_audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
     """Return every (viewer, leaked_seat, term). Empty == gate #1 holds.
 
@@ -38,6 +53,25 @@ def leak_audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
     whichever seats are on the clock, the ask is audited too - it is bytes that
     leave for the model like any other, and a role name added to a prompt string
     is exactly the regression that would otherwise go unseen.
+
+    **A seat's own self-declaration leaves the audited corpus, and that is what
+    makes a repeated role auditable at all.** Two seats dealt the same role hold
+    the same secret term by construction, so the term one of them legitimately
+    reads in "Your role: ..." is character-for-character the term that would betray
+    the other. A naive scan reports a mutual leak in every skin - measured on a
+    hand-built 7-seat deal with two ``loyalist`` seats, which is the setup this
+    exists for. The repo's standing remedy for a colliding term is to rename it,
+    and that remedy cannot reach here: the collision IS the deal, and renaming one
+    ``loyalist`` breaks it.
+
+    So the corpus is narrowed rather than the matcher weakened, exactly as
+    ``include_speech=False`` already narrows it, and ``find_leaks`` stays naive per
+    the repo invariant. This is not a skip: it removes ONE line, the only place the
+    referee asserts a seat's role to that seat, so a duplicate term appearing
+    anywhere else in the payload - a public event, the blurb, the ask, a future
+    reveal - is still caught. The sibling game reached the same shape from the
+    other direction (``games/changeling`` audits a seat's own card against its own
+    line only), which is evidence about the shape rather than a coincidence.
     """
     terms = secret_terms(ref)
     acting = set(ref.acting_seats())
@@ -48,6 +82,7 @@ def leak_audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
             ref.prompt_for(viewer, include_speech=False) if viewer in acting
             else ref.render_context(viewer, include_speech=False)
         )
+        payload = payload.replace(self_line(ref, viewer), "", 1)
         for seat, term in find_leaks(payload, terms, entitled, viewer):
             out.append((viewer, seat, term))
     return out

@@ -112,5 +112,44 @@ class TestSamplerSeed(unittest.TestCase):
         self.assertNotIn("seed", self.sent())
 
 
+class TestEndpointsComeFromTheEnvironment(unittest.TestCase):
+    """A box's topology is configuration, not source. The loopback defaults stay so
+    a fresh clone still runs with nothing set - that is the "no dependencies, no API
+    key" promise in README.md - but they are overridable."""
+
+    def reloaded(self, **env):
+        import importlib
+
+        import core.backends as backends
+        with mock.patch.dict("os.environ", env, clear=False):
+            return importlib.reload(backends).ENDPOINTS
+
+    def tearDown(self):
+        import importlib
+
+        import core.backends as backends
+        importlib.reload(backends)          # leave the module as the suite found it
+
+    def test_a_clone_with_nothing_set_gets_the_loopback_defaults(self):
+        env = {k: "" for k in ("PARLOR_ENDPOINT_LOCAL", "PARLOR_ENDPOINT_CLEAN",
+                               "PARLOR_ENDPOINT_GRAY")}
+        got = self.reloaded(**env)
+        self.assertEqual(got["local"].base_url, "http://127.0.0.1:8090/v1")
+        self.assertEqual(got["clean"].base_url, "http://127.0.0.1:3001/v1")
+        self.assertEqual(got["gray"].base_url, "http://127.0.0.1:3003/v1")
+
+    def test_each_route_reads_its_own_variable(self):
+        got = self.reloaded(PARLOR_ENDPOINT_LOCAL="http://box:9/v1")
+        self.assertEqual(got["local"].base_url, "http://box:9/v1")
+        self.assertEqual(got["clean"].base_url, "http://127.0.0.1:3001/v1")
+
+    def test_an_EMPTY_variable_falls_back_rather_than_resolving_to_nothing(self):
+        """A shell that exports an unset variable meant to unset it. Resolving that
+        to "" would point every request at a URL too broken to read as a config
+        mistake."""
+        self.assertEqual(self.reloaded(PARLOR_ENDPOINT_GRAY="")["gray"].base_url,
+                         "http://127.0.0.1:3003/v1")
+
+
 if __name__ == "__main__":
     unittest.main()

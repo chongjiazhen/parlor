@@ -1,0 +1,318 @@
+# The DURF rung - a rules kernel under a model adjudicator
+
+Written 2026-08-27, unmeasured, from a design read of `core/observability.py`,
+`games/cabal/audit.py`, `docs/action-channel.md` and `docs/faction-heartbeat.md`.
+Same job as both of those: nothing here is a decision, it is here so the cheap
+moves stay cheap.
+
+**What this scopes.** `RESUME.md` has carried "5e / a rules-lite RPG" as the
+endgame rung with no statement of what the cheap version is. This names one: a
+single dungeon session of DURF, a deterministic kernel underneath, a model in the
+adjudicator seat, and one number nobody in the neighbouring literature has
+produced. It is the first rung where `referee.py:6` inverts - judgment IS the
+referee - and therefore the first that tests the actual product claim.
+
+## Why this ruleset
+
+**DURF is the smallest real system that ships legally.** ~40-50 pages, d20,
+three attributes, no class tree, no spell list needed for a first session. Its
+whole ruleset is smaller than four Blood on the Clocktower characters'
+interaction surface, which is what `RESUME.md` scoped that spike down to anyway.
+The adjudicator's failure therefore arrives isolated from rules complexity, which
+is the only reason to prefer a small system over an interesting one.
+
+**Licence, and it is a build requirement rather than a footnote.** DURF by Emiel
+Boven is CC BY 4.0: share and adapt for any purpose with credit. So the rules
+text can ship in-tree, in its own data directory, carrying its own LICENSE and an
+attribution line naming the author. Root LICENSE stays the unmodified MIT text so
+the SPDX detector keeps returning `MIT`; a root NOTICE names the exception. The
+engine does not become CC BY by sitting next to it.
+
+**The comparative read that picked DURF out of nine candidates is off-repo** -
+the licence tiering of the others, and what shipping two of them would cost,
+names third parties and stops at the working notes. `CLAUDE.local.md` has the
+path. Nothing in this file needs it: DURF's own licence is stated above because
+attribution is owed, not because a comparison is being made here.
+
+**Version pin, because a kernel without one is not reproducible.** The table
+below is **DURF version 2.2 (2021)**, verified line by line against Boven's own
+source text - the public Google Doc he links from the itch page as "source text",
+exported as plain text and read in full. Not a summary, not the carrd reference,
+not the PDF (same content, worse to quote). Pin that version in the game module.
+
+**The pin, addressable**, because a pin nobody can re-fetch is a pin you have to
+take on trust - and the 2026-08-27 pass found two rules missing from the table
+below rather than wrong in it, which is a failure only a re-read catches:
+
+```
+https://docs.google.com/document/d/16mu9tmLyxPFvAsYonFaYU14btvYo_aK3JVr5HLWwKzk/
+```
+
+Append `/export?format=txt` for the plain-text export this table and the fixture
+were verified against; the document's own first line reads `VERSION 2.2 - 2021`,
+which is the string to check before trusting a re-read. Boven links it from
+`emielboven.itch.io/durf` under the "Google Doc Source Text" devlog, so the id
+above is a convenience, not the authority - if it ever fails to resolve, the itch
+page is where the current link lives. The doc is a **living** artifact under the
+author's control: **check that version line every time**, because a doc that has
+moved past 2.2 silently re-baselines the fixture, which is the same failure the
+Expanded migration trigger below exists to prevent.
+
+**DURF Expanded is the successor and it must not be built on yet - the reason is
+the fixture, not the page count.** *(read - one trade-news piece; the draft
+itself is Patreon-gated and was NOT opened, and the campaign's own figures came
+from a search synthesis, so none are quoted here.)* It is a funded Kickstarter in
+fulfilment: a ~200-page hardcover against 2.2's ~48, whose current draft is
+described as **overhauled rules and procedures** and which its own coverage says
+will keep being updated as the book is finalised. So the kernel is in motion.
+
+The expensive artifact in this rung is not the kernel, it is the labelled
+declaration set below. A kernel edit re-baselines it, and a fixture labelled
+against a superseded draft still produces numbers - which is the worst failure
+shape this repo knows. **Migrate only when Expanded ships stable, out of draft,
+with its CC variant confirmed**, then re-verify the table against it and re-pin.
+
+**That licence check is a gate, not a formality.** Expanded is reported as
+Creative Commons with an "open license" and **no variant named**. DURF 2.2 is CC
+BY, and CC BY is the whole reason this ruleset was preferred over the richer
+candidates - a non-commercial or share-alike successor would not carry that
+argument, and would land in the quarantine the off-repo ledger describes rather
+than in-tree. Confirm the variant from Boven's own text before treating the
+migration as available.
+
+**A first pass built this table from a summary page and got three things wrong.**
+The armour mechanic was inverted, the tie rules were merged into one that does not
+exist, and Breaks were described as adding. All three are corrected below; the
+episode is the argument for the pin.
+
+**A second pass, 2026-08-27, added two rows this table was missing** - the
+per-item slot costs, and the once-per-day casting limit that binds NPC casters
+only. Both were read from the same source text. Neither was wrong here; both were
+absent, and the fixture was resting labels on them anyway, which is the failure
+mode a pin does not catch on its own. `games/durf/fixtures/README.md` records what
+that cost.
+
+## The kernel *(verified against DURF 2.2 source text, 2026-08-27)*
+
+| mechanism | rule |
+|---|---|
+| attributes | STR / DEX / WIL, each d3 at creation, **max 8** by advancement |
+| action roll | d20 + attribute, **over 15 is a success**. Saves are action rolls |
+| opposed roll | both roll, **highest wins**; NPCs add **Skill** instead of an attribute |
+| ties | **three different rules** - general opposed: GM decides; close combat: **attacker wins**; initiative: **PCs go first** |
+| buffs / breaks | cancel first, then roll a d6 each; **highest Buff added, highest Break subtracted**. **NPCs never roll them** |
+| pushing | pre-roll, needs an empty slot: take **Stress** to gain a **Buff**. Repeatable while slots last. NPCs cannot push |
+| weapons | 2 dmg improvised, 3 dagger/bow, 4 sword/crossbow, 5 greatsword/pistol; bigger weapons cost slots |
+| armour | **a depleting pool, not flat reduction** - Light 3 / Medium 5 / Heavy 7. Damage drains Armor points first, the remainder lands as Wounds |
+| shields | reduce incoming damage by 1, **never below 1** |
+| worn weapons | natural **1** on an attack drops that weapon to **1 dmg** until repaired |
+| critical | natural **20** on an attack deals **double** weapon damage even if the opposed roll is lost. Ranged **defenders** cannot crit |
+| wounds | on receiving Wounds, roll **all** HD (d6 each); **result <= accumulated Wounds means death**. 0 HD dies to any Wound |
+| inventory | slots = **10 + STR**. **Most items take one slot**; medium armour **+1**, heavy armour **+2**, two-handed weapons **+1 or +2**. Each Stress occupies one; **Wounds and GP occupy none**. "A PC cannot carry more items or Stress than they have inventory slots" |
+| morale | NPCs carry **ML**; roll **2d6**, **higher than ML** means flee or parley |
+| NPC stats | **Skill** (one value, max 14), HD, Armor, ML. NPCs take no Stress |
+| clock | round 10s, turn 10min, watch 4h. **d6 per turn and per watch; on a 1, a random encounter** |
+| rest | a day safe clears **Wounds, Stress, Armor and worn weapons**. In the field, 1 Supply restores 2 Armor or 1 weapon, taking a turn |
+| spellcasting | WIL roll; success casts and costs 1 Stress, **failure costs neither**; natural 1 hits the Blunders table; a full turn casts automatically. Requires an empty slot, a free hand and the ability to speak. **"Unless otherwise stated, NPC spellcasters can only cast each of their spells once each day" - NPCs only; a PC is bounded by slots** |
+| advancement | 1000 x current HD in XP; +1 attribute or a new spell; **retire at 13 HD**. 1 GP = 1 XP, plus 25 XP per defeated NPC HD |
+
+Everything in that table is arithmetic. That is the point: it is all kernel, none
+of it is discretion, and a model never touches any of it.
+
+**Attribution, required by the licence and satisfied here:** DURF is written and
+illustrated by Emiel Boven, edited by Ava Islam, CC BY 4.0.
+
+## What is actually secret here, and why the topology is new
+
+**cabal and changeling hide secrets that belong to seats. DURF hides secrets that
+belong to the world.** Room contents before entry, whether the chest is trapped,
+a monster's remaining Wounds and its damage value, what the reaction roll said, an
+NPC's intent, the map past line of sight. None of those is any seat's secret. No
+seat owns them and every seat is equally un-entitled to them.
+
+Three consequences, and the second is the one that matters:
+
+- **Entitlement is uniform across seats.** Every player seat has identical
+  entitlement at any instant, so the peer-to-peer boundary cabal audits does not
+  exist here. Gate #1 collapses to one boundary: referee -> the party.
+- **That is structurally weaker and operationally far riskier.** cabal's referee
+  is deterministic, so its private bytes are a fixed set of strings and naive
+  matching is sound. A model adjudicator authors prose, and `docs/action-channel.md`
+  already names the failure: "the innkeeper looks nervous" leaks that he is the
+  cultist with zero substring overlap and the audit reads clean. The weaker
+  boundary is guarded by the stronger adversary.
+- **A seat's own state is public at this rung.** Wounds, slots and the HD death
+  check are open at a real table, so `self_is_secret` stays off and there is no
+  changeling-shaped self-belief problem to solve. Do not import one.
+
+## The entitlement model breaks, and this is the promotion evidence
+
+`find_leaks` takes `secret_terms: dict[int, list[str]]` keyed by **seat** and
+`entitled: set[int]` of **seats**. There is no seat to key a trapped chest to.
+`SeatView.knowledge` has the same shape: `Knowledge(seat, label)` is a statement
+about a seat.
+
+**The generalisation is fact-keyed entitlement, and seat-keyed is a special case
+of it** - "seat 3's role" is just one fact among many. So the promotion does not
+fork the primitive, it widens the key:
+
+- `secret_terms: dict[FactId, list[str]]`, `entitled: set[FactId]`.
+- `Knowledge(fact_id, label)`, with today's per-seat reveals expressed as
+  `fact_id = ("role", seat)`.
+
+**Per the `core/` invariant, promote on evidence that a second game needs it -
+and this is the evidence, so it is written down rather than acted on.** cabal and
+changeling are both seat-keyed and neither needs this; rewriting the spine under
+a code freeze to serve an unbuilt rung is exactly the hardening
+`docs/action-channel.md` warns about. Build the fact-keyed version inside
+`games/durf/` first. It moves to `core/` when a second game wants it, not before.
+
+## The kernel / adjudicator line, drawn where it can be graded
+
+**Kernel** owns everything in the mechanics table, raises on illegal, and is the
+only thing that touches state. **Adjudicator** owns five decisions, and nothing
+else:
+
+1. Does this declaration require a roll at all?
+2. Which attribute governs it?
+3. Buff, break, or neither?
+4. **Has something shocked the NPCs enough to warrant a morale roll?**
+5. What is the fictional consequence of the kernel's result?
+
+**Decision 4 was found by reading the rules rather than by design, and it is the
+best-shaped of the five.** DURF hands the GM a morale mechanic with a fully
+specified roll and an entirely unspecified trigger - "when something manages to
+shock the NPCs (they meet more resistance than expected, their leader is killed
+etc.)". The roll is kernel; deciding a moment qualifies is pure discretion, it
+recurs several times a session, and it is gradable against a labelled fixture in
+exactly the False Pass / False Check shape. Any rung built here should carry it.
+
+Envelope is the one `docs/action-channel.md` already specifies -
+`{"think":..., "narrate":..., "calls":[...]}` - validated by the kernel, refused
+with the kernel's own error text, retried against the same seat, counted on
+fallback. That is `LLMPolicy`'s existing loop unchanged, which is the whole reason
+the sketch is cheap.
+
+**Decisions 1, 2 and 4 are gradable against the rules text; 5 is not.** Do not
+pretend otherwise and do not build a judge for 5. The measurement below scores 1,
+2 and 4, and reports 5 as prose in the transcript.
+
+## The number this rung produces
+
+**CoC-Seduce (arXiv:2607.02802) measured adjudication failure as directional and
+the direction is the finding: mean False Pass 9.58%, mean False Check 0.08%.**
+Models grant unearned success and essentially never over-demand rolls. Their task
+was single-turn, stateless, binary-output, with referee-authored ground truth
+handed to the model in the prompt. **Every property parlor adds makes it harder,
+so their 9.58% is a floor and this rung's job is to measure how far above it a
+stateful multi-turn adjudicator sits.** Nobody has produced that number.
+
+Report three quantities, each with the fallback rate beside it per the standing
+invariant, and void above 10%:
+
+- **False Pass** - the adjudicator resolved a declaration with no roll where the
+  rules require one, or applied a buff the fiction does not support.
+- **False Check** - it demanded a roll the rules do not require.
+- **Refusal** - it declined to rule. **A third outcome, counted, never dropped.**
+  CoC-Seduce silently excluded 35 refusals and disclosed it in a caption; this
+  repo names it in the denominator or not at all.
+
+**The instrument is a hand-labelled declaration set, and it must be labelled
+before any model runs.** Labelling after seeing model output is the
+promote-a-statistic failure `docs/reference-policies.md` exists to prevent.
+
+**BUILT 2026-08-27, unrun: `games/durf/fixtures/`.** A fixed four-room scenario
+with three fully-statted PCs, 48 declarations labelled for decisions 1 and 2, and
+12 events labelled for decision 4, every label carrying the rule it rests on.
+Balance is counted rather than asserted - 22 no-roll against 26 roll; morale
+splits 6/6. **The degenerate baselines were restated 2026-08-27** after a
+re-derivation: the "never-roll 46%" first recorded here pooled the six refusal
+traps into the no-roll bucket, and the honest pair is always-roll **61.9%** /
+never-roll **38.1%** over the 42 declarations that admit a roll answer (54.2% /
+33.3% over all 48). Always-roll is the bar this rung's model is closest to, so
+that correction raises it by ~8pp. The fixture README carries both rows. Eight declarations
+are Pseudo-Logic, and one of those eight argues a claim that is **correct**, as
+the control against a model that reflexively rejects any argued case. Read that
+directory's README before quoting any number from it.
+
+**Two instrument controls, both cheap, both required before the number means
+anything.** A floor set of declarations whose ruling is unambiguous in the rules
+text (an attack is an opposed roll; walking across an empty room is no roll) - a
+model failing those is not measuring adjudication. And a random-adjudicator arm,
+the same shape as cabal's `--arm random`, so the reported rates have a chance
+baseline to sit against.
+
+## Pre-committed criteria
+
+Written before any run, per house rule.
+
+- **Gate #1 holds or the run is void.** The audit raises on any world fact
+  appearing in a seat's context that the adjudicator did not declare. Not a rate.
+- **The rung is worth continuing if** False Pass is measurable and separable from
+  fallback - that is, the model rules often enough that its errors are rulings
+  rather than parse failures. Concretely: fallback under 10% and refusal under 10%
+  on the labelled set.
+- **The rung is a negative result if** fallback or refusal dominates. That is a
+  publishable finding about the action channel, not a failed run, and it is the
+  outcome `docs/action-channel.md`'s free-text-JSON choice makes most likely on
+  weak backends.
+- **No claim about play quality.** Whether the session was fun, coherent or
+  well-narrated is not measured and must not be asserted from a transcript.
+
+## The cheapest version that tests anything
+
+One dungeon, hand-authored, fixed. Three to four player seats. One session, no
+levelling, no spells, no downtime, no campaign state. The kernel implements the
+mechanics table and nothing else. The adjudicator answers the four decisions and
+declares its reveals as typed facts.
+
+**Score it on one thing: can a render be audited against the facts the
+adjudicator declared, with `find_leaks` still naive.** Everything else is
+downstream of that answer, exactly as the heartbeat note says of its own scope.
+
+## Ordering against the two other unbuilt spikes
+
+Three things are queued that all need the same typed-fact channel, and they are
+not alternatives:
+
+| spike | surface | what it uniquely tests |
+|---|---|---|
+| faction heartbeat | one faction, three action types | entitlement over **time** - snapshot-vs-recompute, logical ticks |
+| **DURF rung** | one dungeon, four decisions | the **kernel/adjudicator split** and the discretion number |
+| Clocktower adjudicator | 3-4 characters | discretion at a game with peer-to-peer secrets |
+
+**DURF is the typed-fact channel with the time axis at its smallest, and an
+earlier draft of this file overstated that as "static".** It is not: DURF counts
+turns and watches and rolls a d6 against each one, so world state changes on a
+counted clock that no player declaration triggers. What it lacks is the part the
+heartbeat note is actually about - an actor with goals, acting off-map, whose
+events propagate to some seats and not others. A wandering monster arrives in the
+room the party is standing in, and every seat learns at once.
+
+So the entitlement snapshot still has to be captured with the render, exactly as
+`docs/faction-heartbeat.md` §1 says. What DURF spares you is propagation: one
+audience, no partial knowledge, no seat learning late or wrong. That is a real
+reduction and it is the reason to build the channel here first, but it is a
+smaller reduction than the earlier draft claimed. **Its clock is also already
+seeded** - a d6 per turn against the run seed - so it costs the reproducibility
+invariant nothing.
+
+**This is an argument, not a queue edit.** `RESUME.md` §S8 and its standing-menu
+row for Blood on the Clocktower still read as they did; whether this displaces
+either is the operator's call, made in a session scoped for it.
+
+## What not to harden on the way
+
+All three carry over verbatim from `docs/action-channel.md` and
+`docs/faction-heartbeat.md`, because a third game arriving early is what they were
+written about:
+
+- Do not add DURF phases to `cabal`'s `Phase` enum or its `action_prompt` chain.
+- Do not grow `ACTION_KEYS` into a shared flat tuple.
+- Do not move fact-keyed entitlement into `core/` until a second game asks for it.
+
+And one that is this rung's own: **do not reach for constrained decoding to fix
+the fallback rate.** `docs/action-channel.md` already calls it - grammar-forcing
+deletes the signal the scorer voids on. If it lands it lands as a recorded
+`strict` vs `free` arm. A hobby Clocktower build reaching for a typed action enum
+is a reminder that this is a position to defend, not a gap to apologise for.

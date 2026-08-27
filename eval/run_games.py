@@ -14,8 +14,8 @@ hunt half is the hunter, who is EVIL. Only the full ``llm`` arm can carry gate #
 whole; a mixed arm carries one half and the report says which.
 
 Route discipline follows the endpoint, not the flag: ``clean``/``gray`` are
-parallel (freellmapi fans out), ``local`` is one model on one GPU and is forced
-serial no matter what ``--workers`` says.
+parallel (an off-box gateway fans out), ``local`` is one model on one GPU and is
+forced serial no matter what ``--workers`` says.
 
 Two gates, and what would falsify each:
 
@@ -49,6 +49,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
+from core import integrity
 from core.backends import ENDPOINTS, REGISTERS, Backend
 from core.runlog import RunState, run_with_marker
 from core.stats import wilson
@@ -473,11 +474,6 @@ def score(records: list[GameRecord]) -> dict:
              if h.get("legal_targets")]
     hunter_baseline = sum(1 / k for k in legal) / len(legal) if legal else None
 
-    decisions = sum(r.decisions for r in records)
-    fallbacks = sum(r.fallbacks for r in records)
-    served: Counter = Counter()
-    for r in records:
-        served.update(r.upstreams or {})
     return {
         "games_requested": len(records),
         "games_completed": len(played),
@@ -511,22 +507,11 @@ def score(records: list[GameRecord]) -> dict:
             #: some rows predate the field and the average speaks for a subset.
             "hunter_baseline_n": len(legal),
         },
-        "integrity": {
-            "decisions": decisions,
-            "fallbacks": fallbacks,
-            "fallback_rate": fallbacks / decisions if decisions else 0.0,
-            "upstreams": dict(served.most_common()),
-            "trace_sample": _dedupe([line for r in records for line in r.trace_sample])[:6],
-        },
+        # Shared with changeling since S9 - a second implementation of a void bar is
+        # how two runs come to void differently. Caused vs witnessed, the recovered
+        # third outcome and the clean-game count all live there.
+        "integrity": integrity.summarise(records, trace_lines=6),
     }
-
-
-def _dedupe(lines: list[str]) -> list[str]:
-    out: list[str] = []
-    for line in lines:
-        if line not in out:
-            out.append(line)
-    return out
 
 
 def report(s: dict, args, elapsed: float) -> str:
@@ -569,10 +554,8 @@ def report(s: dict, args, elapsed: float) -> str:
            else "UNRECORDED")
         + ")",
         "",
-        f"integrity  {integ['fallbacks']}/{integ['decisions']} decisions fell back "
-        f"to random ({fr:.2%})",
-    ]
-    if fr > 0.10:
+    ] + integrity.report_lines(integ)
+    if fr > integrity.VOID_BAR:
         lines.append("  WARNING: >10% of decisions were random. These numbers are "
                      "not a measurement of the model.")
     served = integ.get("upstreams") or {}

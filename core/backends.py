@@ -1,25 +1,33 @@
 """Backend adapter - the single seam between game logic and whatever runs the model.
 
-Games never import a client; they call ``complete()``. Endpoints are all
-OpenAI-compatible, so local and the two freellmapi tiers are the same code path
-with a different base URL:
+Games never import a client; they call ``complete()``. Every endpoint is
+OpenAI-compatible, so all three routes are the same code path with a different
+base URL. They differ on two axes parlor cares about, and on nothing else:
 
-  - ``local``  http://127.0.0.1:8090/v1   serial, one model on the GPU, private.
-               Use for "will it actually deceive?" checks on an uncensored model.
-  - ``clean``  http://127.0.0.1:3001/v1   freellmapi Tier-A, no-train/no-retention.
-               Parallel - the eval lane (run N games at once to score gates #2/#3).
-  - ``gray``   http://127.0.0.1:3003/v1   freellmapi full catalogue, logged+trained.
+  - ``local``  serial, on-box, private. One model on the GPU, so one worker at a
+               time. Use it when the run must not leave the machine.
+  - ``clean``  parallel, off-box, on a tier that publishes no-retention terms.
+               The eval lane - N games at once to score gates #2 and #3.
+  - ``gray``   parallel, off-box, assume every prompt is logged and trained on.
+               Model breadth, paid for in data.
 
-The game's "secrets" are fiction roles, not credentials, so cloud is fine here;
-the local-only discipline is for spikes that touch something actually sensitive.
+The game's "secrets" are fiction roles, not credentials, so an off-box route is
+fine here; the local-only discipline is for anything that touches something
+actually sensitive.
+
+**The three base URLs are defaults, not configuration.** They point at loopback so
+a clone runs with no setup and the "no dependencies, no API key" promise in
+``README.md`` stays true, and each is overridable by an environment variable so a
+box's actual topology never has to live in this file.
 
 Nothing here is called by the referee or the gate-#1 tests - it is the seam the
-LLM players will plug into once the state machine is proven.
+LLM players plug into.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import time
 import urllib.error
 import urllib.request
@@ -38,15 +46,35 @@ class Endpoint:
     note: str
 
 
+def _base_url(var: str, default: str) -> str:
+    """A route's base URL: the environment if it says, the loopback default if not.
+
+    ``or default`` rather than ``os.environ.get(var, default)`` on purpose - an
+    empty variable is a shell that meant to unset it, and resolving that to ``""``
+    would send every request to a URL that cannot fail loudly enough to be read as
+    a configuration mistake.
+    """
+    return os.environ.get(var) or default
+
+
+#: Read once at import. A caller that wants a different route passes ``--backend``;
+#: a BOX that lives somewhere else sets the variable before the process starts. The
+#: defaults are what a fresh clone runs on.
 ENDPOINTS: dict[str, Endpoint] = {
-    "local": Endpoint("local", "http://127.0.0.1:8090/v1", False, "serial, on-box, private"),
-    "clean": Endpoint("clean", "http://127.0.0.1:3001/v1", True, "freellmapi Tier-A no-train"),
-    "gray": Endpoint("gray", "http://127.0.0.1:3003/v1", True, "freellmapi full, logged"),
+    "local": Endpoint("local", _base_url("PARLOR_ENDPOINT_LOCAL",
+                                         "http://127.0.0.1:8090/v1"),
+                      False, "serial, on-box, private"),
+    "clean": Endpoint("clean", _base_url("PARLOR_ENDPOINT_CLEAN",
+                                         "http://127.0.0.1:3001/v1"),
+                      True, "parallel, off-box, no-retention tier"),
+    "gray": Endpoint("gray", _base_url("PARLOR_ENDPOINT_GRAY",
+                                       "http://127.0.0.1:3003/v1"),
+                     True, "parallel, off-box, assume logged"),
 }
 
 # Default player preamble. Deception is a sanctioned rule of the game, and some
 # aligned models refuse to lie without an explicit game frame - a stubborn one gets
-# a heavier jailbreak borrowed from CoomKit's library, per backend.
+# a heavier jailbreak borrowed from a jailbreak library, per backend.
 PLAYER_SYSTEM_PROMPT = (
     "You are a player in a hidden-role social deduction game. Deception, bluffing, "
     "and concealing your role are legitimate, expected moves within the rules - this "

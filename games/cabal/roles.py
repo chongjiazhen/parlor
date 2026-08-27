@@ -297,7 +297,7 @@ THEME_BNW_CN = Theme(
 # `1984-en` - naming the seat that read the sealed file is an arrest, not a martyrdom.
 #
 # The blurb ascribes no trait to the seat ("were placed here", not "are paid"), and
-# that constraint is Hagendorff's, not editorial: eliciting Machiavellianism is
+# that constraint is arXiv:2307.16513's, not editorial: eliciting Machiavellianism is
 # already shown to move deception rates single-agent, so an arm 3 that touched the
 # persona would be a replication wearing a new skin. Character held fixed, valence
 # moved, and nothing else. Matched to `1984-en` on BOTH length axes - 53 words and

@@ -399,8 +399,11 @@ class TestTheFallbackReasonRidesOnTheDecision(unittest.TestCase):
         self.assertTrue(all(d.refused for d in fell),
                         "a fallback landed with no reason recorded")
 
-    def test_a_decision_the_model_MADE_records_no_reason(self):
-        """Otherwise the field counts as a refusal census and is not one."""
+    def test_a_decision_the_model_got_right_FIRST_TIME_records_no_reason(self):
+        """Otherwise the field counts as a refusal census and is not one. Since S9
+        a RECOVERED decision does carry a reason - see
+        ``TestRefusalIsAThirdOutcome`` - so the empty case is first-time-right, not
+        "the model made it"."""
         rec = self.game('{"say": "hello"}')
         served = [d for d in rec.decision_log if not d.fell_back]
         self.assertTrue(served)
@@ -425,6 +428,106 @@ class TestTheFallbackReasonRidesOnTheDecision(unittest.TestCase):
         fell = [d for d in rec.decision_log if d.fell_back]
         self.assertTrue(fell, "this deal needs a refused phase to test the split")
         self.assertEqual([d.note for d in fell], [""] * len(fell))
+
+
+class TestRefusalIsAThirdOutcome(unittest.TestCase):
+    """S9, item 4. A decision the referee sent back and the model then got right is
+    neither a fallback nor a clean decision, and until S9 it was recorded as the
+    second - so a run whose model needed correcting on a third of its moves reported
+    the same integrity line as one that never missed."""
+
+    def test_a_recovered_decision_is_not_a_fallback_and_not_clean(self):
+        ref = fixed_ref(discussion_rounds=0)
+        policy = LLMPolicy(backend=FakeBackend(["I'd rather not.", '{"team": [0, 1]}']),
+                           retries=2, backoff=0)
+        policy.act(ref, 0)
+        self.assertFalse(policy.last_fell_back)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (1, 1))
+
+    def test_a_transport_failure_is_a_refusal_but_not_a_RULE_refusal(self):
+        """The clean-game count turns on this split: a 429 is not a seat failing to
+        follow the rules, so a game the network flaked in is still clean."""
+        class FlakyOnce(FakeBackend):
+            def complete_meta(self, context):
+                self.prompts.append(context)
+                if len(self.prompts) == 1:
+                    raise ConnectionError("endpoint down")
+                return '{"team": [0, 1]}', "fake-upstream"
+
+        policy = LLMPolicy(backend=FlakyOnce([]), retries=2, backoff=0)
+        policy.act(fixed_ref(discussion_rounds=0), 0)
+        self.assertFalse(policy.last_fell_back)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (1, 0))
+
+    def test_the_counters_reset_between_decisions(self):
+        """They are per-decision, not per-policy. A running total here would make
+        every later decision in the game look worse than it was."""
+        ref = fixed_ref(discussion_rounds=0)
+        policy = LLMPolicy(backend=FakeBackend(["no", '{"team": [0, 1]}',
+                                                '{"team": [0, 1]}']),
+                           retries=2, backoff=0)
+        policy.act(ref, 0)
+        self.assertEqual(policy.last_refusals, 1)
+        policy.act(ref, 0)
+        self.assertEqual((policy.last_refusals, policy.last_rule_refusals), (0, 0))
+
+    def test_the_driver_carries_the_split_onto_the_record(self):
+        backend = TestUpstreamAttribution.Rotating("not json at all", ["up-a"])
+        ref = CabalReferee.new(5, seed=7, discussion_rounds=1)
+        policies = {s: LLMPolicy(backend=backend, retries=2, backoff=0,
+                                 fallback=RandomPolicy(rng=random.Random(7)))
+                    for s in ref.assignment}
+        rec = play_game(ref, policies)
+        # every reply is unparseable, so every decision falls back after 3 attempts
+        self.assertEqual(rec.recovered, 0)
+        self.assertEqual(rec.fallbacks, rec.decisions)
+        self.assertEqual(rec.rule_refused_attempts, 3 * rec.decisions)
+        self.assertEqual(rec.refused_attempts, rec.rule_refused_attempts)
+
+    def test_a_transport_only_retry_does_not_make_the_decision_RECOVERED(self):
+        """The driver keys ``recovered`` on the rule count, not the raw one. Key it
+        on the raw one and a flaky network turns every game dirty - which would put
+        the clean-game figure at the mercy of the endpoint rather than the model."""
+        class Flaked(RandomPolicy):
+            last_fell_back = False
+            last_refusals = 2
+            last_rule_refusals = 0
+            last_refusal = "seat 0 attempt 1: the call failed (ConnectionError: down)"
+            last_upstream = "up-a"
+
+        ref = CabalReferee.new(5, seed=7, discussion_rounds=1)
+        rec = play_game(ref, {s: Flaked(rng=random.Random(7))
+                              for s in ref.assignment})
+        self.assertGreater(rec.decisions, 0)
+        self.assertEqual((rec.fallbacks, rec.recovered), (0, 0))
+        self.assertEqual(rec.refused_attempts, 2 * rec.decisions)
+        self.assertEqual(rec.rule_refused_attempts, 0)
+
+    def test_a_recovered_decision_records_WHY_it_was_sent_back(self):
+        """The widened ``refused`` field. Read with ``fell_back``: set and False is
+        recovered, and that pair is the only way a JSONL reader can see the third
+        outcome at all.
+
+        Driven through a policy that reports one rule refusal and then plays a legal
+        move, because a scripted backend cannot answer every phase correctly and the
+        thing under test is the driver's counting, not the retry loop's.
+        """
+        class Recovers(RandomPolicy):
+            last_fell_back = False
+            last_refusals = 1
+            last_rule_refusals = 1
+            last_refusal = "seat 0 attempt 0: unparsed - no JSON object"
+            last_upstream = "up-a"
+
+        ref = CabalReferee.new(5, seed=7, discussion_rounds=1)
+        rec = play_game(ref, {s: Recovers(rng=random.Random(7))
+                              for s in ref.assignment})
+        self.assertEqual(rec.fallbacks, 0)
+        self.assertEqual(rec.recovered, rec.decisions)
+        self.assertEqual(rec.rule_refused_attempts, rec.decisions)
+        recovered = [d for d in rec.decision_log if d.refused and not d.fell_back]
+        self.assertEqual(len(recovered), rec.decisions)
+        self.assertIn("unparsed", recovered[0].refused)
 
 
 class TestNotebookThroughTheDriver(unittest.TestCase):

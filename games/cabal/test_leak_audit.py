@@ -6,8 +6,10 @@ right, and the watcher genuinely cannot tell the seer from the mimic.
 import unittest
 
 from core.observability import find_leaks
+from games.cabal.audit import leak_audit, self_line
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import (
+    AGENT,
     HUNTER,
     LOYALIST,
     MIMIC,
@@ -17,9 +19,15 @@ from games.cabal.roles import (
     THEME_1984_EN,
     THEME_BNW_EN,
     THEME_PLAIN,
+    THEMES,
     WATCHER,
+    Setup,
     Team,
 )
+
+#: Every shipped skin, so a repeated-role deal is checked in the faces a run can
+#: actually be launched with rather than only the default one.
+ALL_THEMES = tuple(THEMES.values())
 
 FIXED = {0: SEER, 1: WATCHER, 2: LOYALIST, 3: MIMIC, 4: HUNTER}
 
@@ -70,6 +78,61 @@ class TestGate1NoLeak(unittest.TestCase):
         terms = secret_terms(r)
         hits = find_leaks(rendered, terms, entitled=set(), viewer=2)
         self.assertIn((3, "mimic"), hits)
+
+
+class TestRepeatedRole(unittest.TestCase):
+    """Two seats dealt the SAME role hold the same secret term by construction, so
+    the repo's usual remedy for a colliding term - rename it - cannot reach them.
+    These pin the corpus narrowing that makes such a deal auditable, and pin that it
+    narrowed the corpus rather than weakening the matcher.
+
+    Nothing ships a repeated role yet: ``SETUP_5`` is five distinct ones. The deal
+    below is the hand-built 7-seat shape the unbuilt setups would use, and this is
+    setup work done before the setup so the audit is not discovered to be unsound
+    on the first run that needs it.
+    """
+
+    SETUP_7 = Setup(n=7,
+                    roles=(SEER, WATCHER, LOYALIST, LOYALIST, MIMIC, HUNTER, AGENT),
+                    team_sizes=(2, 3, 3, 4, 4), fails_required=(1, 1, 1, 1, 1))
+    DEAL = {0: SEER, 1: WATCHER, 2: LOYALIST, 3: LOYALIST,
+            4: MIMIC, 5: HUNTER, 6: AGENT}
+
+    def ref7(self, theme):
+        return CabalReferee(setup=self.SETUP_7, assignment=dict(self.DEAL),
+                            theme=theme, leader=0)
+
+    def test_two_loyalist_seats_do_not_leak_each_other(self):
+        # Before the fix this reported a MUTUAL leak in every skin - seat 2 and seat
+        # 3 each reading the other's term out of its own "Your role:" line.
+        for theme in ALL_THEMES:
+            with self.subTest(theme=theme.name):
+                self.assertEqual(leak_audit(self.ref7(theme)), [])
+
+    def test_the_self_line_is_really_in_every_payload(self):
+        # The strip is only sound while the line it removes is the line the referee
+        # actually renders. `audit.self_line` re-templates it, so this is what stops
+        # that duplicate drifting: a render change makes the strip match nothing and
+        # this fails, instead of the audit silently going back to false positives.
+        for theme in ALL_THEMES:
+            for r in (self.ref7(theme), ref(theme)):
+                for seat in r.assignment:
+                    with self.subTest(theme=theme.name, n=r.n, seat=seat):
+                        self.assertIn(self_line(r, seat),
+                                      r.render_context(seat, include_speech=False))
+
+    def test_a_repeated_term_outside_the_self_line_is_still_caught(self):
+        # The soundness half. If the strip had been a blanket skip of same-role
+        # seats, this leak would be invisible; it removes one line, so it is not.
+        r = self.ref7(THEME_1984_EN)
+        name = THEME_1984_EN.role_names["loyalist"]
+        clean = r.render_context
+
+        def leaky(seat, *a, **kw):
+            return clean(seat, *a, **kw) + f"\npssst seat 3 is the {name}"
+
+        r.render_context = leaky
+        self.assertIn((2, 3, name), leak_audit(r))
 
 
 class TestEntitlement(unittest.TestCase):

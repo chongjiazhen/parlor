@@ -76,6 +76,38 @@ class NightResult:
         """Which side a seat WINS with - always from truth, never from belief."""
         return self.truth[seat].side
 
+    def knowledge_class(self, seat: int) -> str:
+        """What this seat was actually TOLD, as one of ``KNOWLEDGE_CLASSES``.
+
+        **Keyed on the reveal, not on the card alone - changed 2026-08-28 (S10),
+        against the measurement in RULES.md.** The card says what a seat CAN learn;
+        only the night says whether it learned any of it. A MEET card's reveal is
+        conditional on ANOTHER seat's deal, so a seat dealt ``pack`` whose partner
+        went to the centre wakes, sees nobody, receives no ``Knowledge`` at all -
+        and used to carry the ``identity`` label into every stratified number
+        anyway. Measured on 4000 nights of the shipped deck: 42.6% of seated
+        ``pack`` seats got no fellow reveal, and 17.4% of villager seats in the
+        ``identity`` stratum had been told nothing. Those are blind villagers, and
+        THE GATE is cut on blind villagers.
+
+        Still keyed on the DEALT card and never on the dawn card - that half of the
+        old pin stands. A seat robbed after it looked was told what it was told, and
+        relabelling it by a card it acquired later would score it for knowledge it
+        never had. Same reason ``false`` comes from the deal: only the seat that
+        DRANK holds a belief wrong by construction, and it is told nothing at all
+        beyond that stale belief, so a reveal count cannot see it.
+
+        The card supplies the LABEL and the reveal supplies whether there is one,
+        which works because every card produces reveals of a single class - the
+        switcher is the only source of ``positional``. A card that mixed classes
+        would need this to read the labels themselves; `KNOWLEDGE_CLASSES` and the
+        conformance test are where that assumption is pinned.
+        """
+        card = self.dealt[seat]
+        if card.knowledge_class == "false":
+            return "false"
+        return card.knowledge_class if self.knowledge[seat] else "none"
+
 
 def deal(setup: Setup, rng: random.Random) -> tuple[dict[int, Card], list[Card]]:
     """Deal seats and centre, refusing a deal that seats no ``pack``.

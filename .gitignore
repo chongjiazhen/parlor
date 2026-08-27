@@ -7,11 +7,12 @@ _*.md
 *.log
 .pytest_cache/
 
-# Raw run output. Regenerable, grows per run, and git is not a data store. The
-# directory is durable (unlike the harness scratchpad), so records survive a
-# reboot without entering history. A run that EVIDENCES a claim in the docs gets
-# rendered to a readable transcript and that transcript is committed - not the blob.
+# Raw run output - regenerable, and git is not a data store. A run that evidences
+# a claim is rendered to transcripts/, and the transcript is what gets committed.
 eval/records/
 
-# Launchers are INPUTS, not run output - they live in eval/runs/ and are tracked.
-# A run recipe that is not versioned cannot be reviewed after it misfires.
+CLAUDE.local.md
+RESUME.local.md
+pre-push.local.md
+
+/.scratch/

@@ -38,8 +38,16 @@ Change them against a measurement, and change them HERE.
   wins ~65% with no deception at all.
 - **`core/` is what game #2 inherits; `games/<name>/` is what is about that game.**
   Promote on evidence that a second game needs it.
-- **Canonical keys are functional and branding-free.** Prose may name the games a
-  rung is modelled on; a game's role names, art, or text stay out of the code.
+- **The tree describes parlor; the rest is a working note.** Canonical keys stay
+  functional and branding-free - prose may name the game a rung is modelled on,
+  while that game's role names, art and text stay out of the code. Published work
+  is cited by identifier, never by author. Who ELSE built something, what their
+  work is worth, and any claim nobody here has read first-hand go to the untracked
+  working notes.
+- **A run's OUTPUT is untracked, a run's RECIPE is tracked.** `eval/records/` holds
+  the raw blobs and never enters history; the rendered transcript that evidences a
+  claim does, in `transcripts/`. The launchers in `eval/runs/` are inputs, not
+  output - a run recipe that is not versioned cannot be reviewed after it misfires.
 - **Judge a detached run by its own log or JSONL** - CPU, IO counters and exit codes
   all read as healthy while a run sleeps, and one such call killed a live run. Probe
   a cloud tier with a burst: a cooled key serves single requests and fails a stream.

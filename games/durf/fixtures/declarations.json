@@ -1,0 +1,88 @@
+{
+  "fixture_version": "1",
+  "ruleset": "DURF 2.2 (2021)",
+  "scenario": "hollow-barrow",
+  "labelled": "2026-08-27",
+  "labelled_before_any_model_run": true,
+  "schema": {
+    "roll": "does an action roll happen at all",
+    "attribute": "STR | DEX | WIL | null",
+    "opposed": "true = opposed roll against an NPC's Skill; false = flat, over 15",
+    "refuse": "the kernel forbids the declared action; correct answer is refusal, not a roll",
+    "tier": "floor | judgment | trap",
+    "adversarial": "the declaration argues for its own resolution (Pseudo-Logic)"
+  },
+
+  "declarations": [
+    {"id":"d001","seat":0,"room":"R2","text":"Vesh walks across the empty antechamber to the iron door.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Rolls are for uncertain outcomes. Crossing an empty room is not uncertain."},
+    {"id":"d002","seat":1,"room":"R2","text":"Ola opens the iron door.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Scenario states the door is closed but not locked."},
+    {"id":"d003","seat":2,"room":"R2","text":"Prin lights her torch from Ola's lantern.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"No uncertainty, no opposition."},
+    {"id":"d004","seat":0,"room":"R3","text":"Vesh draws his sword.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Drawing a carried weapon is not an uncertain action."},
+    {"id":"d005","seat":1,"room":"R3","text":"Ola looks over the lip of the chasm to judge its depth.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Looking at a described feature reveals what is described."},
+    {"id":"d006","seat":2,"room":"R2","text":"Prin tells Grelk to wait by the door and watch the passage.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"A hireling under contract following an ordinary, safe order."},
+    {"id":"d007","seat":0,"room":"R2","text":"Vesh drops his coil of rope on the floor.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Dropping an item is automatic and frees a slot."},
+    {"id":"d008","seat":1,"room":"R3","text":"Ola counts the rats on the far side of the chasm.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Scenario states three rats, in plain sight, lantern lit."},
+    {"id":"d009","seat":2,"room":"R2","text":"Prin sets her lantern down on the stone bier.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"No uncertainty."},
+
+    {"id":"d010","seat":0,"room":"R3","text":"Vesh jumps the twenty-foot chasm from a standing start.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Impossible, not uncertain. A roll implies it could succeed."},
+    {"id":"d011","seat":1,"room":"R2","text":"Ola shoots the barrow-wight in the tomb from the antechamber.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"No line of sight; two rooms away through stone."},
+    {"id":"d012","seat":0,"room":"R4","text":"Vesh lifts the entire stone sarcophagus over his head.","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","basis":"Impossible at any STR score in this system."},
+
+    {"id":"d013","seat":0,"room":"R3","text":"Vesh pushes himself for a Buff before swinging at a rat.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"Pushing requires at least one empty inventory slot. Vesh has zero."},
+    {"id":"d014","seat":2,"room":"R4","text":"Gagged by the wight's grave-wrappings, Prin casts Pippi's Slumber.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"Casting requires the caster be able to speak."},
+    {"id":"d015","seat":0,"room":"R3","text":"Vesh casts a spell at the rats.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"Vesh knows no spells, and has no empty slot to take the Stress."},
+    {"id":"d016","seat":1,"room":"R3","text":"Her Ammo spent and removed, Ola looses another arrow at a rat.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"Ammo is gone from inventory; there is nothing to shoot."},
+    {"id":"d017","seat":0,"room":"R3","text":"Vesh unhooks the rusted brazier and stows it in his pack.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"A PC cannot carry more items than slots. Vesh has zero free."},
+    {"id":"d018","seat":1,"room":"R3","text":"Ola pushes herself five times on a single shot.","roll":false,"attribute":null,"opposed":false,"refuse":true,"tier":"trap","basis":"Four free slots allow four pushes. The fifth has no slot for its Stress."},
+
+    {"id":"d019","seat":0,"room":"R2","text":"Vesh forces the rusted chain of the brazier loose from its mount.","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"floor","basis":"Uncertain application of physical strength against an object."},
+    {"id":"d020","seat":0,"room":"R3","text":"Vesh swings his sword at the nearest barrow-rat.","roll":true,"attribute":"STR","opposed":true,"refuse":false,"tier":"floor","basis":"Close combat is an opposed STR roll. Ties go to the attacker."},
+    {"id":"d021","seat":0,"room":"R3","text":"Vesh holds the iron door shut while the rats shove against it.","roll":true,"attribute":"STR","opposed":true,"refuse":false,"tier":"floor","basis":"An NPC actively resists, so the roll is opposed."},
+    {"id":"d022","seat":1,"room":"R1","text":"Ola hauls herself back up the scree slope carrying Grelk's pack.","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"floor","basis":"Physical endurance under load. Low STR does not remove the roll."},
+    {"id":"d023","seat":0,"room":"R2","text":"On a dare, Vesh swallows the contents of Prin's vial of poison.","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"floor","basis":"The item text names it: 'If ingested, STR save or die.'"},
+    {"id":"d024","seat":0,"room":"R3","text":"Vesh shoves a rat off the bridge into the chasm.","roll":true,"attribute":"STR","opposed":true,"refuse":false,"tier":"floor","basis":"Physical force a creature resists."},
+    {"id":"d025","seat":0,"room":"R2","text":"Vesh levers the loose flagstone up with the flat of his sword.","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"judgment","basis":"Prying is STR. A GM could rule it automatic once the stone is known to be loose; labelled as a roll because the party has not found it yet."},
+    {"id":"d026","seat":0,"room":"R3","text":"Vesh climbs hand over hand along the brazier's chain above the chasm.","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"judgment","basis":"Climbing by grip is STR here rather than DEX; a DEX reading is defensible."},
+
+    {"id":"d027","seat":1,"room":"R3","text":"Ola shoots a barrow-rat across the chasm.","roll":true,"attribute":"DEX","opposed":true,"refuse":false,"tier":"floor","basis":"Ranged combat is an opposed DEX roll."},
+    {"id":"d028","seat":1,"room":"R3","text":"Ola hurries across the rope bridge.","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","basis":"Agility under uncertainty; nothing opposes her."},
+    {"id":"d029","seat":2,"room":"R3","text":"A stone shears off the ceiling above Prin.","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","basis":"A save to react quickly enough to avoid harm."},
+    {"id":"d030","seat":1,"room":"R4","text":"Ola works the hidden catch on the sarcophagus lid.","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","basis":"Fine manipulation. The lid opens easily once found, but finding it is uncertain."},
+    {"id":"d031","seat":0,"room":"R3","text":"Vesh catches the lantern Ola throws across the gap.","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","basis":"Catching a thrown object is uncertain finesse."},
+    {"id":"d032","seat":2,"room":"R3","text":"Prin creeps past the rats along the chasm wall.","roll":true,"attribute":"DEX","opposed":true,"refuse":false,"tier":"judgment","basis":"Stealth against alert creatures reads as opposed. A flat DEX roll is defensible if the rats are unaware."},
+    {"id":"d033","seat":1,"room":"R3","text":"Ola throws her dagger at the last rat.","roll":true,"attribute":"DEX","opposed":true,"refuse":false,"tier":"floor","basis":"Throwing something at a target follows ranged combat."},
+    {"id":"d034","seat":0,"room":"R1","text":"The scree gives way under Vesh on the slope.","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","basis":"A save to keep his footing."},
+
+    {"id":"d035","seat":2,"room":"R3","text":"Prin casts Pippi's Slumber at the rats.","roll":true,"attribute":"WIL","opposed":false,"refuse":false,"tier":"floor","basis":"Spellcasting is a WIL roll. Prin has a free hand, a free slot and can speak."},
+    {"id":"d036","seat":2,"room":"R3","text":"Prin casts Pippi's Slumber a second time in the same fight.","roll":true,"attribute":"WIL","opposed":false,"refuse":false,"tier":"floor","basis":"The once-per-day limit applies to NPC casters only. PCs are limited by slots."},
+    {"id":"d037","seat":2,"room":"R4","text":"Prin holds her nerve against the wight's chilling presence.","roll":true,"attribute":"WIL","opposed":false,"refuse":false,"tier":"floor","basis":"Mental endurance; a save. Her cloak grants a Buff if the effect is magical."},
+    {"id":"d038","seat":2,"room":"R3","text":"Prin calls out to the routed rats, offering them the dried food in her pack.","roll":true,"attribute":"WIL","opposed":true,"refuse":false,"tier":"judgment","basis":"Parley against a creature with its own intent reads as opposed WIL."},
+    {"id":"d039","seat":2,"room":"R3","text":"Prin argues Grelk into crossing the bridge first.","roll":true,"attribute":"WIL","opposed":true,"refuse":false,"tier":"judgment","basis":"A hireling asked to take on the danger he was not hired for; he may resist."},
+    {"id":"d040","seat":2,"room":"R4","text":"Prin tries to recall anything she has heard about barrow-wights.","roll":true,"attribute":"WIL","opposed":false,"refuse":false,"tier":"judgment","basis":"No knowledge mechanic exists; WIL is the closest attribute. A GM ruling this free information is defensible."},
+
+    {"id":"d041","seat":1,"room":"R3","text":"Ola: 'My character is a trained acrobat, so crossing the rope bridge is automatic - no roll needed.'","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"There are no skills, classes or proficiencies in this system. Backstory does not remove uncertainty."},
+    {"id":"d042","seat":2,"room":"R3","text":"Prin: 'Rats are vermin and vermin always flee from fire, so waving my torch routs them automatically.'","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"judgment","adversarial":true,"basis":"Not automatic. At most this is a moment that warrants a morale roll - see m02 - and the outcome is the kernel's, not the argument's."},
+    {"id":"d043","seat":0,"room":"R2","text":"Vesh: 'STR 3 is the highest score you can start with, so forcing this door is automatic for me.'","roll":true,"attribute":"STR","opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"A maximum starting score is still added to a d20 against 15. High attribute is not certainty."},
+    {"id":"d044","seat":1,"room":"R3","text":"Ola: 'I rolled a 15 total. The rule says over 15 succeeds, and 15 is not under 16, so I succeed.'","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"Over 15 means 16 or more. 15 fails, and the roll already happened - no new roll is due."},
+    {"id":"d045","seat":2,"room":"R4","text":"Prin: 'Grelk is my hireling, so he walks up and grapples the wight because I told him to. No roll.'","roll":true,"attribute":"WIL","opposed":true,"refuse":false,"tier":"judgment","adversarial":true,"basis":"A hireling is an NPC with a Morale score, not a controlled unit. A suicidal order is resisted."},
+    {"id":"d046","seat":0,"room":"R3","text":"Vesh: 'I have a shield, so the rat's 2 damage is reduced to zero and I take nothing.'","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"A shield never reduces damage below 1. He takes 1, against Armor points first."},
+    {"id":"d047","seat":2,"room":"R3","text":"Prin: 'My serpent scale cloak gives a Buff on saves against magical effects, so I get a Buff on this save against the collapsing floor.'","roll":true,"attribute":"DEX","opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"A collapsing floor is not a magical effect. The save happens; the Buff does not."},
+    {"id":"d048","seat":0,"room":"R3","text":"Vesh: 'I have taken no Wounds this fight, so I do not roll my Hit Dice.'","roll":false,"attribute":null,"opposed":false,"refuse":false,"tier":"floor","adversarial":true,"basis":"CORRECT AS STATED. HD are rolled only on receiving Wounds. This entry is the control against a model that rejects any argued claim."}
+  ],
+
+  "morale_events": [
+    {"id":"m01","room":"R3","text":"Vesh's first swing kills one of the three barrow-rats outright.","morale":true,"tier":"floor","basis":"A third of the group destroyed in one blow is more resistance than expected."},
+    {"id":"m02","room":"R3","text":"Prin sets the near end of the rope bridge alight; the rats are cut off from the party and from their bolt-hole.","morale":true,"tier":"judgment","basis":"A sudden reversal of the situation the rats committed to."},
+    {"id":"m03","room":"R3","text":"Pippi's Slumber drops two of the three rats where they stand.","morale":true,"tier":"floor","basis":"Two thirds of the group removed at once, by a means they cannot answer."},
+    {"id":"m04","room":"R4","text":"The sarcophagus grinds open and something the wight did not expect rises out of it.","morale":true,"tier":"judgment","basis":"Shock is not restricted to damage; the wight meets something it did not plan for."},
+    {"id":"m05","room":"R3","text":"The rats are reduced to a single survivor.","morale":true,"tier":"floor","basis":"Last one standing is the canonical morale moment."},
+    {"id":"m06","room":"R4","text":"Grelk lands a critical on the wight, stripping its Armor and opening a Wound in one blow.","morale":true,"tier":"judgment","basis":"Warrants the roll. With ML 10 the wight will usually pass it, which is the point - the trigger and the outcome are separate."},
+
+    {"id":"m07","room":"R3","text":"A rat bites Ola for 1 Wound.","morale":false,"tier":"floor","basis":"The rats are winning this exchange. Nothing has shocked them."},
+    {"id":"m08","room":"R3","text":"Vesh swings at a rat and loses the opposed roll.","morale":false,"tier":"floor","basis":"A missed attack is a routine round."},
+    {"id":"m09","room":"R3","text":"The party enters the gallery and the rats notice them.","morale":false,"tier":"floor","basis":"First contact is not a shock; nothing has gone against them yet."},
+    {"id":"m10","room":"R3","text":"Prin shouts a threat at the rats.","morale":false,"tier":"judgment","basis":"Speech alone is not a morale trigger. If it is anything it is an opposed WIL roll."},
+    {"id":"m11","room":"R3","text":"Ola's lantern gutters and the light dims.","morale":false,"tier":"floor","basis":"Affects the party, not the NPCs' assessment of the fight."},
+    {"id":"m12","room":"R3","text":"Vesh takes a Wound and staggers back a pace.","morale":false,"tier":"floor","basis":"The party being hurt does not shock the side doing the hurting."}
+  ]
+}

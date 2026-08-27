@@ -176,10 +176,21 @@ class LLMPolicy:
     #: is the "N attempts failed, playing random" summary, which says a fallback
     #: happened and nothing about why, and a census of those is no diagnosis at all.
     last_refusal: str = ""
+    #: how many attempts on the most recent decision were refused, and how many of
+    #: those the PARSER or the RULES refused rather than the network. Both, because
+    #: they answer different questions: a 429 says nothing about how the model
+    #: plays, an unparsed or illegal reply says everything. A decision with
+    #: ``last_refusals`` above zero and ``last_fell_back`` False is the third
+    #: outcome this record used to have no room for - the model got there, but only
+    #: after the referee sent it back.
+    last_refusals: int = 0
+    last_rule_refusals: int = 0
 
     def act(self, ref: CabalReferee, seat: int) -> dict:
         self.last_fell_back = False
         self.last_refusal = ""
+        self.last_refusals = 0
+        self.last_rule_refusals = 0
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -193,7 +204,7 @@ class LLMPolicy:
                 self.last_upstream = served_by
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
-                self._refused(seat, attempt, complaint)
+                self._refused(seat, attempt, "transport", complaint)
                 if self.backoff and attempt < self.retries:
                     time.sleep(self.backoff * (2 ** attempt))
                 continue
@@ -201,13 +212,13 @@ class LLMPolicy:
                 action = parse_action(reply, ref)
             except ParseError as exc:
                 complaint = str(exc)
-                self._refused(seat, attempt, f"unparsed - {exc}")
+                self._refused(seat, attempt, "unparsed", str(exc))
                 continue
             try:
                 self._precheck(ref, seat, action)
             except IllegalAction as exc:
                 complaint = str(exc)
-                self._refused(seat, attempt, f"illegal - {exc}")
+                self._refused(seat, attempt, "illegal", str(exc))
                 continue
             return action
         self.trace.append(f"seat {seat}: {self.retries + 1} attempts failed, playing random")
@@ -215,10 +226,22 @@ class LLMPolicy:
         self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
 
-    def _refused(self, seat: int, attempt: int, complaint: str) -> None:
-        """One place writes a refusal, so the trace and the per-decision census can
-        never disagree about what happened."""
-        self.last_refusal = f"seat {seat} attempt {attempt}: {complaint}"
+    def _refused(self, seat: int, attempt: int, kind: str, detail: str) -> None:
+        """One place writes a refusal, so the trace, the per-decision census and the
+        integrity block can never disagree about what happened.
+
+        ``kind`` is ``transport`` | ``unparsed`` | ``illegal``, and it is an argument
+        rather than a prefix parsed back off the text: the clean-game count turns on
+        whether the model or the network was at fault, and recovering that by string
+        match against a message written for a human is how the answer drifts the next
+        time somebody rewords one. The rendered line is unchanged - a transport
+        complaint already reads as its own sentence.
+        """
+        self.last_refusals += 1
+        if kind != "transport":
+            self.last_rule_refusals += 1
+        text = detail if kind == "transport" else f"{kind} - {detail}"
+        self.last_refusal = f"seat {seat} attempt {attempt}: {text}"
         self.trace.append(self.last_refusal)
 
     def _precheck(self, ref: CabalReferee, seat: int, action: dict) -> None:
@@ -300,8 +323,8 @@ class Decision:
     #: chose to CARRY, which is a different and usually sharper thing than the
     #: reasoning it happened to have.
     note: str = ""
-    #: why this decision was refused, when it was - the last trace line the policy
-    #: wrote before giving up. Empty on a decision the model actually made.
+    #: why the last refused ATTEMPT on this decision was refused - the trace line
+    #: the policy wrote. Empty on a decision the model got right first time.
     #:
     #: A field of its own rather than a second meaning for ``note``: the notebook
     #: is off on most runs and on for some, so one field over two meanings would
@@ -310,7 +333,19 @@ class Decision:
     #: ``trace_sample`` (8 per game) and the end-of-run report (deduped, capped,
     #: and absent until the run ends) - neither a census, and the second unreadable
     #: while a six-hour run is still going.
+    #:
+    #: **Widened 2026-08-27 (S9): it is now written on a RECOVERED decision too**,
+    #: not only on one that fell back. A refused-then-corrected decision is the
+    #: third outcome, and it used to be recorded as indistinguishable from a clean
+    #: one. Read it with ``fell_back``: set and False is recovered, set and True is
+    #: a fallback, empty is clean.
     refused: str = ""
+    #: how many attempts were refused before this decision landed, and how many of
+    #: those the parser or the rules refused rather than the network. Only the
+    #: second kind is evidence about the model, and only the second kind costs a
+    #: game its clean-game count.
+    refusals: int = 0
+    rule_refusals: int = 0
     fell_back: bool = False
     #: which upstream actually answered THIS decision. Under a routing alias the
     #: gateway picks per request, so a per-run mix cannot tell you whether the model
@@ -347,6 +382,16 @@ class GameRecord:
     fails_played: int = 0
     missions: list[bool] = field(default_factory=list)
     fallbacks: int = 0        # decisions no model could make legally
+    #: decisions the parser or the rules sent back at least once and the model then
+    #: got RIGHT - the third outcome, invisible until S9 because it was counted with
+    #: the decisions nothing was wrong with. ``fallbacks``, ``recovered`` and the
+    #: remainder partition ``decisions``; a decision that only ever failed in
+    #: TRANSPORT is not recovered, because a 429 is not the model getting it wrong.
+    recovered: int = 0
+    #: attempts, not decisions - the diagnostic behind the two counts above, and
+    #: either may exceed ``decisions`` on a bad network.
+    refused_attempts: int = 0
+    rule_refused_attempts: int = 0
     decisions: int = 0
     utterances: list[str] = field(default_factory=list)
     #: every decision in order, with the private reasoning behind it. Referee-side
@@ -393,8 +438,14 @@ def play_game(
         phase = ref.phase
         action = policies[seat].act(ref, seat)
         fell_back = bool(getattr(policies[seat], "last_fell_back", False))
+        refusals = int(getattr(policies[seat], "last_refusals", 0) or 0)
+        rule_refusals = int(getattr(policies[seat], "last_rule_refusals", 0) or 0)
         if fell_back:
             rec.fallbacks += 1
+        elif rule_refusals:
+            rec.recovered += 1
+        rec.refused_attempts += refusals
+        rec.rule_refused_attempts += rule_refusals
         # filed before the move is applied, so a note written about THIS board is
         # dated to this board. It is a no-op when the notebook is off.
         stored = ref.note(seat, action.get("note", ""))
@@ -403,7 +454,8 @@ def play_game(
             played=played_summary(phase, action),
             think=str(action.get("think", "")), note=stored or "",
             refused=(str(getattr(policies[seat], "last_refusal", "") or "")
-                     if fell_back else ""),
+                     if refusals else ""),
+            refusals=refusals, rule_refusals=rule_refusals,
             fell_back=fell_back,
             served_by=("" if fell_back
                        else str(getattr(policies[seat], "last_upstream", "") or "")),

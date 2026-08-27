@@ -1,84 +1,80 @@
 # parlor
 
-A PettingZoo-style arena for LLM agents playing hidden-information games - built to
-prove one hard property before anything else: **independent context**. Each agent
-sees only its own view of the world; secrets it isn't entitled to are not merely
-hidden in the UI, they are *absent from the bytes sent to its model*.
+**A table of AI players that genuinely do not know what you know.**
 
-The endgame is a freeform AI-run TTRPG: independent actors, off-map factions acting
-on their own clock, and a referee that oversees without micromanaging. The games
-below are increasingly-freeform test harnesses for that one `core/` engine. We start
-with `cabal` - a bounded team-mission hidden-role deduction game, modelled on The
-Resistance: Avalon - because it is the purest test of the property, and its referee
-needs zero judgment: it is a unit test, not an opinion.
+Sit down in one seat. Every other seat is held by a model with its own private
+view of the same game - its own secret role, its own night knowledge, its own
+wrong ideas about you. Nobody at the table can read anyone else's, including the
+referee's own bookkeeping, because an un-entitled secret is not hidden in a UI or
+discouraged by a prompt: it is **absent from the bytes sent to that seat's model**.
 
-**The game, if you don't know it.** The family plays 5-10 and is usually best at
-7-8; this ships the 5-seat setup, which is the cheapest to run and, for what is
-being measured here, the densest in usable samples. Five players. Two are secretly
-saboteurs and
-know each other. Of the other three, one secretly knows who they are, and a second
-knows only that the informant is one of two people - without knowing which of those
-two is the informant and which is a saboteur wearing the same face. Each round a
-leader proposes a small team, everyone argues, everyone votes. The chosen team goes
-on a mission and plays cards in secret - a saboteur may fail it, and only the number
-of fails becomes public, never who played what. Three missions held wins it for the
-majority; three failed wins it for the saboteurs. If the majority is about to win,
-the saboteurs get one last shot: name the player who secretly knew, and take the
-game instead. Everything interesting happens in the argument between those votes,
-which is exactly what is being measured.
+That property is what makes a table of AI teammates worth playing against. If
+every seat renders from one shared transcript, no teammate can be surprised, none
+can keep something back, none can be wrong in a way you have to work around - and
+bluffing, dramatic irony and betrayal are structurally impossible, however good
+the prose is. Most multi-agent chat frameworks share one history by construction -
+a group chat renders every member from the same log, and per-member visibility is
+routinely declined as a feature because the whole design assumes one transcript.
 
-Naming is deliberately branding-free. The canonical layer (dir, class, role *keys*)
-is functional - `seer`, `watcher`, `mimic`, `hunter` - so the engine reads cleanly
-and carries no game's trademark. Game *rules/mechanics* aren't copyrightable; only
-*expression* (names, art, text) is, and no game's expression is baked into the
-engine. Naming a game in prose as the thing a rung is modelled on is reference, not
-reliance: nothing here needs a licence from anyone.
+This is not a claim to be first at anything - only that the repo treats
+information isolation as a machine-checked invariant that fails the run, rather
+than a leakage rate measured afterwards. The nearest survey of the area
+([arXiv:2607.12406](https://arxiv.org/html/2607.12406v1)) names
+"isolation-by-construction" as open future work and calls this the **agent-agent**
+boundary.
 
-Fiction lives only in swappable **themes**, which are display-only and sit outside
-that guarantee. `plain` is the sterile functional skin. The shipping default is a
-dystopia skin evoking Orwell's *Nineteen Eighty-Four* - public domain in the UK/EU
-since 2021, still under US copyright until 2045, so it is a flavour choice and not
-a licensing claim. `bnw-en` is a second dystopia face, evoking Huxley's *Brave New
-World*, whose terms run the other way round: US public domain in 2028, UK/EU in
-2034. Both dystopias ship in English and Chinese (`1984-cn`, `bnw-cn`). Neither
-date is load-bearing. What a theme carries is coined vocabulary and
-prose written here - single words and short phrases are not copyrightable, the
-novels' text is, and none of it is in this repo. Run `--theme plain` for a face
-that makes no reference at all.
+The endgame is a freeform AI-run TTRPG - independent actors, off-map factions on
+their own clock, and a referee that oversees without micromanaging. The games
+below are increasingly-freeform test harnesses for one `core/` engine, and they
+are deliberately the *hard* case: if seats can keep secrets from each other and
+from you in a hidden-role game, a party where the rogue has a secret patron is
+easy by comparison.
 
-Full rules, the night-knowledge table, and what each seat can derive:
-`games/cabal/RULES.md`.
+## Try it
+
+```bash
+python -m games.cabal.demo                    # a whole game, random players, no model needed
+python -m games.cabal.demo --human 0          # you play seat 0
+python -m games.changeling.demo --human 0     # the other rung: your own card can change
+```
+
+No dependencies, no API key, no GPU. The referee and the leak audit are stdlib
+Python; a backend is only needed to put models in the other seats.
+
+A rendered game to read instead:
+[`transcripts/local-q36-2rounds-game0.md`](transcripts/local-q36-2rounds-game0.md).
+
+**`--human SEAT` hands a person exactly the bytes that seat's model would have
+received and nothing else** - so the isolation property is not something you take
+on trust from a test, it is something you can sit inside and try to break. One
+seat and one game per run, and that is the property asserting itself rather than a
+missing feature: a terminal is a single channel, so two people at it would read
+each other's private view. A second human seat needs a second channel.
 
 ## The ladder (rule-heavy -> judgment-heavy)
 
 | Rung | Referee is | Status |
 |---|---|---|
-| **cabal** (hidden-role missions) | pure deterministic code | spike #1 (here) |
-| Secret Hitler | deterministic + forced reveals | next |
-| Blood on the Clocktower | a Storyteller with discretion | north star |
+| **cabal** (hidden-role missions) | pure deterministic code | spike #1 |
+| **changeling** (belief can diverge from truth) | deterministic, one night | spike #2 |
+| Secret Hitler | deterministic + forced reveals | **not planned** - same rung as cabal, so it buys recognition and no engine progress |
+| Blood on the Clocktower | a Storyteller with discretion | next, as an ADJUDICATOR spike against 3-4 characters, not the game |
 | Freeform TTRPG (5e SRD) | mostly LLM judgment | the actual product |
 
-## Layout
+Ordered by how much JUDGMENT the referee needs, which is the axis the engine risk
+sits on. A rung that adds rules without adding discretion is a lateral move, which
+is why the third row is not planned.
 
-```
-core/observability.py   SeatView, Knowledge, find_leaks  (partial-observability spine + gate #1)
-core/backends.py        one adapter: local:8090 / clean:3001 / gray:3003, pluggable player prompt
-core/replies.py         model reply -> values (JSON out of prose, salvage, coercion)
-games/cabal/RULES.md    the rules + the night-knowledge table the gates stratify on
-games/cabal/roles.py    roles as data (functional keys) + swappable themes (1984-en default)
-games/cabal/referee.py  deterministic state machine (propose -> discuss -> vote -> mission -> hunt)
-games/cabal/audit.py    gate #1 as an executable guarantee - the driver runs it, and it raises
-games/cabal/player.py   policies (random / LLM), phase->key mapping, retry loop, game driver
-games/cabal/demo.py     one game, random or live players
-games/cabal/transcript.py  one game -> readable markdown, straight off the public record
-games/cabal/test_*.py   gate #1 (no leak) + referee win paths + parsing/plumbing
-eval/run_games.py       run-N-games scoring for gates #2/#3 (deception, deduction)
-```
-
-`core/` holds what the next game up the ladder inherits; `games/cabal/` holds what
-is about *this* game. Reply-reading is in `core/` because a truncated reply or a
-`"Approve."` where a boolean was asked for is a property of talking to models, not
-of hidden roles - only the phase-to-key mapping is cabal's.
+**cabal** is a bounded team-mission deduction game, modelled on The Resistance:
+Avalon: a leader proposes a team, the table argues, everyone votes, the team plays
+success/fail cards in secret, and only the *count* of fails is ever public. Three
+missions held wins it for the majority; three sunk wins it for the saboteurs, who
+get one last shot at naming the seat that secretly knew them. **changeling** is a
+different question, modelled on One Night Ultimate Werewolf: roles move during the
+night, so a seat is told what it was *dealt* and never what it now *holds*, and it
+can play a whole game sincerely wrong about itself. Full rules and the
+night-knowledge tables:
+`games/cabal/RULES.md`, `games/changeling/RULES.md`.
 
 ## Two public channels, and the line between them
 
@@ -92,7 +88,8 @@ made one distinction load-bearing, so the referee keeps two tagged channels:
 
 A player's private reasoning is in neither: the JSON envelope gives it a `think`
 field, the driver reads it for the log and drops it, and only `say` reaches
-`speak()`. Three mutation-checked tests hold that line (`test_player.py`).
+`speak()`. Three tests hold that line - `test_think_is_dropped_say_is_kept`,
+`test_driver_never_puts_think_on_the_table`, `test_a_lie_in_say_is_gameplay_not_a_leak`.
 
 `--notebook` adds a private third channel: a seat's `note` comes back to that seat
 and to no other, on every later call, so a read survives the turn that formed it.
@@ -100,45 +97,107 @@ It leaves the audit view with speech, because player-authored text is one class 
 and a seat writing down a correct guess must not score as a referee leak.
 
 The gate is enforced, not remembered. `play_game(..., audit=True)` is the default
-and **raises** on a leak, so every game - demo, test, and every game in an N-game
-eval - is audited at every reachable state. `test_audit_coverage.py` walks all five
-phases in all three skins, audits `prompt_for` (the ask, not just the view), and
-plants a leak in each phase's ask to prove the audit is still reading it.
+and **raises** on a leak, so every game - demo, hand-played, test, and every game
+in an N-game eval - is audited at every reachable state. `test_audit_coverage.py`
+walks all five phases in **every** skin - it iterates `THEMES` rather than a list,
+so a skin added later is covered the day it lands - audits `prompt_for` (the ask,
+not just the view), and plants a leak in each phase's ask to prove the audit is
+still reading it.
 
-## The three gates
+## The gates - one property and two dated snapshots
 
-1. **No leak** - no seat's context reveals another's secret role. *(green: `test_leak_audit.py`)*
-2. **Deception works** - evil wins a non-trivial share via failed missions or a correct hunt.
-   *(live players wired; not yet shown - see below)*
-3. **Deduction works** - good votes / the hunt beat chance. *(live players wired; not yet shown)*
+**Gate #1 - no leak.** No seat's context reveals another's secret. This is the one
+that measures *parlor*, it is green, and it is executable rather than argued
+(`test_leak_audit.py`, `test_audit_coverage.py`).
 
-**Gate #2 is conditional on gate #3, and that is measured, not pedantry.** Against
-good seats voting at chance, evil wins ~65% of games with no deception in the loop
-at all (`--arm random`, n=200). So an evil win rate is only evidence of deception
-once the good side demonstrably deduces; the scorer refuses to call gate #2 until
-gate #3 holds, and voids both verdicts when too many decisions fell back to random.
+The other two measure whichever model was armed, so they are reported as dated
+snapshots and never as this repo's result - identical prompts scored **-0.2% on a
+12B and +66% on 120B-class**, which is the whole argument for the distinction:
+
+- **Gate #3 - deduction.** Blind seats approve clean teams over tainted ones by
+  ~+18pp (binary, two runs agreeing). That figure pools self-votes with off-team
+  votes and sits downstream of seer-originated public signal, so it measures
+  *information reaching blind seats through play*, not unaided detection. The
+  unaided estimator exists and accrues at ~0.4 votes/game, which is unaffordable
+  at this rung - the arithmetic is re-runnable (`py -3 -m eval.gate3_arithmetic`).
+- **Gate #2 - deception.** Evil wins a non-trivial share by sinking missions or a
+  correct hunt. **Conditional on gate #3, and that is measured, not pedantry:**
+  against good seats voting at chance, evil wins ~65% of games with no deception
+  in the loop at all (`--arm random`, n=200). So an evil win rate is only evidence
+  of deception once the good side demonstrably deduces.
+
+Every number ships beside its fallback rate and the scorer voids a verdict above
+10%. A decision no model made legally is played at random, and a run that hides
+that is the random policy wearing a model's name. Beside it: how many decisions
+the referee sent back before the model got them right, how random a table each
+seat actually played against, and how many games ran with neither.
+
+## Layout
+
+```
+core/observability.py      SeatView, Knowledge, find_leaks  (partial-observability spine + gate #1)
+core/backends.py           one adapter, three routes (local / clean / gray), pluggable player prompt
+core/console.py            a human seat wearing the backend interface (--human)
+core/replies.py            model reply -> values (JSON out of prose, salvage, coercion)
+core/runlog.py             a run writes its own terminal marker, from a finally
+core/stats.py              Wilson intervals, bootstrap CIs
+core/integrity.py          what a run's numbers are worth: three outcomes, caused vs witnessed
+
+games/cabal/RULES.md       rules + the night-knowledge table the gates stratify on
+games/cabal/roles.py       roles as data (functional keys) + 7 swappable themes
+games/cabal/referee.py     deterministic state machine (propose -> discuss -> vote -> mission -> hunt)
+games/cabal/audit.py       gate #1 as an executable guarantee - the driver runs it, and it raises
+games/cabal/player.py      policies (random / LLM / human), phase->key mapping, retry loop, driver
+games/cabal/transcript.py  one game -> readable markdown, straight off the public record
+games/cabal/demo.py        one game, random or live or hand-played
+games/cabal/solver.py      the mechanical reference - what the rules alone determine
+games/cabal/heuristic.py   a rules-only policy, the rung the model is scored against
+
+games/changeling/RULES.md  rules, and what a seat can and cannot know about itself
+games/changeling/night.py  the night: roles move, and the seat is not told
+games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 8 themes
+
+eval/run_games.py          run-N-games scoring for cabal's gates
+eval/run_changeling.py     the same for changeling
+eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
+eval/s6_verdict.py         the gate-#3b verdict, reproduced from each arm's own records
+eval/strata.py             changeling's knowledge strata, counted over N nights
+eval/derivable.py          what a seat could derive with no model at all
+eval/ladder.py             the control ladder: random, rules-only, model
+eval/audit_decisions.py    mine a finished run for moves wrong on their own terms
+
+games/durf/fixtures/       a third rung, scoped - a labelled fixture and no engine yet
+```
+
+`core/` holds what the next game up the ladder inherits; `games/<name>/` holds
+what is about *that* game. Reply-reading is in `core/` because a truncated reply
+or a `"Approve."` where a boolean was asked for is a property of talking to
+models, not of hidden roles - only the phase-to-key mapping is the game's.
 
 ## Run
 
 ```bash
 python -m unittest discover -s . -p "test_*.py"   # all tests, no dependencies
-python -m games.cabal.demo                         # watch a random game (default 1984-en face)
-python -m games.cabal.demo --theme plain           # sterile functional names
-python -m games.cabal.demo --theme bnw-en          # the other dystopia face
-python -m games.cabal.demo --rounds 2              # two discussion rounds per proposal
 
-# live players (needs a backend; PARLOR_API_KEY for the cloud tiers)
+python -m games.cabal.demo --theme plain           # sterile functional names
+python -m games.cabal.demo --rounds 2              # two discussion rounds per proposal
+python -m games.changeling.demo --theme greek      # the vocabulary-control skin
+
+# live players (needs a backend; PARLOR_API_KEY for the off-box routes)
+# each route defaults to a loopback URL and reads PARLOR_ENDPOINT_LOCAL /
+# _CLEAN / _GRAY if you serve them somewhere else
 python -m games.cabal.demo --backend local --model <armed-model>
 python -m games.cabal.demo --backend clean --speaker    # model on the discussion only
+python -m games.cabal.demo --human 0 --backend local --model <armed-model>
 
 # scoring
 python -m eval.run_games --games 200 --arm random                 # the chance baseline
 python -m eval.run_games --games 20 --backend clean --model <id> --workers 3
 python -m eval.run_games --games 20 --arm llm-good --backend clean --model <id>
+python -m eval.run_changeling --games 200 --arm random
 
 # a game a human can read
 python -m games.cabal.demo --transcript game.md
-python -m eval.run_games --games 12 ... --transcript one-game.md
 python -m games.cabal.transcript run.json --game 3 --out game3.md
 ```
 
@@ -171,5 +230,26 @@ can be stale (`model_not_found` at call time on a model `/v1/models` lists). The
 scorer reports a fallback rate and the refusal trace beside every number, so a dead
 endpoint reads as "the run is void", not "the model played badly".
 
-Python 3.10+. No dependencies (stdlib only) for the referee and gates; a backend is
-only needed once LLM players go live.
+## Naming, themes, and what is actually in this repo
+
+Naming is deliberately branding-free. The canonical layer - directory, class, role
+*keys* - is functional (`seer`, `watcher`, `mimic`, `hunter`), so the engine reads
+cleanly and carries no game's trademark. Game rules and mechanics are not
+copyrightable; only *expression* is - names, art, text - and no game's expression
+is baked into the engine. Naming a game in prose as the thing a rung is modelled
+on is reference, not reliance: nothing here needs a licence from anyone.
+
+Fiction lives only in swappable **themes**, which are display-only and sit outside
+that guarantee. `plain` is the sterile functional skin in both games. cabal ships
+7 (default `1984-en`, a dystopia skin evoking Orwell's *Nineteen Eighty-Four*);
+changeling ships 8 (default `folk`, plain folk-game vocabulary). What a theme
+carries is coined vocabulary and prose written here - single words and short
+phrases are not copyrightable, the novels' text is, and none of it is in this
+repo. Run `--theme plain` for a face that makes no reference at all.
+
+Themes are also an experimental dial, not just decoration - length-matched arms
+exist for polarity and vocabulary controls. Design and the confounds:
+`docs/moral-framing.md`.
+
+MIT licensed. Python 3.10+, stdlib only for the referee, the gates and both
+demos; a backend is needed only once LLM players go live.

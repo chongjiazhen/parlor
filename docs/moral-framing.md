@@ -33,7 +33,8 @@ same register, same vocabulary shelf; only who-wrongs-whom moves. The trusting
 majority becomes an underground cell running five drops out of the city, and the
 informed minority are plants placed to lose each drop and give the cell up at the
 end. Its blurb ascribes no trait to the seat ("were placed here", not "are paid"),
-which is Hagendorff's constraint below rather than an editorial preference.
+which is the persona constraint in §Prior work below rather than an editorial
+preference.
 
 **Arm 4 is a sanctioned exercise with no victim** - a readiness drill everyone
 signed for, where two seats were assigned to make each evolution fail so the
@@ -124,9 +125,12 @@ be pre-committed the way gate #3b already was.
 
 ## Prior work - verified 2026-08-25, read before designing arm 3
 
-All four opened and confirmed; identifiers are exact so nobody re-searches for them.
+All four opened and confirmed; identifiers are exact so nobody re-searches for
+them. **Cited by identifier, not by author** - a title and an arXiv number are
+what a reader needs to check the claim, and this repo does not carry named people
+it has no reason to name.
 
-- **Hagendorff, "Deception Abilities Emerged in Large Language Models"**,
+- **"Deception Abilities Emerged in Large Language Models"**,
   arXiv:2307.16513, PNAS 121(24), doi:10.1073/pnas.2317967121 (2024). **The
   closest prior result, and it constrains the design.** It reports that eliciting
   Machiavellianism in an LLM alters its propensity to deceive - so "manipulating
@@ -134,22 +138,21 @@ All four opened and confirmed; identifiers are exact so nobody re-searches for t
   therefore not touch the seat's persona or traits; if it does, this is a
   replication wearing a new skin. The one thing left unclaimed is the valence of
   the ACT with the agent's character held fixed.
-- **Park, Goldstein, O'Gara, Chen, Hendrycks, "AI Deception: A Survey of
-  Examples, Risks, and Potential Solutions"**, arXiv:2308.14752, Patterns (2024).
+- **"AI Deception: A Survey of Examples, Risks, and Potential Solutions"**,
+  arXiv:2308.14752, Patterns (2024).
   Survey; defines deception as systematic inducement of false beliefs in pursuit
   of an outcome other than truth. Covers CICERO. Use its definition rather than
   coining one.
-- **Meinke, Schoen, Scheurer, Balesni, Shah, Hobbhahn (Apollo Research),
-  "Frontier Models are Capable of In-context Scheming"**, arXiv:2412.04984
+- **"Frontier Models are Capable of In-context Scheming"**, arXiv:2412.04984
   (2024). Six agentic evals; covert vs deferred subversion. Nearest neighbour for
   eval DESIGN, not for the question.
-- **Pan, Shern et al., "Do the Rewards Justify the Means? Measuring Trade-Offs
+- **"Do the Rewards Justify the Means? Measuring Trade-Offs
   Between Rewards and Ethical Behavior in the MACHIAVELLI Benchmark"**,
   arXiv:2304.03279, ICML 2023 (oral). 134 choose-your-own-adventure games, half a
   million scenarios, reward-vs-ethics tension. Nearest neighbour for the SETTING.
 
 **So the contribution, if any, is narrower than it first looked.** Not "does fiction
-move deception" - Hagendorff answers that. What is left: whether the moral valence
+move deception" - arXiv:2307.16513 answers that. What is left: whether the moral valence
 of the act, with persona held fixed, moves deception in a MULTI-AGENT game where
 information isolation is machine-checked rather than assumed, pre-registered, and
 reported with its fallback rate. Workshop-paper shaped at most, and only if the
@@ -197,4 +200,5 @@ measured change - and gate #3's own N problem binds here twice as hard, because
 this needs four arms rather than one. It is an argument for doing ONUW first (~10-15
 calls a game against cabal's 80-220), not for running it sooner.
 
-See also `prior-work.md` (AvalonBench, and HARBOR on persona dynamics).
+The wider neighbour list is kept off-repo with its raw notes; `CLAUDE.local.md`
+has the path.

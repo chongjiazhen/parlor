@@ -112,18 +112,24 @@ def over_sabotage(games: list[dict]) -> tuple[int, int, list[str]]:
 
     NOT an error, and the first version of this file was wrong to call it one.
     Two evils on one mission decide independently and there is no private channel
-    between them - that is a rule of the game, not an oversight. Playing success
-    is only better IF the other one fails, and nothing tells you it will. It is an
-    anti-coordination game with a mixed equilibrium, so some double-fail rate is
-    irreducible and the ideal count is not zero.
+    between them - that is a rule of the game, not an oversight. Playing success is
+    only better IF the other one fails, and nothing tells you it will.
 
-    What is still worth counting: a focal point exists that needs no channel at
-    all - "the lower-numbered evil on this team plays fail" is derivable by both
-    seats from the public proposal alone. Schelling points do not require
-    communication. A pair that finds any such convention drives this near zero
-    without ever signalling; the observed 39-45% of payable sunk missions says the
-    model is not finding one. That is a fact about reasoning, not a rules violation, which
-    is why it sits under COST rather than PROOF.
+    **What the number means: the pair failed to find a convention.** An earlier
+    version of this docstring argued against itself - it said a mixed equilibrium
+    makes some double-fail rate irreducible, and then derived the channel-free focal
+    point that drives it to ~0. Both halves are right about different things, and
+    read as one claim they mis-state the benchmark a reader grades the observed
+    39-45% against.
+
+    The irreducible-rate half holds only for a pair that finds NO convention. One
+    exists and needs no channel at all: "the lower-numbered evil on this team plays
+    fail" is derivable by both seats from the public proposal alone, and Schelling
+    points do not require communication. So the normative count for a capable pair
+    is ~0, and 39-45% of payable sunk missions is the model failing to find any such
+    convention - which is precisely the reasoning being priced here, and the reason
+    this sits under COST rather than PROOF. It is a fact about reasoning, not a
+    rules violation, and not an equilibrium that forbids zero.
 
     **Denominator: SUNK missions on which the game continued.** Two corrections in
     one, and they pull opposite ways.

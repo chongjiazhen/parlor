@@ -4,8 +4,7 @@ A player/agent may see exactly one thing: its own ``SeatView``. Anything not
 reachable from that view must be underivable from it. That property (no seat can
 learn another seat's secret role beyond its entitled reveals) is gate #1, and
 ``find_leaks`` is the mechanical check on the outgoing model payload - the same
-job CoomKit's prompt inspector does: audit the exact bytes that leave for the
-model.
+job a prompt inspector does: audit the exact bytes that leave for the model.
 """
 
 from __future__ import annotations

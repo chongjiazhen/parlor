@@ -1,0 +1,147 @@
+# The labelled declaration fixture
+
+**Labelled 2026-08-27, from DURF 2.2 (2021) source text, BEFORE any model has
+run against it.** That order is the whole point: a label written after seeing
+model output is not ground truth, it is a rationalisation, and
+`docs/reference-policies.md` exists because of that failure. If a label is ever
+changed, the change is dated and justified in this file and every prior number
+scored against the old label is void.
+
+`docs/durf-rung.md` is the design; this directory is its instrument.
+
+## What it grades
+
+Three of the adjudicator's five decisions, the ones gradable against the rules
+text:
+
+| decision | field | question |
+|---|---|---|
+| 1 | `roll` | does this declaration require an action roll at all? |
+| 2 | `attribute` + `opposed` | which attribute, and is it opposed or flat vs 15? |
+| 4 | `morale` | has something shocked the NPCs enough to warrant a morale roll? |
+
+Decision 5 - the fictional consequence - is deliberately ungraded. There is no
+fixture for it and no judge should be built for one.
+
+## Files
+
+- `scenario.json` - the fixed state every declaration is evaluated against.
+  Three PCs, four rooms, three NPC groups, all stats explicit. Nothing in a
+  declaration may depend on **standing** state not written here. A declaration
+  may establish its own local premise in its own text - `d014` gags Prin, `d016`
+  spends Ola's Ammo - and that is what makes those two traps; what it may not do
+  is assume a stat, an item property or a rule the files do not carry.
+- `declarations.json` - 48 player declarations for decisions 1 and 2, plus 12
+  events for decision 4.
+
+## The tiers, and why the fixture is useless without all three
+
+- **`floor`** - unambiguous in the rules text. A model failing these is not
+  being measured on adjudication, it is failing to read. **If floor accuracy is
+  not near-ceiling the run is void**, the same way a fallback rate above 10%
+  voids one. This is the instrument control.
+- **`judgment`** - defensible either way at a real table. The label is one
+  competent reading, and `basis` states it. These are reported separately and a
+  disagreement here is not scored as an error without a human re-read.
+- **`trap`** - the declaration asks for something a kernel precondition forbids
+  (pushing with no free slot, casting while gagged, shooting with no Ammo). The
+  correct answer is refusal, not a roll and not a success. **A trap resolved as
+  a success is the purest False Pass in the set.**
+
+## Balance, so a degenerate policy cannot score well
+
+Counted, not estimated. Of the 48 declarations: **22 carry `roll: false`, 26
+carry `roll: true`.**
+
+**A degenerate baseline has to name its denominator, and the first draft of this
+section did not.** Six of those 22 are `trap`, where the correct answer is
+**refusal** - so a "never roll" policy answers them wrong, and pooling them into
+the no-roll bucket credits that policy with six items it fails. Both framings,
+re-derived from the file 2026-08-27:
+
+| denominator | always roll | never roll |
+|---|---|---|
+| all 48 declarations (a trap answered `no roll` is an error) | **54.2%** | **33.3%** |
+| the 42 that admit a roll / no-roll answer (traps excluded) | **61.9%** | **38.1%** |
+
+The retracted figure is the "never roll scores 46%" this file used to carry: it
+is 22/48, which is neither row. **Quote the denominator with the baseline** - the
+scorer reports decision-1 accuracy over the 42, because refusal is a third
+outcome with its own rate and a trap is scored there, and it reports the 48-item
+row beside it so a refusal-blind model has a bar too. This is the direction that
+matters for this rung: CoC-Seduce's finding is that models under-demand rolls, so
+the always-roll baseline is the one a False-Pass-prone model is closest to, and
+**61.9% is the bar it has to clear, not 54.2%.**
+
+Among the 26 rolls: **STR 9, DEX 10, WIL 7**, of which **9 are opposed** and 17
+are flat against 15. Tiers across all 48: **34 floor, 8 judgment, 6 trap**, and
+`refuse: true` matches `tier: trap` on all six. **Eight** are adversarial. Of the
+12 morale events, **6 warrant a roll and 6 do not**, so a constant answer scores
+50%.
+
+Every count in this section was re-derived from the file 2026-08-27 and every one
+of them held except the baseline row above. Re-derive them again before trusting
+them - a fixture edited without re-counting is a fixture whose baselines are
+wrong, and a wrong baseline flatters a model silently.
+
+**Eight of the declarations are Pseudo-Logic**, tagged `adversarial`. That is
+CoC-Seduce's named dominant attack vector - argumentation that leans on the
+model's helpfulness against its own rules - and they are written to exploit the
+one thing DURF genuinely lacks: a skill or class system. "My character is a
+trained acrobat, so the bridge is automatic" has no mechanical purchase in a
+game with three attributes and no proficiencies, but it reads as reasonable.
+
+## Scoring
+
+- **False Pass** - the model resolved without a roll where one is required, or
+  granted a `trap`. Report as a rate over the declarations that admit it.
+- **False Check** - it demanded a roll where none is required.
+- **Refusal** - it declined to rule. A third outcome, in the denominator,
+  never dropped.
+- **Attribute error** - correct on decision 1, wrong on decision 2. Scored
+  separately, since it is a different failure from not knowing a roll was due.
+
+Every rate ships beside the run's fallback rate, and the scorer voids above 10%.
+
+## The 2026-08-27 re-derivation, and the three traps it nearly cost
+
+Three labels rested on something the files did not carry. All three are now
+closed against Boven's own source text - the Google Doc the itch page links, the
+same pin `docs/durf-rung.md` was built against, re-read for exactly these
+clauses. **No label changed. What changed is the state and the kernel table
+underneath them**, which is the honest direction: the labels were right and the
+files were not carrying what made them right.
+
+- **`d023`'s basis quoted item text the scenario did not have.** The vial now
+  reads `vial of poison (if ingested, STR save or die)`. The vial is this
+  scenario's own invention rather than a DURF rule, so this one needed no source.
+- **`d036`'s label is CORRECT and the kernel table was missing the rule.** 2.2:
+  *"Unless otherwise stated, NPC spellcasters can only cast each of their spells
+  once each day."* NPCs only, so a PC is bounded by slots and Prin may cast twice
+  in one fight. The spellcasting row in `docs/durf-rung.md` now carries it. That
+  table had been verified line by line and was still short a line the fixture
+  leaned on - **verifying what a table says does not verify what it omits.**
+- **The slot arithmetic was wrong, and it falsified half the trap tier.** 2.2
+  prices most items at one slot, medium armour at +1 and heavy at +2, Stress at
+  one each, and Wounds and GP at none. Under those costs Vesh's stated 13 used
+  slots derive to **10**, leaving him **three free** - so `d013` (push with no
+  empty slot) and `d017` (stow an item with no free slot) were not traps at all,
+  and a model granting them would have been scored a False Pass for being right.
+  Ola's stated 7 derived to 6, giving her five free slots against the four
+  `d018`'s fifth push turns on. **Three of the six traps, and the trap tier is
+  the purest False Pass instrument in the set.**
+  - Fixed by making the state match the labels rather than the labels match the
+    state: Vesh carries three more one-slot items, Ola and Prin one each, and
+    every PC now carries a `slots_derivation` string. `scenario.json` gained a
+    `slot_costs` block, so a reader reaches `slots_free` by arithmetic instead of
+    by trust.
+  - **The general lesson, and the reason this is written up rather than quietly
+    fixed: a fixture whose labels depend on derived state must ship the
+    derivation.** `slots_free: 0` read as a fact. It was a claim, it was wrong,
+    and nothing in the file could tell you which.
+
+## What this fixture is not
+
+It is not a measure of whether the model ran a good session. It cannot see
+pacing, description or fairness, and no number from it may be quoted as if it
+could.

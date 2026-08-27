@@ -36,6 +36,7 @@ import time
 from collections import Counter
 from dataclasses import asdict
 
+from core import integrity
 from core.backends import ENDPOINTS, REGISTERS, Backend
 from core.runlog import RunState, run_with_marker
 from core.stats import bootstrap_ci, wilson
@@ -200,12 +201,6 @@ def score(records: list[GameRecord]) -> dict:
         sum(v.target_holds_pack for v in sleepers) / len(sleepers)
         if sleepers else None)
 
-    decisions = sum(r.decisions for r in records)
-    fallbacks = sum(r.fallbacks for r in records)
-    served: Counter = Counter()
-    for r in records:
-        served.update(r.upstreams or {})
-
     blind = strata["none"]
     return {
         "games_requested": len(records),
@@ -231,22 +226,12 @@ def score(records: list[GameRecord]) -> dict:
             "strata": strata,
         },
         "belief": diverged,
-        "integrity": {
-            "decisions": decisions,
-            "fallbacks": fallbacks,
-            "fallback_rate": fallbacks / decisions if decisions else 0.0,
-            "upstreams": dict(served.most_common()),
-            "refusals": _dedupe([line for r in records for line in r.trace_sample])[:8],
-        },
+        # Shared with cabal since S9. The trace-line list moved from the key
+        # ``refusals`` to ``trace_sample``, cabal's name for it: S9 gives
+        # "refusals" a numeric meaning, and one key over a count and a list of
+        # strings is how a JSONL reader ends up summing sentences.
+        "integrity": integrity.summarise(records),
     }
-
-
-def _dedupe(lines: list[str]) -> list[str]:
-    out: list[str] = []
-    for line in lines:
-        if line not in out:
-            out.append(line)
-    return out
 
 
 def _pct(value, width: int = 0) -> str:
@@ -306,20 +291,19 @@ def report(s: dict, args, elapsed: float) -> str:
             f"{_pct(b['sleeper_accuracy'])} (n={b['sleeper_votes']})", ""]
 
     rate = i["fallback_rate"]
-    out.append(f"integrity  {i['fallbacks']}/{i['decisions']} decisions fell back "
-               f"to random ({rate:.2%})")
+    out += integrity.report_lines(i)
     if i["upstreams"]:
         total = sum(i["upstreams"].values()) or 1
         out.append("  served by  " + ", ".join(
             f"{k} {v / total:.0%}" for k, v in i["upstreams"].items()))
-    if i["refusals"]:
+    if i["trace_sample"]:
         out.append("  why decisions were refused or retried:")
-        out += [f"    {line}" for line in i["refusals"]]
+        out += [f"    {line}" for line in i["trace_sample"]]
     out.append("")
 
     # Verdicts. Same discipline as cabal: a gate is not read off a random side, and
     # gate #2 is unreadable until gate #3 holds.
-    if rate > 0.10:
+    if rate > integrity.VOID_BAR:
         out.append("VOID - more than 10% of decisions were random. These numbers "
                    "are the random policy wearing a model's name.")
         return "\n".join(out)

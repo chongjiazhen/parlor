@@ -88,10 +88,16 @@ state left by the one before, so earlier knowledge decays:
 ## What a seat is told, and the knowledge classes
 
 The class is what the deduction gate stratifies on, and - as in `cabal` - it is a
-different axis from side. It describes **what the night told this seat**, and it is
-assigned from the DEALT card, because that is what determines the reveal.
+different axis from side. It describes **what the night told this seat**: the DEALT
+card supplies the label, and the seat carries it only if the night actually gave it
+a reveal. A card whose reveal did not happen leaves its seat in `none`.
 
-| dealt card | knowledge class | what it holds |
+Never the DAWN card. A seat robbed after it looked was told what it was told, and
+relabelling it by a card it acquired afterwards would score it for knowledge it
+never had. `false` likewise comes from the deal - only the seat that DRANK holds a
+belief wrong by construction, and it is handed no reveal a count could see.
+
+| dealt card | knowledge class **if the reveal happens** | what it holds |
 |---|---|---|
 | `pack` | `identity` | the other `pack` seat, by identity |
 | `spotter` | `identity` | one other seat's exact card, or two centre cards |
@@ -120,6 +126,56 @@ worth building:
 reveal, no correction, and no phase in which the referee reconciles the two. The
 divergence is resolved at scoring time, referee-side, after the vote.
 
+### Keyed on the reveal, not on the card alone - changed 2026-08-28 (S10)
+
+Until S10 the class came from the dealt card outright, and for a MEET card that was
+wrong: **a MEET card's reveal is conditional on ANOTHER seat's deal.** A seat dealt
+`pack` whose partner went to the centre wakes, sees nobody, and receives no
+`Knowledge` at all - while carrying the `identity` label into every stratified
+number. That seat, robbed into the village by dawn, is a **blind villager wearing
+the `identity` label**, and THE GATE is cut on blind villagers.
+
+Recomputable, and that is the point - `py -3 -m eval.strata`, which resolves nights
+and counts, no model and no GPU. Both rules side by side, because the size of the
+change is the claim:
+
+| `SETUP_5`, 4000 nights, 20000 seat-nights (`--seed 11`) | TOLD (S10) | DEALT (pre-S10) |
+|---|---|---|
+| `identity` | 8038 (40.19%) | 10413 (52.06%) |
+| `positional` | 2416 (12.08%) | 2416 (12.08%) |
+| `false` | 2335 (11.68%) | 2335 (11.68%) |
+| `none` | 7211 (36.05%) | 4836 (24.18%) |
+
+The move is 2375 seat-nights, all of it between `identity` and `none`, and it is
+exactly the MEET seats that met nobody - **42.2% of seated `pack` seats got no
+fellow reveal**. Of 5358 blind villager seat-nights, **1043 (19.5%) had been hiding
+in `identity`**, which is the same seats diluting that stratum from the other side
+(18.7% of the pre-S10 villager `identity` cell). Stable on a second seed: 42.8%,
+19.8%, 19.1% at `--seed 99`.
+
+**These supersede the ad-hoc figures this section carried from 2026-08-27** (42.6%,
+17.4%), which had no reproducer. They agree to about a point; where they do not,
+the command above is the answer.
+
+**So every recorded changeling run is re-baselined.** The blind stratum a pre-S10
+record reports is ~19% smaller than the night produced, and the `identity` stratum
+is correspondingly diluted. A number quoted across the change is two different
+questions.
+
+The behaviour was pinned on purpose while it stood
+(`test_knowledge_class_is_keyed_on_the_DEALT_card`), so this was an argued change
+rather than a bugfix. That pin is **replaced, not deleted**: the half of it that
+still holds - the class comes from the dealt card and never the dawn card - is now
+`test_the_class_still_comes_from_the_DEALT_card_never_the_DAWN_card`, and it sits
+beside `test_knowledge_class_is_keyed_on_what_the_seat_was_TOLD` and the property
+itself, `test_no_seat_is_labelled_with_knowledge_it_was_never_given`. Four guards
+mutation-checked, each killed by its own named test.
+
+**It is also the constraint the expansion decks below are designed around**, since
+`kindred` is a second MEET card and a lone one is a blind *villager* by default -
+straight into the gate's own denominator rather than beside it. With this landed,
+both decks are unblocked.
+
 ### What each seat can DERIVE
 
 Not written into any prompt; a strong player finds it.
@@ -136,6 +192,94 @@ Not written into any prompt; a strong player finds it.
 - **A claimed `deceived`** is unfalsifiable from the inside and cheap to fake,
   which makes it the natural cover story for a wolf. That it is *also* the seat
   most likely to be a wolf without knowing it is the joke this game is built on.
+
+## The soundness invariant - what a fabricated belief must obey
+
+Written before any belief-planting role ships, because it is cheaper to state than
+to retrofit and because the first such card would otherwise be graded by taste.
+
+> **A fabricated observation must be consistent with everything the seat can
+> legally count.** A planted belief is legal only if at least one complete deal and
+> night exists that would have produced the seat's entire rendered view. If no such
+> world exists, the seat can refute its own knowledge by arithmetic, and the card is
+> not a deception - it is a tell.
+
+**Today's `false` seat is sound for free, which is why the rule has to be written
+down now.** `deceived` plants nothing. Its belief is a *stale truth*: it was correct
+at the deal and the night made it wrong, so the referee never asserts a fact that
+was never a fact. Every world consistent with what it saw is a real world, because
+what it saw really happened. The invariant is satisfied by construction and so is
+invisible - and a card that actually invents an observation is the first time the
+referee lies, with nothing in the existing machinery objecting.
+
+### What the seat can legally count against
+
+Five surfaces, all of them already public or already private-and-entitled. A plant
+must survive every one, and each is decidable without play.
+
+1. **The card multiset.** Eight cards, two `pack`, two `bystander`, one each of the
+   rest, printed in the preamble. Counting claims against it is this game's central
+   deduction, so a plant implying a ninth card, a third `pack`, or a card the deck
+   does not hold is refuted before anyone speaks.
+2. **The deal constraint.** `require_seated_pack` is public, so a plant may not
+   imply a deal that seats no `pack`.
+3. **Night order.** Public, and it does real work - a reveal's step position
+   constrains what could have produced it. The `waker` derivation above is the
+   worked example: a single self-reveal with no partner line is uniquely `waker`,
+   because only two cards produce a self-reveal and the other one comes in a pair.
+   A plant arriving in a shape no card in the deck emits identifies itself.
+4. **The reveal grammar.** `referee.reveal_forms` and `self_reveal_forms` are the
+   only phrasings the renderer can produce, and a test asserts it. A plant must be
+   drawn from that same list, or it is distinguishable as a string rather than as a
+   claim.
+5. **Its own act.** A seat knows what it did, and a plant may not contradict it.
+
+Cross-seat consistency is the sixth and it is the one that is easy to miss: two
+planted beliefs must not *jointly* imply an impossible board, even where each is
+individually sound. Soundness is a property of the whole render, not of one line.
+
+### The inverse failure, which is a gate #1 leak
+
+**The referee must not become inconsistent in order to keep a lie sound.** If
+honouring a plant requires rendering a different multiset, a different night order,
+or a different reveal form to the deceived seat than to every other seat, then the
+lie is being maintained by changing the public rules per seat - and the difference
+between two renders is itself information. That is the same failure as the
+`kindred` collision, arriving from the opposite direction: there, two seats got one
+sentence that should have been two; here, one seat would get a private version of
+text that must be byte-identical for all. Both are caught by the same instinct -
+compare renders, not intentions.
+
+### Why this needs a test and not care
+
+**The audit cannot see an unsound plant, by construction.** `find_leaks` with
+`self_is_secret` looks for a seat's *truth* appearing in bytes it is not entitled
+to. A fabricated belief contains no truth to find - it is a false render, and every
+gate #1 property this repo claims is about true knowledge reaching the wrong seat,
+never about false knowledge reaching the right one. So the audit will be clean over
+any number of deals while the card ships a refutable lie.
+
+The guard is the enumeration instead, and it is affordable: eight cards over five
+seats and three centre slots, six ordered steps, so the set of worlds consistent
+with a rendered view can be enumerated outright rather than argued about. A
+belief-planting card is admissible when a test enumerates that set and asserts it is
+non-empty for every seat, on every deal it is exercised over. Same remedy shape as
+`reveal_forms` - the property holds by construction or it fails a test.
+
+### What it costs the stratum if this is got wrong
+
+The `false` class exists to measure whether a model reasons **soundly from an
+unsound premise**. A plant the seat can refute converts that seat from one that is
+wrong into one that knows it is being lied to, which is a different question and a
+different game. The stratum would still produce a number, and the number would be
+about a seat detecting the referee rather than about a seat deducing. That is the
+failure mode worth naming, because it does not look like a bug: nothing raises,
+every render is legal, and the run reports as normal.
+
+**A belief-planting card also re-baselines every recorded changeling number**, on
+the same footing as `kindred` and `waker` - it changes what the deck can tell a
+seat, so it may not enter `SETUP_5` without the measurement that a deck change
+always owes.
 
 ## Expansion cards - defined, resolved, dealt by nothing
 
@@ -171,6 +315,92 @@ variety.
   `waker` - and `swapper`'s comes with a second reveal about the seat it robbed. A
   single self-reveal with no partner line is `waker`, uniquely. The same reasoning
   the `swapper` already needs, one step shorter.
+
+### The decks that would seat them - designed 2026-08-27, built by nothing
+
+Paper. No `Setup` is registered, no number has moved, and the measurement waits on
+the 200-game run. What follows is the design and the arithmetic behind it, so that
+work is a launch rather than a session.
+
+**Every deck change here costs at least TWO variables, and that is structural.**
+`Setup.__post_init__` enforces `len(deck) == n + centre`, so a card cannot be added
+without also growing the table or the centre. There is no one-variable arm
+available in this game, and the honest move is to choose the second variable
+deliberately and report it, rather than to pretend the deck was the only thing that
+moved.
+
+**The 8-card deck has no slack to cut into.** Six of its eight cards are the only
+copy of their knowledge class - `spotter`/`swapper` (`identity`), `switcher`
+(`positional`), `deceived` (`false`) - and the other two are `pack`, which is the
+win condition. That leaves the two `bystander` cards, and they are the `none`
+class, which is THE GATE. So a swap is not on the table; the deck grows or nothing
+happens.
+
+Measured by resolving 4000 nights per candidate. `blind/game` is villager seats
+the night told nothing, by dawn truth - the gate's own denominator.
+
+| candidate | n / centre | blind/game | unwinnable | `identity` told nothing | card seated |
+|---|---|---|---|---|---|
+| **shipped** | 5 / 3 | 1.02 | 2.8% | 17.4% | - |
+| W-a: cut a `bystander` | 5 / 3 | **0.51** | 2.8% | 12.7% | waker 57.9% |
+| W-b: grow the centre | 5 / 4 | 0.93 | 3.0% | 13.9% | waker 49.6% |
+| **W-c: grow the table** | **6 / 3** | **1.18** | **1.8%** | **9.3%** | **waker 62.0%** |
+| K: `kindred` x2, free deal | 7 / 3 | 1.27 | 1.2% | 20.6% | pair 45.2%, **lone 47.1%** |
+| **K-c: same, both-or-neither** | **7 / 3** | **1.21** | **1.0%** | **5.1%** | **pair 86.0%**, lone 0% |
+
+**Two decks, not one.** They answer different questions - `waker` is an instrument
+for whether a model reasons about having been MOVED, `kindred` is a change to what
+the village can know - and each already spends a second variable. Putting both in
+one deck spends four and attributes nothing.
+
+**Deck A, for `waker`: 6 seats, 3 centre, 9 cards.** `pack` x2, `spotter`,
+`swapper`, `switcher`, `deceived`, `bystander` x2, `waker`.
+- **Cutting a `bystander` to make room was the obvious move and it is the wrong
+  one** - W-a halves the gate's own denominator, 1.02 blind seats per game to 0.51,
+  to buy an instrument that measures something else. The blind stratum is already
+  this game's bottleneck.
+- Growing the TABLE beat growing the centre on every axis measured, which was not
+  the armchair prediction: the centre is the cheaper second variable in principle,
+  and the deal arithmetic says otherwise. W-c raises blind/game to 1.18 (+16% on
+  shipped), nearly halves the unwinnable rate, and nearly halves the
+  `identity`-told-nothing contamination, because a fuller table seats both `pack`
+  cards more often.
+- **One run carries its own control.** The `waker` is seated in 62.0% of games and
+  sits in the centre in the rest, randomised within the run and on the same deck -
+  so waker-present against waker-absent is one 200-game run, not a paired pair. It
+  is a weaker comparison than same-seed pairing in one way (different deals, not
+  the same ones) and a stronger one in another (no code freeze needed between
+  arms). Report it as what it is.
+- Cost: six seats is ~20% more model calls per game, and it moves wolf density from
+  2/5 to 2/6. **The accusation baseline must be re-measured** with `--arm random`
+  before any deduction claim - it is not derivable, which is why the shipped one was
+  measured rather than asserted.
+
+**Deck B, for `kindred`: 7 seats, 3 centre, 10 cards, plus a seating constraint.**
+`pack` x2, `kindred` x2, `spotter`, `swapper`, `switcher`, `deceived`,
+`bystander` x2.
+- **On a free deal the pair FAILS to form more often than it forms** - lone 47.1%
+  against pair 45.2%. Half of every run would spend a card measuring nothing about
+  `kindred` while adding a second blind villager mislabelled `identity`, which is
+  the section above happening twice.
+- So the deck needs `require_seated_kin`: **both seated or both in the centre**, a
+  deal retried otherwise. That is 0.92 retries per game against a
+  `MAX_DEAL_ATTEMPTS` of 200, and it lifts the pair to 86.0%.
+- The precedent is exact and already in this file: `require_seated_pack` is a
+  deliberate deviation from the family, publicly stated so every seat may reason
+  from it, justified by keeping a tenth of every run from being noise. This is the
+  same argument at twice the rate.
+- The remaining 14% are games where both `kindred` are in the centre. They are not
+  degenerate - the village simply plays without the card - and they are the
+  natural control, on the same terms as deck A's.
+- **`kindred` x3 with no constraint was tried and is worse** (75.1% pair, but 22.6%
+  still lone, and a 9-card deck with three of them has no `bystander` left at all -
+  blind/game 0.00, which deletes the gate). Constrain the deal; do not buy the pair
+  with copies.
+
+**Neither deck may be run before the class-assignment question above is settled**,
+because both of them change how much of the `identity` stratum is blind seats, and
+a deck comparison across that change measures the scorer rather than the deck.
 
 ### Notable expansions NOT built, and what each would cost
 
@@ -228,6 +458,13 @@ THE GATE is cut on villagers the night told nothing. Measured on the powers run
 above: **14 of 63 villager votes** were blind, giving a CI of [21.05%, 83.33%]
 around a 50.00% point estimate against 37.50% chance. That interval cannot show
 anything, whatever the model did.
+
+**That 14 is a pre-S10 count and is too small** - it was cut on the old rule, which
+labelled a MEET seat that met nobody `identity`. The census above puts the
+understatement at ~19% of the blind stratum, so the re-run this section calls for
+will find the denominator larger than the numbers here imply. It does not rescue
+the interval: 14 votes and ~17 are both unreadable, and the argument for a 200-game
+run is unchanged.
 
 This is `cabal`'s thin-denominator problem again - and unlike `cabal`, it is
 affordable here. At ~1.6 min/game a 200-game run is ~5 hours and yields ~140 blind
