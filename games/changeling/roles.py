@@ -372,9 +372,21 @@ THEME_GREEK = Theme(
 # here also still wants the `sys.stdout.reconfigure` line `eval/run_changeling.py`
 # has never had - see RESUME.
 #
-# The reading of Fengshen above is from general knowledge of the novel, not a fresh
-# pass over the text. RESUME asks for that check before building on it; the check is
-# still owed, and what it would move is the blurb, not the mechanics.
+# TEXT CHECK DONE 2026-08-27, and it moved a clause. RESUME asked for the reading to
+# be checked against the novel before anything was built on it. Chapter 99, Jiang
+# Ziya at the investiture altar, reading Yuanshi Tianzun's edict: the dead are
+# enrolled "依劫運之輕重，循資品之高下" - by the weight of the calamity endured and by
+# rank - and thereafter "有功之日，循序而遷", promoted in order as they earn it. Shang's
+# dead take posts beside Zhou's; Huang Feihu served Shang and is enrolled.
+#
+# So "the dead of both sides are enrolled" and "losing is a posting rather than a
+# damnation" are the novel's, and the frame stands. What did NOT survive is the clause
+# that both hosts execute one mandate: the edict grounds enrollment in calamity and
+# karma rather than in a shared commission, so that sentence was this repo's gloss
+# wearing the novel's authority. Replaced with what the text actually says - the roll
+# asks what it cost you, not which host you served - which is both more faithful and a
+# flatter statement of neutrality, since it makes the indifference the ROLL's rather
+# than a symmetry between the sides. The blurb is 59 words either way.
 THEME_INVESTITURE = Theme(
     "investiture",
     {Side.VILLAGE: "The Zhou Host", Side.PACK: "The Shang Host"},
@@ -390,10 +402,10 @@ THEME_INVESTITURE = Theme(
     },
     blurb=(
         "The war was settled before it was fought, and every name that falls on "
-        "either side is enrolled among the gods. Both hosts are executing the same "
-        "mandate, so losing is an appointment rather than a damnation. Nobody wants "
-        "to be the one read out tonight even so, and at dawn the host names one of "
-        "its own aloud."
+        "either side is enrolled among the gods. The roll asks what it cost you, not "
+        "which host you served, so losing is an appointment rather than a damnation. "
+        "Nobody wants to be read out tonight, and at dawn the host names one of its "
+        "own."
     ),
     centre_name="register",
 )

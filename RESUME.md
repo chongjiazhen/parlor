@@ -11,6 +11,19 @@ above.
 
 What's next:
 
+**Next step, written 2026-08-27 at session close: WAIT, do not launch.** `hunt6a`
+(S6 arm 1) was 6/20 games and ~3.5h from done at close, fallbacks 0-3%; `hunt6b` is
+armed on sentinel `eval/records/hunt6a.json`. Read `eval/records/hunt6a.log` for its
+`PARLOR DONE rc=` line, never a process probe. When both arms land, the next session
+is S6's verdict against the pre-committed criterion below. **The freeze line in S6
+names `2c0e2a3` and HEAD has moved past it** - the theme work committed 2026-08-27
+touches no byte either arm renders, verified rather than argued: cabal's full render
+under `1984-en` at seeds 2000 and 3000, all five seats, context plus prompt, is
+byte-identical across the two SHAs (14656 bytes), with `bnw-en` as the live control
+proving the comparison could see a change. The one edit inside cabal's eval path is a
+guarded `sys.stdout.reconfigure` in `main()`. Ten new theme arms exist across both
+games and NONE has been run; all of it is gated behind gate #3 either way.
+
 ## Session slices - what one `/new` should take
 
 The queue is 24 open items and a cold session cannot rank them. These are the
@@ -452,9 +465,17 @@ can re-run.
         separates an act with no moral weight from an act with no consequences,
         which one neutral arm confounds. If 4 and 4' differ, what moved was stakes
         rather than valence. `masquerade` is thin in the conceit only: 59 words,
-        like every other arm here. The Fengshen reading is still from general
-        knowledge, not a pass over the text; that check is still owed and what it
-        would move is the blurb, not the mechanics.
+        like every other arm here.
+        **Fengshen TEXT CHECK DONE 2026-08-27, and it moved a clause.** Ch. 99, the
+        edict at the investiture altar: the dead are enrolled `依劫運之輕重，循資品之高下`
+        (by the weight of the calamity endured and by rank), then `有功之日，循序而遷`.
+        Shang's dead take posts beside Zhou's - Huang Feihu served Shang and is
+        enrolled. So the frame stands. What did NOT survive is "both hosts execute the
+        same mandate": the edict grounds enrollment in calamity and karma, not a shared
+        commission, so that was this repo's gloss wearing the novel's authority. The
+        blurb now says what the text says - the roll asks what it cost you, not which
+        host you served - which is flatter neutrality, the indifference being the
+        ROLL's rather than a symmetry between the sides. Still 59 words.
       - **Journey to the West holds the best statement of this rung's premise.**
         The Six-Eared Macaque: an impostor identical to Sun Wukong, indistinguish-
         able to the gods and to the pilgrims who travelled with him. That is the
@@ -533,16 +554,8 @@ can re-run.
         exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
         byte-identical and moves only the language, on a game whose numbers are
         already in hand.
-      - **Prerequisite for any CJK skin here: DONE 2026-08-27.**
-        `eval/run_changeling.py` printed its report with no `sys.stdout.reconfigure`
-        and would have died on the cp1252 console exactly as cabal's demo did before
-        `320e322`. Landed as the one line it was, ahead of the skin.
-        **And the same line was missing from `eval/run_games.py`, which is the worse
-        half and was not on anyone's list**: cabal's EVAL lane already accepts
-        `--theme 1984-cn` and `--theme bnw-cn`, so a CJK run could have completed in
-        full and then died at the moment of printing its report - hours of model
-        calls, a non-zero exit, and nothing wrong with the arena. Both fixed.
-        Changeling still has no demo entry point.
+      - **Changeling still has no demo entry point.** The CJK console prerequisite
+        that used to sit here is done (both eval drivers reconfigure stdout now).
 
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-
