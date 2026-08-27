@@ -409,6 +409,44 @@ can re-run.
         acts as it (the game is named for it, and it makes the night recursive), a
         mass positional shuffle (cheap, but variety).
 
+- [ ] **Candidate changeling skins, and which arm each is FOR** (scoped
+      2026-08-27; nothing written). All of them sit behind arm 3, the
+      inverted-polarity skin - two more rich arm-2 fictions and still no claim
+      about morality is the trap `docs/moral-framing.md` exists to name.
+      - **Greek myth = the vocabulary control (arm 2').** What `bnw-en` is to
+        `1984-en`. Register-distant from `folk` in the way a fae skin was not, and
+        the fit is structural rather than decorative: metamorphosis and theoxeny
+        are the corpus, gods walk unrecognised, Proteus is a different thing each
+        time you grip him, Circe changes what you are while you are her guest.
+        Polarity maps onto `folk`'s cleanly, which is exactly what a control needs.
+      - **Fengshen Yanyi = a better arm 4 than the masquerade.** Its conceit is
+        that the dead of the war are enrolled in the celestial bureaucracy and both
+        sides execute a mandate: "one side must lose, and losing is not damnation"
+        is a morally NEUTRAL frame that is also rich, where a masquerade is neutral
+        by being thin. Check the reading against the text before building on it.
+      - **Journey to the West holds the best statement of this rung's premise.**
+        The Six-Eared Macaque: an impostor identical to Sun Wukong, indistinguish-
+        able to the gods and to the pilgrims who travelled with him. That is the
+        belief/truth split in one episode. If one myth skin ever ships, that is its
+        blurb.
+      - **The mashup, asked 2026-08-27: right as SOURCING, wrong as DESIGN.** The
+        two share a pantheon - Nezha, Li Jing, Erlang Shen, Laozi are in both - so
+        drawing on both is how the folk cosmology actually works, not a mangling.
+        But their value here is opposite: Fengshen's is neutral polarity, JTTW's is
+        righteous-pilgrims-versus-impostors. Mash them and the skin's polarity is
+        indeterminate, which is the `1984-en`-vs-`plain` confound rebuilt by hand.
+        So: one corpus owns the FRAME, the other supplies vocabulary and imagery
+        across the shared pantheon. A mashup in practice, one variable on paper.
+      - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
+        language at once and cannot be read. The clean language control already
+        exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
+        byte-identical and moves only the language, on a game whose numbers are
+        already in hand.
+      - **Prerequisite for any CJK skin here:** `eval/run_changeling.py` prints its
+        report with no `sys.stdout.reconfigure`, so it dies on the cp1252 console
+        exactly as cabal's demo did before `320e322`. Changeling has no demo entry
+        point at all. One line, wanted before the skin and not after.
+
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-
       mission hidden-role deduction game" means nothing to anyone outside the
