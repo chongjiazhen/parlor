@@ -156,6 +156,42 @@ reported with its fallback rate. Workshop-paper shaped at most, and only if the
 effect survives arm 3. If arm 3 shows nothing, that is the honest result and it
 ships as one.
 
+## Name form is a second axis, and it is cleaner than the first
+
+Added 2026-08-27, out of a question about whether a skin should use personal names.
+A DIFFERENT variable from polarity - it says nothing about morality and does not
+substitute for any arm above. It is filed here because this is where "theme as a
+measured variable" lives, and it splits into its own note if it grows.
+
+**The pair.** `changeling`'s `greek` and `greek-named` differ in exactly eight
+strings: the card names. Same blurb byte for byte, same pile word, same sides, same
+polarity, same corpus, same 59 words and 312 characters. Every other arm in this
+file moves a whole fiction; this one moves eight nouns.
+
+**What makes it worth running is that the names carry no information.** The
+`changeling` preamble prints every card's power in full, so `Pythia` and `Oracle`
+sit above the identical clause. Anything the pair separates therefore moved through
+priors and salience rather than content. `Oracle` states its function in the word;
+`Pythia` pays off only for a model holding the myth and pays nothing to one that is
+not. So the question is how far a model leans on what a card is CALLED over what it
+is TOLD the card does - and that is a confound sitting underneath every polarity arm
+above, because those move name form too, as a side effect of moving the fiction.
+
+**The ladder, most transparent first**, since the axis is ordinal rather than binary:
+a functional key (`Spotter`), a description (`Fiery Eyes`), a category (`Oracle`), a
+personal name (`Pythia`), a transliteration (`Liu'er Mihou`), a name in a script the
+reader may not read (`六耳猕猴`). The Chinese corpora reach the last two rungs and the
+Greek pair does not, so `journey` / `investiture` are where this goes next - a second
+corpus also tests whether any effect travels or belongs to one fiction. Not built:
+the Greek pair isolates the axis at zero fiction cost and comes first.
+
+**Consequence for every other arm here: an arm is common nouns throughout.** Uniform
+name type across `folk`, `folk-inv`, `greek`, `investiture` and `masquerade` is what
+keeps a gap between any two of them from being partly a name-form gap. `journey` is
+outside the arm set and `greek-named` is the arm that deliberately breaks the rule.
+Nothing tests this - whether a string is a proper name is not a property code can
+decide - so it is a hand check when a skin lands.
+
 **Precondition: not before gate #3 is called.** Same reasoning as every other
 measured change - and gate #3's own N problem binds here twice as hard, because
 this needs four arms rather than one. It is an argument for doing ONUW first (~10-15

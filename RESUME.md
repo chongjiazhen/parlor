@@ -512,15 +512,37 @@ can re-run.
         Trickster / Enchantress / Lotus-Eater / Shepherd / Twins / Pool-Gazer, same
         register, no personal names. **Check name type on any future skin**; nothing
         tests it, because "is this a proper name" is not a property code can decide.
+      - **The proper names came back the same day as `greek-named`, which is the
+        right LAYER for them** - not a reversal. Dropping them from the CONTROL was
+        correct; treating them as a defect rather than a variable was not. The pair
+        differs in exactly eight strings, the card names, with blurb, pile, sides,
+        polarity, corpus and length all identical - the cleanest single-variable
+        manipulation in the repo, since every other arm pair moves a whole fiction.
+        It is worth running because the preamble prints every power in full, so the
+        names carry no information: whatever separates the pair moved through priors
+        and salience, which is a confound underneath every polarity arm. Axis, ladder
+        and the CN follow-up: `docs/moral-framing.md` §Name form.
+      - **CN name forms are the next rung on that axis, not a new one** - a
+        transliteration (`Liu'er Mihou`) is opaque where a gloss (`Six-Eared Macaque`)
+        is not, and Han script is opaquer again. `journey` / `investiture` are where
+        it would go, and it also tests whether the effect travels or belongs to one
+        fiction. Not built: the Greek pair isolates the axis at no fiction cost and
+        comes first. The console prerequisite below is now cleared either way.
       - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
         language at once and cannot be read. The clean language control already
         exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
         byte-identical and moves only the language, on a game whose numbers are
         already in hand.
-      - **Prerequisite for any CJK skin here:** `eval/run_changeling.py` prints its
-        report with no `sys.stdout.reconfigure`, so it dies on the cp1252 console
-        exactly as cabal's demo did before `320e322`. Changeling has no demo entry
-        point at all. One line, wanted before the skin and not after.
+      - **Prerequisite for any CJK skin here: DONE 2026-08-27.**
+        `eval/run_changeling.py` printed its report with no `sys.stdout.reconfigure`
+        and would have died on the cp1252 console exactly as cabal's demo did before
+        `320e322`. Landed as the one line it was, ahead of the skin.
+        **And the same line was missing from `eval/run_games.py`, which is the worse
+        half and was not on anyone's list**: cabal's EVAL lane already accepts
+        `--theme 1984-cn` and `--theme bnw-cn`, so a CJK run could have completed in
+        full and then died at the moment of printing its report - hours of model
+        calls, a non-zero exit, and nothing wrong with the arena. Both fixed.
+        Changeling still has no demo entry point.
 
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-

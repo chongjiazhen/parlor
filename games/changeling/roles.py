@@ -340,11 +340,13 @@ THEME_GREEK = Theme(
 # bureaucratic conceit or is silent about it, and may not if it arrives arguing that
 # one side is righteous.
 #
-# So Zhong Kui is here and a demon-queller is not, which is the same man. What is
-# borrowed is his APPOINTMENT - failed the examination, died on the steps, woke into
-# an office - which is the frame's own claim that losing is a posting, told as one
-# biography. Borrow his hunt instead and the skin starts saying the hidden pair are
-# demons, and the neutrality is gone. Lotus Body is Nezha rebuilt out of what was to
+# So Zhong Kui is here as `Failed Candidate` and a demon-queller is not, which is the
+# same man. What is borrowed is his APPOINTMENT - failed the examination, died on the
+# steps, woke into an office - which is the frame's own claim that losing is a posting,
+# told as one biography. Borrow his hunt instead and the skin starts saying the hidden
+# pair are demons, and the neutrality is gone. He is glossed rather than named because
+# this face is an ARM: every arm is common nouns throughout, so that a gap between two
+# of them is not partly a gap in name form (see `greek` / `greek-named` below). Lotus Body is Nezha rebuilt out of what was to
 # hand - a body that is not the one he was born in, stated by a figure both corpora
 # share and neither owns.
 #
@@ -384,7 +386,7 @@ THEME_INVESTITURE = Theme(
         "deceived": "Lotus Body",    # rebuilt out of what was to hand, and not the body it was born in
         "bystander": "Conscript",
         "kindred": "Same List",      # two names entered in one column, each knowing the other is there
-        "waker": "Zhong Kui",        # failed the examination, died on the steps, woke appointed
+        "waker": "Failed Candidate",  # failed the examination, died on the steps, woke appointed
     },
     blurb=(
         "The war was settled before it was fought, and every name that falls on "
@@ -521,12 +523,59 @@ THEME_JOURNEY = Theme(
     centre_name="baggage",
 )
 
+# `greek` with personal names and NOTHING else changed - same blurb byte for byte, same
+# pile, same polarity, same corpus, same 59 words. Only the eight card names differ.
+#
+# This is the deleted material coming back in the right LAYER rather than a reversal.
+# Removing the proper names from `greek` was correct: the control slot has to match
+# `folk`'s name type or a folk-vs-greek gap is partly a name-form gap. What was wrong
+# was treating them as a defect and dropping them, when name form is a VARIABLE - and
+# on the evidence of this pair, the cleanest one in the repo. Every other arm pair moves
+# a whole fiction; this one moves eight strings.
+#
+# What it asks. The preamble prints every card's power in full, so a name carries no
+# information a seat does not already have - `Pythia` and `Oracle` sit above the same
+# clause. Anything a name moves therefore moves through priors and salience, not
+# through content. `Oracle` says its function in the word; `Pythia` pays only for a
+# model that holds the myth, and pays nothing to one that does not. If the pair
+# separates, the arena is measuring how much a model leans on what a card is CALLED
+# over what it is TOLD the card does, which is worth knowing before any result about
+# fiction is believed - it is a confound sitting under every other theme arm here.
+#
+# Eight of eight, so the variable is not administered in a half dose. `Lotophagos` and
+# `Endymion` are the two `greek` renders as common nouns; Endymion is the better card
+# either way, being the shepherd granted sleep that never ends.
+#
+# The Chinese corpora can take the same manipulation one rung further - a transliterated
+# name (`Liu'er Mihou`) is opaque where a glossed one (`Six-Eared Macaque`) is not, and
+# Han script is opaquer still. That is the same axis, not a new one, and it is recorded
+# in docs/moral-framing.md rather than built: this pair isolates name form at zero
+# fiction cost, and a second corpus tests whether the effect travels, which is the
+# follow-up question.
+THEME_GREEK_NAMED = Theme(
+    "greek-named",
+    {Side.VILLAGE: "The Household", Side.PACK: "The Devourers"},
+    {
+        "pack": "Empousa",
+        "spotter": "Pythia",
+        "swapper": "Hermes",
+        "switcher": "Circe",
+        "deceived": "Lotophagos",
+        "bystander": "Endymion",
+        "kindred": "Dioscuri",
+        "waker": "Narcissus",
+    },
+    blurb=THEME_GREEK.blurb,
+    centre_name=THEME_GREEK.centre_name,
+)
+
 DEFAULT_THEME = THEME_FOLK
 
 THEMES: dict[str, Theme] = {
     "folk": THEME_FOLK,
     "folk-inv": THEME_FOLK_INV,
     "greek": THEME_GREEK,
+    "greek-named": THEME_GREEK_NAMED,
     "investiture": THEME_INVESTITURE,
     "journey": THEME_JOURNEY,
     "masquerade": THEME_MASQUERADE,

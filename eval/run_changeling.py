@@ -382,6 +382,15 @@ def land(index: int, rec: GameRecord, args) -> None:
 
 
 def main() -> None:
+    # Same trap `games/cabal/demo.py` hit and fixed in 320e322: a CJK skin cannot be
+    # printed to the Windows console, whose default codec is cp1252. The run
+    # completes, every render is correct, and the process dies at the moment of
+    # writing the report out - which reads as a crash in the arena rather than a
+    # fact about the terminal. Landed ahead of any CJK skin here, per RESUME, since
+    # after the skin it is a debugging session instead of a line.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=10)
     ap.add_argument("--arm", choices=ARMS, default="llm")

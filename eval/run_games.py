@@ -671,6 +671,14 @@ def report(s: dict, args, elapsed: float) -> str:
 
 
 def main() -> None:
+    # cabal's demo fixed this in 320e322 and the EVAL lane never got it, which is the
+    # worse half: `--theme 1984-cn` and `--theme bnw-cn` are already accepted here, so
+    # a CJK run could complete in full and then die on the cp1252 console at the
+    # moment of printing its report - hours of model calls, exit non-zero, and nothing
+    # wrong with the arena.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=10)
     ap.add_argument("--arm", choices=list(LIVE_TEAMS), default="llm",
