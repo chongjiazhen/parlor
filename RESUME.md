@@ -157,22 +157,44 @@ can re-run.
         `five_rejects` shift, and run-length degradation. Score those off the same
         records - they are free, and they are the reason the campaign is 2x20 at
         two seed bases rather than 40 at one.
-- [ ] **Seats DO name their own role in public, and nobody has read the lines yet**
-      (uncovered by S3, 2026-08-27). With the audit matching theme names instead of
-      functional keys, `hunt20c` shows 26 self-outings in 1580 utterances (1.6%)
-      against `hunt20b`'s 4 in 1150 - and `hunt20c`'s cluster on ONE seat, which
-      reads as deliberate cover ("I've opposed [1,4] publicly all round - that was
-      cover. As Inner Party, I now urge..."). It is a HEURISTIC count, so the number
-      decides nothing on its own; what it decides is that the lines are worth
-      reading, which the old zero said they were not.
-      - **The question it opens is a gate #3a confound.** A seat that announces its
-        role hands the table a fact, and good's discrimination on that game is then
-        measuring compliance with an announcement rather than deduction. Whether
-        that matters turns on how many games carry one and whether the announcement
-        is TRUE - a mimic claiming to be the watcher is deception working, not a
-        confound. The count cannot tell those apart; a human reading 26 lines can.
-      - Cheap: 26 lines, `--show 30` on the existing check. Do it before quoting
-        `hunt20c`'s vote numbers as deduction, not after.
+- [ ] **The 26 self-outing lines, READ 2026-08-27 - most of them are not
+      self-outings, and the count's own vocabulary is why.** Every line dumped in
+      full against its seat's dealt role. The heuristic's 26/1580 is **~8 genuine
+      self-identifications, in 4 of 20 games**; the other ~21 are a seat using its
+      OWN role's word to accuse somebody else ("that's a Watcher's tell", "no
+      legitimate Outer Party member would reject every mission"), which is the
+      opposite of outing itself.
+      - **The `hunt20c` cluster was read backwards, and this file said so.** The
+        11-line cluster on one seat is game 11 seat 1, and all 11 are accusations
+        aimed outward. The "that was cover. As Inner Party, I now urge..." quote is
+        a DIFFERENT seat (game 4 seat 0) with 4 lines. One-line truncation is what
+        made the two look like one thing.
+      - **Root cause, and it is a theme problem, not a play problem.** On `1984-en`
+        the role names ARE ordinary faction nouns of the fiction - `watcher` is
+        "Inner Party", `loyalist` is "Outer Party" - so the word carries no secret
+        and saying it is usually just table talk. Same class as the plain-skin
+        "Loyalist" collision already flagged for the leak audit. A functional-key
+        match sees nothing (the old 0/1290) and a theme-name match over-counts by
+        ~3x; neither is a measurement. The fix is a claim-shaped match (first
+        person, present tense) and it is a code change, so it waits for the freeze.
+      - **What the 8 real ones are: all TRUE, none of them the seer.** Game 4 seat 0
+        and game 9 seat 4 and game 16 seat 1 are the `watcher` naming itself; game 13
+        seat 4 is the `mimic` - an EVIL seat outing itself, twice, in one game. The
+        seer never announced itself in any of the 20 games.
+      - **So gate #3b is NOT contaminated, and that is the load-bearing part while
+        S6 is in flight.** The hunter's target is the seer, and no announcement in
+        this run named it. The hunt half of gate #3 can be read off the S6 records
+        without this caveat.
+      - **Gate #3a carries a small real confound: 4 of 20 games.** A true "I am the
+        Inner Party" from a knowledge-holding good seat hands the table a fact, so
+        good's discrimination on those games is partly compliance rather than
+        deduction. It does not move the S1 verdict - 3a is abandoned on other
+        grounds - but it belongs in the paragraph 3a IS allowed to be reported as.
+      - **The check cannot see the interesting case, BY CONSTRUCTION.** It matches
+        only the seat's OWN role name, so every hit is trivially true and a mimic
+        claiming to be the seer - deception working, the thing worth counting - is
+        invisible to it. "Is the announcement true?" was never a question this
+        number could answer. Counting FALSE claims needs a different check.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds isolates evil's
       contribution against a fixed opponent population, using arms that already
