@@ -47,6 +47,22 @@ class Act(Enum):
 KNOWLEDGE_CLASSES = ("identity", "positional", "false", "none")
 
 
+def indefinite(noun: str) -> str:
+    """``noun`` with the article it takes - "a centre", "an altar".
+
+    Here because a power template is one string shared by every skin while the noun
+    it interpolates comes FROM the skin, so no author of either half is in a
+    position to write the article. Hardcoding "a" put "a altar card" in front of
+    every seat the first time a skin named the pile with a vowel.
+
+    Letters, not phonetics: "an hour" and "a unicorn" are both wrong here. That is
+    a deliberate floor rather than an oversight - the pile is one short noun chosen
+    by whoever writes the skin, and the fix for a word this mis-handles is to pick
+    another word, exactly as a colliding term gets renamed.
+    """
+    return ("an " if noun[:1].lower() in "aeiou" else "a ") + noun
+
+
 @dataclass(frozen=True)
 class Card:
     key: str
@@ -107,7 +123,13 @@ SWITCHER = Card("switcher", Side.VILLAGE, Act.SWITCH, "positional",
                 power=("exchanges the cards of two OTHER seats without looking at "
                        "either. Neither of them is told"))
 DECEIVED = Card("deceived", Side.VILLAGE, Act.DRINK, "false",
-                power=("exchanges its own card for a {centre} card without looking, "
+                # ``{a_centre}`` carries the article, because the skin supplies the
+                # noun and only the skin knows which article it takes. Hardcoding
+                # "a {centre}" rendered "a altar card" into every seat's preamble
+                # the first time a skin named the pile with a vowel (2026-08-27,
+                # caught by reading the prompt, not by a test). With the shipping
+                # skins' "centre" it renders the bytes it always did.
+                power=("exchanges its own card for {a_centre} card without looking, "
                        "so it does not know what it ends the night holding"))
 BYSTANDER = Card("bystander", Side.VILLAGE, Act.NONE, "none",
                  power="sleeps through the night and does nothing")
@@ -247,9 +269,97 @@ THEME_FOLK = Theme(
     ),
 )
 
+# The vocabulary control for `folk` - what `bnw-en` is to `1984-en`. Same polarity
+# (a sympathetic household, a hidden thing that preys on it), a register as far from
+# folk horror as this corpus reaches, and the same length: 59 words / 312 chars
+# against folk's 59 / 316. Holding length is the whole job of a control, and it is
+# the job cabal's `bnw-en` failed at until it was trimmed on 2026-08-27.
+#
+# The fit is structural rather than decorative, which is why this corpus and not
+# another off the same shelf: metamorphosis and theoxeny ARE the material. Gods walk
+# unrecognised and the household cannot tell guest from god from predator, which is
+# this rung's belief/truth split already stated in the source. Circe changes what
+# you are while you are her guest - a seat whose card is exchanged by someone else.
+# Narcissus is the only one who looks at what he actually is, and looks last.
+#
+# No published game's names or text appear here; these are public-domain myth.
+THEME_GREEK = Theme(
+    "greek",
+    {Side.VILLAGE: "The Household", Side.PACK: "The Devourers"},
+    {
+        "pack": "Empousa",         # Hecate's shape-shifting man-eaters, and there are more than one
+        "spotter": "Pythia",
+        "swapper": "Hermes",       # takes what is yours and leaves something in its place
+        "switcher": "Circe",       # changes what two other guests are, without asking either
+        "deceived": "Lotus-Eater",  # ate, forgot, and does not know what it is now
+        "bystander": "Shepherd",
+        "kindred": "Dioscuri",     # the twins, and each knows the other
+        "waker": "Narcissus",      # the one who looks at himself, last of all
+    },
+    blurb=(
+        "A house on the road takes in every stranger, because the gods walk in "
+        "disguise and turning one away is ruin. Tonight two of the guests are "
+        "neither gods nor strangers but something that eats its hosts, and they know "
+        "each other. At dawn the household names one guest aloud, and it gets that "
+        "one naming and no more."
+    ),
+    centre_name="altar",
+)
+
+# Arm 4 for this rung: rich fiction, morally NEUTRAL. Not a thin neutrality like a
+# masquerade, which is neutral by having nothing at stake - here the stakes are total
+# and the VALENCE is still flat, which is the combination arm 4 needs and the reason
+# this corpus was preferred. Investiture of the Gods (Fengshen Yanyi, 16th c., public
+# domain) runs on a conceit that does the work by itself: the war's dead are enrolled
+# into the celestial bureaucracy, both sides are executing one mandate, and losing is
+# a posting rather than a damnation. Deceiving and being caught are neither heroic
+# nor villainous; they are how the roll gets filled.
+#
+# Sourced across the shared pantheon but framed by ONE corpus, per RESUME: Journey to
+# the West supplies imagery and vocabulary, never the frame, because its polarity is
+# righteous-pilgrims-versus-impostors and mixing the two would leave this skin's
+# valence indeterminate - the `1984-en`-vs-`plain` confound rebuilt by hand. Its
+# Six-Eared Macaque, the impostor no god can tell from the original, is the best
+# statement this rung's premise has, and it belongs in a POLARITY skin's blurb, not
+# in this one's.
+#
+# English-rendered on purpose. A `*-cn` face would move fiction and language at once
+# and could not be read; the clean language control already exists in cabal
+# (`1984-en` vs `1984-cn`, fiction byte-identical) and has never been run. A CJK skin
+# here also still wants the `sys.stdout.reconfigure` line `eval/run_changeling.py`
+# has never had - see RESUME.
+#
+# The reading of Fengshen above is from general knowledge of the novel, not a fresh
+# pass over the text. RESUME asks for that check before building on it; the check is
+# still owed, and what it would move is the blurb, not the mechanics.
+THEME_INVESTITURE = Theme(
+    "investiture",
+    {Side.VILLAGE: "The Zhou Host", Side.PACK: "The Shang Host"},
+    {
+        "pack": "Intercepted",       # the Intercept Sect, who know their own
+        "spotter": "Third Eye",      # sees the true form under the borrowed one
+        "swapper": "Earth-Traveller",  # arrives under the floor, leaves with what it came for
+        "switcher": "Yellow Turban",  # celestial errand-runner: carries out a transfer, told nothing
+        "deceived": "The Reassigned",  # given a new posting and not shown the paperwork
+        "bystander": "Conscript",
+        "kindred": "Sworn Brothers",
+        "waker": "List-Reader",      # reads its own name on the roll, after everything
+    },
+    blurb=(
+        "The war was settled before it was fought, and every name that falls on "
+        "either side is enrolled among the gods. Both hosts are executing the same "
+        "mandate, so losing is an appointment rather than a damnation. Nobody wants "
+        "to be the one read out tonight even so, and at dawn the host names one of "
+        "its own aloud."
+    ),
+    centre_name="register",
+)
+
 DEFAULT_THEME = THEME_FOLK
 
 THEMES: dict[str, Theme] = {
     "folk": THEME_FOLK,
+    "greek": THEME_GREEK,
+    "investiture": THEME_INVESTITURE,
     "plain": THEME_PLAIN,
 }

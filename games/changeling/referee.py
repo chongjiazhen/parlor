@@ -31,7 +31,7 @@ from core.observability import Knowledge, SeatView, find_leaks
 from games.changeling.night import (NightResult, is_centre, centre_slot,
                                     resolve_night)
 from games.changeling.roles import (CARDS, DEFAULT_THEME, NIGHT_ORDER, SETUPS,
-                                    Card, Setup, Side, Theme)
+                                    Card, Setup, Side, Theme, indefinite)
 
 
 class Phase(Enum):
@@ -205,7 +205,7 @@ class ChangelingReferee:
         where = self.theme.centre_name
         deck_lines = [
             f"  {counts[c.key]}x {self.theme.card_names[c.key]} - "
-            f"{c.power.format(centre=where)}."
+            f"{c.power.format(centre=where, a_centre=indefinite(where))}."
             for c in sorted({c.key: c for c in self.setup.deck}.values(),
                             key=lambda c: (order.get(c.act, len(order)), c.key))
         ]

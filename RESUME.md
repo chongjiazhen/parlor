@@ -412,9 +412,23 @@ can re-run.
         mass positional shuffle (cheap, but variety).
 
 - [ ] **Candidate changeling skins, and which arm each is FOR** (scoped
-      2026-08-27; nothing written). All of them sit behind arm 3, the
+      2026-08-27). All of them sit behind arm 3, the
       inverted-polarity skin - two more rich arm-2 fictions and still no claim
       about morality is the trap `docs/moral-framing.md` exists to name.
+      **BUILT 2026-08-27, as themes only:** `greek` (the vocabulary control below)
+      and `investiture` (the Fengshen arm 4 below). Unrun, `DEFAULT_THEME` still
+      `folk`, no number moved. Both are 59 words against `folk`'s 59, and 312/308
+      chars against its 316 - length is held on BOTH axes, because a same-word-count
+      blurb ran 13% short in bytes on cabal and word count alone is not the control.
+      **The inverted-polarity skin is still the blocker and is still unbuilt**, so
+      what exists now is one polarity, its vocabulary control, and a neutral arm -
+      readable as richness and vocabulary, not yet as morality.
+      **Reading the rendered preamble under `greek` caught a live prompt bug that no
+      test held**: the `deceived` power hardcoded "a {centre}", so a skin naming the
+      pile with a vowel put "a altar card" in front of every seat. The article now
+      comes from `roles.indefinite()` and a guard renders every skin's power text;
+      `folk` and `plain` render the bytes they always did, so the queued 200-game run
+      is untouched. Read the prompt, not just the tests, when a skin lands.
       - **Greek myth = the vocabulary control (arm 2').** What `bnw-en` is to
         `1984-en`. Register-distant from `folk` in the way a fae skin was not, and
         the fit is structural rather than decorative: metamorphosis and theoxeny

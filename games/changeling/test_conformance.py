@@ -25,7 +25,7 @@ import unittest
 from games.changeling.night import (centre_ref, is_centre, legal_targets,
                                     resolve_night)
 from games.changeling.roles import (ALL_CARDS, CARDS, NIGHT_ORDER, SETUP_5,
-                                    THEMES, Act, Side)
+                                    THEMES, Act, Side, indefinite)
 
 RULES = pathlib.Path(__file__).with_name("RULES.md").read_text(encoding="utf-8")
 
@@ -169,6 +169,24 @@ class TestEverySkinIsNamedAndCollisionFree(unittest.TestCase):
                     self.assertNotIn(theme.card_names[other.key].lower(),
                                      card.power.lower(),
                                      f"{name}: {card.key}'s power names {other.key}")
+
+    def test_no_power_text_takes_the_wrong_article_in_any_skin(self):
+        """The article sits in a template shared by every skin; the noun it precedes
+        comes FROM the skin. So neither author is in a position to write the pair,
+        and a hardcoded "a" put "a altar card" into every seat's preamble the first
+        time a skin named the pile with a vowel. Caught by reading the rendered
+        prompt, which is why the check now renders rather than reading the template.
+        """
+        for name, theme in THEMES.items():
+            for card in ALL_CARDS:
+                text = card.power.format(centre=theme.centre_name,
+                                         a_centre=indefinite(theme.centre_name))
+                self.assertNotRegex(
+                    text, r"\ba (?=[aeiou])",
+                    f"{name}: {card.key} renders '{text}'")
+                self.assertNotRegex(
+                    text, r"\ban (?=[^aeiou])",
+                    f"{name}: {card.key} renders '{text}'")
 
 
 class TestNightInvariants(unittest.TestCase):
