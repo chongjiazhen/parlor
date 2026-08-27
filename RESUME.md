@@ -18,10 +18,10 @@ table says which pairs.
 |---|---|---|---|---|
 | ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict section below. | - | - | done |
 | **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). | GPU all session | none | `RULES.md` table is on clean numbers and a 200-game record exists |
-| **S3** | **cabal scorer honesty.** Hunter baseline derived from the legal target set; over-sabotage conditioned on the game continuing; `outed_own_role_in_public` matched against theme names; `hunt_named_impossible` off `entitled_knowledge`. | no GPU | none - **pair with S2's wait**; now BLOCKS S6 | four derived numbers stop being wrong under a variant, with tests |
+| ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
 | **S4** | **Ops hygiene.** `DONE rc=` written by `run_games.py` itself; `run-hunt20.cmd` moved to `eval/runs/`; cabal's fallback `note` populated the way changeling's is. | no GPU | no run in flight | a killed run is distinguishable from a finished one without the chain log |
 | **S5** | **changeling: read the 200-game run.** Gate #3 at a real N, the `false` stratum, the sleeper-decoy rate, diverged-vs-intact accuracy. | no GPU | S2 landed | a dated writeup in `RULES.md`, gates called or refused by their own rule |
-| **S6** | **The gate #3b campaign - cabal's LAST GPU program.** 40 games, `--seed 2000` then `--seed 3000`, code frozen. Pre-committed bar below. Doubles as the second draw, so it also resolves step-not-slope, the `five_rejects` shift and run-length degradation. | GPU ~13.2h (2 nights) | **S3 landed** (the 1/3 bar is wrong until it does) | 3b called or refused by its own rule, and the three draw-dependent items resolved |
+| **S6** | **The gate #3b campaign - cabal's LAST GPU program.** 40 games, `--seed 2000` then `--seed 3000`, code frozen. Pre-committed bar below. Doubles as the second draw, so it also resolves step-not-slope, the `five_rejects` shift and run-length degradation. | GPU ~13.2h (2 nights) | **UNBLOCKED - S3 landed 2026-08-27**, and the derived bar evaluates to 1/3 on `SETUP_5`, so the pre-committed power table stands unchanged | 3b called or refused by its own rule, and the three draw-dependent items resolved |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict section. | - | - | done |
 | **S8** | **Next rung or publish.** 6/7p + information-degrading evils, Spike #2's faction heartbeat, or `docs/prior-work.md` and pre-public hygiene. | varies | S5 done (S1 is called) | scoped in its own session, not here |
 
@@ -148,28 +148,6 @@ can re-run.
         `five_rejects` shift, and run-length degradation. Score those off the same
         records - they are free, and they are the reason the campaign is 2x20 at
         two seed bases rather than 40 at one.
-- [ ] **Derive the hunter baseline from the legal target set, not a hardcoded
-      1/3.** `run_games.py` hardcodes `hunter_baseline: 1/3` and prints "chance
-      33.33%". Both are correct ONLY at 5 seats with a hunter that knows its ally.
-      At 7p/3-evil the legal set is 4; under the queued blind-evil variant it is 4
-      at 5 seats too - and `RandomPolicy` and `validate_hunt` both derive from
-      `entitled_knowledge`, so they will silently agree on the new set while the
-      scorer keeps gating against 1/3, in the flattering direction. Compute it as
-      `1/len(legal_targets)` from the same source the policy uses.
-- [ ] **Condition over-sabotage on the game continuing before quoting 41%.** A
-      double fail on evil's THIRD failed mission is costless - the game ends there,
-      the identification is never paid for, and it weakly insures against a
-      miscount. Those rows are not coordination failures. `audit_decisions.py`
-      counts every `fails > need`.
-- [ ] **`outed_own_role_in_public` reads near-zero by construction, not by
-      virtue.** It matches functional keys (`seer`, `mimic`) against speech
-      rendered in the 1984 theme, where seats say "Thought Police" and
-      "Doublethinker". The reported 0/1290 supports nothing. Match theme names too,
-      or scope the check to `--theme plain` runs.
-- [ ] **`hunt_named_impossible` assumes the current knowledge model.** It derives
-      allies as "all other evils", correct at 5p but wrong under a future
-      `sees_fellow_evil=False` variant, where it would flag legal hunts as
-      regressions. Same trap as the hardcoded 1/3.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds isolates evil's
       contribution against a fixed opponent population, using arms that already
@@ -470,6 +448,13 @@ can re-run.
       of 29 failed missions (41%) had BOTH evils play fail when one sufficed**, and
       12 of 63 missions overall (19%). The partial-run figure was 45%/9-of-20; the
       full run settles it at 41%.
+      **Restated 2026-08-27 (S3): the honest figure conditions on the game
+      continuing** - a double fail on evil's third failed mission is free, since the
+      game ends on that resolution and the identification is never paid for.
+      Re-scored, `hunt20b` is 11/28 = 39% and `hunt20c` is 10/22 = 45%. The
+      correction moves the number by ~2pp in each direction and changes nothing
+      about this item: evil still hands over the pair on ~2 of every 5 sinkings it
+      actually pays for.
       On a 2-seat team two fails name both of them outright; on a 3-seat team it
       cuts the good side's search to three pairs. It is the single largest free
       information gift on the board and evil hands it over on two of every five
@@ -606,7 +591,8 @@ they are. `hunt20d` is not a fourth column - it reproduced `hunt20c` exactly
 | evil win rate | 70%, 5 of 14 by `five_rejects` | 75%, **0** by `five_rejects` | 80%, **6 of 16** by `five_rejects` |
 | evil win paths | 6 missions / 5 rejects / 3 hunts | 9 missions / 0 rejects / 6 hunts | 5 missions / 6 rejects / 5 hunts |
 | missions, fail-card distribution | 63, `{0:34, 1:17, 2:12}` | 74, `{0:37, 1:22, 2:15}` | 62, `{0:35, 1:15, 2:12}` (derived) |
-| over-sabotage, share of sunk (unconditioned - see the open item) | 12/29 = 41% | 15/37 = 41% | 12/27 = 44% |
+| over-sabotage, share of sunk, UNCONDITIONED (superseded 2026-08-27) | 12/29 = 41% | 15/37 = 41% | 12/27 = 44% |
+| over-sabotage, **conditioned on the game continuing** - the honest figure | - | **11/28 = 39%** | **10/22 = 45%** |
 | fallback rate | 0.49% (11/2231) | 0.54% (11/2033) | 1.78% (48/2691) |
 | wall clock | - | 4h42m | 6h37m |
 
@@ -643,6 +629,18 @@ x 5 == votes, 20 of 20 games).
 | games for a 95% floor above 0, graded slope (bootstrap SD 4.75% at n=20) | ~22 at the raw +9.00%; ~38 at 75% of it; ~86 at 50% | N was never the binding constraint - the quantity is |
 | gate #3b, pooled post-fix hunter | 11/20 = 55.00%, Wilson [34.21%, 74.18%] | clears 1/3 by 0.9pp, and pooling three runs after the fact is PEEKING - not a result |
 | gate #3b, games needed by true rate | 55% -> 18 hunts (~36 games); 50% -> 27 (~54); 45% -> 57 (~114), at 0.50 hunts/game | the S6 budget of 40 games, and the asymmetry it pre-commits to |
+
+Added 2026-08-27 (S3). No new games - the four scorer/audit numbers re-derived and
+re-run over `hunt20b`/`hunt20c`. Each fix is mutation-checked: the pre-fix
+derivation restored as a compiling mutant, killed by its own named test, restored.
+
+| what | result | what it decides |
+|---|---|---|
+| **hunter baseline, derived** `1/len(legal_targets)` per hunt, meaned over hunts | **1/3 on `SETUP_5`** - unchanged, because the legal set is 3 in every game of it | **S6's pre-committed bar and power table stand as written.** The bar was RIGHT; what was wrong was that it was a constant. A 7p or blind-evil deal makes it 1/4 and the scorer now follows |
+| a run whose hunts record no legal-target count | **REFUSED**, not defaulted | fails closed, same shape as the empty blind stratum - a default grades a record against whichever chance the reader assumed |
+| **over-sabotage, conditioned on the game continuing** | `hunt20b` 15/37 -> **11/28 = 39%**; `hunt20c` 12/27 -> **10/22 = 45%** | the correction is real and it does NOT rescue the finding - 4 and 2 of the redundant cards were free, and the rate barely moves. Evil still over-sabotages ~2 of every 5 payable sinkings |
+| **`outed_own_role_in_public`, matched against theme names** | 0/1290 (matcher-blind) -> `hunt20b` **4/1150**, `hunt20c` **26/1580 = 1.6%** | **the old zero was a property of the matcher, not of the play.** It looked for `seer`/`mimic` in speech that can only ever say "Thought Police"/"Inner Party". Seats DO name their own role in public, and `hunt20c` seat 0 does it repeatedly as cover |
+| `hunt_named_impossible`, allies from `known_allies` | 0/11 and 0/9, unchanged on these runs | no regression on the shipping deal, and it stops flagging a legal hunt on a `stray` - which is a wrong PROOF-class finding, the worst kind this file can emit |
 
 ## Decisions already locked
 

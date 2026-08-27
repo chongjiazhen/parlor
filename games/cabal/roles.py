@@ -59,6 +59,43 @@ STRAY = Role("stray", Team.EVIL, sees_fellow_evil=False, seen_by_fellow_evil=Fal
 #: Listed here rather than derived so the theme-coverage test cannot go stale.
 ALL_ROLES = (SEER, WATCHER, LOYALIST, MIMIC, HUNTER, AGENT, LURKER, STRAY)
 
+#: key -> role, for anything reading a FINISHED record. A ``GameRecord`` stores the
+#: assignment as keys, so a post-hoc reader (the decision audit) has strings where
+#: the referee had roles - and every one of those readers has, at least once, hard-
+#: coded the knowledge model instead of looking it up.
+ROLES_BY_KEY: dict[str, Role] = {r.key: r for r in ALL_ROLES}
+
+
+def known_allies(assignment: dict[int, Role], seat: int) -> set[int]:
+    """The seats the night named to ``seat`` as its own side.
+
+    One definition, three callers: ``entitled_knowledge`` (what the seat is told),
+    ``legal_hunt_targets`` (what it may therefore name), and the post-hoc decision
+    audit (whether a recorded hunt was impossible). Derived from the role flags
+    rather than from the key, so the blind-evil variant - where an evil seat is
+    named nothing - moves all three at once. A second copy of this rule is how the
+    audit ends up flagging a legal hunt as a regression.
+    """
+    me = assignment[seat]
+    if me.team is not Team.EVIL or not me.sees_fellow_evil:
+        return set()
+    return {s for s, r in assignment.items()
+            if s != seat and r.team is Team.EVIL and r.seen_by_fellow_evil}
+
+
+def legal_hunt_targets(assignment: dict[int, Role], hunter: int) -> list[int]:
+    """Every seat the hunter may name, in seat order.
+
+    A seat it KNOWS is evil cannot be the seer, and it knows two things that way:
+    its own role, and whoever the night named. What is left is the denominator of
+    the hunt baseline - ``1/len(...)`` - so this function and the chance figure the
+    gate is scored against are the same statement. Hardcoding ``1/3`` was correct
+    only at 5 seats with a hunter that sees its ally; at 7p/3-evil the set is 4,
+    and under the blind-evil variant it is 4 at 5 seats too.
+    """
+    barred = known_allies(assignment, hunter) | {hunter}
+    return [s for s in sorted(assignment) if s not in barred]
+
 
 @dataclass(frozen=True)
 class Setup:

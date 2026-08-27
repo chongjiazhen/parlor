@@ -8,7 +8,8 @@ found by hand on the 2026-08-25 run and every one turned out to be a scorer
 confound rather than a play-quality curiosity:
 
   - a hunt naming the hunter's own seat (fixed; this file now regression-tests it)
-  - both evils failing a mission that needed one fail, on 41% of sunk missions
+  - both evils failing a mission that needed one fail, on ~39-45% of the sunk
+    missions the game continued past
   - a seat reasoning about itself in the third person
 
 That is the pattern worth automating. A confound inflates or deflates a gate
@@ -31,10 +32,40 @@ import re
 import sys
 from collections import Counter
 
+from games.cabal.roles import ROLES_BY_KEY, THEMES, Role, known_allies
+
 
 def load(path: str) -> list[dict]:
     with open(path, encoding="utf-8") as fh:
         return [json.loads(line) for line in fh if line.strip()]
+
+
+def _assignment(game: dict) -> dict[int, Role]:
+    """The recorded ``seat -> role key`` map, back as roles.
+
+    A record stores keys; every knowledge question needs the flags behind them. An
+    unknown key is skipped rather than guessed - a checker that invents a role model
+    reports a confident wrong answer, which is worse than reporting nothing.
+    """
+    return {int(s): ROLES_BY_KEY[k]
+            for s, k in (game.get("assignment") or {}).items()
+            if k in ROLES_BY_KEY}
+
+
+def _says(text: str, name: str) -> bool:
+    """Did ``text`` name ``name``?
+
+    Word-boundary for a Latin name, plain substring for anything else. ``\\b`` is a
+    transition between a word and a non-word character, and CJK characters are word
+    characters with no spaces between them - so ``\\b思想警察\\b`` never matches
+    inside an ordinary Chinese sentence, and the `1984-cn` skin would go silently
+    unchecked. Which is exactly the failure mode this check was already in.
+    """
+    if not name:
+        return False
+    if name.isascii():
+        return re.search(rf"\b{re.escape(name)}\b", text, re.I) is not None
+    return name in text
 
 
 # ---- PROOF checks ---------------------------------------------------------
@@ -45,6 +76,14 @@ def hunt_named_impossible(games: list[dict]) -> tuple[int, int, list[str]]:
     The seer is good, so no seat known to be evil can be it. Refused by
     ``validate_hunt`` since 2026-08-26, so a non-zero count here on a later run is
     a regression, not a discovery.
+
+    "The night's ally" is read from ``known_allies``, the same function the referee
+    validates against, and never from a list of evil role keys. The first version
+    listed ``{mimic, hunter, agent}`` and treated every other evil as known - right
+    at 5 seats, wrong the moment a ``stray`` is dealt, because that seat is named to
+    nobody. It would have flagged a perfectly legal hunt as a regression, in a
+    checker whose whole contract is that a non-zero count means the referee broke.
+    Same trap as the hardcoded 1/3 baseline, in the other direction.
     """
     bad, total, notes = 0, 0, []
     for g in games:
@@ -53,10 +92,12 @@ def hunt_named_impossible(games: list[dict]) -> tuple[int, int, list[str]]:
             continue
         total += 1
         hunter, target = h.get("hunter"), h.get("target")
-        roles = g.get("assignment", {})
-        evil_keys = {"mimic", "hunter", "agent"}
-        allies = {int(s) for s, k in roles.items()
-                  if k in evil_keys and int(s) != hunter}
+        assignment = _assignment(g)
+        if hunter not in assignment:
+            notes.append(f"game {g.get('game')}: assignment does not cover the "
+                         f"hunter (seat {hunter}) - not checked")
+            continue
+        allies = known_allies(assignment, hunter)
         if target == hunter:
             bad += 1
             notes.append(f"game {g.get('game')}: hunter {hunter} named ITSELF")
@@ -80,21 +121,50 @@ def over_sabotage(games: list[dict]) -> tuple[int, int, list[str]]:
     all - "the lower-numbered evil on this team plays fail" is derivable by both
     seats from the public proposal alone. Schelling points do not require
     communication. A pair that finds any such convention drives this near zero
-    without ever signalling; the observed 41% of sunk missions says the model is
-    not finding one. That is a fact about reasoning, not a rules violation, which
+    without ever signalling; the observed 39-45% of payable sunk missions says the
+    model is not finding one. That is a fact about reasoning, not a rules violation, which
     is why it sits under COST rather than PROOF.
+
+    **Denominator: SUNK missions on which the game continued.** Two corrections in
+    one, and they pull opposite ways.
+
+    Sunk, because a redundant fail card can only be played on a mission that sank -
+    ``fails > need`` implies it - so scoring it against every resolution mixes in
+    missions where the move was unavailable. That is the "share of sunk" figure the
+    repo already quotes, now computed rather than derived by hand.
+
+    Continuing, because a double fail on evil's THIRD failed mission is costless:
+    the game ends on that resolution, the identification is never paid for, and the
+    redundant card weakly insures against a miscount. Those rows are not
+    coordination failures. They are reported as their own line rather than dropped
+    silently - "12 of 27, and 2 more that were free" says what happened.
     """
-    bad, total, notes = 0, 0, []
+    bad, total, free, notes = 0, 0, 0, []
     for g in games:
+        failed_missions = 0
         for ev in g.get("public_events", []):
-            m = re.search(r"(\d+) fail\(s\), need (\d+)", str(ev))
+            m = re.search(r"(\d+) fail\(s\), need (\d+) -> (SUCCESS|FAIL)", str(ev))
             if not m:
                 continue
             fails, need = int(m.group(1)), int(m.group(2))
+            if m.group(3) != "FAIL":
+                continue
+            failed_missions += 1
+            if failed_missions >= 3:      # this resolution ENDS the game
+                if fails > need:
+                    free += 1
+                    notes.append(f"game {g.get('game')}: {fails} fails on the "
+                                 "game-ENDING mission - free, not counted")
+                continue
             total += 1
             if fails > need:
                 bad += 1
                 notes.append(f"game {g.get('game')}: {fails} fails where {need} sufficed")
+    if free:
+        # first, not last: `--show` truncates the tail, and a caveat nobody reads
+        # is the same as no caveat
+        notes.insert(0, f"{free} redundant fail(s) EXCLUDED as costless - played "
+                        "on the mission that ended the game")
     return bad, total, notes
 
 
@@ -175,10 +245,25 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
 
     Naive substring, deliberately: the same reasoning as find_leaks. A false
     positive is a line a human reads; a false negative is a blind spot.
+
+    **Matches the THEME name as well as the functional key, and that is the whole
+    point of the check working at all.** Speech is rendered in whatever skin the run
+    used: on the shipping `1984-en` face a seat outing itself says "Thought Police"
+    or "Doublethinker" and never once says "seer" or "mimic". The reported 0/1290
+    on the seed-1000 runs was near-zero BY CONSTRUCTION - it was matching vocabulary
+    the players had no way to produce - and supported nothing. A run's theme is on
+    the record, so the names are a lookup, not a guess.
+
+    A record with no theme is checked on the functional key alone and SAYS so;
+    silently narrowing the match is how the 0/1290 happened the first time.
     """
     bad, total, notes = 0, 0, []
+    unskinned = 0
     for g in games:
-        roles = {int(s): k for s, k in g.get("assignment", {}).items()}
+        roles = {int(s): k for s, k in (g.get("assignment") or {}).items()}
+        theme = THEMES.get(str(g.get("theme") or ""))
+        if theme is None and g.get("utterances"):
+            unskinned += 1
         for utt in g.get("utterances", []):
             m = re.match(r"seat (\d+): (.*)", str(utt), re.S)
             if not m:
@@ -186,10 +271,20 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
             seat, said = int(m.group(1)), m.group(2)
             total += 1
             key = roles.get(seat, "")
-            if key and re.search(rf"\b{re.escape(key)}\b", said, re.I):
+            if not key:
+                continue
+            names = [key]
+            if theme is not None and key in theme.role_names:
+                names.append(theme.role_names[key])
+            hit = next((nm for nm in names if _says(said, nm)), None)
+            if hit:
                 bad += 1
                 notes.append(f"game {g.get('game')} seat {seat} said its own role "
-                             f"'{key}': {said[:80]}")
+                             f"'{hit}': {said[:80]}")
+    if unskinned:
+        notes.insert(0, f"{unskinned} game(s) record no known theme - checked "
+                        "against the functional key only, which a skinned run "
+                        "never speaks")
     return bad, total, notes
 
 
@@ -200,7 +295,8 @@ PROOF = [
 #: rules make unavoidable or the metrics mis-score. Never added to the proof total:
 #: a strategic cost reported as an error is a wrong finding with a number on it.
 COST = [
-    ("mission over-sabotaged (no private channel; focal point unused)", over_sabotage),
+    ("mission over-sabotaged, share of SUNK missions the game continued past "
+     "(no private channel; focal point unused)", over_sabotage),
     ("good seat approved a known-tainted team (concealment has value)",
      approved_a_team_it_knew_was_tainted),
 ]

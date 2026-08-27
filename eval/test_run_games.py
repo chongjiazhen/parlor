@@ -423,3 +423,67 @@ class TestGradedTaint(unittest.TestCase):
         slope, levels = taint_sensitivity(self.votes({0: (5, 10)}))
         self.assertIsNone(slope)
         self.assertEqual(levels, {0: (5, 10)})
+
+
+class TestHunterBaselineIsDerived(unittest.TestCase):
+    """The hunt baseline is ``1/len(legal_targets)`` as the hunt actually faced it,
+    never a hardcoded 1/3.
+
+    1/3 is a fact about ONE knowledge model - 5 seats, a hunter that sees its ally.
+    At 7p/3-evil the legal set is 4, and under the blind-evil variant it is 4 at 5
+    seats too. ``RandomPolicy`` and ``validate_hunt`` both derive that set from
+    ``entitled_knowledge``, so a variant moves them silently while a hardcoded bar
+    keeps grading against 1/3 - in the flattering direction, which is the direction
+    a wrong bar is never caught in.
+    """
+
+    def played(self, legal_targets, hit=True):
+        rec = play_game(CabalReferee.new(5, seed=3),
+                        {s: RandomPolicy(rng=random.Random(3)) for s in range(5)})
+        rec.winner, rec.error = "good", None
+        rec.hunt = {"hunter": 4, "target": 0, "seer": 0, "hit": hit}
+        if legal_targets is not None:
+            rec.hunt["legal_targets"] = legal_targets
+        return [rec]
+
+    def test_five_seats_still_reads_one_in_three(self):
+        """The number does not move on the deal it was hardcoded for - a derived
+        bar that changed the shipping figure would be a different bug."""
+        rec = play_game(CabalReferee.new(5, seed=0),
+                        {s: RandomPolicy(rng=random.Random(0)) for s in range(5)})
+        # seed 0 reaches a hunt; a fixture that did not would make this vacuous
+        self.assertIsNotNone(rec.hunt)
+        self.assertEqual(rec.hunt["legal_targets"], 3)
+        g3 = score([rec])["gate3_deduction"]
+        self.assertAlmostEqual(g3["hunter_baseline"], 1 / 3)
+
+    def test_a_wider_legal_set_raises_the_bar(self):
+        g3 = score(self.played(4))["gate3_deduction"]
+        self.assertAlmostEqual(g3["hunter_baseline"], 0.25)
+        self.assertEqual(g3["hunter_baseline_n"], 1)
+
+    def test_the_verdict_grades_against_the_derived_bar(self):
+        """A 40% hunter beats 1-in-4 and does not beat 1-in-3. Same hits, same
+        interval, opposite verdicts - which is the whole reason the bar cannot be
+        a constant."""
+        s = score(self.played(4))
+        g3 = dict(s["gate3_deduction"], hunter_ci95=(0.30, 0.60))
+        text = report(dict(s, gate3_deduction=g3), make_args(arm="llm"), 1.0)
+        self.assertIn("hunter beats chance (25.00%)", text)
+        narrow = dict(g3, hunter_baseline=1 / 3)
+        text = report(dict(s, gate3_deduction=narrow), make_args(arm="llm"), 1.0)
+        self.assertIn("hunter does not beat chance (33.33%)", text)
+
+    def test_an_unrecorded_legal_set_is_REFUSED_not_defaulted(self):
+        """A record that never wrote its candidate count cannot be graded, and
+        defaulting one grades it against whichever chance the reader assumed. Fails
+        CLOSED, the same shape as the empty blind stratum next door."""
+        s = score(self.played(None))
+        g3 = s["gate3_deduction"]
+        self.assertIsNone(g3["hunter_baseline"])
+        self.assertEqual(g3["hunter_baseline_n"], 0)
+        text = report(dict(s, gate3_deduction=dict(g3, hunter_ci95=(0.9, 1.0))),
+                      make_args(arm="llm"), 1.0)
+        self.assertIn("hunter baseline REFUSED", text)
+        self.assertIn("chance UNRECORDED", text)
+        self.assertNotIn("gate #3 PASS", text)

@@ -448,9 +448,23 @@ def score(records: list[GameRecord]) -> dict:
         }
     blind = strata["none"]
 
-    # gate #3b - does the hunter beat 1-in-3?
+    # gate #3b - does the hunter beat chance? Chance is DERIVED from the legal
+    # target set each hunt actually faced, never hardcoded: `1/3` is right only at
+    # 5 seats with a hunter that sees its ally. At 7p/3-evil the set is 4, and under
+    # the blind-evil variant it is 4 at 5 seats too - and `RandomPolicy` and
+    # `validate_hunt` both read that set from the referee, so they would silently
+    # agree on the new denominator while a hardcoded bar kept grading against 1/3,
+    # in the flattering direction.
+    #
+    # Averaged over hunts rather than assumed constant: nothing stops a setup from
+    # varying it game to game. `None` when no hunt carries the field, which fails
+    # the gate CLOSED - a record predating it cannot be graded against a chance
+    # nobody wrote down, and inventing one is exactly the error being fixed.
     hunts = [r.hunt for r in played if r.hunt]
     hits = sum(1 for h in hunts if h["hit"])
+    legal = [h["legal_targets"] for h in hunts
+             if h.get("legal_targets")]
+    hunter_baseline = sum(1 / k for k in legal) / len(legal) if legal else None
 
     decisions = sum(r.decisions for r in records)
     fallbacks = sum(r.fallbacks for r in records)
@@ -485,7 +499,10 @@ def score(records: list[GameRecord]) -> dict:
             "hunter_hits": hits,
             "hunts": len(hunts),
             "hunter_ci95": wilson(hits, len(hunts)),
-            "hunter_baseline": 1 / 3,
+            "hunter_baseline": hunter_baseline,
+            #: how many hunts contributed a legal-target count. Below `hunts` means
+            #: some rows predate the field and the average speaks for a subset.
+            "hunter_baseline_n": len(legal),
         },
         "integrity": {
             "decisions": decisions,
@@ -540,7 +557,10 @@ def report(s: dict, args, elapsed: float) -> str:
         "it is what earlier runs reported, not because it means anything)",
         f"  hunter accuracy            {g3['hunter_accuracy']:.2%} "
         f"({g3['hunter_hits']}/{g3['hunts']}, 95% CI "
-        f"{_ci_text(g3['hunter_ci95'])}, chance 33.33%)",
+        f"{_ci_text(g3['hunter_ci95'])}, chance "
+        + (f"{g3['hunter_baseline']:.2%}" if g3.get("hunter_baseline") is not None
+           else "UNRECORDED")
+        + ")",
         "",
         f"integrity  {integ['fallbacks']}/{integ['decisions']} decisions fell back "
         f"to random ({fr:.2%})",
@@ -588,8 +608,14 @@ def report(s: dict, args, elapsed: float) -> str:
     blind_ci = g3.get("taint_sensitivity_blind_ci95")
     n_3a = bool(blind_ci) and blind_ci[0] > 0
     a_refused = g3.get("taint_sensitivity_blind") is None
+    # Same shape as 3a's refusal: a missing baseline is REFUSED, not defaulted. The
+    # bar is `1/len(legal_targets)` as the hunt actually faced it, so a run that did
+    # not record the set cannot be graded - and a default would grade it against
+    # whichever chance the reader happened to assume.
+    baseline_3b = g3.get("hunter_baseline")
+    b_refused = baseline_3b is None
     floor_3b = _ci_floor(g3["hunter_ci95"])
-    n_3b = floor_3b is not None and floor_3b > 1 / 3
+    n_3b = (not b_refused and floor_3b is not None and floor_3b > baseline_3b)
     verdict_3a, verdict_3b = n_3a and good_is_live, n_3b and evil_is_live
     verdict_3 = verdict_3a and verdict_3b
     floor_2 = _ci_floor(g2["ci95"])
@@ -600,14 +626,17 @@ def report(s: dict, args, elapsed: float) -> str:
         + ("blind-seat taint sensitivity REFUSED (no blind votes)" if a_refused
            else f"blind-seat taint-sensitivity CI floor {'clears 0' if n_3a else 'includes 0'}")
         + ", hunter "
-        f"{'beats' if n_3b else 'does not beat'} chance at the CI floor",
+        + ("baseline REFUSED (no legal-target count recorded)" if b_refused
+           else f"{'beats' if n_3b else 'does not beat'} chance "
+                f"({baseline_3b:.2%}) at the CI floor"),
     ]
     if not good_is_live:
         lines.append("  (good played at random in this arm, so the vote half is the "
                      "chance baseline, not a deduction claim)")
     if not evil_is_live:
         lines.append("  (the hunter is an EVIL seat and played at random in this "
-                     "arm, so the hunt half is the 1-in-3 baseline)")
+                     "arm, so the hunt half IS the baseline"
+                     + (f", {baseline_3b:.2%}" if not b_refused else "") + ")")
     # Gate #2 is conditional on gate #3, and that is not pedantry: against good
     # seats voting at chance, evil wins ~65% of the time with no deception at all
     # (measured, --arm random). An unconditioned evil win rate measures the

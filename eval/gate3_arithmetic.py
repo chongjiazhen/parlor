@@ -248,8 +248,11 @@ def report(paths: list[str]) -> None:
         print(f"   at a true {rate:.0%}: {n_hunts:3d} hunts (floor "
               f"{interval[0]:.2%}) -> {games:5.0f} games, "
               f"{games * MIN_PER_GAME / 60:5.1f} h")
-    print("   NOTE: the 1/3 bar is the hardcoded one. S3 derives it from the legal "
-          "target set; when that lands, the bar moves and this table moves with it.")
+    print("   NOTE: the bar is now DERIVED, 1/len(legal_targets) per hunt "
+          "(landed 2026-08-27). On SETUP_5 that is 3 candidates in every game, so "
+          "it evaluates to 1/3 and this table is unchanged - the S6 criterion's "
+          "power figures stand. A variant that changes what the night says (7p, or "
+          "a blind-evil `stray`) moves the bar and moves this table with it.")
 
     if not agreed:
         sys.exit(1)

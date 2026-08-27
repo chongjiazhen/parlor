@@ -26,7 +26,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from core.observability import Knowledge, SeatView
-from games.cabal.roles import DEFAULT_THEME, SETUPS, Role, Setup, Team, Theme
+from games.cabal.roles import (DEFAULT_THEME, SETUPS, Role, Setup, Team, Theme,
+                               known_allies, legal_hunt_targets)
 
 
 class Phase(Enum):
@@ -160,10 +161,8 @@ class CabalReferee:
             for s in self.evil_seats():
                 if s != seat and self.assignment[s].seen_by_seer:
                     out.append(Knowledge(s, "evil"))
-        if role.team is Team.EVIL and role.sees_fellow_evil:
-            for s in self.evil_seats():
-                if s != seat and self.assignment[s].seen_by_fellow_evil:
-                    out.append(Knowledge(s, "fellow-evil"))
+        for s in sorted(known_allies(self.assignment, seat)):
+            out.append(Knowledge(s, "fellow-evil"))
         if role.sees_magic:
             for s, r in self.assignment.items():
                 if r.shown_to_watcher:
@@ -488,6 +487,17 @@ class CabalReferee:
             self.phase = Phase.PROPOSE
         return success
 
+    def legal_hunt_targets(self, hunter: int) -> list[int]:
+        """Every seat ``hunter`` may name, in seat order.
+
+        Exposed on the referee because three callers need the SAME set and each one
+        used to derive it separately: ``validate_hunt`` refuses what is not in it,
+        ``RandomPolicy`` draws uniformly from it, and the scorer's hunt baseline is
+        ``1/len`` of it. Three copies of one rule is how the control and the bar it
+        is compared against drift apart.
+        """
+        return legal_hunt_targets(self.assignment, hunter)
+
     def validate_hunt(self, hunter: int, target: int) -> None:
         """Per-seat legality of one hunt, so the policy can be told off while it can
         still fix it - the same split as ``validate_card``.
@@ -507,11 +517,11 @@ class CabalReferee:
         ``| {hunter}`` rather than a second special case: the rule is one rule.
 
         Both halves also keep the SCORER honest, which is the real reason they are
-        refusals and not advice. ``RandomPolicy`` excludes itself and its known
-        ally, leaving 3 candidates - that is exactly where the 1-in-3 chance the
-        gate is measured against comes from. Every target left legal here that the
-        control will not pick scores the model against a baseline using knowledge
-        the model was allowed to throw away.
+        refusals and not advice. ``RandomPolicy`` draws from ``legal_hunt_targets``,
+        the same set this validates against, and ``1/len`` of it is the chance the
+        gate is measured against. Every target left legal here that the control will
+        not pick scores the model against a baseline using knowledge the model was
+        allowed to throw away.
 
         Refused, not silently corrected: the retry loop hands the seat this reason
         and it names someone else, which is the difference between a player learning
@@ -526,9 +536,7 @@ class CabalReferee:
                 f"you are seat {hunter}, and you know your own role - the informant "
                 "is one of the other seats at this table. Name one of them."
             )
-        own = {k.seat for k in self.entitled_knowledge(hunter)
-               if k.label == "fellow-evil"}
-        if target in own:
+        if target in known_allies(self.assignment, hunter):
             raise IllegalAction(
                 f"seat {target} is one of your own - the night named them to you, "
                 "so they cannot be the informant. Name a different seat."

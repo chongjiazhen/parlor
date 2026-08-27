@@ -139,12 +139,11 @@ class RandomPolicy:
             return {"card": evil and self.rng.random() < self.fail_rate}
         if p is Phase.HUNT:
             # uses only what this seat is entitled to know: itself, and the fellow
-            # evil the night named. That is the 1/3 chance baseline gate #3 beats.
-            known_evil = {k.seat for k in ref.entitled_knowledge(seat)
-                          if k.label == "fellow-evil"}
-            others = [s for s in sorted(ref.assignment)
-                      if s != seat and s not in known_evil]
-            return {"target": self.rng.choice(others)}
+            # evil the night named. `1/len` of this set is the chance baseline gate
+            # #3b beats, and it comes from the referee so the control and the bar
+            # cannot disagree - at 5p with a hunter that sees its ally it is 1/3,
+            # and under any variant that changes what the night says it is not.
+            return {"target": self.rng.choice(ref.legal_hunt_targets(seat))}
         raise IllegalAction(f"no action in phase {p.value}")
 
 
@@ -439,8 +438,14 @@ def play_game(
             hunter = ref.seat_of("hunter")
             target = decide(hunter)["target"]
             seer = ref.seat_of("seer")
+            # `legal_targets` is the hunt's own denominator, recorded per game
+            # rather than assumed by the scorer: it is 3 at 5 seats with a hunter
+            # that sees its ally, 4 at 7p/3-evil, and 4 at 5 seats under the
+            # blind-evil variant. A scorer that reconstructs it from the seat
+            # count is one variant away from grading against the wrong chance.
             rec.hunt = {"hunter": hunter, "target": target, "seer": seer,
-                        "hit": target == seer}
+                        "hit": target == seer,
+                        "legal_targets": len(ref.legal_hunt_targets(hunter))}
             ref.hunt(hunter, target)
 
     rec.winner = ref.winner.value if ref.winner else None

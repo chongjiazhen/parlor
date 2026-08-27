@@ -1,5 +1,6 @@
 """Referee state-machine tests: setup, mission flow, both win paths, rule refusals."""
 
+import random
 import unittest
 
 from games.cabal.referee import (
@@ -9,12 +10,14 @@ from games.cabal.referee import (
     IllegalAction,
     Phase,
 )
+from games.cabal.player import RandomPolicy
 from games.cabal.roles import (
     HUNTER,
     LOYALIST,
     MIMIC,
     SEER,
     SETUP_5,
+    STRAY,
     WATCHER,
     Team,
 )
@@ -445,27 +448,50 @@ class TestHuntCannotNameYourOwnSide(unittest.TestCase):
         self.assertIsNone(ref.winner)           # not over - the seat names again
 
     def test_the_hunter_has_the_same_candidate_set_as_the_control(self):
-        """The scorer's 1-in-3 chance is RandomPolicy's candidate count. If the
+        """The gate's chance figure is RandomPolicy's candidate count. If the
         referee lets the model pick from a wider set, the gate compares a 1-in-4
         guess against a 1-in-3 baseline - the asymmetry this whole class exists to
-        close. Assert the two sets are identical rather than trusting the two
-        exclusion lists to stay in step.
+        close.
+
+        Three callers now read ONE set - ``validate_hunt`` refuses what is not in
+        it, the control draws from it, and the scorer's baseline is ``1/len`` of it
+        - so what this asserts is that they still agree, walked independently
+        through ``validate_hunt`` rather than trusting the accessor to be what the
+        accessor returns.
         """
         ref = self.reached_hunt()
         hunter = ref.seat_of("hunter")
-        legal = []
+        walked = []
         for target in sorted(ref.assignment):
             try:
                 ref.validate_hunt(hunter, target)
             except IllegalAction:
                 continue
-            legal.append(target)
-        known_evil = {k.seat for k in ref.entitled_knowledge(hunter)
-                      if k.label == "fellow-evil"}
-        control = [s for s in sorted(ref.assignment)
-                   if s != hunter and s not in known_evil]
-        self.assertEqual(legal, control)
-        self.assertEqual(len(legal), 3)         # the 1-in-3 the gate is scored on
+            walked.append(target)
+        self.assertEqual(walked, ref.legal_hunt_targets(hunter))
+        self.assertEqual(len(walked), 3)        # the 1-in-3 the gate is scored on
+        # and the control never draws outside it
+        policy = RandomPolicy(rng=random.Random(0))
+        drawn = {policy.act(ref, hunter)["target"] for _ in range(60)}
+        self.assertEqual(drawn, set(walked))
+
+    def test_a_stray_widens_the_candidate_set_and_the_baseline_with_it(self):
+        """The hardcoded 1/3 was a fact about ONE knowledge model, not about the
+        game. A ``stray`` is named to nobody, so the hunter that holds no ally may
+        legally name four seats and its chance is 1-in-4 - and ``RandomPolicy`` and
+        ``validate_hunt`` both derive from the night, so under this deal they would
+        silently agree on 4 while a hardcoded bar kept grading against 3, in the
+        flattering direction.
+        """
+        ref = CabalReferee(
+            setup=SETUP_5,
+            assignment={0: SEER, 1: WATCHER, 2: LOYALIST, 3: STRAY, 4: HUNTER},
+        )
+        self.assertEqual(ref.entitled_knowledge(4), ())       # named nobody
+        self.assertEqual(ref.legal_hunt_targets(4), [0, 1, 2, 3])
+        ref.validate_hunt(4, 3)                 # the stray is a LEGAL target now
+        with self.assertRaises(IllegalAction):
+            ref.validate_hunt(4, 4)             # itself never is
 
     def test_the_policy_is_told_before_the_move_is_applied(self):
         """Checked by validate_hunt too, so the retry loop can hand the seat the

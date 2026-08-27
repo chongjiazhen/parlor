@@ -2,8 +2,8 @@
 
 The canonical statement of this game's model. It exists because three separate
 things depend on it and until now none of them could be checked against anything:
-the gate #3a strata, `eval/audit_decisions.py`, and `RandomPolicy`'s 1-in-3 hunt
-baseline. Before this file, reading a gate number meant reconstructing the
+the gate #3a strata, `eval/audit_decisions.py`, and the hunt baseline
+`RandomPolicy` draws against. Before this file, reading a gate number meant reconstructing the
 knowledge model from boolean flags in `roles.py` and the derivation in
 `referee.entitled_knowledge`.
 
@@ -115,11 +115,21 @@ an impossible one, since the seer is good. Two such seats:
 - **itself**.
 
 Both are refused, not silently corrected: the retry loop hands the seat the reason
-and it names again. This also keeps the scorer honest - `RandomPolicy` excludes the
-same two, leaving three candidates, which is exactly where the 1-in-3 baseline
-gate #3b is measured against comes from. Any target left legal here that the
-control will not pick scores the model against a baseline using knowledge the
-model was allowed to throw away.
+and it names again. This also keeps the scorer honest - one function,
+`roles.legal_hunt_targets`, answers all three questions: what the referee refuses,
+what `RandomPolicy` draws from, and what the gate's chance figure is `1/len` of.
+Any target left legal here that the control will not pick scores the model against
+a baseline using knowledge the model was allowed to throw away.
+
+**The baseline is 1-in-3 only on this deal, and the scorer no longer assumes it.**
+Three candidates is what is left at 5 seats with a hunter its partner was named to.
+At 7p/3-evil the legal set is 4, and under the blind-evil variant (`stray`) it is 4
+at 5 seats too - and the referee and the control both derive it from
+`entitled_knowledge`, so under a variant they would silently agree on the wider set
+while a hardcoded `1/3` kept grading against the narrower one, in the flattering
+direction. Every hunt records the size of the set it faced (`hunt.legal_targets`);
+the run-level chance is the mean of `1/k` over the hunts, and a record that carries
+no such count is REFUSED rather than defaulted.
 
 ## The two public channels, and the line between them
 
