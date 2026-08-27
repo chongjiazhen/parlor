@@ -30,7 +30,8 @@ import os
 import random
 import sys
 
-from core.backends import REGISTERS, Backend
+from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
+                           require_key)
 from core.console import ConsoleBackend, human_seats
 from games.cabal import transcript
 from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
@@ -76,7 +77,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
     backend = Backend.named(
         args.backend,
         args.model,
-        api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+        api_key=api_key_from_env(),
         system_prompt=REGISTERS[args.register],
         seed=args.seed,
     )
@@ -144,6 +145,12 @@ def main() -> None:
                          "falls back to random (default: effectively unlimited)")
     ap.add_argument("--transcript", help="write this game as markdown here")
     args = ap.parse_args()
+
+    # Refuse at the DOOR, never at game 200. An off-box route with no key does
+    # not crash - it 401s every attempt, falls back on every decision, and
+    # reports a number the scorer then voids after the GPU is spent.
+    if args.backend:
+        require_key(ENDPOINTS[args.backend], api_key_from_env())
 
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     rng = random.Random(args.seed)

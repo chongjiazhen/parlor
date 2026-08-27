@@ -185,5 +185,49 @@ class TestReportLines(unittest.TestCase):
         self.assertEqual(integrity.VOID_BAR, 0.10)
 
 
+class TestTheRecoveredBar(unittest.TestCase):
+    """Set 2026-08-28, BEFORE any run produced the number. S9 added `recovered` and
+    gave it no bar, so a run at 1% fallback and 40% recovered passed every check and
+    read as clean. Picking the bar after seeing changeling's 200 games would be the
+    peeking this repo refuses by name."""
+
+    def summary(self, recovered):
+        return integrity.summarise([game(100, fallbacks=1, recovered=recovered)])
+
+    def test_a_high_recovered_rate_is_flagged(self):
+        lines = chr(10).join(integrity.report_lines(self.summary(40)))
+        self.assertIn("NOTE:", lines)
+        self.assertIn("25%", lines)
+
+    def test_a_low_recovered_rate_is_not(self):
+        lines = chr(10).join(integrity.report_lines(self.summary(5)))
+        self.assertNotIn("NOTE:", lines)
+
+    def test_exactly_at_the_bar_does_not_fire(self):
+        """Strictly above, matching how the void bar is applied."""
+        lines = chr(10).join(integrity.report_lines(self.summary(25)))
+        self.assertNotIn("NOTE:", lines)
+
+    def test_it_WARNS_and_never_voids(self):
+        """The asymmetry is the decision. A fallback is a decision no model made, so
+        a verdict resting on it is void. A recovered decision IS the model's - it was
+        refused, told why, and got it right - so it belongs beside the verdict."""
+        lines = chr(10).join(integrity.report_lines(self.summary(90)))
+        self.assertIn("NOT a void", lines)
+        self.assertNotIn("VOID", lines.replace("NOT a void", ""))
+
+    def test_the_two_bars_are_separate_constants(self):
+        """A single threshold would either void a legal run or excuse a random one."""
+        self.assertEqual(integrity.RECOVERED_WARN_BAR, 0.25)
+        self.assertGreater(integrity.RECOVERED_WARN_BAR, integrity.VOID_BAR)
+
+    def test_a_run_can_be_clean_on_fallback_and_flagged_on_recovery(self):
+        """The exact hole S9 left: nothing else in the block reports this run as
+        anything other than healthy."""
+        s = self.summary(40)
+        self.assertLess(s["fallback_rate"], integrity.VOID_BAR)
+        self.assertGreater(s["recovered_rate"], integrity.RECOVERED_WARN_BAR)
+
+
 if __name__ == "__main__":
     unittest.main()

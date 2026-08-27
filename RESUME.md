@@ -252,10 +252,10 @@ table says which pairs.
 | ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict section below. | - | - | done |
 | ~~**S9**~~ | ~~Code debt, commit one - the integrity surface.~~ **LANDED 2026-08-28** - items 7, 1, 2 and 4 in one commit. `over_sabotage`'s docstring now states the benchmark as "the pair failed to find a convention"; the integrity block moved to `core/integrity.py`, shared by both games, and gained a witnessed rate per seat-game, a `recovered` third outcome, and a clean-game count. `fallback_rate` is unchanged and keeps its name - both reproducers still agree with the recorded runs. Seven guards mutation-checked, each killed by its own named test. | - | - | done |
 | ~~**S10**~~ | ~~Code debt, commit two - changeling's knowledge class.~~ **LANDED 2026-08-28** - the class is keyed on what the seat was TOLD; a MEET card that met nobody is `none`, not `identity`. The pin was replaced, not deleted: `..._never_the_DAWN_card` keeps the half that still holds, beside `..._keyed_on_what_the_seat_was_TOLD` and the property itself. Four guards mutation-checked. Stratum sizes re-measured and now recomputable - `py -3 -m eval.strata` - which moves 2375 of 20000 seat-nights from `identity` to `none` and recovers ~19% of the blind stratum. Both expansion decks are unblocked. | - | - | done |
-| **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). | GPU all session | **MET 2026-08-28** - S9 and S10 both landed, so the code-debt batch has finished re-baselining every stratum and every integrity line. 200 games run now are scored once | `RULES.md` table is on clean numbers and a 200-game record exists |
+| **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). **Read §PRE-COMMITTED CRITERION below before launching** - it is written and dated 2026-08-28 and must not be edited once the run starts. | GPU all session | **MET 2026-08-28** - S9 and S10 both landed, so the code-debt batch has finished re-baselining every stratum and every integrity line. 200 games run now are scored once | `RULES.md` table is on clean numbers and a 200-game record exists |
 | ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
 | ~~**S4**~~ | ~~Ops hygiene.~~ **LANDED 2026-08-27** - `core/runlog.py` writes `PARLOR DONE rc=N games=L/R elapsed=Ns` from both eval drivers; both games record a fallback's REASON per decision on a `refused` field; the untracked `run-hunt20.cmd` is retired and its exact invocation preserved in `eval/runs/hunt-local.cmd`. Records changed, play did not - the bytes a model receives are identical, so S6 may freeze on this code. | - | - | done |
-| **S5** | **changeling: read the 200-game run.** Gate #3 at a real N, the `false` stratum, the sleeper-decoy rate, diverged-vs-intact accuracy. | no GPU | S2 landed | a dated writeup in `RULES.md`, gates called or refused by their own rule |
+| **S5** | **changeling: read the 200-game run.** Apply §PRE-COMMITTED CRITERION clause by clause - blind villager accuracy against 35.95%, gate #2 only if #3 holds - then the three free reads it names (`false` stratum, sleeper-decoy rate, diverged-vs-intact). | no GPU | S2 landed | a dated writeup in `RULES.md`, each clause answered, and the criterion left as written |
 | ~~**S6**~~ | ~~The gate #3b campaign - cabal's LAST GPU program.~~ **CALLED 2026-08-27 - gate #3b NOT SHOWN, cabal's GPU program stops.** 40/40 games, both arms `rc=0`, 1.35% campaign fallback. Pooled 9/20 = 45.00%, Wilson [25.82%, 65.79%] against the derived bar 33.33% - floor does not clear, so the pre-committed answer applies and there is no third campaign. All three draw-dependent items resolved off the same records: step-not-slope did NOT fire, the `five_rejects` shift is not established, run-length degradation did not reproduce. Verdict and arithmetic: `docs/gate3b-verdict.md`, `py -3 -m eval.s6_verdict`. | - | - | done |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict section. | - | - | done |
 | **S8** | **Next rung or publish.** 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. | varies | S5 done (S1 is called) | scoped in its own session, not here |
@@ -318,6 +318,78 @@ the section immediately below - read it before restarting any cabal run.
 **Do not mix cabal and changeling in one session.** They have separate `RULES.md`
 files, separate scorers and separate baselines, and every number confusion in this
 file so far came from carrying one game's intuition into the other's denominator.
+
+## PRE-COMMITTED CRITERION for changeling's gates - written 2026-08-28, BEFORE S2
+
+Same discipline as the S6 criterion, which held. **Written before the run because
+after it the statistic would be chosen with the numbers in view** - which is the
+`hunt20b` error this file has already refused twice by name, and S1's verdict
+declined the better-specified binary figure on exactly that ground. Nothing below
+may be edited once S2 launches; the outcome goes in the S5 writeup, clause by
+clause, and the promise stays as written.
+
+**S2 is 200 games, `--arm llm`, one model pinned, `--seed` set.** Its powers re-run
+comes first and is a separate 2x20 arm - that one is a re-measure on the fixed
+lane, not a gate, and nothing here applies to it.
+
+### Gate #3, deduction - THE GATE is blind villager accuracy
+
+- **The statistic: accuracy of votes cast by villager seats the night told
+  NOTHING**, on the `none` knowledge stratum keyed by S10's told-based rule. Not
+  villager accuracy pooled, and not village win rate - a villager handed an
+  identity is not deducing, and the win rate mixes in the deal.
+- **The bar: 35.95%**, the measured per-vote chance from `--arm random`, n=4000
+  (`games/changeling/RULES.md` §The chance baseline). **The run must also report
+  its own random arm**; if that arm disagrees with 35.95% by more than a point,
+  the run's own arm is the bar and this number is the thing that was wrong.
+- **It holds only if the Wilson 95% FLOOR clears the bar.** Point estimates do not
+  decide gates here.
+- **Power, computed before the run** off `eval.strata`: 1.34 blind villager
+  seat-nights per game, x97.2% winnable, so 200 games yields **~260 blind votes**.
+  At that N the floor clears 35.95% from a true rate of **42% upward**; a true 41%
+  does not clear and a true 40% is well short. So **200 games CAN show a
+  moderately good blind villager and CANNOT settle a marginal one** - the same
+  shape S6 had, stated in advance.
+- **If it lands marginal the answer is "not shown", and the deck work proceeds
+  anyway.** No second 200-game campaign to chase it. The expansion decks are the
+  next thing either way, and each changes this stratum, so a re-run belongs after
+  a deck change rather than after a disappointing draw.
+
+### Gate #2, deception - conditional, and the condition is stated here
+
+- **Gate #2 is unreadable until gate #3 holds.** Villagers at chance hand the pack
+  a high win rate with no deception in it: the measured random reference is 39.51%
+  village wins on the scored denominator, so the pack takes ~60% against a table
+  that is not deducing at all. Same conditionality cabal's #2 carries, for the same
+  measured reason.
+- **If #3 holds**, gate #2 is the pack win rate with its Wilson interval, against
+  that run's own random arm - never against the 39.51% reference, which is a
+  different model, a different day and a reference point rather than a control.
+- **`rate_ok`'s 5% CI-floor bar is pre-declared nowhere and is not adopted here.**
+  If a bar for #2 is wanted it is written in this section before a run, or #2 is
+  reported as a rate with an interval and no verdict.
+
+### What voids the whole thing, decided in advance
+
+- **Fallback rate above 10%** voids every verdict, as always.
+- **Recovered rate above 25%** does NOT void - it is flagged beside the verdict
+  (`core/integrity.py` §RECOVERED_WARN_BAR, set 2026-08-28 before any run produced
+  the number). A recovered decision is the model's own legal move; it is simply not
+  the same measurement as a run that never missed, and the writeup says so.
+- **A blind stratum smaller than 150 votes** makes the gate REFUSED rather than
+  failed. `_blind_line` already refuses an empty stratum; this puts a floor under
+  a thin one, because a 40-vote interval spans everything and reads as a result.
+
+### Three things to score off the same records, free
+
+They need no extra run and are the reason S2 is one 200-game block rather than two
+of 100:
+- the `false` stratum's accuracy against the `none` stratum's - the seat whose
+  entitled knowledge is wrong by construction, which `cabal` has no analogue for;
+- the sleeper-decoy rate - seats that believed pack while holding village;
+- diverged-vs-intact accuracy, the observation this rung was built to make.
+**None of the three is a gate**, none gets a bar, and none may be promoted to one
+after the fact.
 
 ## Gate #3 called - 2026-08-27 (S1)
 

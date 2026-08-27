@@ -53,6 +53,26 @@ from collections import Counter
 #: pair of literals is the bug this module exists to make impossible.
 VOID_BAR = 0.10
 
+#: Above this share of RECOVERED decisions the report says so, loudly, and does NOT
+#: void. **Set 2026-08-28, before any run had produced the number** - S9 introduced
+#: `recovered` and gave it no bar, so a run at 1% fallback and 40% recovered passed
+#: every check and read as clean. changeling's 200-game run is the first record that
+#: will carry it, and picking a bar with that number in view is the peeking this
+#: repo refuses by name.
+#:
+#: **Warn rather than void, and the asymmetry is the point.** A fallback is a
+#: decision no model made - the random policy played it, so the number is not the
+#: model's and a verdict resting on it is void. A recovered decision IS the model's:
+#: it was refused, told why, and got it right, which is legal play under the rules
+#: the referee enforces. What it is not is the same measurement as a run that never
+#: missed, so it belongs beside the verdict rather than in place of it.
+#:
+#: 25%, i.e. one decision in four needing the referee. Chosen as the point at which
+#: the refuse-and-retell loop stops being a safety net and becomes part of how the
+#: seat plays - two and a half times the void bar, because the failure it describes
+#: is milder by exactly that kind of margin. No run has been measured against it.
+RECOVERED_WARN_BAR = 0.25
+
 
 def summarise(records: list, trace_lines: int = 8) -> dict:
     """The integrity block for a run. ``records`` are per-game records carrying
@@ -161,6 +181,12 @@ def report_lines(i: dict) -> list[str]:
         f"  recovered  {i['recovered']}/{i['decisions']} decisions "
         f"({i['recovered_rate']:.2%}) were sent back by the parser or the rules and "
         f"then answered legally" + detail)
+    if i["recovered_rate"] > RECOVERED_WARN_BAR:
+        lines.append(
+            f"  NOTE: more than {RECOVERED_WARN_BAR:.0%} of decisions needed the "
+            f"referee to send them back before the model got them right. Legal "
+            f"play, and NOT a void - but this is not the same measurement as a run "
+            f"that never missed, and a comparison across the two should say so.")
     if i["games_finished"]:
         lines.append(f"  clean      {i['clean_games']}/{i['games_finished']} games "
                      "ran with no fallback and nothing sent back")

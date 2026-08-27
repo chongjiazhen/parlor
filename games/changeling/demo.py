@@ -29,7 +29,8 @@ import os
 import random
 import sys
 
-from core.backends import REGISTERS, Backend
+from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
+                           require_key)
 from core.console import ConsoleBackend, human_seats
 from games.changeling.audit import leak_audit
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
@@ -75,7 +76,7 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
         backend = Backend.named(
             args.backend,
             args.model,
-            api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+            api_key=api_key_from_env(),
             system_prompt=REGISTERS[args.register],
             seed=args.seed,
             enable_thinking=(False if args.no_thinking else None),
@@ -119,6 +120,12 @@ def main() -> None:
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
     args = ap.parse_args()
+
+    # Refuse at the DOOR, never at game 200. An off-box route with no key does
+    # not crash - it 401s every attempt, falls back on every decision, and
+    # reports a number the scorer then voids after the GPU is spent.
+    if args.backend:
+        require_key(ENDPOINTS[args.backend], api_key_from_env())
 
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     rng = random.Random(args.seed)

@@ -50,7 +50,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
 from core import integrity
-from core.backends import ENDPOINTS, REGISTERS, Backend
+from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
 from core.runlog import RunState, run_with_marker
 from core.stats import wilson
 from games.cabal import transcript
@@ -245,7 +245,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random,
         return {s: fallback for s in ref.assignment}
     backend = Backend.named(
         args.backend, args.model,
-        api_key=os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY"),
+        api_key=api_key_from_env(),
         system_prompt=REGISTERS[getattr(args, "register", "character")],
         temperature=args.temperature,
         timeout=args.timeout,
@@ -704,6 +704,12 @@ def main() -> None:
     if LIVE_TEAMS[args.arm] and not args.backend:
         sys.exit(f"--arm {args.arm} needs --backend "
                  "(or run --arm random for the baseline)")
+
+    # Refuse at the DOOR, never at game 200. An off-box route with no key does
+    # not crash - it 401s every attempt, falls back on every decision, and
+    # reports a number the scorer then voids after the GPU is spent.
+    if args.backend:
+        require_key(ENDPOINTS[args.backend], api_key_from_env())
 
     workers = args.workers
     if not LIVE_TEAMS[args.arm] or not args.backend:

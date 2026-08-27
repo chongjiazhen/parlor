@@ -37,7 +37,7 @@ from collections import Counter
 from dataclasses import asdict
 
 from core import integrity
-from core.backends import ENDPOINTS, REGISTERS, Backend
+from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
 from core.runlog import RunState, run_with_marker
 from core.stats import bootstrap_ci, wilson
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
@@ -75,7 +75,7 @@ def build_backend(args, seed: int | None) -> Backend:
     return Backend(
         endpoint=ENDPOINTS[args.backend],
         model=args.model,
-        api_key=os.environ.get("FREELLMAPI_KEY"),
+        api_key=api_key_from_env(),
         system_prompt=REGISTERS[args.register],
         temperature=args.temperature,
         timeout=args.timeout,
@@ -399,6 +399,12 @@ def main() -> None:
 
     if args.arm != "random" and not args.backend:
         ap.error("a live arm needs --backend")
+
+    # Refuse at the DOOR, never at game 200. An off-box route with no key does
+    # not crash - it 401s every attempt, falls back on every decision, and
+    # reports a number the scorer then voids after the GPU is spent.
+    if args.backend:
+        require_key(ENDPOINTS[args.backend], api_key_from_env())
 
     started = time.time()
     records: list[GameRecord] = []

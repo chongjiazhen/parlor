@@ -44,6 +44,12 @@ class Endpoint:
     base_url: str
     parallel: bool
     note: str
+    #: Does a request to this route have to carry an API key? Kept separate from
+    #: ``parallel`` even though the two currently agree - one is about how many
+    #: workers may run, the other about whether an unauthenticated request is
+    #: silently refused, and a route that changed on one axis and not the other
+    #: would make a conflated flag wrong in the direction that costs a whole run.
+    needs_key: bool = False
 
 
 def _base_url(var: str, default: str) -> str:
@@ -66,11 +72,51 @@ ENDPOINTS: dict[str, Endpoint] = {
                       False, "serial, on-box, private"),
     "clean": Endpoint("clean", _base_url("PARLOR_ENDPOINT_CLEAN",
                                          "http://127.0.0.1:3001/v1"),
-                      True, "parallel, off-box, no-retention tier"),
+                      True, "parallel, off-box, no-retention tier", needs_key=True),
     "gray": Endpoint("gray", _base_url("PARLOR_ENDPOINT_GRAY",
                                        "http://127.0.0.1:3003/v1"),
-                     True, "parallel, off-box, assume logged"),
+                     True, "parallel, off-box, assume logged", needs_key=True),
 }
+
+
+def api_key_from_env() -> str | None:
+    """The key for an off-box route, from the environment. ONE definition.
+
+    It was open-coded at five call sites and one of them - changeling's eval driver,
+    the one that runs for five hours - read only the second variable. Setting the
+    name `README.md` documents would have sent every request out unauthenticated:
+    401 on every attempt, every decision exhausting its retries, and a whole night
+    of GPU spent measuring the random policy. The scorer would have voided it, at
+    the end, which is the expensive place to find out.
+
+    ``PARLOR_API_KEY`` is the documented name; ``FREELLMAPI_KEY`` is honoured second
+    so an existing environment keeps working. An empty variable is treated as unset,
+    the same refusal ``_base_url`` makes.
+    """
+    return (os.environ.get("PARLOR_API_KEY")
+            or os.environ.get("FREELLMAPI_KEY")
+            or None)
+
+
+class MissingKey(SystemExit):
+    """An off-box route with no key. A `SystemExit` so it stops a launcher at the
+    door rather than surfacing as a stack trace inside game 1 of 200."""
+
+
+def require_key(endpoint: Endpoint, key: str | None) -> None:
+    """Refuse to START a run that cannot authenticate.
+
+    The failure this replaces is silent and expensive: an unauthenticated off-box
+    run does not crash, it falls back on every decision and reports a number. Fail
+    at the door, loudly, naming the variable to set - a long run must not be able to
+    begin in a state whose only outcome is a voided verdict.
+    """
+    if endpoint.needs_key and not key:
+        raise MissingKey(
+            f"backend '{endpoint.key}' ({endpoint.base_url}) requires an API key and "
+            f"none is set. Export PARLOR_API_KEY, or use --backend local, which is "
+            f"keyless. Refusing to start: without a key every decision would fall "
+            f"back to random and the run would score the random policy.")
 
 # Default player preamble. Deception is a sanctioned rule of the game, and some
 # aligned models refuse to lie without an explicit game frame - a stubborn one gets

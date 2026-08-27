@@ -13,7 +13,8 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from core.backends import RETRY_CODES, Backend
+from core.backends import (ENDPOINTS, RETRY_CODES, Backend, MissingKey,
+                           api_key_from_env, require_key)
 
 
 def http_error(code: int) -> urllib.error.HTTPError:
@@ -149,6 +150,95 @@ class TestEndpointsComeFromTheEnvironment(unittest.TestCase):
         mistake."""
         self.assertEqual(self.reloaded(PARLOR_ENDPOINT_GRAY="")["gray"].base_url,
                          "http://127.0.0.1:3003/v1")
+
+
+class TestTheKeyHasOneSource(unittest.TestCase):
+    """It was open-coded at five call sites and one of them read only the second
+    variable - changeling's eval driver, the one that runs for five hours."""
+
+    def key(self, **env):
+        import importlib
+
+        import core.backends as backends
+        with mock.patch.dict("os.environ", env, clear=True):
+            return importlib.reload(backends).api_key_from_env()
+
+    def tearDown(self):
+        import importlib
+
+        import core.backends as backends
+        importlib.reload(backends)
+
+    def test_the_documented_name_wins(self):
+        self.assertEqual(self.key(PARLOR_API_KEY="a", FREELLMAPI_KEY="b"), "a")
+
+    def test_the_legacy_name_is_honoured_second(self):
+        """An environment that predates the rename keeps working."""
+        self.assertEqual(self.key(FREELLMAPI_KEY="b"), "b")
+
+    def test_nothing_set_is_None_not_empty_string(self):
+        self.assertIsNone(self.key())
+
+    def test_an_EMPTY_variable_is_treated_as_unset(self):
+        """Same refusal `_base_url` makes: an exported-but-empty variable meant to
+        be unset, and "" would satisfy a truthiness check at the door and then fail
+        every request."""
+        self.assertIsNone(self.key(PARLOR_API_KEY=""))
+        self.assertEqual(self.key(PARLOR_API_KEY="", FREELLMAPI_KEY="b"), "b")
+
+
+class TestAnOffBoxRunRefusesToStartWithoutAKey(unittest.TestCase):
+    """The failure this replaces is silent and expensive. An unauthenticated
+    off-box run does not crash: it 401s every attempt, exhausts every retry, falls
+    back on every decision, and reports a number - which the scorer voids AFTER the
+    GPU is spent. Fail at the door instead.
+
+    Everything is reached through the MODULE, never through a name imported at the
+    top of this file. The env-var tests above reload ``core.backends``, which
+    rebinds every class in it - so a module-level ``from ... import MissingKey``
+    holds a stale class object, ``assertRaises`` stops matching the exception
+    actually raised, and it reads as "the guard did not fire".
+    """
+
+    def setUp(self):
+        import core.backends as backends
+        self.b = backends
+
+    def test_an_off_box_route_with_no_key_refuses(self):
+        with self.assertRaises(self.b.MissingKey) as caught:
+            self.b.require_key(self.b.ENDPOINTS["clean"], None)
+        self.assertIn("PARLOR_API_KEY", str(caught.exception))
+        self.assertIn("local", str(caught.exception),
+                      "the refusal must name the way out")
+
+    def test_it_is_a_SystemExit_so_it_stops_a_launcher_at_the_door(self):
+        """Rather than a stack trace inside game 1 of 200."""
+        self.assertTrue(issubclass(self.b.MissingKey, SystemExit))
+
+    def test_gray_refuses_too(self):
+        with self.assertRaises(self.b.MissingKey):
+            self.b.require_key(self.b.ENDPOINTS["gray"], None)
+
+    def test_local_is_keyless_and_must_not_be_blocked(self):
+        self.b.require_key(self.b.ENDPOINTS["local"], None)      # raises nothing
+
+    def test_a_key_present_passes(self):
+        self.b.require_key(self.b.ENDPOINTS["clean"], "sk-whatever")
+
+    def test_an_EMPTY_key_is_refused_rather_than_accepted(self):
+        """An empty string satisfies a truthiness check at the door and then fails
+        every request after it."""
+        with self.assertRaises(self.b.MissingKey):
+            self.b.require_key(self.b.ENDPOINTS["clean"], "")
+
+    def test_needs_key_is_its_own_flag(self):
+        """It agrees with ``parallel`` today. One is about how many workers may run,
+        the other about whether an unauthenticated request is refused, so a route
+        that moved on one axis and not the other would make a conflated flag wrong
+        in the direction that costs a whole run."""
+        self.assertFalse(self.b.ENDPOINTS["local"].needs_key)
+        self.assertTrue(self.b.ENDPOINTS["clean"].needs_key)
+        self.assertTrue(self.b.ENDPOINTS["gray"].needs_key)
 
 
 if __name__ == "__main__":
