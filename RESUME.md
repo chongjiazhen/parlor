@@ -180,7 +180,9 @@ Queue only. Done work leaves to git log. What's next:
       - **This is still NOT the spread measurement.** `hunt20b` ran pre-`2cfe9d5`
         with an unseeded sampler; `hunt20c` is post. One uncontrolled variable
         remains between them, so the above is suggestive, not measured. The pair
-        that measures spread is `hunt20c` + `hunt20d`, both off the same code.
+        that measures spread is a run at a DIFFERENT seed base - `hunt20c` +
+        `hunt20d` at one seed came back byte-identical
+        (`docs/reproducibility.md`).
       - **The graded slope is fitting a step function - two runs now agree.**
         Approval by taint level: `hunt20b` 93/70/77, `hunt20c` 82/64/64. Both show a
         real 0->1 drop and NO further response at 2; `hunt20c`'s 1->2 leg is exactly
@@ -195,28 +197,29 @@ Queue only. Done work leaves to git log. What's next:
         mid-run: EMPTY replies (`reply: ''`) grew 22 -> 32 while every parse-failure
         bucket stayed flat or fell, and `3 attempts failed, playing random` more
         than doubled. Empties are the server returning nothing, not the model
-        answering badly. Carry this into the pair: `hunt20d` is the same length and
-        should show the same shape - if it does not, that is a fact about the
-        backend, not the game.
+        answering badly. `hunt20d` reproduced it exactly, which says nothing new -
+        a same-seed re-run replays the same calls. A different seed base at the same
+        length is what would separate run-length degradation from this deal.
       - **Evil's win PATH moved a lot**: `five_rejects` 0/20 in `hunt20b` -> 6/20
         here, now the single most common path (vs missions_failed 5, hunt_hit 5).
-        Deadlocking the table is not sabotage; if this holds in `hunt20d` it changes
-        what gate #2 would even be measuring.
-- [ ] **NEXT: `hunt20d` - the paired re-run that measures the spread.** Same
-      everything as `hunt20c`: 20 games, seed 1000, 2 rounds, pinned
-      `qwen36-35b-a3b-iq3`, notebook OFF, `eval\runs\hunt-local.cmd hunt20d 20 1000`.
-      Budget ~6h40m on the GPU.
-      - **Launching off HEAD is valid and was checked.** `git diff f8c5f71..HEAD`
-        over non-`.md` paths is EMPTY - the four commits since the anchor are all
-        docs. Re-run that check at launch time, not from this line.
-      - What the pair buys, in order: the run-to-run spread on blind taint
-        sensitivity (the number every "+X% vs +Y%" claim in this file has assumed
-        and none has measured); whether the step-not-slope shape replicates a third
-        time; whether the `five_rejects` path shift is real; and whether the
-        transport degradation is a property of run length.
-      - **The spread is the ONUW/cloud decision variable.** Wider than the ~+9pp
-        effect -> 5-seat cabal cannot show gate #3a at an affordable N. See the
-        Spike #1.5 item.
+        Deadlocking the table is not sabotage. `hunt20d` reproduced it identically,
+        so it is still one draw; a different seed base is what tests it.
+- [x] **`hunt20d` landed 2026-08-27 07:38 and is BYTE-IDENTICAL to `hunt20c`.** A
+      same-seed re-run cannot measure spread, so the pair this item was queued to
+      make does not exist and never could. Full finding, evidence and what to do
+      instead: `docs/reproducibility.md`.
+      - The spread was already in `hunt20c`'s own report: blind taint sensitivity
+        **+9.00%, 95% CI [-0.25%, +18.18%]**, from the bootstrap over games. Read
+        that, not a second run.
+      - **So the ONUW/cloud decision is answerable now**, on evidence in hand:
+        ±9pp around a +9.00% effect at n=20 means a 5-seat cabal run of this size
+        cannot show gate #3a. See the Spike #1.5 item.
+- [ ] **NEXT: decide cabal's gate #3 on `hunt20c`'s interval, not on a new run.**
+      The three items below that name `hunt20d` as their trigger need a real second
+      draw, which is a run at a DIFFERENT seed base (`--seed 2000`), not a repeat of
+      1000. Budget ~6h40m; it checks whether the within-run bootstrap is honest, and
+      it is a smaller prize than this file used to claim - `docs/reproducibility.md`
+      says why.
 - [ ] **The JSONL records no REASON for a fallback.** Every `fell_back` entry in
       `decision_log` carries `note: ""` and `served_by: ""`, so a run's refusal
       diagnosis exists only in `trace_sample` (sampled, 8/game) and the log's final
@@ -226,14 +229,15 @@ Queue only. Done work leaves to git log. What's next:
       out loud; the next reader may not add the caveat. Populate `note` on the
       fallback path, where the refusal string is already in hand.
 - [ ] **The scorer steers readers to the mis-specified statistic - do NOT fix this
-      until `hunt20d`.** `_blind_line` prints "superseded by the graded slope above,
+      until a second DRAW.** `_blind_line` prints "superseded by the graded slope above,
       which uses every taint level" (`eval/run_games.py`), but the taint response
       looks like a STEP in both runs that have the table (`hunt20b` 93/70/77,
       `hunt20c` 82/64/64), and an OLS slope through a step is the wrong summary.
       **The reason to wait**: retargeting that note would rest on two draws of n=20
       whose 1->2 legs sit inside noise - the same evidence quality this file just
       finished voiding a gate verdict over. Fixing it now would be the `hunt20b`
-      error wearing a different hat. `hunt20d`'s table is the trigger: a third flat
+      error wearing a different hat. A run at a different seed base is the trigger,
+      not `hunt20d`, which reproduced `hunt20c` byte for byte: a third flat
       or rising 1->2 leg makes it a shape, and then change the note AND make
       `taint_sensitivity` say the slope is fitted to a non-monotone table.
 - [ ] **The local launcher loses its own completion marker.** `hunt20b` finished
@@ -540,7 +544,8 @@ Added 2026-08-26, all `qwen36-35b-a3b-iq3`, seed 1000, 20 games, 2 rounds. **NON
 these three columns is a controlled comparison of another.** `hunt20` vs `hunt20b`
 differ by three things (see the `hunt20b` item); `hunt20b` vs `hunt20c` differ by the
 sampler pin `2cfe9d5`, which landed between them. They are three draws, which is all
-they are. The first controlled pair will be `hunt20c` vs `hunt20d`.
+they are. `hunt20d` is not a fourth column - it reproduced `hunt20c` exactly
+(`docs/reproducibility.md`), so a controlled pair still needs a different seed.
 
 | what | `hunt20` (08-25 19:54) | `hunt20b` (08-26 08:56) | `hunt20c` (08-26 14:52) |
 |---|---|---|---|
@@ -609,6 +614,9 @@ queue, the dated measurements, and the route decisions.
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - `docs/prior-work.md` - AvalonBench and how to position against it. Read before
   flipping the repo public.
+- `docs/reproducibility.md` - two 20-game runs at one seed came back byte-identical,
+  so a same-seed repeat cannot measure spread. Read before scheduling ANY run whose
+  purpose is variability, and before quoting a "+X% vs +Y%" comparison.
 
 ## Route: local is for spot-checks, not for gates
 
