@@ -34,6 +34,34 @@ Polarity is arms 2 vs 3, and only 2 vs 3 - they differ in valence and in nothing
 else. Richness is 2+3 vs 1. Without arm 3 the experiment cannot make a claim about
 morality at all, and that is the difference between a result and an anecdote.
 
+**A vocabulary control has to be register-DISTANT, and that is why a fae skin was
+rejected** (2026-08-27, changeling). The proposal was a Fair Folk changeling skin
+beside `folk`: same polarity, same richness, different mythology - a 2-vs-2' pair
+like `1984-en`/`bnw-en`. It fails as a control because the two are barely distant
+at all. Same register (folk horror), same setting (a village at night), same
+premise (something swapped you while you slept), same moral shape. The likely
+result is no difference, and a null there is uninterpretable: "vocabulary does not
+move it" and "those were one fiction under two names" produce the same number.
+A null result nobody can read costs GPU and then gets cited. If this repo ever
+wants a changeling vocabulary control, it has to move the register as far as it
+can while holding polarity - the clinical-SF body-snatcher framing, not another
+mythology off the same shelf. It is third in line regardless, behind arms 3 and 4.
+
+The fae material is not wasted; it is in the wrong LAYER. It belongs in the prose
+of a richer `folk`, not in a skin of its own - the rung is already *called*
+`changeling` in the branding-free canonical layer, and `folk`'s blurb already
+carries the premise ("some of what you know about yourself stopped being true
+while you slept"). A skin would be restating in costume what the name and the
+blurb already say.
+
+**If that enrichment happens, it ships as a NEW theme key, not as an edit to
+`folk`.** Two reasons, and the second is the one that binds. A blurb edit is a
+prompt edit, so rewriting the default face orphans every number recorded against
+it, and a 200-game run is queued on this one. And keeping both makes the pair
+measurable: same polarity, same vocabulary, more prose is a clean richness arm on
+an axis none of 1-4 isolates - blurb DENSITY, held apart from valence and from
+which fiction it is.
+
 **What this repo brings that a prompt-level study does not.** Gate #1 makes
 information equality a machine-checked property rather than an assumption, so a
 behavioural difference cannot be a leak. Fallback rates are recorded per run and
