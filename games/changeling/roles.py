@@ -328,16 +328,25 @@ THEME_GREEK = Theme(
 # borrowed is his APPOINTMENT - failed the examination, died on the steps, woke into
 # an office - which is the frame's own claim that losing is a posting, told as one
 # biography. Borrow his hunt instead and the skin starts saying the hidden pair are
-# demons, and the neutrality is gone. The Six-Eared Macaque enters on the same test:
-# as a card it is the impostor nobody can separate from the original, which is this
-# rung's premise and takes no side; as a BLURB it comes with the pilgrims who are
-# right and the copy that is wrong, so the frame stays Fengshen's. Lotus Body is
-# Nezha rebuilt out of what was to hand - a body that is not the one he was born in,
-# stated by a figure both corpora share.
+# demons, and the neutrality is gone. Lotus Body is Nezha rebuilt out of what was to
+# hand - a body that is not the one he was born in, stated by a figure both corpora
+# share and neither owns.
 #
-# A JTTW-FRAMED skin, with the Macaque episode as its blurb, is a different thing and
-# is NOT built: its polarity matches `folk`, so it would be a second same-polarity
-# fiction beside `greek`, buying a vocabulary control this rung already has.
+# A SECOND test, and it is why the Six-Eared Macaque is not here (removed 2026-08-27,
+# hours after it landed). It passes the polarity test cleanly: as a card it is the
+# impostor nobody can separate from the original, which is this rung's premise and
+# takes no side. It fails on ownership. A figure that is the SIGNATURE of a corpus
+# which may get its own skin is reserved to that skin, because two faces sharing their
+# most distinctive name stop being two vocabularies - and vocabulary is the entire
+# variable a control arm moves. Shared-pantheon figures stay free to both; corpus
+# signatures do not. The same rule removed `Yellow Turban`, which collided lexically
+# rather than by ownership with the JTTW skin's `Yellow Wind` for the same slot.
+#
+# A JTTW-FRAMED skin is NOT built, and its reserved names are recorded in RESUME so a
+# later session does not re-collide with them. Its polarity matches `folk`, so it
+# would be a second same-polarity fiction beside `greek` rather than a new arm - and
+# if it is ever built it takes `greek`'s slot rather than joining it, because two
+# same-polarity rich fictions compete for one place in the set.
 #
 # English-rendered on purpose. A `*-cn` face would move fiction and language at once
 # and could not be read; the clean language control already exists in cabal
@@ -354,11 +363,11 @@ THEME_INVESTITURE = Theme(
     {
         "pack": "Intercepted",       # the Intercept Sect, who know their own
         "spotter": "Third Eye",      # sees the true form under the borrowed one
-        "swapper": "Six-Eared Macaque",  # takes what you are and leaves something in its place
-        "switcher": "Yellow Turban",  # celestial errand-runner: carries out a transfer, told nothing
+        "swapper": "Earth-Traveller",  # arrives under the floor, leaves with what it came for
+        "switcher": "Duty Officer",  # carries out the transfer it was handed, told nothing about either end
         "deceived": "Lotus Body",    # rebuilt out of what was to hand, and not the body it was born in
         "bystander": "Conscript",
-        "kindred": "Sworn Brothers",
+        "kindred": "Same List",      # two names entered in one column, each knowing the other is there
         "waker": "Zhong Kui",        # failed the examination, died on the steps, woke appointed
     },
     blurb=(

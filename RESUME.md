@@ -475,9 +475,29 @@ can re-run.
         out if it arrives arguing one side is righteous. Zhong Kui is in for his
         APPOINTMENT - failed the examination, died on the steps, woke into an office,
         which is the frame's own claim told as a biography - and his demon-hunt is
-        out, being the same man. Six-Eared Macaque is in as a card, where it is the
-        impostor nobody can separate from the original and takes no side, and out as
-        a blurb, where it brings the pilgrims who are right. Lotus Body is Nezha.
+        out, being the same man. Lotus Body is Nezha.
+      - **A second test: corpus signatures are RESERVED, even when they pass the
+        polarity one** (2026-08-27, after a pure-JTTW skin was costed). Six-Eared
+        Macaque was in `investiture` for a few hours and is out again: as a card it
+        takes no side, but it is the JTTW skin's headline, and two faces sharing
+        their most distinctive name stop being two vocabularies - which is the whole
+        variable a control arm moves. Shared-pantheon figures (Nezha, Zhong Kui,
+        Yang Jian) stay free to both; signatures do not. `Yellow Turban` went with
+        it, colliding lexically rather than by ownership with `Yellow Wind`.
+        `investiture`'s swapper/switcher/kindred are now Earth-Traveller / Duty
+        Officer / Same List, the last two also pulling toward the bureaucratic frame.
+      - **Reserved for a pure-JTTW skin, so nobody re-collides with them:** pack =
+        Six-Eared Macaque, spotter = Fiery Eyes, swapper = Hair Double, switcher =
+        Yellow Wind, deceived = River-Drinker, bystander = Porter, kindred =
+        Vow-Bound, waker = Cast-Off Body (the corpse at the Lingyun crossing - looking
+        at what you actually are, after everything). Sides The Pilgrims / The
+        Impostors, pile `baggage`. **Not built, and if built it TAKES `greek`'s slot
+        rather than joining it** - both are same-polarity rich fictions competing for
+        one place. `greek` holds the slot on merit: its polarity maps onto `folk`'s
+        predator/prey axis, where JTTW's is legitimate-versus-counterfeit, a different
+        moral axis that would confound the 2-vs-2' gap it is supposed to measure.
+        JTTW's premise fit is the better of the two, so it is the face to ship if
+        parlor ever wants one skin that states what this rung is for.
       - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
         language at once and cannot be read. The clean language control already
         exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
