@@ -11,8 +11,6 @@ _*.md
 # a claim is rendered to transcripts/, and the transcript is what gets committed.
 eval/records/
 
-CLAUDE.local.md
-RESUME.local.md
-pre-push.local.md
+*.local.md
 
 /.scratch/

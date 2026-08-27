@@ -309,8 +309,7 @@ does and what its numbers mean; the scope rule for everything else is the invari
 in `CLAUDE.md`, and it is the thing to check a new doc against rather than a pass to
 re-run. The three route base URLs are environment variables with loopback defaults
 (`PARLOR_ENDPOINT_LOCAL` / `_CLEAN` / `_GRAY`), so a clone runs with nothing set and
-no box's topology is in the tree. The remaining queue is box-local in
-`pre-push.local.md`.
+no box's topology is in the tree. Nothing is queued behind it.
 
 **S1 is called, and it freed half the queue.** S6 survives in a changed and
 bounded form; S7 and the cloud arm are dead. The verdict and its arithmetic are
