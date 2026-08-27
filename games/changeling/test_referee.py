@@ -8,11 +8,14 @@ quietly makes the audit vacuous fails these instead of passing them.
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
-from games.changeling.night import resolve_night
+from core.observability import Knowledge
+from games.changeling.night import centre_ref, resolve_night
 from games.changeling.referee import ChangelingReferee, IllegalAction, Phase
 from games.changeling.roles import (BYSTANDER, DECEIVED, PACK, SETUP_5, SPOTTER,
-                                    SWAPPER, SWITCHER, Act, Side, THEMES)
+                                    SWAPPER, SWITCHER, THEME_FOLK, THEME_PLAIN,
+                                    Act, Side, THEMES)
 
 
 def find_diverged_seed(limit: int = 200) -> int:
@@ -59,6 +62,44 @@ class TestPreambleIsSeatInvariant(unittest.TestCase):
         ref = ChangelingReferee.new(5, seed=3)
         self.assertNotIn("Seat ", ref.preamble())
         self.assertNotIn("You are", ref.preamble())
+
+
+class TestThemedCentre(unittest.TestCase):
+    """The face-down pile is the one piece of furniture a skin renames, and it is
+    named in three different places: the deck listing's power clauses, the
+    face-down line under them, and a centre reveal in a seat's own night. A skin
+    that renames two of the three describes two different tables."""
+
+    SKINNED = replace(THEME_FOLK, name="test-centre", centre_name="sideboard")
+
+    def test_the_shipping_skins_render_the_bytes_they_rendered_before(self):
+        """Adding the field must not move the default face - a preamble edit is a
+        prompt edit, and changeling has a 200-game run queued on this one."""
+        for theme in (THEME_FOLK, THEME_PLAIN):
+            ref = ChangelingReferee.new(5, seed=3, theme=theme)
+            text = ref.preamble()
+            self.assertIn("in hands or in the centre,", text)
+            self.assertIn("lie face down in the centre and belong to nobody.", text)
+            self.assertIn("or at two centre cards", text)
+            self.assertIn("for a centre card without looking", text)
+
+    def test_a_renamed_centre_reaches_every_place_the_word_appears(self):
+        """The guard that earns its keep: it fails on a place missed today and on
+        a place added tomorrow, which no amount of reading the renderer catches."""
+        for seed in range(30):
+            ref = ChangelingReferee.new(5, seed=seed, theme=self.SKINNED)
+            for seat in range(ref.n):
+                rendered = ref.render_context(seat)
+                self.assertNotIn("centre", rendered.lower(),
+                                 f"seed {seed}, seat {seat} still says centre")
+                self.assertIn("sideboard", rendered.lower())
+
+    def test_a_centre_reveal_is_rendered_in_the_skin_s_word(self):
+        """Driven directly, because a spotter that looked at the centre is not in
+        every deal and a sweep that silently never hit one would pass empty."""
+        ref = ChangelingReferee.new(5, seed=3, theme=self.SKINNED)
+        line = ref._knowledge_line(Knowledge(centre_ref(0), "pack"))
+        self.assertIn("Sideboard card 1 is the", line)
 
 
 class TestSeatSeesBeliefNotTruth(unittest.TestCase):

@@ -172,7 +172,9 @@ class ChangelingReferee:
             return f"  - Seat {k.seat} is one of the two whose cards you exchanged."
         if is_centre(k.seat):
             name = self.theme.card_names[k.label]
-            return f"  - Centre card {centre_slot(k.seat) + 1} is the {name}."
+            where = self.theme.centre_name
+            return (f"  - {where[:1].upper()}{where[1:]} card "
+                    f"{centre_slot(k.seat) + 1} is the {name}.")
         if k.label == "fellow-pack":
             return "  - " + self.reveal_forms(k.seat, "pack")[1]
         return "  - " + self.reveal_forms(k.seat, k.label)[0]
@@ -197,8 +199,13 @@ class ChangelingReferee:
         # stale. A seat that cannot tell whether the looking happened before or
         # after the moving cannot evaluate its own knowledge, let alone a claim.
         order = {act: i for i, act in enumerate(NIGHT_ORDER)}
+        # `power` is a template - see `Card.power`. Filled here rather than at
+        # definition so one canonical clause serves every skin in that skin's own
+        # word for the face-down pile.
+        where = self.theme.centre_name
         deck_lines = [
-            f"  {counts[c.key]}x {self.theme.card_names[c.key]} - {c.power}."
+            f"  {counts[c.key]}x {self.theme.card_names[c.key]} - "
+            f"{c.power.format(centre=where)}."
             for c in sorted({c.key: c for c in self.setup.deck}.values(),
                             key=lambda c: (order.get(c.act, len(order)), c.key))
         ]
@@ -207,11 +214,11 @@ class ChangelingReferee:
             lines += [self.theme.blurb, ""]
         lines += [
             f"Players: {self.n} seats, numbered 0..{self.n - 1}.",
-            "The deck, all of it, in hands or in the centre, and what each card "
+            f"The deck, all of it, in hands or in the {where}, and what each card "
             "does. They act in this order, each one on whatever the one before it "
             "left behind:",
             *deck_lines,
-            f"{self.setup.centre} of those cards lie face down in the centre and "
+            f"{self.setup.centre} of those cards lie face down in the {where} and "
             f"belong to nobody.",
             # Positive framing, per .claude/rules/model-facing-text.md: state the
             # standing rule rather than warning against trusting your own card.

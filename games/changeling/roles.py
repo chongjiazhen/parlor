@@ -62,6 +62,13 @@ class Card:
     #:
     #: Deliberately written without naming any other card, so this text is the same
     #: for every seat and carries no association a leak could ride on.
+    #:
+    #: A TEMPLATE, not a finished string: ``{centre}`` is filled from the theme at
+    #: render time. The face-down pile is the one piece of table furniture a skin
+    #: needs to rename, and a power text that said "centre" while the rules text
+    #: above it said "the sideboard" would read as two different places. The clause
+    #: itself is theme-independent and must stay so - a skin that reworded a power
+    #: would stop being display-only and start being a rules change.
     power: str = ""
     #: Does this card's holder look at what it ends up with? The whole belief/truth
     #: split lives in this one flag. ``TAKE`` looks and so keeps belief == truth;
@@ -74,7 +81,7 @@ class Card:
 PACK = Card("pack", Side.PACK, Act.MEET, "identity", meets_own_kind=True,
             power="wakes first and sees every other seat holding this same card")
 SPOTTER = Card("spotter", Side.VILLAGE, Act.LOOK, "identity",
-               power="looks at one other seat's card, or at two centre cards")
+               power="looks at one other seat's card, or at two {centre} cards")
 SWAPPER = Card("swapper", Side.VILLAGE, Act.TAKE, "identity",
                looks_after_acting=True,
                power=("takes one other seat's card and leaves its own in exchange, "
@@ -83,7 +90,7 @@ SWITCHER = Card("switcher", Side.VILLAGE, Act.SWITCH, "positional",
                 power=("exchanges the cards of two OTHER seats without looking at "
                        "either. Neither of them is told"))
 DECEIVED = Card("deceived", Side.VILLAGE, Act.DRINK, "false",
-                power=("exchanges its own card for a centre card without looking, "
+                power=("exchanges its own card for a {centre} card without looking, "
                        "so it does not know what it ends the night holding"))
 BYSTANDER = Card("bystander", Side.VILLAGE, Act.NONE, "none",
                  power="sleeps through the night and does nothing")
@@ -140,6 +147,13 @@ class Theme:
     side_names: dict[Side, str]
     card_names: dict[str, str]
     blurb: str = ""
+    #: What this skin calls the face-down pile. The only piece of furniture on the
+    #: table, and the one word a rich skin has to own: three cards that belong to
+    #: nobody are a cradle, a sideboard, or an empty bed long before they are a
+    #: "centre". Defaults to the functional word, so a skin that says nothing
+    #: renders exactly the bytes it rendered before this field existed - which is
+    #: what keeps adding it a non-measured change for the shipping face.
+    centre_name: str = "centre"
 
 
 # Sterile functional skin - the fallback face, no fiction.

@@ -337,3 +337,13 @@ convenient:
 As in `cabal`: a `Theme` renames sides and roles and carries a premise blurb. It
 changes no rule, no entitlement, and no byte of private knowledge - and is
 therefore a MEASURED change, not a cosmetic one.
+
+One thing more than `cabal`'s: a skin also names **the centre**, the three
+face-down cards that belong to nobody. It is the only piece of furniture on this
+table, it is named in three separate places a seat reads - the power clauses, the
+face-down line, and a centre reveal in its own night - and a skin that renamed two
+of the three would be describing two different tables. `Card.power` is therefore a
+template with a `{centre}` slot rather than a finished string; the clause it states
+stays theme-independent, because a skin that reworded a power would have stopped
+being display-only. The functional word is the default, so the shipping faces
+render exactly what they rendered before the field existed.
