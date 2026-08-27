@@ -120,7 +120,14 @@ SETUP_5 = Setup(
 
 SETUPS: dict[int, Setup] = {5: SETUP_5}
 
-CARDS: dict[str, Card] = {c.key: c for c in SETUP_5.deck}
+#: Every card the game defines, dealt by a shipped setup or not. A skin must name
+#: all of them - the referee looks a display name up by key, so a theme missing one
+#: is a KeyError the first time that card is dealt, and a variant deck is exactly
+#: when that happens. Listed rather than derived from a deck so the theme-coverage
+#: test cannot go quiet the moment a card exists that `SETUP_5` does not hold.
+ALL_CARDS = (PACK, SPOTTER, SWAPPER, SWITCHER, DECEIVED, BYSTANDER)
+
+CARDS: dict[str, Card] = {c.key: c for c in ALL_CARDS}
 
 
 @dataclass(frozen=True)

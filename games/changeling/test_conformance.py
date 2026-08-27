@@ -24,7 +24,8 @@ import unittest
 
 from games.changeling.night import (centre_ref, is_centre, legal_targets,
                                     resolve_night)
-from games.changeling.roles import (CARDS, NIGHT_ORDER, SETUP_5, Act, Side)
+from games.changeling.roles import (ALL_CARDS, CARDS, NIGHT_ORDER, SETUP_5,
+                                    THEMES, Act, Side)
 
 RULES = pathlib.Path(__file__).with_name("RULES.md").read_text(encoding="utf-8")
 
@@ -112,6 +113,62 @@ class TestRulesTablesMatchTheCode(unittest.TestCase):
                 if other != key:
                     self.assertNotIn(other, card.power.lower(),
                                      f"{key}'s power names {other}")
+
+
+class TestEverySkinIsNamedAndCollisionFree(unittest.TestCase):
+    """The properties a skin must have, checked as data rather than by playing.
+
+    Ported from cabal's ``test_audit_coverage.py``, but NOT verbatim, because this
+    game's audit is association-based. There a secret term is a bare role name, so
+    the hazard is one name hiding inside another or inside the blurb. Here
+    ``reveal_forms`` wraps every name in a frame that carries the seat number, so
+    "Seat 3 held the Wolf." cannot hide inside "Seat 3 held the Werewolf." and a
+    card named in the blurb reveals nothing about who holds it. Two of cabal's
+    three guards therefore have no work to do here, and porting them anyway would
+    be ceremony that reads as coverage.
+
+    What survives the translation is the pair below, plus the deck-composition
+    guard one rung out: a duplicate display name is the collision this game
+    actually has, because it collapses two distinct cards into one term and every
+    reveal about either then reads as the other.
+    """
+
+    def test_every_skin_names_every_card(self):
+        for name, theme in THEMES.items():
+            for card in ALL_CARDS:
+                self.assertIn(card.key, theme.card_names,
+                              f"{name} does not name {card.key}")
+
+    def test_no_two_cards_in_a_skin_share_or_hide_in_a_name(self):
+        """Sharing is the live hazard; hiding is insurance against the frame in
+        ``reveal_forms`` ever being loosened, which would make a substring match
+        the moment the seat number stops separating two terms."""
+        for name, theme in THEMES.items():
+            terms = {c.key: [c.key.lower(), theme.card_names[c.key].lower()]
+                     for c in ALL_CARDS}
+            for key, mine in terms.items():
+                for other, theirs in terms.items():
+                    if key == other:
+                        continue
+                    for a in mine:
+                        for b in theirs:
+                            self.assertNotIn(a, b,
+                                             f"{name}: {key} term '{a}' hides in {other}")
+
+    def test_no_power_text_names_another_card_in_any_skin(self):
+        """``test_no_power_text_names_another_card`` above checks the canonical
+        keys. The preamble renders ``{display name} - {power}``, so a power text
+        that named another card's DISPLAY name would carry the same association in
+        a skin while passing the key-level check - and power text is one string
+        shared by every theme, so it is exactly where that goes unnoticed."""
+        for name, theme in THEMES.items():
+            for card in ALL_CARDS:
+                for other in ALL_CARDS:
+                    if other.key == card.key:
+                        continue
+                    self.assertNotIn(theme.card_names[other.key].lower(),
+                                     card.power.lower(),
+                                     f"{name}: {card.key}'s power names {other.key}")
 
 
 class TestNightInvariants(unittest.TestCase):
