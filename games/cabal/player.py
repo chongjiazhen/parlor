@@ -171,9 +171,15 @@ class LLMPolicy:
     #: question worth asking under a routing alias, where the hunter and the voter
     #: in one game can be different models entirely.
     last_upstream: str = ""
+    #: the complaint that refused the most recent ATTEMPT - a transport failure, an
+    #: unparsed reply, an illegal move. Deliberately not the trace's last line: that
+    #: is the "N attempts failed, playing random" summary, which says a fallback
+    #: happened and nothing about why, and a census of those is no diagnosis at all.
+    last_refusal: str = ""
 
     def act(self, ref: CabalReferee, seat: int) -> dict:
         self.last_fell_back = False
+        self.last_refusal = ""
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -187,7 +193,7 @@ class LLMPolicy:
                 self.last_upstream = served_by
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
-                self.trace.append(f"seat {seat} attempt {attempt}: {complaint}")
+                self._refused(seat, attempt, complaint)
                 if self.backoff and attempt < self.retries:
                     time.sleep(self.backoff * (2 ** attempt))
                 continue
@@ -195,19 +201,25 @@ class LLMPolicy:
                 action = parse_action(reply, ref)
             except ParseError as exc:
                 complaint = str(exc)
-                self.trace.append(f"seat {seat} attempt {attempt}: unparsed - {exc}")
+                self._refused(seat, attempt, f"unparsed - {exc}")
                 continue
             try:
                 self._precheck(ref, seat, action)
             except IllegalAction as exc:
                 complaint = str(exc)
-                self.trace.append(f"seat {seat} attempt {attempt}: illegal - {exc}")
+                self._refused(seat, attempt, f"illegal - {exc}")
                 continue
             return action
         self.trace.append(f"seat {seat}: {self.retries + 1} attempts failed, playing random")
         self.last_fell_back = True
         self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
+
+    def _refused(self, seat: int, attempt: int, complaint: str) -> None:
+        """One place writes a refusal, so the trace and the per-decision census can
+        never disagree about what happened."""
+        self.last_refusal = f"seat {seat} attempt {attempt}: {complaint}"
+        self.trace.append(self.last_refusal)
 
     def _precheck(self, ref: CabalReferee, seat: int, action: dict) -> None:
         """Catch the per-seat illegalities the referee can only see at bulk apply,
@@ -288,6 +300,17 @@ class Decision:
     #: chose to CARRY, which is a different and usually sharper thing than the
     #: reasoning it happened to have.
     note: str = ""
+    #: why this decision was refused, when it was - the last trace line the policy
+    #: wrote before giving up. Empty on a decision the model actually made.
+    #:
+    #: A field of its own rather than a second meaning for ``note``: the notebook
+    #: is off on most runs and on for some, so one field over two meanings would
+    #: make "how many refusals did this run have" unanswerable from the JSONL
+    #: without knowing which. Before this the reason existed only in
+    #: ``trace_sample`` (8 per game) and the end-of-run report (deduped, capped,
+    #: and absent until the run ends) - neither a census, and the second unreadable
+    #: while a six-hour run is still going.
+    refused: str = ""
     fell_back: bool = False
     #: which upstream actually answered THIS decision. Under a routing alias the
     #: gateway picks per request, so a per-run mix cannot tell you whether the model
@@ -379,6 +402,8 @@ def play_game(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
             think=str(action.get("think", "")), note=stored or "",
+            refused=(str(getattr(policies[seat], "last_refusal", "") or "")
+                     if fell_back else ""),
             fell_back=fell_back,
             served_by=("" if fell_back
                        else str(getattr(policies[seat], "last_upstream", "") or "")),

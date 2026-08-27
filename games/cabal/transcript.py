@@ -181,6 +181,9 @@ def _decision_lines(rec: dict) -> list[str]:
         note = " ".join(str(d.get("note") or "").split())
         if note:
             lines.append(f"    - *notebook:* {note}")
+        refused = " ".join(str(d.get("refused") or "").split())
+        if refused:
+            lines.append(f"    - *refused:* {refused}")
     return lines
 
 

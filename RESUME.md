@@ -28,7 +28,7 @@ table says which pairs.
 | ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict section below. | - | - | done |
 | **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). | GPU all session | none | `RULES.md` table is on clean numbers and a 200-game record exists |
 | ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
-| **S4** | **Ops hygiene.** `DONE rc=` written by `run_games.py` itself; `run-hunt20.cmd` moved to `eval/runs/`; cabal's fallback `note` populated the way changeling's is. | no GPU | no run in flight | a killed run is distinguishable from a finished one without the chain log |
+| ~~**S4**~~ | ~~Ops hygiene.~~ **LANDED 2026-08-27** - `core/runlog.py` writes `PARLOR DONE rc=N games=L/R elapsed=Ns` from both eval drivers; both games record a fallback's REASON per decision on a `refused` field; the untracked `run-hunt20.cmd` is retired and its exact invocation preserved in `eval/runs/hunt-local.cmd`. Records changed, play did not - the bytes a model receives are identical, so S6 may freeze on this code. | - | - | done |
 | **S5** | **changeling: read the 200-game run.** Gate #3 at a real N, the `false` stratum, the sleeper-decoy rate, diverged-vs-intact accuracy. | no GPU | S2 landed | a dated writeup in `RULES.md`, gates called or refused by their own rule |
 | **S6** | **The gate #3b campaign - cabal's LAST GPU program.** 40 games, `--seed 2000` then `--seed 3000`, code frozen. Pre-committed bar below. Doubles as the second draw, so it also resolves step-not-slope, the `five_rejects` shift and run-length degradation. | GPU ~13.2h (2 nights) | **UNBLOCKED - S3 landed 2026-08-27**, and the derived bar evaluates to 1/3 on `SETUP_5`, so the pre-committed power table stands unchanged | 3b called or refused by its own rule, and the three draw-dependent items resolved |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict section. | - | - | done |
@@ -241,14 +241,6 @@ can re-run.
       arm at `--no-thinking`; re-run both, not just the after arm, or the pairing is
       lost. Update the table in `games/changeling/RULES.md` and drop the caveat
       block above it.
-- [ ] **The JSONL records no REASON for a fallback.** Every `fell_back` entry in
-      `decision_log` carries `note: ""` and `served_by: ""`, so a run's refusal
-      diagnosis exists only in `trace_sample` (sampled, 8/game) and the log's final
-      report block (deduped, capped at 6 lines) - neither of which is a census, and
-      the second of which does not exist until the run ends. Diagnosing the
-      `hunt20c` fallback drift mid-run meant bucketing sampled traces and saying so
-      out loud; the next reader may not add the caveat. Populate `note` on the
-      fallback path, where the refusal string is already in hand.
 - [ ] **The scorer steers readers to the mis-specified statistic - do NOT fix this
       until a second DRAW.** `_blind_line` prints "superseded by the graded slope above,
       which uses every taint level" (`eval/run_games.py`), but the taint response
@@ -266,21 +258,6 @@ can re-run.
       verdict does NOT pre-empt this - it declines to PROMOTE the binary to the
       gate, which is a different act from fixing a scorer note that points readers
       at a mis-specified statistic.
-- [ ] **The local launcher loses its own completion marker.** `hunt20b` finished
-      cleanly - full report, complete JSON, 20 JSONL lines, zero errors - and wrote
-      no `DONE rc=` line, because `cmd.exe` did not survive to echo it after python
-      exited. That line is the one thing distinguishing "finished" from "killed at
-      hour four", which is exactly the judgement the detached-run invariant says to
-      make from the log alone. Have `run_games.py` write its own terminal marker
-      rather than trusting the wrapper to outlive it.
-- [ ] **Move `run-hunt20.cmd` into `eval/runs/` once the run lands.** The cloud
-      launcher moved there 2026-08-26 and is now tracked and probe-gated
-      (`eval/runs/hunt-cloud.cmd`); the local one is still the untracked copy in
-      `eval/records/`, and it is NOT safe to move while it executes - `cmd.exe`
-      reads a batch file incrementally, so moving it mid-run can lose the trailing
-      `DONE rc=` line. Launchers are inputs, not run output; `eval/records/` is
-      gitignored, which is why tonight's misconfigured cloud recipe left no
-      reviewable record of what it launched.
 - [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
@@ -673,6 +650,21 @@ derivation restored as a compiling mutant, killed by its own named test, restore
 and two copies of one rule is how the stale copy wins an argument. What stays
 here is project state: the route calls and what a run measured.
 
+- **A run writes its own terminal marker; a wrapper cannot be trusted to outlive
+  it.** `core/runlog.py`, used by both eval drivers: `PARLOR DONE rc=N
+  games=landed/requested elapsed=Ns`, written from a `finally` so it survives a
+  crash, a `sys.exit` and a Ctrl-C. It contains `DONE rc=` so old greps still find
+  it. **A log whose last line is a progress line is a killed run** - that is the
+  whole point, and nothing writes the marker for a process killed outright. The
+  `.cmd` echo stays for the one case python cannot cover: a crash before the driver
+  runs at all.
+- **`refused` is the fallback census; `note` is cabal's notebook.** Both games
+  record the refusal that produced a fallback on the decision itself, so a run's
+  refusal diagnosis is a census in the JSONL rather than a sampled trace (8/game)
+  and an end-of-run report that does not exist until the run ends. It holds the
+  last ATTEMPT's complaint, not the "N attempts failed" summary. Two consequences
+  for old records: pre-2026-08-27 JSONL has no `refused` at all, and changeling's
+  records before that date carry the same string under `note`.
 - Independent context = one model + per-seat private context slice, not N brains.
 - Referee is deterministic code; LLM only for players (and, later, judgment-GMs).
 - Cloud is fine for game-fiction secrets (not credentials); local for deception checks.

@@ -50,6 +50,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 
 from core.backends import ENDPOINTS, REGISTERS, Backend
+from core.runlog import RunState, run_with_marker
 from core.stats import wilson
 from games.cabal import transcript
 from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
@@ -292,6 +293,11 @@ def progress_line(done: int, total: int, index: int, rec: GameRecord,
     return line
 
 
+#: What this run knows about itself, for the terminal marker. See `core/runlog.py`
+#: for why the marker is written by the run rather than echoed by its wrapper.
+RUN_STATE = RunState()
+
+
 def land(index: int, rec: GameRecord, args) -> None:
     """Persist one finished game immediately.
 
@@ -308,6 +314,7 @@ def land(index: int, rec: GameRecord, args) -> None:
         os.makedirs(args.transcript_dir, exist_ok=True)
         transcript.write(os.path.join(args.transcript_dir, f"game-{index:03d}.md"),
                          transcript.render(rec, vars(args)))
+    RUN_STATE.landed += 1
 
 
 #: The fields the gate #3 strata are cut on. A record missing any of them is not
@@ -701,6 +708,7 @@ def main() -> None:
     ap.add_argument("--transcript-game", type=int, default=None,
                     help="which game to transcribe (default: the first completed one)")
     args = ap.parse_args()
+    RUN_STATE.requested = args.games
 
     if LIVE_TEAMS[args.arm] and not args.backend:
         sys.exit(f"--arm {args.arm} needs --backend "
@@ -740,4 +748,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(run_with_marker(main, RUN_STATE))

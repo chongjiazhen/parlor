@@ -1,0 +1,91 @@
+"""The last line of a detached run's log, written by the process that did the work.
+
+`hunt20b` finished cleanly - full report, complete JSON, 20 JSONL lines, zero
+errors - and wrote no completion line, because the ``cmd.exe`` wrapper did not
+survive to echo one after python exited. That line is the only thing separating
+"finished" from "killed at hour four", and it is exactly the judgement the
+detached-run invariant says to make from the log alone: CPU time, IO counters and
+exit codes all read as healthy while a run sleeps.
+
+So the marker is written by the run itself. A wrapper cannot be trusted to outlive
+the thing it wrapped, and there is no reason to ask it to - the process that knows
+how many games landed is the one holding the count.
+
+Absence keeps meaning what it should. :func:`run_with_marker` writes from a
+``finally``, so the marker survives a crash, a ``sys.exit`` and a Ctrl-C; nothing
+can write it for a process that was killed outright, which is the case it exists to
+expose. A log whose last line is a progress line is a log of a killed run.
+
+This is ``core/`` rather than one runner's file because both eval drivers launch
+detached multi-hour runs and both need the same guarantee - the second game needing
+it is the bar for promotion.
+"""
+
+from __future__ import annotations
+
+import sys
+import time
+import traceback
+from dataclasses import dataclass
+
+#: The marker's prefix. It CONTAINS ``DONE rc=`` so a grep written against the old
+#: wrapper-echoed line keeps finding it, and carries a word of its own so the two
+#: are distinguishable in a log that has both.
+MARKER = "PARLOR DONE rc="
+
+
+@dataclass
+class RunState:
+    """What a run knows about itself, readable from an exception handler.
+
+    Held beside the driver rather than inside ``main()`` for one reason: the
+    handler that writes the marker never saw ``main()``'s locals, and a crashed
+    run's partial yield - 17 of 20 games, not zero - is exactly what the reader of
+    a twelve-hour log needs.
+    """
+
+    #: games the run was ASKED for, known once the arguments are parsed
+    requested: int | None = None
+    #: games that reached disk, counted where the write happens
+    landed: int = 0
+
+    def reset(self) -> None:
+        self.requested = None
+        self.landed = 0
+
+    def marker(self, rc: int, elapsed: float) -> str:
+        of = "?" if self.requested is None else str(self.requested)
+        return (f"{MARKER}{rc} games={self.landed}/{of} "
+                f"elapsed={elapsed:.0f}s")
+
+
+def run_with_marker(main, state: RunState) -> int:
+    """Call ``main()`` and end the log with a marker either way.
+
+    Returns the exit code to hand ``sys.exit``. Every exit path is mapped rather
+    than left to the interpreter, because an uncaught exception's traceback is the
+    last thing in the log and reads exactly like a killed run.
+    """
+    started = time.time()
+    state.reset()
+    rc = 0
+    try:
+        main()
+    except SystemExit as exc:                 # argparse, or a driver's own refusal
+        if exc.code is None or isinstance(exc.code, int):
+            rc = exc.code or 0
+        else:
+            print(exc.code, file=sys.stderr)  # sys.exit("message") - print it
+            rc = 1
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        rc = 130
+    # The catch-all is the guard the crash case rests on, and it is the one under
+    # the mutation check: narrow it and a crashed run raises out of here with no
+    # code to report. The ``finally`` below is belt-and-braces behind it.
+    except BaseException:                     # noqa: BLE001 - about to exit anyway
+        traceback.print_exc()
+        rc = 1
+    finally:
+        print(state.marker(rc, time.time() - started), flush=True)
+    return rc

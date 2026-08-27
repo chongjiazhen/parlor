@@ -89,9 +89,14 @@ class LLMPolicy:
     upstreams: Counter = field(default_factory=Counter)
     last_fell_back: bool = False
     last_upstream: str = ""
+    #: the complaint that refused the most recent ATTEMPT. Not the trace's last
+    #: line - that is the "N attempts failed, playing random" summary, which says a
+    #: fallback happened and nothing about why.
+    last_refusal: str = ""
 
     def act(self, ref: ChangelingReferee, seat: int) -> dict:
         self.last_fell_back = False
+        self.last_refusal = ""
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -104,7 +109,7 @@ class LLMPolicy:
                 self.last_upstream = served_by
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
-                self.trace.append(f"seat {seat} attempt {attempt}: {complaint}")
+                self._refused(seat, attempt, complaint)
                 if self.backoff and attempt < self.retries:
                     time.sleep(self.backoff * (2 ** attempt))
                 continue
@@ -112,13 +117,12 @@ class LLMPolicy:
                 action = parse_action(reply, ref, seat)
             except ParseError as exc:
                 complaint = str(exc)
-                self.trace.append(f"seat {seat} attempt {attempt}: unparsed - {exc}")
+                self._refused(seat, attempt, f"unparsed - {exc}")
                 continue
             if ref.phase is Phase.VOTE and action["vote"] == seat:
                 complaint = (f"seat {seat} cannot point at itself; choose from "
                              f"{ref.legal_votes(seat)}")
-                self.trace.append(f"seat {seat} attempt {attempt}: illegal - "
-                                  f"{complaint}")
+                self._refused(seat, attempt, f"illegal - {complaint}")
                 continue
             return action
         self.trace.append(
@@ -126,6 +130,12 @@ class LLMPolicy:
         self.last_fell_back = True
         self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
+
+    def _refused(self, seat: int, attempt: int, complaint: str) -> None:
+        """One place writes a refusal, so the trace and the per-decision census can
+        never disagree about what happened."""
+        self.last_refusal = f"seat {seat} attempt {attempt}: {complaint}"
+        self.trace.append(self.last_refusal)
 
 
 # ---- driver ---------------------------------------------------------------
@@ -159,7 +169,14 @@ class Decision:
     phase: str
     played: str
     think: str = ""
-    note: str = ""
+    #: why this decision was refused, when it was - the last trace line the policy
+    #: wrote before giving up. Empty on a decision the model actually made.
+    #:
+    #: Named ``refused`` rather than ``note`` so it means the same thing in both
+    #: games: cabal's ``note`` is a seat's NOTEBOOK entry, a different field with a
+    #: different life, and one name over two meanings is how a JSONL reader ends up
+    #: counting notebook lines as refusals.
+    refused: str = ""
     fell_back: bool = False
     served_by: str = ""
 
@@ -198,12 +215,12 @@ def _record_decision(rec: GameRecord, policy, turn: int, seat: int, phase: str,
     rec.decision_log.append(Decision(
         turn=turn, seat=seat, phase=phase, played=played,
         think=action.get("think", ""),
-        # The refusal string that produced a fallback, carried on the DECISION.
-        # The cabal JSONL records `note: ""` here and its refusal diagnosis lives
-        # only in a sampled trace and an end-of-run report, which is unreadable
-        # mid-run and not a census afterwards. Same bug, not repeated.
-        note=(policy.trace[-1] if fell_back and getattr(policy, "trace", None)
-              else ""),
+        # The refusal string that produced a fallback, carried on the DECISION, so
+        # the reason is a CENSUS in the JSONL rather than a sampled trace and an
+        # end-of-run report - neither of which is readable mid-run. cabal does the
+        # same on the same field name since 2026-08-27 (S4).
+        refused=(str(getattr(policy, "last_refusal", "") or "") if fell_back
+                 else ""),
         fell_back=fell_back,
         served_by=getattr(policy, "last_upstream", ""),
     ))

@@ -8,6 +8,19 @@ rem A launcher is an INPUT, not run output. eval\records\ is gitignored, so the
 rem untracked copy of this recipe that produced the first seed-1000 run left no
 rem reviewable record of what it launched; that is what this file fixes.
 rem
+rem The recipe this generalises, kept because `hunt20`'s numbers are quoted in
+rem RESUME.md and the launcher that produced them was an untracked file in the
+rem gitignored records dir (retired 2026-08-27, S4). It is this file's defaults
+rem with no probe gate:
+rem
+rem   python -m eval.run_games --games 20 --arm llm --backend local
+rem     --model qwen36-35b-a3b-iq3 --rounds 2 --seed 1000 --timeout 240
+rem     --out eval\records\hunt20-q36.json
+rem     --transcript-dir eval\records\hunt20-transcripts
+rem     --transcript eval\records\hunt20-game0.md
+rem
+rem i.e.  eval\runs\hunt-local.cmd hunt20 20 1000 qwen36-35b-a3b-iq3
+rem
 rem The gate is a burst, not a ping (RESUME.md Backend notes). Local's failure
 rem mode is different from cloud's - the router is exact-match, so a cold model
 rem answers 503 model_not_armed naming what IS live rather than silently serving
@@ -53,4 +66,10 @@ python -m eval.run_games --games %GAMES% --arm llm --backend local ^
   --transcript-dir "%OUTDIR%\%TAG%-transcripts" ^
   --transcript "%OUTDIR%\%TAG%-game0.md" ^
   >>"%LOG%" 2>&1
-echo DONE rc=%ERRORLEVEL%>>"%LOG%"
+rem run_games writes its own `PARLOR DONE rc=` line from a finally, and THAT is the
+rem authoritative one: `hunt20b` finished cleanly and wrote no completion line
+rem because cmd.exe did not survive to echo one after python exited. This echo
+rem stays for the case python's marker cannot cover - a crash before the driver
+rem runs at all (an import error, a bad interpreter), where python prints a
+rem traceback and nothing else.
+echo DONE rc=%ERRORLEVEL% ^(wrapper^)>>"%LOG%"

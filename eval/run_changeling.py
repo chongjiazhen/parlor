@@ -37,6 +37,7 @@ from collections import Counter
 from dataclasses import asdict
 
 from core.backends import ENDPOINTS, REGISTERS, Backend
+from core.runlog import RunState, run_with_marker
 from core.stats import bootstrap_ci, wilson
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
@@ -368,10 +369,16 @@ def _chance(s: dict) -> float:
 
 # ---- runner ---------------------------------------------------------------
 
+#: What this run knows about itself, for the terminal marker. See `core/runlog.py`
+#: for why the marker is written by the run rather than echoed by its wrapper.
+RUN_STATE = RunState()
+
+
 def land(index: int, rec: GameRecord, args) -> None:
     if args.out:
         with open(f"{args.out}.jsonl", "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"game": index, **asdict(rec)}) + "\n")
+    RUN_STATE.landed += 1
 
 
 def main() -> None:
@@ -395,6 +402,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
+    RUN_STATE.requested = args.games
 
     if args.arm != "random" and not args.backend:
         ap.error("a live arm needs --backend")
@@ -422,4 +430,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(run_with_marker(main, RUN_STATE))

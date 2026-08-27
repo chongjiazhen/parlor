@@ -378,6 +378,55 @@ class TestPerDecisionAttribution(unittest.TestCase):
         self.assertTrue(all(d.served_by == "up-a" for d in spoke))
 
 
+class TestTheFallbackReasonRidesOnTheDecision(unittest.TestCase):
+    """A run's refusal diagnosis used to exist only in ``trace_sample`` (8 per
+    game) and the end-of-run report (deduped, capped at 6 lines, and absent until
+    the run ends). Neither is a census, and diagnosing a fallback drift mid-run
+    meant bucketing sampled traces and saying so out loud."""
+
+    def game(self, reply, notebook=False, retries=0, seed=7):
+        backend = TestUpstreamAttribution.Rotating(reply, ["up-a"])
+        ref = CabalReferee.new(5, seed=seed, discussion_rounds=1, notebook=notebook)
+        policies = {s: LLMPolicy(backend=backend, retries=retries, backoff=0,
+                                 fallback=RandomPolicy(rng=random.Random(seed)))
+                    for s in ref.assignment}
+        return play_game(ref, policies)
+
+    def test_every_fallback_records_why(self):
+        rec = self.game("{}")                       # never a legal move
+        fell = [d for d in rec.decision_log if d.fell_back]
+        self.assertTrue(fell)
+        self.assertTrue(all(d.refused for d in fell),
+                        "a fallback landed with no reason recorded")
+
+    def test_a_decision_the_model_MADE_records_no_reason(self):
+        """Otherwise the field counts as a refusal census and is not one."""
+        rec = self.game('{"say": "hello"}')
+        served = [d for d in rec.decision_log if not d.fell_back]
+        self.assertTrue(served)
+        self.assertEqual([d.refused for d in served if d.refused], [])
+
+    def test_the_reason_is_the_LAST_refusal_not_the_first(self):
+        """With retries the seat is refused several times and only the final one
+        explains why it gave up."""
+        rec = self.game("not json at all", retries=2)
+        fell = [d for d in rec.decision_log if d.fell_back]
+        self.assertTrue(fell)
+        self.assertTrue(all("attempt 2" in d.refused for d in fell), fell[0].refused)
+
+    def test_the_reason_does_not_collide_with_the_notebook(self):
+        """``note`` is what a seat filed for itself; ``refused`` is why no move was
+        made. One field over both meanings would make "how many refusals did this
+        run have" unanswerable without knowing whether the notebook was on."""
+        rec = self.game('{"note": "CARRIED-READ", "say": "hi"}', notebook=True)
+        wrote = [d for d in rec.decision_log if d.note]
+        self.assertTrue(wrote)
+        self.assertEqual([d.note for d in wrote if d.refused], [])
+        fell = [d for d in rec.decision_log if d.fell_back]
+        self.assertTrue(fell, "this deal needs a refused phase to test the split")
+        self.assertEqual([d.note for d in fell], [""] * len(fell))
+
+
 class TestNotebookThroughTheDriver(unittest.TestCase):
     """The notebook via ``play_game`` - the code path a real game uses, and the one
     that would quietly regress."""

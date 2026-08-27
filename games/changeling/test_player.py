@@ -162,9 +162,9 @@ class TestRetryLoop(unittest.TestCase):
         self.assertTrue(any("illegal" in t for t in policy.trace))
 
     def test_the_fallback_REASON_rides_on_the_decision(self):
-        """cabal's JSONL records note:'' on every fallback, so its refusal
-        diagnosis survives only in a sampled trace and an end-of-run report. Same
-        bug, not repeated: the refusal string is on the decision itself."""
+        """The refusal string rides on the decision itself, so a run's refusal
+        diagnosis is a census in the JSONL rather than a sampled trace and an
+        end-of-run report. cabal carries the same field for the same reason."""
         ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
         policies = {s: RandomPolicy(random.Random(s)) for s in range(5)}
         policies[0] = LLMPolicy(backend=FakeBackend(['{}'] * 40), retries=1,
@@ -172,8 +172,11 @@ class TestRetryLoop(unittest.TestCase):
         rec = play_game(ref, policies)
         fell = [d for d in rec.decision_log if d.fell_back]
         self.assertTrue(fell)
-        self.assertTrue(all(d.note for d in fell),
+        self.assertTrue(all(d.refused for d in fell),
                         "a fallback landed with no reason recorded")
+        # The complaint, not the "N attempts failed, playing random" summary - a
+        # census of summaries says a fallback happened and nothing about why.
+        self.assertTrue(all("attempt" in d.refused for d in fell), fell[0].refused)
 
     def test_a_transport_failure_is_distinguishable_from_a_bad_reply(self):
         ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
