@@ -1,10 +1,19 @@
 # RESUME - open work
 
-Queue only. Done work leaves to git log. What's next:
+Queue only. Done work leaves to git log - **delete the row**.
+
+**One exception, and it is the slice table below: a finished slice is struck
+through and annotated, never deleted.** Live rows cite slices by name - S6's
+pre-committed criterion rests on "the baseline derived by S3", and four items read
+"re-homed 2026-08-27 (S1)". Delete the row and those pointers dangle, which costs
+more than the two lines it saves. Everything else in this file follows the rule
+above.
+
+What's next:
 
 ## Session slices - what one `/new` should take
 
-The queue is 25 open items and a cold session cannot rank them. These are the
+The queue is 24 open items and a cold session cannot rank them. These are the
 units: each is one session's worth, has a stated entry condition, and ends in a
 thing that exists. **Take exactly one.** They are ordered by what unblocks what,
 not by appeal.
