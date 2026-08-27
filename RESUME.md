@@ -420,9 +420,15 @@ can re-run.
       `folk`, no number moved. Both are 59 words against `folk`'s 59, and 312/308
       chars against its 316 - length is held on BOTH axes, because a same-word-count
       blurb ran 13% short in bytes on cabal and word count alone is not the control.
-      **The inverted-polarity skin is still the blocker and is still unbuilt**, so
-      what exists now is one polarity, its vocabulary control, and a neutral arm -
-      readable as richness and vocabulary, not yet as morality.
+      **The inverted-polarity skin landed the same day and the blocker is cleared.**
+      `folk-inv` is the hunted framing: same village, same night, opposite valence.
+      Six of its eight names are `folk`'s own and unchanged - only the two carrying
+      the valence move, `Werewolf` to `Hunted` and `Seer` to `Witchfinder` - so 2-vs-3
+      differs in valence and very nearly nothing else, which is tighter than cabal's
+      `1984-inv` manages. The village still wins by naming one of them; the blurb
+      stops calling that a rescue. The set is now floor / polarity / inverted polarity
+      / vocabulary control / two neutrals, all at 59 words and 308-316 chars, all
+      unrun.
       **Reading the rendered preamble under `greek` caught a live prompt bug that no
       test held**: the `deceived` power hardcoded "a {centre}", so a skin naming the
       pile with a vowel put "a altar card" in front of every seat. The article now
@@ -440,6 +446,15 @@ can re-run.
         sides execute a mandate: "one side must lose, and losing is not damnation"
         is a morally NEUTRAL frame that is also rich, where a masquerade is neutral
         by being thin. Check the reading against the text before building on it.
+        **Both built 2026-08-27, and the masquerade objection is what gives it a
+        job.** They are neutral by DIFFERENT mechanisms - `investiture` with total
+        stakes that do not matter, `masquerade` with no stakes at all - so the pair
+        separates an act with no moral weight from an act with no consequences,
+        which one neutral arm confounds. If 4 and 4' differ, what moved was stakes
+        rather than valence. `masquerade` is thin in the conceit only: 59 words,
+        like every other arm here. The Fengshen reading is still from general
+        knowledge, not a pass over the text; that check is still owed and what it
+        would move is the blurb, not the mechanics.
       - **Journey to the West holds the best statement of this rung's premise.**
         The Six-Eared Macaque: an impostor identical to Sun Wukong, indistinguish-
         able to the gods and to the pilgrims who travelled with him. That is the
@@ -453,6 +468,16 @@ can re-run.
         indeterminate, which is the `1984-en`-vs-`plain` confound rebuilt by hand.
         So: one corpus owns the FRAME, the other supplies vocabulary and imagery
         across the shared pantheon. A mashup in practice, one variable on paper.
+        **The first `investiture` was Fengshen top to bottom and did not honour the
+        sourcing half; re-vocabularied 2026-08-27** across the pantheon, with a test
+        the division can be applied by, one name at a time: a figure enters if its
+        story reinforces the bureaucratic conceit or is silent about it, and stays
+        out if it arrives arguing one side is righteous. Zhong Kui is in for his
+        APPOINTMENT - failed the examination, died on the steps, woke into an office,
+        which is the frame's own claim told as a biography - and his demon-hunt is
+        out, being the same man. Six-Eared Macaque is in as a card, where it is the
+        impostor nobody can separate from the original and takes no side, and out as
+        a blurb, where it brings the pilgrims who are right. Lotus Body is Nezha.
       - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
         language at once and cannot be read. The clean language control already
         exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
