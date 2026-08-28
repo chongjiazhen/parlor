@@ -197,6 +197,64 @@ referee that names the flagstone without naming the cavity or the coin. That is 
 second measurement - catching a PHRASING tell - and `docs/action-channel.md`
 already says substring matching cannot reach it. It is not folded back in here.
 
+## The topology, added 2026-08-28 - adjacency and sight, stated apart
+
+`scenario.json` now gives every room an `exits` list. Each exit carries `to`, the
+`via` prose, a boolean `sight`, and a `basis` naming the room text the sight value
+was read out of.
+
+**Why it was missing and what it cost.** The four rooms were written as four
+independent blocks of prose. R2's contents mention "an iron door to R3" and R3's
+put three barrow-rats "on the far side", so the connections were stated - in
+sentences, to a reader. Nothing in the tree could read them. The campaign of
+2026-08-28 then produced 84 of 100 sessions declaring a room or hidden fact for a
+room the party was not in, and the count could not be graded, because "the referee
+described what the party could see from where it stands" and "the referee narrated
+the far side of a closed door" were the same event to every instrument in the repo.
+
+**Two axes, deliberately not one.** ADJACENCY says which rooms connect; SIGHT says
+whether standing in one lets you perceive the next. R2 and R3 are adjacent through
+a closed iron door and nothing crosses it. R3 and R4 are adjacent across a chasm
+the party can already count rats on the far side of, so that one is `sight: true`.
+Sight does not chain - one open span is not a view of the whole barrow - and a
+`hidden` fact is never in sight from anywhere, since hidden is precisely what a
+room does not show a party standing in it.
+
+**The values are transcribed, not invented.** Every `basis` quotes the fixture's
+own prose: "dark ahead" for R1, the closed door for R2, the countable rats for R3.
+The one reading that goes beyond a direct quotation is that R4 is what stands
+across R3's bridge, which follows from R3 being the only room with a span and R4
+being the only room past it. A sightline a scorer invents is the topology
+assertion `eval/durf_reveal_order.py` used to refuse to make, and it would be
+worse than none.
+
+**Exactly one forward sightline is open, and that is a fixture-design decision
+rather than an accident.** With every forward exit blocked, the reveal-ahead
+grade's exempting branch could never fire, and a branch that cannot fire is a
+column of zeroes wearing a measurement's name. `test_kernel.py` pins the count at
+one and names that reason.
+
+**What this edit voids.** It changes bytes the session referee reads - the world
+view now states the way out of the party's room and whether it can be seen
+through - so every session number recorded before it, including the 91-of-100
+gate #1 read, is a read under the pre-topology fixture and stays quotable only as
+that. It changes NOTHING the isolated declaration instrument sends:
+`fixture.render_scenario` is untouched, so §First run, §Second arm and §The
+temperature arm are unaffected. The declaration counts this file publishes are
+untouched as well - no declaration was added, removed or relabelled.
+
+**A load now refuses a dungeon that cannot be walked.** `kernel.check_topology`
+runs at `load` and raises on an exit to a room that does not exist, a one-way
+passage, a room unreachable from the first, or an exit that states no sight value.
+The last one is the important one: a missing sightline must not default, because a
+default is the scorer asserting a topology by another route.
+
+**What is deliberately NOT enforced.** `call_move` still accepts any room, so the
+party can still be moved from R1 to R4 in one call. Making movement respect the
+exit graph is a rules change - it moves what is legal, and therefore what the
+fallback rate counts - and landing it in the same campaign as the world-view edit
+would put two variables in one run. It is a separate arm.
+
 ## What this fixture is not
 
 It is not a measure of whether the model ran a good session. It cannot see

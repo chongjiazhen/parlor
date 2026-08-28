@@ -106,25 +106,45 @@
       "id": "R1",
       "name": "Entry slope",
       "contents": "A steep scree slope down into the barrow. Loose stone underfoot. Daylight behind, dark ahead.",
-      "hidden": []
+      "hidden": [],
+      "exits": [
+        {"to": "R2", "via": "the slope down into the dark", "sight": false,
+         "basis": "'dark ahead' - the room's own text says the party cannot see what it leads to."}
+      ]
     },
     {
       "id": "R2",
       "name": "Antechamber",
       "contents": "Bare stone. A low stone bier, empty. An iron door to R3, closed but not locked.",
-      "hidden": ["A loose flagstone by the bier covers a shallow cavity holding 40 GP."]
+      "hidden": ["A loose flagstone by the bier covers a shallow cavity holding 40 GP."],
+      "exits": [
+        {"to": "R1", "via": "the slope back up", "sight": true,
+         "basis": "'Daylight behind' in R1 - the way out is lit and in view."},
+        {"to": "R3", "via": "the iron door, closed but not locked", "sight": false,
+         "basis": "A closed door. This is the canonical blocked sightline of this dungeon."}
+      ]
     },
     {
       "id": "R3",
       "name": "Gallery",
       "contents": "A twenty-foot chasm spanned by an old rope bridge. Three barrow-rats on the far side. A rusted brazier on a chain hangs over the chasm.",
-      "hidden": ["The bridge's far anchor is rotted and will fail under two people at once."]
+      "hidden": ["The bridge's far anchor is rotted and will fail under two people at once."],
+      "exits": [
+        {"to": "R2", "via": "the iron door, closed but not locked", "sight": false,
+         "basis": "The same door. A door blocks sight from whichever side you stand on."},
+        {"to": "R4", "via": "the rope bridge over the chasm", "sight": true,
+         "basis": "R3's own text puts three barrow-rats 'on the far side' and the party can count them, so the far side is within sight and lit. R4 is what stands there."}
+      ]
     },
     {
       "id": "R4",
       "name": "Tomb",
       "contents": "A sealed stone sarcophagus. The barrow-wight stands over it. Grave goods worth 300 GP.",
-      "hidden": ["The sarcophagus lid is counterweighted and opens easily once the catch is found."]
+      "hidden": ["The sarcophagus lid is counterweighted and opens easily once the catch is found."],
+      "exits": [
+        {"to": "R3", "via": "the rope bridge over the chasm", "sight": true,
+         "basis": "The same span, read from the other end."}
+      ]
     }
   ],
 

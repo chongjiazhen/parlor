@@ -56,8 +56,21 @@ def row(*entries, declared=None):
             "declared": [list(f) for f in sorted(declared or seen)]}
 
 
+#: A synthetic dungeon, not the shipped one - the same reason every other case
+#: here is synthetic. R1->R2 is blocked and R3->R4 is in sight, so both branches
+#: of the grade are exercised by the fixture a test controls.
+ROOMS = {
+    "R1": {"id": "R1", "exits": [{"to": "R2", "via": "a slope", "sight": False}]},
+    "R2": {"id": "R2", "exits": [{"to": "R1", "via": "a slope", "sight": False},
+                                 {"to": "R3", "via": "a door", "sight": False}]},
+    "R3": {"id": "R3", "exits": [{"to": "R2", "via": "a door", "sight": False},
+                                 {"to": "R4", "via": "a bridge", "sight": True}]},
+    "R4": {"id": "R4", "exits": [{"to": "R3", "via": "a bridge", "sight": True}]},
+}
+
+
 def ahead(a_row):
-    return ro.replay(a_row, DECL, SEEDED, ORDER)["ahead"]
+    return ro.replay(a_row, DECL, SEEDED, ORDER, ROOMS)["ahead"]
 
 
 def test_declaring_the_room_being_entered_is_not_ahead():
@@ -110,10 +123,10 @@ def test_the_control_catches_a_replay_that_misses_a_declaration():
     declarations measures every count against the wrong entitlement.
     """
     good = row(say(), ref(TEXT[("room", "R2")]))
-    assert ro.control([good], [ro.replay(good, DECL, SEEDED, ORDER)]) == []
+    assert ro.control([good], [ro.replay(good, DECL, SEEDED, ORDER, ROOMS)]) == []
 
     lying = dict(good, declared=[["room", "R1"], ["room", "R2"], ["room", "R3"]])
-    assert ro.control([lying], [ro.replay(lying, DECL, SEEDED, ORDER)])
+    assert ro.control([lying], [ro.replay(lying, DECL, SEEDED, ORDER, ROOMS)])
 
 
 def test_leak_context_names_the_declaration_the_narration_answered():
@@ -129,3 +142,50 @@ def test_leak_context_names_the_declaration_the_narration_answered():
     got = ro.leak_context(leaking)
     assert [(g["who"], g["declaration"]) for g in got] == [
         ("Ola", "I listen at the door before touching it.")]
+
+
+def test_a_room_in_sight_is_graded_apart_from_one_behind_a_door():
+    """The distinction the fixture's sightlines were stated to make. Same shape of
+    reveal, two rooms, two grades - and the mutation that matters is the one where
+    both come back ``blocked``, which is the instrument before this existed."""
+    text = "R4 Tomb: a sealed stone sarcophagus."
+    decl = dict(DECL, **{text: ("room", "R4")})
+    seen = ro.replay(
+        {"index": 0, "gate1_held": True, "declared": [["room", "R1"], ["room", "R2"],
+                                                      ["room", "R3"], ["room", "R4"]],
+         "transcript": [say(), move("R2"), move("R3"), ref(text)]},
+        decl, SEEDED, ORDER, ROOMS)["ahead"]
+    assert [a["grade"] for a in seen] == ["in_sight"]
+
+    blocked = ahead(row(say(), ref(TEXT[("room", "R3")])))
+    assert [a["grade"] for a in blocked] == ["blocked"]
+
+
+def test_a_hidden_fact_is_blocked_even_across_an_open_sightline():
+    """Hidden is what a room does not show a party standing IN it, so a sightline
+    into that room cannot carry it. Without this branch the grade would exempt a
+    referee that announced what is under a flagstone in the room next door."""
+    rooms = dict(ROOMS)
+    rooms["R1"] = {"id": "R1",
+                   "exits": [{"to": "R2", "via": "an arch", "sight": True}]}
+    seen = ro.replay(row(say(), ref(TEXT[("hidden", "R2")])),
+                     DECL, SEEDED, ORDER, rooms)["ahead"]
+    assert [a["grade"] for a in seen] == ["blocked"]
+
+
+def test_distance_is_walked_along_the_exits_not_the_fixture_order():
+    """``ROOMS`` is a corridor, so order and graph agree on it; the mutant is a
+    dungeon where they do not. R1 exits straight to R4, and a distance read off
+    the listing order would call that three rooms."""
+    rooms = {
+        "R1": {"id": "R1", "exits": [{"to": "R4", "via": "a shaft", "sight": False}]},
+        "R2": {"id": "R2", "exits": [{"to": "R4", "via": "a door", "sight": False}]},
+        "R3": {"id": "R3", "exits": [{"to": "R4", "via": "a door", "sight": False}]},
+        "R4": {"id": "R4", "exits": [{"to": "R1", "via": "a shaft", "sight": False},
+                                     {"to": "R2", "via": "a door", "sight": False},
+                                     {"to": "R3", "via": "a door", "sight": False}]},
+    }
+    text = "R4 Tomb: a sealed stone sarcophagus."
+    seen = ro.replay(row(say(), ref(text)), dict(DECL, **{text: ("room", "R4")}),
+                     SEEDED, ORDER, rooms)["ahead"]
+    assert [a["distance"] for a in seen] == [1]

@@ -88,3 +88,37 @@ def test_the_referee_view_lists_the_undeclared_facts_by_id():
     view = seats.referee_view(sess)
     assert "['hidden', 'R2']" in view
     assert "NOT YET DECLARED" in view
+
+
+def test_the_referee_view_states_the_way_out_and_whether_it_can_be_seen_through():
+    """Added 2026-08-28 with the fixture's topology.
+
+    The referee held the whole world and no statement of how its rooms connect,
+    so nothing it was given could tell "what the party sees from where it stands"
+    from "the far side of a closed iron door" - the distinction the campaign's
+    84-of-100 forward reveals turned out to need. The party starts in R1, whose
+    one exit is dark.
+    """
+    from games.durf import session as session_mod
+
+    view = seats.referee_view(session_mod.new(seed=1))
+    assert "The way out of this room" in view
+    assert "R2 Antechamber, by the slope down into the dark." in view
+    assert "The party cannot see into it from here." in view
+
+
+def test_the_scripted_line_presupposes_nothing_the_opening_room_lacks():
+    """The iron-door finding, closed 2026-08-28 in the fixture rather than in the
+    audit: all eight of the campaign's leaks followed one scripted line that
+    listened at a door, while the party stood in R1, which has no door. A player
+    line that assumes an object the room does not carry hands the referee the
+    other room's contents to answer with.
+    """
+    from games.durf import kernel
+
+    opening = kernel.load(seed=0)
+    contents = opening.rooms[opening.room]["contents"].lower()
+    for line in seats.ScriptedPlayer.LINES:
+        for noun in ("door", "bridge", "chasm", "sarcophagus", "bier"):
+            assert noun not in line.lower() or noun in contents, (
+                f"{line!r} names a {noun} the opening room does not have")

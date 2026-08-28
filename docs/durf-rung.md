@@ -664,6 +664,12 @@ with it. A live party is a second variable and it has its own flag.
 
 ### The campaign, 2026-08-28: gate #1 HOLDS, 91 of 100 sessions
 
+**Read under fixture v1, and two edits later that day moved the bytes.** The
+world view gained the room topology and one scripted line lost its door
+(§The adjacency question). So this stays quotable as what it is - a dated read
+under the pre-topology fixture - and a number under the current one needs a fresh
+campaign, exactly as the 3/6 stayed a read under the old fact set.
+
 `qwen36-35b-a3b-iq3` local, greedy, `--no-thinking`, seed 5100, 100 sessions x 3
 rounds, 3107s. Records `eval/records/durf-camp1.json` + `.jsonl` + `.log`; recipe
 `eval/runs/durf-session.cmd durf-camp1 5100 qwen36-35b-a3b-iq3 100 3`. The
@@ -756,7 +762,15 @@ oversharing - which is why the remedy is one line of `ScriptedPlayer.LINES` and
 not a prompt change, and why "the referee should have said *a door*" is the wrong
 reading: there was no door for the definite article to point at.
 
-**The edit is prescribed and deliberately NOT applied here.** Replace the line
+**The edit is prescribed here and was APPLIED 2026-08-28**, in the same batch as
+the adjacency decision below, which is the "something else worth measuring" this
+paragraph was waiting for. The line now reads `I listen for anything moving up
+ahead.`; a test pins every scripted line against the opening room's own contents,
+so the next line to presuppose an object R1 lacks fails at the suite rather than
+in a campaign. What follows is the reasoning as it stood, kept because it is why
+the edit waited rather than landing alone.
+
+Replace the line
 with a declaration satisfiable in any room the party can occupy - the other four
 lines already are - and the eight leaks have no vehicle. The reason to hold it:
 unlike a term-set change, a fixture change **cannot be replayed off records**.
@@ -765,7 +779,8 @@ model's input did not move; changing what a seat declares moves the model's inpu
 so the 100 sessions say nothing about the edited fixture and the only way to learn
 anything is another campaign. That is 52 minutes of GPU, and the standing rule
 from the `hidden catch` decision applies unchanged: spend it when something else
-is worth measuring with it. Something now is - see below. **The 91/100 stays
+is worth measuring with it. Something now is - the world-view topology below,
+which the same campaign carries. **The 91/100 stays
 quotable as what it is, a dated read under fixture v1**, exactly as the 3/6 stayed
 a read under the old fact set.
 
@@ -793,13 +808,78 @@ referee's own declarations; this counts declarations against the fiction. Two
 questions, two instruments, and the second one has no criterion and no verdict -
 it is a count, not a read.
 
-**Whether reveal-ahead is even wrong is undecided and belongs to the next slice.**
-A referee describing what the party can see from where it stands is doing its job;
-one narrating the far side of a closed iron door is not; the fixture states no
-adjacency and no sightlines, so nothing in the tree can currently tell those
-apart. That, and not the door wording, is what a second campaign should be run to
-settle - and it is the "something else worth measuring" the fixture edit should
-ride along with, so one run answers both.
+**Whether reveal-ahead is even wrong was undecided when this section was
+written.** The next section decides it.
+
+### The adjacency question, decided 2026-08-28: the fixture states its topology, and the sightline defence accounts for 6 of 141
+
+The question the count could not answer was whether a forward reveal was a fault
+at all. A referee describing what the party can see from where it stands is doing
+its job; one narrating the far side of a closed iron door is not. The fixture
+stated no adjacency and no sightlines, so those were the same event to every
+instrument here - and `eval/durf_reveal_order.py` said so in its own docstring
+rather than inventing a graph.
+
+**The decision is that the fixture states it, on two axes kept apart.**
+`scenario.json` gives every room an `exits` list: `to`, the `via` prose, a boolean
+`sight`, and a `basis` naming the room text each sight value was read out of.
+Adjacency says which rooms connect; sight says whether standing in one lets you
+perceive the next. They are independent - R2 and R3 are adjacent through a closed
+iron door, R3 and R4 across a chasm the party can already count rats on the far
+side of. Sight does not chain, and a `hidden` fact is never in sight from
+anywhere, because hidden is what a room does not show a party standing in it. The
+mechanism, the four load-time refusals and the reason exactly one forward sightline
+is open are in `games/durf/fixtures/README.md` §The topology; the helpers are
+`games.durf.kernel` (`sees`, `adjacent`, `distance`, `check_topology`), and six
+guards are mutation-checked, each killed by its own named test.
+
+**The counterfactual, off the 100 sessions already on disk, at no GPU cost.** The
+topology is a transcription of prose the referee's view already carried, so the
+recorded campaign can be graded against it. Re-run: `py -3 -m
+eval.durf_reveal_order eval/records/durf-camp1.json`.
+
+| | events | sessions |
+|---|---|---|
+| ahead-reveals, unchanged from the first read | 141 | 84/100 |
+| **blocked** - the party could neither reach nor see it | **135** | **84/100** |
+| in sight - an adjacent room the fixture marks visible | 6 | - |
+| of the blocked, `hidden` facts, which no sightline can carry | 27 | - |
+
+**So the sightline defence accounts for 6 of 141 events and 0 of 84 sessions.**
+Every session that revealed ahead did so at least once through something it could
+not see - most often R2 from R1, down a slope the fixture calls dark, 49 times.
+The count survives the grading intact, which is the answer the slice was waiting
+for: **reveal-ahead is wrong here, and it is not the topology's fault.**
+
+**The sharper half is that the prompt already forbade it.** `ADJ_PROCEDURE` lists
+"room contents they have not entered" among the facts that are the referee's alone
+until declared. The referee read that instruction and revealed ahead in 84 of 100
+sessions anyway. What the topology adds is not a new rule, it is the material to
+obey the existing one with - until this edit the referee held four blocks of room
+prose and no statement of how they connect, so "have not entered" had no
+neighbourhood attached to it.
+
+**What this does NOT do.** It is not a gate, it has no criterion and it produces
+no verdict; it is still a count. It does not touch gate #1, which audits a render
+against what was declared and is correctly silent about declarations. And the
+6 in-sight events are not exonerated so much as unfaulted - the grade says the
+party could see the room, not that describing it then was good refereeing.
+
+**The two edits this decision lands, both unmeasured.** The referee's world view
+now states the way out of the party's room and whether it can be seen through
+(`games/durf/seats.py` §`referee_view`); and the scripted line
+`I listen at the door before touching it.` - the fixture text behind all eight of
+the campaign's leaks, presupposing a door R1 does not have - is now
+`I listen for anything moving up ahead.` Both change model-facing bytes, so **the
+91-of-100 gate #1 read stands as a read under the pre-topology fixture** and a
+number under these edits needs a fresh campaign. They are landed together
+deliberately: `RESUME.md` asked for one run to answer both, and a campaign is 52
+minutes.
+
+**Still open, and it is not code.** Whether a refereed session was any GOOD has no
+rubric here and none is known to exist. The reveal-ahead count is not it -
+`games/durf/fixtures/README.md` §What this fixture is not says the same thing about
+the declaration fixture. Nothing above should be read as approaching one.
 
 ## The cheapest version that tests anything
 

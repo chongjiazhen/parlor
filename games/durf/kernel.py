@@ -48,6 +48,110 @@ class IllegalCall(Exception):
     """
 
 
+class TopologyError(Exception):
+    """The dungeon's stated exits do not describe a usable dungeon."""
+
+
+# --- topology, added 2026-08-28 --------------------------------------------
+#
+# Until this, the fixture stated no adjacency and no sightlines, and the cost was
+# not that the kernel needed them - it is that nothing in the tree could tell "what
+# the party can see from where it stands" apart from "the far side of a closed iron
+# door". `eval/durf_reveal_order.py` had to disclaim exactly that, and the 84-of-100
+# forward-reveal count it produced could not be graded because of it.
+#
+# Two axes, and keeping them apart is the whole point. ADJACENCY says which rooms
+# connect; SIGHT says whether standing in one lets you perceive the next. They are
+# independent: R2 and R3 are adjacent through a closed iron door and nothing is
+# visible across it, while R3 and R4 are adjacent across a chasm the party can see
+# the whole width of. Every ``sight`` value in the fixture carries the room text it
+# was read out of, in a ``basis`` field, because a sightline invented by a scorer is
+# the topology assertion this module exists to stop making.
+
+
+def exits_of(rooms: dict[str, dict], room: str) -> list[dict]:
+    """The exits leading out of ``room``, in fixture order."""
+    return list(rooms[room].get("exits", ()))
+
+
+def adjacent(rooms: dict[str, dict], room: str) -> list[str]:
+    return [e["to"] for e in exits_of(rooms, room)]
+
+
+def sees(rooms: dict[str, dict], frm: str, to: str) -> bool:
+    """Can a party standing in ``frm`` perceive what is in ``to``?
+
+    True only for an adjacent room across an exit the fixture marks ``sight``.
+    Sight does not chain: seeing into the next room is not seeing through it, and
+    a transitive rule would make one open arch publish the whole dungeon.
+
+    A room sees ITSELF - the party is standing in it. That case is here rather
+    than at the caller because every caller wants it and one of them forgetting it
+    would grade the room the party occupies as a reveal ahead of the party.
+    """
+    if frm == to:
+        return True
+    return any(e["to"] == to and e["sight"] for e in exits_of(rooms, frm))
+
+
+def distance(rooms: dict[str, dict], frm: str, to: str) -> int:
+    """Rooms between ``frm`` and ``to`` along the exit graph; -1 if unreachable.
+
+    This is what replaces the fixture-ORDER distance the reveal-order instrument
+    had to use while the fixture stated no adjacency. The two agree on this
+    dungeon, which is a corridor - they would not on any dungeon with a loop, and
+    the instrument should not be re-derived from order again.
+    """
+    if frm == to:
+        return 0
+    seen, edge, d = {frm}, [frm], 0
+    while edge:
+        d += 1
+        nxt = []
+        for here in edge:
+            for there in adjacent(rooms, here):
+                if there in seen:
+                    continue
+                if there == to:
+                    return d
+                seen.add(there)
+                nxt.append(there)
+        edge = nxt
+    return -1
+
+
+def check_topology(rooms: dict[str, dict]) -> None:
+    """Refuse a dungeon whose stated exits cannot be walked. Raises on the first
+    disagreement, at load, rather than letting a scorer read a broken graph.
+
+    Four things, each of which has a silent failure behind it: an exit to a room
+    that does not exist would make ``distance`` return -1 and read as "far away";
+    a one-way exit would make reveal-ahead depend on which end you asked from; an
+    unreachable room could never be entered, so every reveal of it would score as
+    ahead forever; and a missing ``sight`` would default somewhere rather than be
+    stated, which is how a scorer ends up asserting a topology.
+    """
+    for rid, room in rooms.items():
+        for e in exits_of(rooms, rid):
+            if e.get("to") not in rooms:
+                raise TopologyError(f"{rid} exits to unknown room {e.get('to')!r}")
+            if not isinstance(e.get("sight"), bool):
+                raise TopologyError(
+                    f"exit {rid}->{e['to']} states no sight value; a sightline is "
+                    "stated in the fixture or it is not stated at all")
+            back = [b for b in exits_of(rooms, e["to"]) if b["to"] == rid]
+            if not back:
+                raise TopologyError(
+                    f"exit {rid}->{e['to']} has no matching exit back; a one-way "
+                    "passage makes reveal-ahead depend on which end you ask from")
+    first = next(iter(rooms))
+    unreachable = [r for r in rooms if distance(rooms, first, r) < 0]
+    if unreachable:
+        raise TopologyError(
+            f"rooms unreachable from {first}: {unreachable}. A room the party can "
+            "never enter scores every reveal of it as ahead of the party, forever")
+
+
 @dataclass
 class PC:
     seat: int
@@ -452,6 +556,7 @@ def load(seed: int | None = None, ledger=None, path=None) -> Kernel:
         armor_points=n["armor_points"], ML=n["ML"], attack=n["attack"],
         location=n["location"]) for n in scenario["npcs"]}
     rooms = {r["id"]: r for r in scenario["rooms"]}
+    check_topology(rooms)
     return Kernel(
         pcs=pcs, npcs=npcs, rooms=rooms,
         ledger=facts_mod.load() if ledger is None else ledger,

@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 
 from core.replies import ParseError, extract_json, salvage
 
+from . import kernel as kernel_mod
 from . import rules
 from .kernel import IllegalCall
 
@@ -170,6 +171,13 @@ def referee_view(session) -> str:
             f"{', '.join(pc.spells) or 'none'}."
             + (f" Private notes: {'; '.join(pc.tokens)}." if pc.tokens else "")
             + (" DEAD." if pc.dead else ""))
+    out += ["", "The way out of this room, and what can be seen from it:"]
+    for e in kernel_mod.exits_of(k.rooms, k.room):
+        out.append(
+            f"- {e['to']} {k.rooms[e['to']]['name']}, by {e['via']}. "
+            + ("The party can see into it from here."
+               if e["sight"] else
+               "The party cannot see into it from here."))
     out += ["", "NPC groups (their statistics are yours, not the party's):"]
     for npc in k.npcs.values():
         out.append(f"- {npc.count}x {npc.group} in {npc.location}: Skill "
@@ -382,7 +390,7 @@ class ScriptedPlayer:
 
     LINES = (
         "I look around the room carefully.",
-        "I listen at the door before touching it.",
+        "I listen for anything moving up ahead.",
         "I take a step forward and hold my weapon ready.",
         "I check the floor for anything loose.",
         "I wait and watch the others.",

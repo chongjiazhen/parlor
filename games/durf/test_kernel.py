@@ -212,3 +212,112 @@ def test_the_rng_is_not_shared_with_the_declaration_fixture(monkeypatch):
     a, b = kernel.load(seed=5), kernel.load(seed=5)
     a.d(20)
     assert b.d(20) == random.Random(5).randint(1, 20)
+
+
+# --- topology, added 2026-08-28 --------------------------------------------
+#
+# Adjacency and sight are what let a scorer tell "what the party can see from
+# where it stands" apart from "the far side of a closed iron door". Every guard
+# below was mutation-checked: each mutant compiles, and each is killed by the
+# named test beside it.
+
+def corridor(sight_r3_r4=True):
+    """A four-room corridor, built here rather than loaded, so a test states the
+    topology it is asserting about instead of inheriting the fixture's."""
+    def ex(to, sight):
+        return {"to": to, "via": "a way", "sight": sight}
+    return {
+        "R1": {"id": "R1", "exits": [ex("R2", False)]},
+        "R2": {"id": "R2", "exits": [ex("R1", False), ex("R3", False)]},
+        "R3": {"id": "R3", "exits": [ex("R2", False), ex("R4", sight_r3_r4)]},
+        "R4": {"id": "R4", "exits": [ex("R3", sight_r3_r4)]},
+    }
+
+
+def test_sight_is_not_adjacency_and_neither_implies_the_other():
+    rooms = corridor()
+    assert kernel.adjacent(rooms, "R2") == ["R1", "R3"]
+    assert kernel.sees(rooms, "R3", "R4")            # adjacent AND visible
+    assert not kernel.sees(rooms, "R2", "R3")        # adjacent, door between
+
+
+def test_sight_does_not_chain_through_a_room():
+    """One open span is not a view of the whole dungeon. The mutant is a
+    transitive ``sees``, which would exempt every reveal past any open exit.
+
+    Two consecutive OPEN spans are what the mutant needs to survive on, so the
+    dungeon here opens R2->R3 as well - a corridor with one open span cannot tell
+    a transitive rule from a direct one, and the first draft of this test could
+    not: the mutant passed it.
+    """
+    rooms = corridor()
+    for rid, other in (("R2", "R3"), ("R3", "R2")):
+        for e in rooms[rid]["exits"]:
+            if e["to"] == other:
+                e["sight"] = True
+    assert kernel.sees(rooms, "R2", "R3") and kernel.sees(rooms, "R3", "R4")
+    assert not kernel.sees(rooms, "R2", "R4")
+
+
+def test_a_room_sees_itself_because_the_party_is_standing_in_it():
+    """Without this the room the party occupies grades as a reveal ahead of the
+    party, which is the one thing an ahead-count must never say."""
+    assert kernel.sees(corridor(), "R3", "R3")
+
+
+def test_distance_walks_the_exits():
+    rooms = corridor()
+    assert kernel.distance(rooms, "R1", "R1") == 0
+    assert kernel.distance(rooms, "R1", "R4") == 3
+    assert kernel.distance(rooms, "R1", "nowhere") == -1
+
+
+def test_an_exit_to_a_room_that_does_not_exist_is_refused():
+    rooms = corridor()
+    rooms["R1"]["exits"] = [{"to": "R9", "via": "a way", "sight": False}]
+    with pytest.raises(kernel.TopologyError, match="unknown room"):
+        kernel.check_topology(rooms)
+
+
+def test_a_one_way_exit_is_refused():
+    """Reveal-ahead would then depend on which end of the passage you asked
+    from, and nothing in a record says which end was meant."""
+    rooms = corridor()
+    rooms["R4"]["exits"] = []
+    with pytest.raises(kernel.TopologyError, match="no matching exit back"):
+        kernel.check_topology(rooms)
+
+
+def test_an_exit_stating_no_sight_value_is_refused():
+    """A missing sightline must not default. A default is the scorer asserting a
+    topology, which is the whole thing the fixture edit exists to stop."""
+    rooms = corridor()
+    rooms["R1"]["exits"] = [{"to": "R2", "via": "a way"}]
+    with pytest.raises(kernel.TopologyError, match="states no sight value"):
+        kernel.check_topology(rooms)
+
+
+def test_a_room_no_one_can_walk_to_is_refused():
+    rooms = corridor()
+    rooms["R1"]["exits"] = []
+    rooms["R2"]["exits"] = [e for e in rooms["R2"]["exits"] if e["to"] != "R1"]
+    with pytest.raises(kernel.TopologyError, match="unreachable"):
+        kernel.check_topology(rooms)
+
+
+def test_the_shipped_dungeon_states_a_topology_and_it_is_walkable():
+    """The fixture's own claims, held against the file: a corridor R1..R4 with
+    exactly one forward sightline, R3 to R4 across the chasm.
+
+    That count is load-bearing rather than decorative. With no open sightline the
+    reveal-ahead grade's exempting branch could never fire, and a branch that
+    cannot fire is a column of zeroes wearing a measurement's name.
+    """
+    rooms = kernel.load(seed=0).rooms          # load() runs check_topology
+    assert kernel.distance(rooms, "R1", "R4") == 3
+    forward = [(a, b) for a in rooms for b in rooms
+               if kernel.distance(rooms, "R1", b) > kernel.distance(rooms, "R1", a)
+               and kernel.sees(rooms, a, b)]
+    assert forward == [("R3", "R4")]
+    for e in rooms["R2"]["exits"]:
+        assert e["basis"], "every sightline states the room text it was read from"

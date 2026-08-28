@@ -39,10 +39,34 @@ is.
 its text never names its room, so the join is by id rather than by prose, and a
 reader should be able to see which half of the count rests on which.
 
-**Distance is by fixture order**, the order ``scenario.json`` lists the rooms in,
-and is reported as such. The fixture states no adjacency graph; inventing one here
-to say "skipped a room" would be this module asserting a dungeon topology the
-dungeon does not carry.
+**Distance is along the exit graph**, and until 2026-08-28 it could not be: the
+fixture stated no adjacency, so this module reported distance in the order
+``scenario.json`` happened to list the rooms in and said so, because inventing a
+graph here would have been the scorer asserting a dungeon topology the dungeon did
+not carry. The fixture now states its exits, so the graph is the dungeon's own and
+``games.durf.kernel.distance`` is the one place it is walked.
+
+**A reveal is BLOCKED or IN SIGHT**, which is the distinction the whole
+reveal-ahead count was waiting on. A referee describing what the party can see
+from where it stands is doing its job; one narrating the far side of a closed iron
+door is not, and before the fixture stated sightlines nothing in the tree could
+tell those apart. So every ahead-reveal is now graded:
+
+  - **in sight** - a ROOM fact for an adjacent room the fixture marks visible from
+    where the party stands. Not a fault. On the shipped dungeon exactly one exit is
+    marked this way, R3 to R4 across the chasm the party can already count rats on.
+  - **blocked** - everything else. The party is being told about a place it can
+    neither reach this turn nor see.
+
+**A hidden fact is never in sight, by definition.** ``hidden`` is what a room does
+not show a party standing in it, so a sightline into the room cannot carry it -
+including for the room the party is already in. That is why the two halves are
+counted separately and why the hidden half needs no topology to be graded.
+
+**None of this makes reveal-ahead a gate.** It is still a count with no criterion
+and no verdict. What the grade buys is that the count can now be argued with: 
+"the referee could see it from there" is answerable off the fixture instead of off
+a reader's picture of the dungeon.
 
 ## The control runs first
 
@@ -65,7 +89,7 @@ import sys
 from pathlib import Path
 
 from games.durf import facts
-from games.durf.kernel import FIXTURE_DIR
+from games.durf.kernel import FIXTURE_DIR, distance, sees
 
 #: The kernel's move line, which is the only entry that moves the party.
 MOVE_PREFIX = "The party moves to "
@@ -81,11 +105,21 @@ REFEREE, SPEECH = "referee", "speech"
 ROOM_KEYED = ("room", "hidden")
 
 
-def room_order(path: Path | None = None) -> list[str]:
-    """The rooms in the order the fixture lists them. Not an adjacency claim."""
+def load_rooms(path: Path | None = None) -> dict[str, dict]:
+    """The fixture's rooms, keyed by id, exits and all.
+
+    Read here rather than through ``kernel.load`` because this module scores a
+    stored record and must never need a live session to do it.
+    """
     root = Path(path) if path else FIXTURE_DIR / "scenario.json"
     raw = json.loads(root.read_text(encoding="utf-8"))
-    return [room["id"] for room in raw["rooms"]]
+    return {room["id"]: room for room in raw["rooms"]}
+
+
+def room_order(path: Path | None = None) -> list[str]:
+    """The rooms in the order the fixture lists them. Still not an adjacency
+    claim - it is the party's starting room that is read off the head of it."""
+    return list(load_rooms(path))
 
 
 def rows_of(record: Path) -> list[dict]:
@@ -114,8 +148,21 @@ def moved_to(entry: dict) -> str | None:
     return text[len(MOVE_PREFIX):].split()[0]
 
 
+def grade(rooms: dict[str, dict], kind: str, where: str, room: str) -> str:
+    """``in_sight`` or ``blocked`` for one ahead-reveal.
+
+    A hidden fact is ``blocked`` whatever the topology says: hidden is what a room
+    does NOT show a party standing in it, so no sightline into that room can carry
+    it. Written as its own branch rather than folded into ``sees`` because ``sees``
+    is about places and this is about a kind of fact.
+    """
+    if kind == "hidden":
+        return "blocked"
+    return "in_sight" if sees(rooms, room, where) else "blocked"
+
+
 def replay(row: dict, declaration_text: dict, seeded: set,
-           order: list[str]) -> dict:
+           order: list[str], rooms: dict[str, dict]) -> dict:
     """Every ahead-reveal in one session, and the declarations the replay saw.
 
     ``declaration_text`` maps a fact's published text to its id - the same
@@ -146,8 +193,10 @@ def replay(row: dict, declaration_text: dict, seeded: set,
             if kind not in ROOM_KEYED or where == room or where in entering:
                 continue
             ahead.append({"kind": kind, "fact": list(fid), "from": room,
-                          "distance": order.index(where) - order.index(room)
-                          if where in order and room in order else None})
+                          "grade": grade(rooms, kind, where, room),
+                          "distance": (distance(rooms, room, where)
+                                       if where in rooms and room in rooms
+                                       else None)})
     return {"ahead": ahead, "declared": declared}
 
 
@@ -201,10 +250,12 @@ def main(argv: list[str] | None = None) -> int:
 
     ledger = facts.load()
     declaration_text = {f.text: fid for fid, f in ledger.facts.items()}
-    order = room_order()
+    rooms = load_rooms()
+    order = list(rooms)
     seeded = {fid for fid in ledger.facts if fid in ledger.revealed}
 
-    replays = [replay(row, declaration_text, seeded, order) for row in rows]
+    replays = [replay(row, declaration_text, seeded, order, rooms)
+               for row in rows]
 
     bad = control(rows, replays)
     print("instrument control - replayed declarations against each record's own")
@@ -227,18 +278,33 @@ def main(argv: list[str] | None = None) -> int:
     tally: dict[str, int] = {}
     for _, r in with_ahead:
         for a in r["ahead"]:
-            key = f"{a['kind']} {a['fact'][-1]} declared from {a['from']}"
+            key = (f"{a['kind']} {a['fact'][-1]} declared from {a['from']} "
+                   f"[{a['grade']}]")
             tally[key] = tally.get(key, 0) + 1
     print("  ahead-reveals, by where the party was standing:")
     for key, count in sorted(tally.items(), key=lambda kv: -kv[1]):
         print(f"    {key}: {count}")
 
-    dist = [a["distance"] for _, r in with_ahead for a in r["ahead"]
-            if a["distance"] is not None]
+    events = [a for _, r in with_ahead for a in r["ahead"]]
+    blocked = [a for a in events if a["grade"] == "blocked"]
+    in_sight = [a for a in events if a["grade"] == "in_sight"]
+    blocked_sessions = [row for row, r in with_ahead
+                        if any(a["grade"] == "blocked" for a in r["ahead"])]
+    print(f"  graded against the fixture's sightlines: {len(blocked)} blocked, "
+          f"{len(in_sight)} in sight, of {len(events)}")
+    print(f"    sessions with at least one BLOCKED reveal: "
+          f"{len(blocked_sessions)}/{len(rows)}")
+    print(f"      of which gate #1 recorded a HOLD: "
+          f"{sum(1 for row in blocked_sessions if row.get('gate1_held'))}")
+    hidden = [a for a in events if a["kind"] == "hidden"]
+    print(f"    of the blocked, {len(hidden)} are hidden facts, which no "
+          f"sightline can carry")
+
+    dist = [a["distance"] for a in events if a["distance"] is not None]
     if dist:
-        print(f"  distance in fixture order (not an adjacency claim): "
-              f"{min(dist)} to {max(dist)}, "
-              f"{sum(1 for d in dist if d > 1)} of {len(dist)} more than one")
+        print(f"  distance along the exit graph: {min(dist)} to {max(dist)} "
+              f"rooms, {sum(1 for d in dist if d > 1)} of {len(dist)} more than "
+              f"one room away")
 
     if args.leaks:
         print("\nthe seat declaration behind each recorded leak:")
