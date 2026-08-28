@@ -8,6 +8,7 @@ import unittest
 
 from core.console import ConsoleBackend, TooManyHumans, human_seats
 from core.replies import ParseError
+from games.quorum.audit import LeakDetected
 from games.quorum.demo import opening_view
 from games.quorum.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                  parse_action, play_game)
@@ -272,6 +273,32 @@ class TestConsoleSeat(unittest.TestCase):
         for s, role in ref.assignment.items():
             self.assertNotIn(ref.theme.role_names[role.key], with_human)
         self.assertIn("private view", opening_view(ref, set()))
+
+
+class TestAuditRunsInsideTheDriver(unittest.TestCase):
+    """The audit's own coverage lives in ``test_audit.py``; what is tested here is
+    that the DRIVER runs it. Both halves were mutation-checked: disabling the call
+    in ``play_game`` leaves every other test in this file green."""
+
+    class _LeaksAnotherSeatsRole(QuorumReferee):
+        def render_context(self, seat, include_speech=True):
+            base = super().render_context(seat, include_speech)
+            other = next(s for s in self.living() if s != seat)
+            name = self.theme.role_names[self.assignment[other].key]
+            return base + f"\nSeat {other} is the {name}."
+
+    def test_a_leaking_referee_RAISES_rather_than_being_scored(self):
+        """The eval lane once ran live models unaudited because a callback was
+        opt-in. This is why the audit is on by default and raises."""
+        ref = self._LeaksAnotherSeatsRole.new(5, seed=3, discussion_rounds=1)
+        rng = random.Random(0)
+        with self.assertRaises(LeakDetected):
+            play_game(ref, {s: RandomPolicy(rng=rng) for s in ref.assignment})
+
+    def test_audit_off_is_possible_but_never_the_default(self):
+        import inspect
+        self.assertIs(inspect.signature(play_game).parameters["audit"].default,
+                      True)
 
 
 if __name__ == "__main__":
