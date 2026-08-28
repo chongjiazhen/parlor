@@ -376,6 +376,61 @@ argued is immune to morale, are both live rulings rather than refusals. Too smal
 a set to carry an interval that means anything (CI [39.06%, 86.19%]), and it is on
 a voided run.
 
+## Second arm and the two controls, 2026-08-28 - the prediction held, and the per-item story did not
+
+Four runs, all `qwen36-35b-a3b-iq3` local, `--no-thinking`, 60 items each,
+164-172s each. Records in `eval/records/`: `durf-q36` (seed 5000),
+`durf-q36-rep` (seed 5000 again), `durf-q36-s6000` (seed 6000),
+`durf-q36-nodecline` (seed 5000, `--no-decline`).
+
+| | arm 1 | arm 2 `--no-decline` | seed 6000 control |
+|---|---|---|---|
+| floor tier - THE CONTROL, bar 55.88% | 38.24% [23.90, 54.96] | 44.12% [28.88, 60.55] | 38.24% [23.90, 54.96] |
+| decision 1 over the 42 | 33.33% [21.01, 48.45] | **45.24%** [31.22, 60.05] | 35.71% [22.99, 50.83] |
+| over-refusal | 28.57% | **38.10%** | 26.19% |
+| refusal (declined to rule) | 27.08% | 0 by construction | 25.00% |
+| False Pass | 6.25% [1.73, 20.15] | 18.75% [8.89, 35.31] | 15.62% [6.86, 31.75] |
+| fallback | 0/60 | 0/60 | 0/60 |
+
+**Every arm is still VOID on the floor control**, which is the prediction's third
+clause and the one that mattered most: the vocabulary was never going to reach the
+slot-gate failure, and it did not.
+
+**The pre-registered prediction, graded clause by clause and not rounded toward
+itself.** Where the 13 declines landed: **6 illegal, 4 no_roll, 3 roll**. The
+first clause said over-refusal would rise past 40% if the declines were only a
+word - it rose to **38.10%**, so the direction is right and the threshold is not
+met, and the interval [25.00, 53.19] contains 40% without establishing it. The
+second clause is the decisive one and it is clean: decision-1 accuracy came in at
+45.24% [31.22, 60.05], **which does not clear the always-roll baseline of 61.90%**
+- so the declines were not a channel artifact hiding a model that can rule. The
+finding stands as the first run wrote it.
+
+**The two controls, and the second one is the reason this section exists.**
+
+- **Reproducibility holds exactly.** Seed 5000 run twice returned byte-identical
+  answers on all 60 items, reasoning text included. `Backend.seed` reaches the
+  sampler, as `docs/reproducibility.md` measured for the games.
+- **A per-item story is NOT reproducible, and only the rates are.** Changing the
+  seed alone moves **23 of 48 rulings**. Changing the 87 prompt bytes moves 27 of
+  48 - and on the 35 declarations that never declined, where the variable has
+  nothing to reach, it moves **14 of 35 against a seed change's 16 of 35**. The
+  item-level churn from the variable is indistinguishable from the churn from
+  noise. What survives is the aggregate: decision 1 moved 2.4pp between seeds and
+  11.9pp between vocabularies, over-refusal 2.4pp against 9.5pp.
+- **So do not quote an individual ruling as evidence.** The first run's writeup
+  names d007 - ruling it illegal for a full-handed seat to drop a rope - as the
+  clearest instance of the slot gate. It is a good illustration and it is not a
+  measurement: that same declaration would plausibly come back ruled differently
+  at another seed. The slot-gate finding rests on the 9-of-12 count, not on any
+  one item, and the count is what to re-derive.
+- **Two draws are not a spread.** One repeat pair and one seed pair are what these
+  numbers are; nothing here establishes a run-to-run distribution, and the 2.4pp
+  figure is one difference rather than an interval. Temperature is the untouched
+  variable behind it - every run is at the 0.8 default, and an adjudicator seat
+  has no particular reason to be sampled at a player's temperature. That is the
+  next cheap arm and it is a measured change like any other.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no

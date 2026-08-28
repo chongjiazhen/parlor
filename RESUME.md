@@ -20,6 +20,23 @@ What's next:
 | cabal gate #3b **NOT SHOWN** - 2026-08-27 (S6). cabal's GPU program stops | `docs/gate3b-verdict.md` | `py -3 -m eval.s6_verdict` |
 | cabal gate #3a **RETIRED** - 2026-08-27 (S1), on arithmetic not budget | `docs/gate3a-retired.md` | `py -3 -m eval.gate3_arithmetic` |
 
+**S8 was taken, in its cheapest honest form, and the first read is VOID.** The
+DURF fixture has a scorer (`eval/durf_score.py`, `games/durf/`), and four runs of
+`qwen36-35b-a3b-iq3` are on disk. The verdict and every number live in
+`docs/durf-rung.md` §First run and §Second arm - **do not restate them here**.
+The three things a later session has to know before it re-opens this:
+
+- **The action channel is NOT what failed** - 0/60 fallbacks across all four runs,
+  nothing sent back by the parser or the rules. This rung's design predicted
+  free-text JSON's likeliest negative outcome was the channel collapsing on a weak
+  backend. It did not, and that prediction is now answered.
+- **A per-item story from these runs is not reproducible; only the rates are.**
+  Same seed twice is byte-identical, and a seed change alone moves 23 of 48
+  rulings. Quote counts, never an individual ruling.
+- **The instrument voids on its own floor control**, which is derived from the
+  fixture's labels rather than picked - so a fixture edit moves the bar with them.
+  Both degenerate arms fail it by construction, which is what makes it a control.
+
 **The powers re-run LANDED 2026-08-28** and the accuracy gain it was run to settle
 is banked: on identical deals and clean code, blind accuracy **+40.00pp** [+13.64,
 +66.67] and villager accuracy **+23.81pp** [+4.55, +42.42], both floors clearing
@@ -211,7 +228,7 @@ table says which pairs.
 | ~~**S5**~~ | ~~changeling: read the 200-game run.~~ **READ 2026-08-28 - GATE #3 HOLDS.** Blind villager accuracy **110/247 = 44.53%**, Wilson floor **38.47%** and the scorer's game-bootstrap floor **37.36%**, both clearing the pre-committed 35.95%. Gate #2 readable at **59.49%** [52.48%, 66.13%] and given **no verdict**, per the criterion. Two clauses did not apply cleanly and are recorded rather than smoothed: the criterion said Wilson where the scorer publishes a bootstrap, and S2 ran no random arm so the own-arm clause had nothing to fire on. Writeup `games/changeling/RULES.md` §S2 read; arithmetic `py -3 -m eval.s5_verdict`. Code-debt item 4 settled in the same session because the writeup had to quote a path. | - | - | done |
 | ~~**S6**~~ | ~~The gate #3b campaign - cabal's LAST GPU program.~~ **CALLED 2026-08-27 - gate #3b NOT SHOWN, cabal's GPU program stops.** 40/40 games, both arms `rc=0`, 1.35% campaign fallback. Pooled 9/20 = 45.00%, Wilson [25.82%, 65.79%] against the derived bar 33.33% - floor does not clear, so the pre-committed answer applies and there is no third campaign. All three draw-dependent items resolved off the same records: step-not-slope did NOT fire, the `five_rejects` shift is not established, run-length degradation did not reproduce. Verdict and arithmetic: `docs/gate3b-verdict.md`, `py -3 -m eval.s6_verdict`. | - | - | done |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed; reasoning in `docs/gate3a-retired.md`. | - | - | done |
-| **S8** | **Next rung or publish.** 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. **The DESIGN half of that literature is now in the tree** - `docs/action-channel.md` carries the call-vocabulary constraints (one blocking call, referee-side free-text seat tokens, a prompt split along its seams) and the two failures the kernel has to catch, all stated in parlor's terms, so the spike does not depend on the ledger surviving. What stays off-repo is the competitive half: which builds exist, what they are rated, and their licences - including that one of them was read in full from source under a licence that forbids reuse, so the call vocabulary above is written from the game's own public rules and stays that way. | varies | S5 done (S1 is called) | scoped in its own session, not here |
+| **S8** | **Next rung or publish. TAKEN 2026-08-28 on the adjudicator branch, and NOT closed** - the DURF fixture got its scorer and four runs; the read is VOID on the instrument control and lives in `docs/durf-rung.md`. What is still open under this slice is the session engine (a kernel, player seats, and the entitlement audit this instrument does not exercise), and the 6/7p and publish options below, untouched. Original scope: 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. **The DESIGN half of that literature is now in the tree** - `docs/action-channel.md` carries the call-vocabulary constraints (one blocking call, referee-side free-text seat tokens, a prompt split along its seams) and the two failures the kernel has to catch, all stated in parlor's terms, so the spike does not depend on the ledger surviving. What stays off-repo is the competitive half: which builds exist, what they are rated, and their licences - including that one of them was read in full from source under a licence that forbids reuse, so the call vocabulary above is written from the game's own public rules and stays that way. | varies | S5 done (S1 is called) | the discretion number exists, VOID and dated; the engine does not |
 
 ## While the card is busy - the standing menu
 
@@ -247,7 +264,7 @@ owed next. The changeling deck design landed 2026-08-27
 (`games/changeling/RULES.md`), and what it left behind - registering the setups -
 is not free. Item 6 of the code-debt batch, its other blocker, landed in S10.
 
-**The queue now reads: S8, and nothing before it.** S2 and S5 landed, the powers
+**The queue reads: S8's remaining halves, and nothing before them.** The adjudicator branch of S8 was taken 2026-08-28 and produced a dated VOID read rather than a closed slice; the 6/7p package and the publish option are where they were. S2 and S5 landed, the powers
 re-run landed, its rule-error half is closed, and `RULES.md` has no table left on
 dirty numbers. The code-debt batch is done except item 3, which is gated outside the
 tree and holds up nothing. S8's entry condition (S5 done, S1 called) is met. The three cabal items that used to
@@ -947,8 +964,9 @@ queue, the dated measurements, and the route decisions.
   three of the six traps: the slot costs made `d013`, `d017` and `d018`
   satisfiable, so a model ruling them correctly would have scored a False Pass.
   The state moved to the labels, never the reverse, and every `slots_used` is now
-  derivable from a `slot_costs` block. The scorer is unbuilt - there is no durf
-  engine yet, only the fixture.
+  derivable from a `slot_costs` block. **The scorer landed 2026-08-28**
+  (`eval/durf_score.py`); there is still no durf engine, and nothing here needs
+  one - the fixture is 60 independent items against a fixed scenario.
 - `docs/moral-framing.md` - the theme-polarity experiment, its confound, the
   verified deception/framing prior work, the name-form axis, and **§The changeling
   skin set, which owns every skin's design and sourcing rules** (moved out of this
