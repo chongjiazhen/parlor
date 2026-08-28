@@ -16,11 +16,13 @@ rung is called `changeling`. Mechanics are not copyrightable and a rung modelled
 a published game is the pattern this repo already ships twice; what the invariant
 forbids is carrying the published game's *surface* into the tree.
 
-**Nothing here has been run.** No model has played this rung, there is no number in
-this file, and there will not be one until an arm lands. The design below is
-written before the code on purpose - the same order cabal and changeling were
-settled in - so that what a seat is entitled to learn is a decision on the record
-rather than a property of whatever the referee happened to render.
+**No model has played this rung.** Every number in this file is the DECK's or the
+random control's, measured 2026-08-28 with no model in the loop, and the section
+on what the deck does says so in each figure. There is no gate here, no criterion
+and no verdict. The design below was written before the code on purpose - the same
+order cabal and changeling were settled in - so that what a seat is entitled to
+learn is a decision on the record rather than a property of whatever the referee
+happened to render.
 
 ## What this rung is FOR
 
@@ -233,6 +235,66 @@ measured change** on the same terms as a theme swap or a prompt edit. It is not 
 tuning parameter to be moved until a number looks better. The probability that a
 draw of three from a fresh deck is all-minority is derived in the code from the
 composition, never hardcoded from memory.
+
+### What the deck does, measured 2026-08-28 - no model involved
+
+`eval/quorum_deck.py` settles this on CPU, and it had to be settled before any
+model ran: a claim about a draw can only be scored against a denominator, and the
+denominator is how often the office had no legal alternative.
+
+**Exact, from a fresh 17-card deck** - enumerated from `Setup`, so a variant deck
+moves every figure with it:
+
+| | |
+|---|---|
+| proposer draws three of one kind | **27.2059%** (185 of 680) |
+| ... all writs, so a charter is impossible | **24.2647%** (165 of 680) |
+| ... all charters, so a writ is impossible | **2.9412%** (20 of 680) |
+| asymmetry | **8.25x** |
+| enactor handed a matching pair, under a uniformly-discarding proposer | **51.4706%** |
+
+**The asymmetry is the finding, and it is what makes the rung work.** "I had no
+choice" is 8.25 times more available to a seat that enacted a writ than to one
+that enacted a charter. A defence that is always available is not evidence and a
+defence that is never available is not a defence; this deck sits between, which is
+the ambiguity the composition was chosen for. It is also why the composition is a
+rule rather than a knob - moving it moves the credibility of every claim made at
+the table.
+
+**Realized, 400 random-control games, 2492 events**, seed 0, `--rounds 0`, fallback
+rate 0% by construction because no model is called:
+
+| | |
+|---|---|
+| proposer forced | **27.6886%** [25.97%, 29.48%] |
+| enactor handed a matching pair | **51.1236%** [49.16%, 53.08%] |
+| drift, realized minus exact | **+0.4827%** |
+
+**The exact figure is the instrument control for the sweep, and it passed.** Cards
+leave play when they are enacted and the pile is rebuilt from the discards, so the
+composition drifts as a game runs and the realized rate need not equal the
+fresh-deck one. The tolerance - 3%, declared in the code before the sweep ran, and
+deliberately loose because the question is whether drift is a first-order effect
+rather than whether it is zero - was not reached, and the interval contains the
+arithmetic. **So the fresh-deck figure is a fair denominator for a whole game**,
+and a later run may quote it rather than carrying its own.
+
+**The random control wins for the minority about four games in five** - majority
+82/400, **20.50%**. That is the chance baseline any later win rate is read against
+and is not a claim about either side; it is the deck showing through, exactly as
+cabal's measured "evil wins ~65% with no deception at all" is. It also says
+something about a gate this rung has not yet written: a minority win rate is
+nearly uninformative on its own here, so whatever quorum's gate #2 turns out to
+be, it will have to be conditional on a control the way cabal's is.
+
+**What is NOT measured, and must not be inferred from any of the above.** No
+deception figure exists. The rung is built so that a public statement about a draw
+scores against what the referee dealt, but no claim scorer is written, and
+`eval/run_quorum.py` prints a refusal in place of a number rather than leaving an
+absence a reader would fill in. The forced count is that scorer's denominator when
+it lands: of the writs enacted in the first 60-game driver run, 58.82% were
+enacted by an office that could have done otherwise, and only those are ever
+scoreable.
 
 ## Win conditions
 
