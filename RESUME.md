@@ -16,14 +16,9 @@ is building its engine, DURF is between measurements. Run
 `grep -L 'PARLOR DONE' eval/records/*.log` first (see below for what it lies
 about), then pick a front:
 
-- **DURF** - the iron-door question is decided and the next slice is *is
-  reveal-ahead wrong at all*, which is BLOCKED on two things that are not code:
-  the fixture states no adjacency and no sightlines, so nothing separates "what
-  the party sees from where it stands" from "the far side of a closed door"; and
-  no rubric for whether a refereed session was any GOOD is known to exist. Both
-  are in the DURF block below. A campaign is 52 minutes and should carry the
-  prescribed fixture edit and the adjacency decision together, or it buys one
-  answer at the price of two.
+- **DURF** - the adjacency question is DECIDED 2026-08-28 and the two prescribed
+  edits are APPLIED, so what is left of this front is a 52-minute campaign to run
+  them and one open question that is not code. Both are in the DURF block below.
 - **quorum** - has RULES.md, roles, referee and a second gate mechanism as of
   2026-08-28; its own rows are further down.
 
@@ -31,7 +26,7 @@ about), then pick a front:
 
 | verdict | where it lives | recompute |
 |---|---|---|
-| DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%] | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
+| DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%]. Read under the PRE-TOPOLOGY fixture; two model-facing edits landed the same day | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
 | its pre-committed criterion, unedited | `docs/durf-gate1-criterion.md` | - |
 | changeling gate #3 **HOLDS** - 2026-08-28 (S5), 200 games | `games/changeling/RULES.md` §S2 read | `py -3 -m eval.s5_verdict` |
 | its pre-committed criterion, as promised | `docs/changeling-gate3-criterion.md` | - |
@@ -89,7 +84,8 @@ Six things a later session needs before it touches this:
   replays a stored session against any term set and must reproduce that run's own
   leaks first. On this campaign the dropped term would have been worth 15 sessions
   (82/100, still holding), which is a counterfactual and never a read.
-- **The iron-door question is DECIDED 2026-08-28 - the fixture, and not for the
+- **The iron-door question is DECIDED 2026-08-28 and its edit is now APPLIED - the
+  fixture, and not for the
   reason the question posed.** R1 has no door at all, so there was never a
   visible-door reading to make public; the door named in all eight leaks is R2's,
   and the party was in R1 for all eight. All eight follow one scripted line,
@@ -99,7 +95,34 @@ Six things a later session needs before it touches this:
   a fixture change cannot be replayed off records the way `durf_rescore` prices a
   term change, so it buys nothing until a campaign is run. Reasoning and the
   evidence: `docs/durf-rung.md` §The iron-door question. **Do not re-derive this.**
-- **THE NEXT DURF SLICE, and the campaign produced it too: 84 of 100 sessions
+- **THE ADJACENCY QUESTION IS DECIDED 2026-08-28, and it did not exonerate the
+  referee.** The fixture states its topology now - every room carries an `exits`
+  list with adjacency and a boolean sightline, each value transcribed from the
+  room's own prose with the sentence it came from. Graded off the 100 records
+  already on disk at no GPU cost, **135 of 141 ahead-reveals are BLOCKED and 6 are
+  in sight, and all 84 sessions keep at least one blocked reveal**, so the
+  sightline defence accounts for none of it: reveal-ahead is wrong here, and not
+  the topology's fault. Reasoning, the table and what it does NOT establish:
+  `docs/durf-rung.md` §The adjacency question - **do not restate them here.**
+  Recompute with `py -3 -m eval.durf_reveal_order eval/records/durf-camp1.json`.
+  - **What is now OWED is one campaign, and its two variables are already
+    landed.** The referee's world view states the way out of the party's room and
+    whether it can be seen through, and the scripted line behind all eight
+    campaign leaks no longer listens at a door R1 does not have. Both are
+    model-facing, so **the 91/100 is a read under the pre-topology fixture** and is
+    marked as one in the rung doc. 52 minutes, recipe
+    `eval/runs/durf-session.cmd`, and the sensible read is the same instrument
+    pair against the new bytes.
+  - **Movement is deliberately still unconstrained by the exit graph.** `call_move`
+    accepts any room, so the party can be moved R1 to R4 in one call. Making it
+    respect adjacency is a RULES change - it moves what is legal and therefore
+    what the fallback rate counts - and it would be a second variable in the same
+    campaign. Separate arm.
+  - **Still open and still not code: no rubric for whether a refereed session was
+    any GOOD.** The reveal-ahead count is not one and must not be promoted into
+    one; `games/durf/fixtures/README.md` §What this fixture is not says the same of
+    the declaration fixture.
+- **The count that produced all of the above: 84 of 100 sessions
   declared a room or hidden fact for a room the party was not in, and 78 of those
   are counted as gate #1 HOLDS.** R3's whole contents were published to a party on
   the entry slope 28 times. This is NOT a gate #1 failure and gate #1 must not be
