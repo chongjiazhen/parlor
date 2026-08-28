@@ -301,6 +301,81 @@ sits beside them - **over-refusal**, `illegal` on a declaration the rules permit
 because without it an arm that refused everything would post a perfect False Pass
 and a perfect False Check.
 
+## First run, 2026-08-28 - VOID on the instrument control, and the shape that voided it is the finding
+
+`qwen36-35b-a3b-iq3` local, seed 5000, `--no-thinking`, all 60 items, 166s.
+Records `eval/records/durf-q36.json` + `.jsonl`; recompute with
+`py -3 -m eval.durf_score --arm llm --backend local --model qwen36-35b-a3b-iq3
+--no-thinking --seed 5000`.
+
+**The verdict first: VOID.** Floor-tier accuracy **38.24%** [23.90%, 54.96%]
+against the derived bar of **55.88%** - the interval does not clear a constant
+policy on the declarations the rules answer unambiguously, so by the criterion
+committed above this model was not measured on adjudication and no rate below is
+a measurement of it. Decision 1 over the 42 came in at **33.33%** [21.01%,
+48.45%], which is below the never-roll baseline of 38.10%, let alone always-roll's
+61.90%.
+
+**The action channel is not what failed, and that is the first real result.**
+This file predicted that free-text JSON's most likely negative outcome on a weak
+backend was fallback or refusal dominating. Fallback was **0/60**. Nothing was
+sent back by the parser or the rules on any item; every reply was a legal envelope
+first time. Whatever is wrong here, it is not the envelope.
+
+**What voided it was refusal, in two distinct shapes.**
+
+- **A precondition applied as a universal gate.** 13 of the 28 non-correct
+  declarations cite inventory slots, and 9 of the 12 over-refusals do. Vesh has
+  zero free slots, and the adjudicator ruled *illegal* on his dropping a coil of
+  rope (dropping frees a slot), on his jumping a chasm, and on his holding a door.
+  It has the rule, and it applies it to declarations the rule does not reach. This
+  is not a False Pass and it is not in CoC-Seduce's pair - **the direction is
+  reversed**: their models grant unearned success, this one refuses earned
+  attempts.
+- **`decline` used as "I reject your argument".** 5 of the 8 Pseudo-Logic
+  declarations were declined and 2 more ruled illegal, with only one ruled. The
+  reasoning on those is right - it names the false premise, that DURF has no
+  proficiencies, that a shield never reduces below 1 - and then answers in the
+  wrong channel.
+
+**That second shape is a confound this instrument introduced, and it is stated
+here rather than fixed quietly.** The envelope offers four words, and `decline`
+was put there so a refusal to rule had a channel instead of arriving as a parse
+failure. A model that reaches for it to reject a player's *argument* is answering
+a question the vocabulary invited. So the 27.08% refusal rate is not yet readable
+as "declined to rule".
+
+**The pre-registered second arm, and what each outcome would mean** - written
+before it runs, because deciding afterwards which reading the numbers support is
+the failure this repo names by name. The arm is the same fixture, same seed, same
+model, one variable: `decline` removed from the ruling vocabulary, leaving roll /
+no_roll / illegal.
+
+- Refusal goes to zero by construction, so the question is **where the 13 declines
+  land**. If they become `illegal`, over-refusal rises past 40% and the answer is
+  that the model refuses broadly and the vocabulary only changed the word - the
+  finding stands as written.
+- If instead decision-1 accuracy clears the always-roll baseline's interval, the
+  declines were a channel artifact and this model can rule; the finding then
+  becomes a fact about the envelope rather than about adjudication.
+- **The slot-gate failure is untouched by the vocabulary either way**, so the
+  prediction is that floor accuracy stays under the bar and the run stays VOID.
+  An arm that came back passing the floor control would falsify that.
+
+**Two numbers not to quote from this run.** The trap tier reads 6/6, which looks
+like the purest instrument in the set working - but a policy that refuses broadly
+catches every trap for the wrong reason, and the over-refusal rate is what says
+so. And False Pass came in at 6.25% [1.73%, 20.15%]: the interval contains
+CoC-Seduce's 9.58%, so this is not a lower rate than theirs, and on a voided run
+it is not a rate at all.
+
+**Morale, decision 4, was the best-behaved of the three** - 8/12 against a
+constant policy's 6/12, with 3 missed and 1 over-called. Missing a third of the
+group killed in one blow, and calling one on an undead the adjudicator itself
+argued is immune to morale, are both live rulings rather than refusals. Too small
+a set to carry an interval that means anything (CI [39.06%, 86.19%]), and it is on
+a voided run.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no
