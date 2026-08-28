@@ -48,6 +48,13 @@ never carry the marker - `hunt6[ab]`, not `hunt6*`, which also matches
 `hunt6b-chain.log` and so reads "in flight" forever. **Never judge a run by a
 process probe.**
 
+**The bare command now names 9 terminal runs, and that number only grows.** The
+`PARLOR DONE` marker landed in S4 (2026-08-27, `core/runlog.py`), so every log
+written before it lacks the marker permanently: the `hunt20*`, `huntcloud*` and
+unsuffixed `cl-powers-*` logs are all finished and all report as in flight. Read
+the answer against `RESUME.local.md`'s launch record, and treat a name it does not
+list as a pre-S4 fossil rather than a run.
+
 **No progress figure, ETA or log-tail path is recorded here** - a count written
 into a queue file about a running job is stale the hour it is written, and an ETA
 in this block was wrong twice on 2026-08-27. That whole class lives in
