@@ -52,14 +52,30 @@ fallback. Everything about it is in `docs/durf-rung.md` §The session engine and
 §The read - **do not restate it here.** Two things a later session needs before
 it touches this:
 
-- **ONE DECISION IS OPEN AND IT VOIDS THE READ EITHER WAY.** Two of the three
-  leaks are the same line, where the character SEARCHES for a loose flagstone
-  rather than being told one exists. The invariant says a colliding term gets
-  renamed; renaming it (to `shallow cavity` / `40 GP`) would resolve it. It was
-  deliberately not decided in the session that produced the number, because
-  editing an instrument after seeing model output is the failure
-  `docs/reference-policies.md` exists to prevent. Decide it in a session scoped
-  for it, and re-run - an arm is 2.3 minutes.
+- **THE OPEN DECISION WAS TAKEN 2026-08-28: RENAME. The work is queued and it is
+  the head of the queue.** Two of the three leaks are the same line, where the
+  character SEARCHES for a loose flagstone rather than being told one exists.
+  `loose flagstone` collides with the ordinary vocabulary of searching a stone
+  floor, and the invariant's remedy for a colliding term is to rename it and leave
+  the matcher naive. **Drop that term from the fact, leave `shallow cavity` and
+  `40 GP`.**
+  - **Why this is a legitimate edit and the alternative is not.** The renaming
+    argument holds without having seen any model output, which is what
+    `docs/reference-policies.md` asks of an instrument change. The cost is
+    symmetric in any case: choosing to KEEP the term once you know which lines
+    tripped it is equally a decision made on the output, so both branches void the
+    3/6 and neither is the free one. Once the cost is equal the choice rests on
+    instrument quality alone.
+  - **Do NOT simply re-run the six.** A clean version of that interval is still
+    uninterpretable, so the re-run buys tidiness and no number. A session is ~23s,
+    so a campaign large enough to quote is ~15 minutes of GPU. **Size it, state the
+    criterion and what a result would MEAN before launching**, the way gate #3b was
+    run, then run once and mark `durf-sess2` superseded. Pass `--temperature 0.0`.
+  - **The tell question is a SEPARATE instrument and must not be folded back in.**
+    The ambiguous line is evidence that catching a referee's PHRASING is a
+    different measurement from catching a fact dump, and `docs/action-channel.md`
+    already says substring matching cannot reach it. It stays an open problem in
+    its own right.
 - **`durf-sess1` is SUPERSEDED by `durf-sess2`** and its 21.18% recovered rate
   was a schema ambiguity in the parser, not the model. Quote sess2.
 
@@ -291,7 +307,7 @@ owed next. The changeling deck design landed 2026-08-27
 (`games/changeling/RULES.md`), and what it left behind - registering the setups -
 is not free. Item 6 of the code-debt batch, its other blocker, landed in S10.
 
-**The queue reads: S8's untaken halves.** S11 landed 2026-08-28 and gate #1 has its first read on this rung; what it left behind is one instrument decision, named in `docs/durf-rung.md` §The read and deliberately not taken there - whether `loose flagstone` is a sentinel a referee can use innocently. Deciding it either way VOIDS the 3/6 read, which is why it is a decision and not a tidy-up. The adjudicator branch of S8 was taken 2026-08-28 and produced a dated VOID read rather than a closed slice; its engine half is S11 and is now done. The 6/7p package and the publish option are where they were. S2 and S5 landed, the powers
+**The queue reads: the DURF rename and the campaign behind it, then S8's untaken halves.** S11 landed 2026-08-28 and gate #1 has its first read on this rung. The instrument decision it left was TAKEN 2026-08-28 and the answer is RENAME; the specification is the S11 block at the top of this file and it is the cheapest item in the queue. What that leaves behind is the campaign, which needs its criterion written before it is launched. The adjudicator branch of S8 was taken 2026-08-28 and produced a dated VOID read rather than a closed slice; its engine half is S11 and is now done. The 6/7p package and the publish option are where they were. S2 and S5 landed, the powers
 re-run landed, its rule-error half is closed, and `RULES.md` has no table left on
 dirty numbers. The code-debt batch is done except item 3, which is gated outside the
 tree and holds up nothing. S8's entry condition (S5 done, S1 called) is met. The three cabal items that used to

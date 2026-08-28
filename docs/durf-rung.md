@@ -612,6 +612,25 @@ exists to prevent. So the fact set is unchanged, the ambiguity is on the record,
 and **any edit to it voids this read** - as `games/durf/fixtures/README.md` says of
 its own labels.
 
+**DECIDED 2026-08-28, in a later session and on the invariant rather than on this
+read: RENAME.** `loose flagstone` collides with the ordinary vocabulary of
+searching a stone floor, and the repo's remedy for a colliding term is to rename
+the term and leave the matcher naive. That argument stands without reference to
+any model output, which is what makes it an instrument change this file's own rule
+permits. Note also that the two branches cost the same: choosing to KEEP the term
+once the tripping lines are known is equally a decision made on the output, so the
+read above is void either way and was never the thing being protected. **The rate
+in this section is therefore superseded on the next run**, and the run that
+supersedes it is a campaign with a criterion written first, sized to say something
+- a second six-session arm would only reproduce the same interval. The rename and
+the campaign are specified in `RESUME.md`.
+
+**One thing that does NOT follow from it.** The arguable line is still evidence
+that a referee naming the object of its own secret is a tell, and renaming the
+sentinel makes this instrument blind to that. That is a second measurement, not a
+weakening of this one: `docs/action-channel.md` already states that substring
+matching cannot see a paraphrased reveal, and a tell-detector is its own problem.
+
 **What this read does NOT say.** Nothing about whether the session was good,
 coherent or well-refereed. There is no fixture for that and no judge is built for
 one, the same refusal this file makes about decision 5. It also says nothing about
