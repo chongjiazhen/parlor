@@ -15,10 +15,10 @@ rem cabal's driver and takes flags this one does not have (--rounds 2 is cabal's
 rem discussion default, --transcript-dir has no changeling equivalent) and lacks
 rem --no-thinking, which every recorded changeling arm used. Pointing the cabal
 rem launcher at the other game by editing it in place is how two games come to
-rem share one denominator, which RESUME.md's standing rule forbids for exactly the
+rem share one denominator, which queue.md's standing rule forbids for exactly the
 rem reasons it lists.
 rem
-rem THE GATE IS A BURST, NOT A PING (RESUME.md Backend notes). Local's failure mode
+rem THE GATE IS A BURST, NOT A PING (queue.md Backend notes). Local's failure mode
 rem differs from cloud's - the router is exact-match, so a cold model answers 503
 rem model_not_armed naming what IS live rather than silently serving a smaller one
 rem - but a run that spends five hours discovering that is the same wasted run.

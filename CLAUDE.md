@@ -1,6 +1,6 @@
 # parlor
 
-`RESUME.md` is the QUEUE, and only the queue - open rows, live slices, and what a
+`queue.md` is the QUEUE, and only the queue - open rows, live slices, and what a
 cold session should pick up. What has landed leaves it: `docs/measurements.md` for
 the dated numbers, backends and route calls (read that before trusting a number),
 `docs/decisions.md` for what is settled, `docs/slices.md` for the closed slice
@@ -54,7 +54,7 @@ Change them against a measurement, and change them HERE.
   `_night_against_the_table` bought +7% -> +63% on a 12B and then INVERTED on q36
   (+80% as-is vs +72% with the line), so more context is not monotonically better
   and cannot be adopted on the argument that it ought to help. Adding standing
-  context is a measured arm (`RESUME.md`), never a convenience. What a PERSON needs
+  context is a measured arm (`queue.md`), never a convenience. What a PERSON needs
   is a different question with a free answer: `core/console.py` prints a briefing
   and `rules` beside the view, outside the payload, where neither cost lands.
 - **The tree describes parlor; the rest is a working note.** Canonical keys stay
@@ -70,7 +70,7 @@ Change them against a measurement, and change them HERE.
 - **Judge a detached run by its own log or JSONL** - CPU, IO counters and exit codes
   all read as healthy while a run sleeps, and one such call killed a live run. Probe
   a cloud tier with a burst: a cooled key serves single requests and fails a stream.
-- **`RESUME.md` is the queue, and the pre-commit gate holds it to that.** Done work
+- **`queue.md` is the queue, and the pre-commit gate holds it to that.** Done work
   leaves - a landed slice struck and moved to `docs/slices.md`, a dated reading to
   `docs/measurements.md`, a settled call to `docs/decisions.md`. The rule is as old
   as the file and was broken anyway, because it had no destination and appending

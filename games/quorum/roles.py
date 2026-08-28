@@ -182,7 +182,7 @@ THEME_PLAIN = Theme(
 # same reason.
 #
 # It is still a MEASURED change against `plain`. Names carry connotation, and
-# RESUME.md already records that a role name can move a seat's threat assessment
+# queue.md already records that a role name can move a seat's threat assessment
 # out of proportion to what the role mechanically does.
 THEME_GUILD = Theme(
     "guild",

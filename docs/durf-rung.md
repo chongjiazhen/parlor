@@ -5,7 +5,7 @@ Written 2026-08-27, unmeasured, from a design read of `core/observability.py`,
 Same job as both of those: nothing here is a decision, it is here so the cheap
 moves stay cheap.
 
-**What this scopes.** `RESUME.md` has carried "5e / a rules-lite RPG" as the
+**What this scopes.** `queue.md` has carried "5e / a rules-lite RPG" as the
 endgame rung with no statement of what the cheap version is. This names one: a
 single dungeon session of DURF, a deterministic kernel underneath, a model in the
 adjudicator seat, and one number nobody in the neighbouring literature has
@@ -17,7 +17,7 @@ referee - and therefore the first that tests the actual product claim.
 **DURF is the smallest real system that ships legally.** ~40-50 pages, d20,
 three attributes, no class tree, no spell list needed for a first session. Its
 whole ruleset is smaller than four Blood on the Clocktower characters'
-interaction surface, which is what `RESUME.md` scoped that spike down to anyway.
+interaction surface, which is what `queue.md` scoped that spike down to anyway.
 The adjudicator's failure therefore arrives isolated from rules complexity, which
 is the only reason to prefer a small system over an interesting one.
 
@@ -873,7 +873,7 @@ the campaign's leaks, presupposing a door R1 does not have - is now
 `I listen for anything moving up ahead.` Both change model-facing bytes, so **the
 91-of-100 gate #1 read stands as a read under the pre-topology fixture** and a
 number under these edits needs a fresh campaign. They are landed together
-deliberately: `RESUME.md` asked for one run to answer both, and a campaign is 52
+deliberately: `queue.md` asked for one run to answer both, and a campaign is 52
 minutes.
 
 **Still open, and it is not code.** Whether a refereed session was any GOOD has no
@@ -1058,7 +1058,7 @@ smaller reduction than the earlier draft claimed. **Its clock is also already
 seeded** - a d6 per turn against the run seed - so it costs the reproducibility
 invariant nothing.
 
-**This is an argument, not a queue edit.** `RESUME.md` §S8 and its standing-menu
+**This is an argument, not a queue edit.** `queue.md` §S8 and its standing-menu
 row for Blood on the Clocktower still read as they did; whether this displaces
 either is the operator's call, made in a session scoped for it.
 

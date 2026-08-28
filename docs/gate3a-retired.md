@@ -24,7 +24,7 @@ reframe, landed 2026-08-28 in S9; the review is closed on all six.
 
 ## The reason to stop is NOT that N is unaffordable
 
-`RESUME.md` said "cannot show gate #3a at an affordable N" from `hunt20d` onward.
+`queue.md` said "cannot show gate #3a at an affordable N" from `hunt20d` onward.
 That was written before anyone priced it, and it is wrong. Priced against
 `hunt20c`'s own per-game bootstrap SD (4.75% on the graded slope):
 
@@ -107,7 +107,7 @@ paragraph.
   not cancelled.** Each is a prompt change and so a measured change; a paired cabal
   arm costs 13.2 h to move a number 3a no longer spends precision on. They belong on
   changeling, where a paired 20-game arm is ~30 min, or they land nowhere. Their rows
-  are live in `RESUME.md`.
+  are live in `queue.md`.
 - **S7 (measured prompt variables) was dropped as a cabal GPU program** for the same
   arithmetic.
 
@@ -119,7 +119,7 @@ other ~21 are a seat using its OWN role's word to accuse somebody else ("that's 
 Watcher's tell", "no legitimate Outer Party member would reject every mission"),
 which is the opposite of outing itself.
 
-- **The `hunt20c` cluster was read backwards, and `RESUME.md` said so.** The 11-line
+- **The `hunt20c` cluster was read backwards, and `queue.md` said so.** The 11-line
   cluster on one seat is game 11 seat 1, and all 11 are accusations aimed outward.
   The "that was cover. As Inner Party, I now urge..." quote is a DIFFERENT seat (game
   4 seat 0) with 4 lines. One-line truncation is what made the two look like one
@@ -141,6 +141,6 @@ which is the opposite of outing itself.
   announcement true?" was never a question this number could answer. Counting FALSE
   claims needs a different check.
 
-**The open half stays open** and its row is in `RESUME.md`: a claim-shaped match
+**The open half stays open** and its row is in `queue.md`: a claim-shaped match
 (first person, present tense) is a code change that RE-BASELINES the 26/1580 count,
 so it lands with a re-score of the records rather than on its own.

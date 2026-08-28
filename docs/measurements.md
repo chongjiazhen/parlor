@@ -1,6 +1,6 @@
 # Measured, dated - the numbers and the backends
 
-Moved out of `RESUME.md` 2026-08-28: these are readings, not queue. Verbatim.
+Moved out of `queue.md` 2026-08-28: these are readings, not queue. Verbatim.
 **Read before trusting any number in this repo.** Each verdict's own doc
 (`docs/gate3a-retired.md`, `docs/gate3b-verdict.md`, `docs/durf-rung.md`,
 `games/changeling/RULES.md` §S2 read) is canonical for that gate; this file is the
@@ -174,7 +174,7 @@ forward.**
 
 ## Three changes that re-read an old record differently - moved from the queue 2026-08-28
 
-Verbatim from `RESUME.md`. Each one changes what a number recorded before it
+Verbatim from `queue.md`. Each one changes what a number recorded before it
 means, which is why they live beside the numbers rather than in the queue.
 
 class) and S5 (the `--out` convention), so a reader has one sha per change rather

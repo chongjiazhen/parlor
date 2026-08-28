@@ -1,12 +1,12 @@
 # Closed session slices
 
-The finished half of `RESUME.md`'s slice table, moved out 2026-08-28 so the queue
+The finished half of `queue.md`'s slice table, moved out 2026-08-28 so the queue
 file carries live rows only. **Rows are struck and annotated, never deleted** -
 live rows cite slices by name (S6's pre-committed criterion rests on "the baseline
 derived by S3"), and the numbers are IDs, not positions. Do not renumber them.
 
-Verbatim from `RESUME.md`; the annotations are the ones written when each slice
-landed. `RESUME.md` keeps the open rows.
+Verbatim from `queue.md`; the annotations are the ones written when each slice
+landed. `queue.md` keeps the open rows.
 
 | # | slice | needs | entry condition | done when |
 |---|---|---|---|---|

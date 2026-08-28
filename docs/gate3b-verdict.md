@@ -16,7 +16,7 @@ A verdict that retires a gate should not rest on arithmetic nobody can re-run.
 
 ## The criterion, and what each clause returned
 
-Pre-committed 2026-08-27 in `RESUME.md`, BEFORE the run, on the same discipline as
+Pre-committed 2026-08-27 in `queue.md`, BEFORE the run, on the same discipline as
 the 2026-08-25 criterion that held.
 
 | clause as written | what landed |
@@ -45,7 +45,7 @@ is voided.
 
 ## The denominator held, and that is what makes this a clean refusal
 
-After arm 1 returned only 4 hunts in 20 games, `RESUME.md` projected ~8 for the
+After arm 1 returned only 4 hunts in 20 games, `queue.md` projected ~8 for the
 campaign and warned that S6 was "on course to return not shown for reasons of
 denominator, not of hunter skill". **That projection was wrong and this verdict
 does not inherit it.** Arm 2 returned 16 hunts, the campaign returned 20, and 20 is

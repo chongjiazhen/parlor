@@ -14,7 +14,7 @@ Five things it establishes, in the order the writeup uses them:
    agrees with the scorer on what the scorer already published, so that check runs
    first and exits non-zero on any disagreement.
 
-2. **The pre-committed criterion, applied in its own words.** ``RESUME.md``
+2. **The pre-committed criterion, applied in its own words.** ``queue.md``
    §PRE-COMMITTED CRITERION, written 2026-08-28 before the run. THE GATE is blind
    villager accuracy on the ``none`` stratum, and it holds only if the **Wilson**
    95% floor clears the bar. The criterion's word is Wilson and the scorer publishes

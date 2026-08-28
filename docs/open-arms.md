@@ -1,6 +1,6 @@
 # Open arms - the reasoning behind the open queue rows
 
-`RESUME.md` is the queue and is budgeted in bytes, so it carries the ASK and the
+`queue.md` is the queue and is budgeted in bytes, so it carries the ASK and the
 entry condition for each open row. What it cannot carry is the argument behind
 the row - why the arm is worth running, what it confounds, what a result would
 and would not establish. That is what is here.
@@ -8,7 +8,7 @@ and would not establish. That is what is here.
 **Read the entry for a row before taking that row**, not before picking one. The
 queue is what ranks the work; this file is what you need once you have chosen.
 
-Moved out of `RESUME.md` 2026-08-28, when the queue was 68 KB against its own
+Moved out of `queue.md` 2026-08-28, when the queue was 68 KB against its own
 30 KB budget and the ratchet had been holding it flat rather than shrinking it.
 **Nothing was rewritten - every entry below is verbatim where it came from**,
 which is the same rule the 2026-08-28 `docs/` split followed. A row that has
@@ -525,13 +525,13 @@ since been reworded in the queue is the live statement; this is the reasoning.
       things), and the walking skeleton that was missing got built by accident the
       same day as `--human`. The cut that follows - gates #2/#3 demoted from gates
       to dated model snapshots, which kills most of the theme, persona, 6/7p and
-      cloud items - is the RESUME restructure, and it waits for S6 so the verdict
+      cloud items - is the queue.md restructure, and it waits for S6 so the verdict
       section can drain to `docs/` complete rather than mid-flight.
 
 
 ## While the card is busy - the standing menu
 
-Verbatim from `RESUME.md`. The question behind it recurs - *a run is in flight,
+Verbatim from `queue.md`. The question behind it recurs - *a run is in flight,
 so what can this session actually do?* - and the answer is stable, which is why
 it is reference rather than queue.
 
@@ -541,7 +541,7 @@ so it lives here instead of being retyped. **The freeze is the binding
 constraint, not the GPU** - no prompt, scorer or rules edit while an arm is
 running, which rules out most of the queue and all of the measured work.
 
-**Whether a freeze is in force is `RESUME.local.md`'s to say** - this table is
+**Whether a freeze is in force is `queue.local.md`'s to say** - this table is
 kept for whenever one is. Its standing lesson is the reusable half: an instrument
 scored against records that already exist costs nothing and can outrank the run it
 is waiting on.

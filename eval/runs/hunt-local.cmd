@@ -9,7 +9,7 @@ rem untracked copy of this recipe that produced the first seed-1000 run left no
 rem reviewable record of what it launched; that is what this file fixes.
 rem
 rem The recipe this generalises, kept because `hunt20`'s numbers are quoted in
-rem RESUME.md and the launcher that produced them was an untracked file in the
+rem queue.md and the launcher that produced them was an untracked file in the
 rem gitignored records dir (retired 2026-08-27, S4). It is this file's defaults
 rem with no probe gate:
 rem

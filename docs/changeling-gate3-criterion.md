@@ -1,20 +1,20 @@
 # changeling's pre-committed criterion - written 2026-08-28, BEFORE S2
 
 **This file is the PROMISE, not the result.** It was written before the 200-game
-run and is reproduced here exactly as it stood in `RESUME.md` when S2 launched.
+run and is reproduced here exactly as it stood in `queue.md` when S2 launched.
 The outcome, clause by clause, is `games/changeling/RULES.md` §S2 read; the
 arithmetic is `py -3 -m eval.s5_verdict`. **Nothing here may be edited to agree
 with what happened** - that is the whole value of a pre-commitment, and a promise
 rewritten after the fact is not evidence of anything.
 
-It moved out of the queue on 2026-08-28, once applied. `RESUME.md` carries the
+It moved out of the queue on 2026-08-28, once applied. `queue.md` carries the
 pointer.
 
 ---
 
 Same discipline as the S6 criterion, which held. **Written before the run because
 after it the statistic would be chosen with the numbers in view** - which is the
-`hunt20b` error `RESUME.md` has already refused twice by name, and S1's verdict
+`hunt20b` error `queue.md` has already refused twice by name, and S1's verdict
 declined the better-specified binary figure on exactly that ground. Nothing below
 may be edited once S2 launches; the outcome goes in the S5 writeup, clause by
 clause, and the promise stays as written.

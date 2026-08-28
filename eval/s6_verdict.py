@@ -20,7 +20,7 @@ Four things it establishes, in the order the verdict uses them:
    faced, never a hardcoded ``1/3``. The bar is read off the records, so a variant
    that changes what the night says would move it here too.
 
-3. **The denominator the campaign actually got.** After arm 1, ``RESUME.md``
+3. **The denominator the campaign actually got.** After arm 1, ``queue.md``
    projected ~8 hunts for the whole campaign and warned the verdict would read
    "not shown" for reasons of denominator. It is recomputed here because that
    projection was wrong, and a verdict that inherits a superseded projection
@@ -175,7 +175,7 @@ def criterion(paths: tuple[str, ...]) -> None:
 
 
 def denominator(paths: tuple[str, ...]) -> None:
-    """Why the campaign's hunt count is the story RESUME.md got wrong after arm 1."""
+    """Why the campaign's hunt count is the story queue.md got wrong after arm 1."""
     print("\n== the denominator - hunts per game, which arm 1 alone mis-projected")
     total_hunts = total_games = 0
     for path in paths:

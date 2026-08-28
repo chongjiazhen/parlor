@@ -36,13 +36,13 @@ size on 2026-08-27; the graded taint slope is the gate that remains, and gate #3
 got the campaign. This review treats the self-membership confound as a bias to
 acknowledge; it is a sampling floor, and that is what killed the gate.
 
-`RESUME.md` is the live account and this file is not - where the two disagree,
-`RESUME.md` wins. The arithmetic behind the sampling floor is `eval/gate3_arithmetic.py`.
+`queue.md` is the live account and this file is not - where the two disagree,
+`queue.md` wins. The arithmetic behind the sampling floor is `eval/gate3_arithmetic.py`.
 
 ---
 
 Scope: the six claims as posed, against `eval/run_games.py`, `eval/audit_decisions.py`,
-`games/cabal/referee.py`, `games/cabal/player.py`, `docs/player-counts.md`, RESUME.md.
+`games/cabal/referee.py`, `games/cabal/player.py`, `docs/player-counts.md`, queue.md.
 Verdicts first, argument after. The two findings that should change numbers are in
 claims 1 and 7.1.
 
@@ -122,7 +122,7 @@ Flags:
    Wilson floor clears 1/3 only at 6/9+ (~67% observed). At a true 60% hunter that
    is ~50% power; at a true 45% essentially none. So "not shown" conflates "at
    chance" with "cannot be distinguished from chance at this N". The pre-committed
-   criterion (RESUME:253-273) handles this correctly - no peeking, respecify the
+   criterion (queue.md:253-273) handles this correctly - no peeking, respecify the
    metric - so the *process* is defensible. But the report line
    (run_games.py:301-303) prints the CI without printing what the gate could
    detect; a reader sees "33.33%, chance 33.33%" and reads "hunter is at chance"
@@ -139,7 +139,7 @@ Flags:
    keeps gating against 1/3, in the flattering direction. Compute the baseline as
    `1/len(legal_targets)` from the same source the policy uses.
 
-3. Already flagged in RESUME but worth repeating because it bounds the current
+3. Already flagged in queue.md but worth repeating because it bounds the current
    number: the 3/9 was scored under the old rule (self-target legal, so the model
    guessed from 4 while the control guessed from 3). The standing 33.33% is not a
    clean measurement against its own printed baseline. The rerun is the fix -
@@ -209,7 +209,7 @@ merely plausible:
    mission loss, and the pivotality discount makes the left side win at almost any
    plausible parameterisation. 7/76 (~9%) occasional cover-approvals is consistent
    with a sensible mixed strategy, and the observed private reasoning quoted in
-   RESUME says the model is doing it on purpose at least once.
+   queue.md says the model is doing it on purpose at least once.
 
 Corollary already half-drawn in the repo: this permanently caps what pooled gate
 #3a can mean, because optimal seer play *should* score as imperfect
@@ -278,10 +278,10 @@ Three flags:
 
 ## 7. Not asked, and it matters
 
-### 7.1 The seed-1000 rerun is already two-variable - the RESUME's own prediction is broken
+### 7.1 The seed-1000 rerun is already two-variable - the queue.md's own prediction is broken
 
-RESUME:44-56 commits to "expect the re-run to shift hunter accuracy slightly and
-nothing else", and RESUME's over-sabotage item (:200-218) commits to landing the
+queue.md:44-56 commits to "expect the re-run to shift hunter accuracy slightly and
+nothing else", and queue.md's over-sabotage item (:200-218) commits to landing the
 `need` disclosure "after gate #3 is called... (a) must land first and alone". But
 commit `c43274e` (2026-08-26, "grade gate 3a on the blind half, **and tell the
 mission its threshold**") already put the need-disclosure into the live MISSION
@@ -293,7 +293,7 @@ information, so:
 - the "if it moves anything other than the hunt, something else changed" tripwire
   will fire by construction, and
 - over-sabotage rate, fail-card counts, evil win path mix, and (via the
-  good-exploits-blunders confound RESUME:219-225 documents) gate #3a itself are
+  good-exploits-blunders confound queue.md:219-225 documents) gate #3a itself are
   all expected to move.
 
 Either revert the prompt half of `c43274e` until the hunt-only rerun lands, or

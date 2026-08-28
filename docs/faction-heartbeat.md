@@ -4,7 +4,7 @@ Written 2026-08-27, unmeasured, from a design read of `core/observability.py`,
 `docs/reproducibility.md` and `docs/action-channel.md`. Same job as the action
 channel note: nothing here is a decision, it is here so the cheap moves stay cheap.
 
-**The item this scopes.** `RESUME.md` has carried one line since the first commit -
+**The item this scopes.** `queue.md` has carried one line since the first commit -
 "off-map faction heartbeat: factions acting on their own clock, driven by a
 long-running agent process outside the game loop" - and nothing has ever said what
 that would break. It was queued as free work because it runs outside the game loop
@@ -81,7 +81,7 @@ there is the remedy here - the actor declares its intended reveals as **typed
 facts**, those are checked against entitlement, and the prose is audited against the
 facts it did *not* declare. Keep `find_leaks` naive; change the corpus.
 
-**Which means these are not alternatives, and `RESUME.md` §S8 currently lists them
+**Which means these are not alternatives, and `queue.md` §S8 currently lists them
 as though they were.** The typed-fact channel is the expensive, unbuilt part of the
 adjudicator spike, and a faction is the smallest thing that needs it: a handful of
 action types against a Storyteller's 20-plus characters of discretion. Building the

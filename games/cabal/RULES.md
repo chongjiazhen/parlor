@@ -39,7 +39,7 @@ named in every skin, dealt by nothing:
 
 They are 7+ roles: at five seats the seer would see exactly one evil, or two evils
 would play knowing nothing of each other, and either is swing rather than signal.
-What they buy is stated in `RESUME.md` - they degrade information in a principled
+What they buy is stated in `queue.md` - they degrade information in a principled
 way, which is what turns the seer's measured edge into a claim about deduction and
 gate #2 into deception between agents that were never introduced.
 

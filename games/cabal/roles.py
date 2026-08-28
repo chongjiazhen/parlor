@@ -43,7 +43,7 @@ AGENT = Role("agent", Team.EVIL)  # generic evil for larger counts
 # skin, and nothing else. No shipped setup seats them - at 5 seats there are two
 # evil, which makes the seer see exactly one (LURKER) or leaves two evils who know
 # nothing of each other (STRAY), swingy to the point of noise. They are 7+ roles,
-# and RESUME.md holds the measurement sequencing: not before gate #3 is called,
+# and queue.md holds the measurement sequencing: not before gate #3 is called,
 # because changing what the seer knows mid-run voids the old number and the new one.
 #
 # `stray` rather than `blind` on purpose: "the blind stratum" already means the good
@@ -386,7 +386,7 @@ THEME_DRILL_EN = Theme(
 # if the DEFAULT carried one the baseline would be gone. So this skin is vocabulary
 # only: names for legibility, no fiction in the prompt beyond them.
 #
-# It is still a MEASURED change. Names carry connotation, and RESUME.md already
+# It is still a MEASURED change. Names carry connotation, and queue.md already
 # records that a role name can move a seat's threat assessment out of proportion to
 # what the role mechanically does - so this face is not `plain` with better labels.
 # Nothing has been run on it.

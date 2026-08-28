@@ -1,4 +1,4 @@
-# RESUME - open work
+# The queue - open work
 
 Queue only. Done work leaves - **delete the row.** What stays is the ask, its
 entry condition and what done looks like; the argument behind a row lives in
@@ -25,13 +25,13 @@ process probe.** Most of what it names is a fossil and no count of them is worth
 writing down: the marker landed in S4 (2026-08-27, `core/runlog.py`), so every
 log written before it lacks it permanently - the `hunt20*`, `huntcloud*` and
 unsuffixed `cl-powers-*` logs are all finished and all report as in flight. Read
-the answer against `RESUME.local.md`'s launch record, and treat a name it does
+the answer against `queue.local.md`'s launch record, and treat a name it does
 not list as a pre-S4 fossil rather than a run.
 
 **No progress figure, ETA or log-tail path is recorded here** - a count written
 into a queue file about a running job is stale the hour it is written, and an ETA
 in this block was wrong twice on 2026-08-27. That class lives in
-`RESUME.local.md` (gitignored, box-local); this file keeps terminal states and
+`queue.local.md` (gitignored, box-local); this file keeps terminal states and
 route decisions. Whether a freeze binds right now is its business too.
 
 **Two fronts are live and they are independent:**
@@ -328,7 +328,7 @@ Publishing:
 
 ## Where the rest of this file went
 
-`RESUME.md` was 1200 lines on 2026-08-28 and 68 KB the same day, against its own
+`queue.md` was 1200 lines on 2026-08-28 and 68 KB the same day, against its own
 30 KB budget - most of it work that had already landed, or argument that is only
 needed once a row is taken. The split is by lifetime, and **nothing was
 rewritten**: every line is verbatim where it went.

@@ -486,7 +486,7 @@ are excluded and reported; 195 scored.
 **Every number below is recomputable**: `py -3 -m eval.s5_verdict`, which
 reproduces the published summary from the per-game records before deriving
 anything and exits non-zero if it stops checking. The criterion it applies is
-`RESUME.md` §PRE-COMMITTED CRITERION, written 2026-08-28 before the run and left
+`queue.md` §PRE-COMMITTED CRITERION, written 2026-08-28 before the run and left
 exactly as written.
 
 ### THE GATE, clause by clause
@@ -734,7 +734,7 @@ and its 95% CI [-18.3pp, -1.7pp]. Three things the re-measurement establishes ab
 them, each of which changes how an old record reads:
 
 - **B's `0.0%` was never true.** The tracked instrument scores 4/200 on that same
-  after arm - reproducing the hand-read in `RESUME.md` sentence for sentence, which
+  after arm - reproducing the hand-read in `queue.md` sentence for sentence, which
   is this module's control - and 6/200 on the clean one. Two of those hits carry no
   correct statement at all, e.g. *"I exchanged cards with seats 1 and 3, but I have
   no idea what I'm holding now"* from a seat dealt `switcher`.

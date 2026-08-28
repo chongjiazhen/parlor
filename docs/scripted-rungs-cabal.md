@@ -92,7 +92,7 @@ rather than a default.
 
 The one thing that might transfer is narrower. Discussion is the most expensive
 and least-scored decision at the table, and games-per-GPU-hour is the binding
-constraint behind every interval in `RESUME.md` - 29 hunts is the whole cabal
+constraint behind every interval in `queue.md` - 29 hunts is the whole cabal
 hunt corpus. A scripted `_say` with a model-driven vote and hunt would buy games.
 It is a separate program from this one, it needs its own arm label, and it must
 not be folded into a rung quietly.
@@ -146,7 +146,7 @@ non-coordinating roles at the top of the priority list precisely because they
 cannot defer: parlor's `STRAY` neither sees its own side nor is seen by it, so it
 must always fail and everyone else must yield to it, and `LURKER` is hidden from
 the seer rather than from its partners. Both are 7+ roles by construction
-(`roles.py`), and `RESUME.md` already packages **6/7p + the two
+(`roles.py`), and `queue.md` already packages **6/7p + the two
 information-degrading evils** as one item for the same reason.
 
 **So rung A is not a new lane.** It is the CPU half of that queued item: the

@@ -50,7 +50,7 @@ before any count, and a failure exits non-zero.
 1. Each arm's utterance total against the 200 every published figure is a
    denominator of, and each arm's `fallback_rate` against the run record.
 2. The one prior figure that IS reproducible - the 2026-08-27 hand-read re-score of
-   error B's AFTER arm recorded in `RESUME.md`: 4/200, with all four hits
+   error B's AFTER arm recorded in `queue.md`: 4/200, with all four hits
    enumerated there. This instrument returns those four sentences verbatim.
 
 **Its BEFORE arm is a stated disagreement, not a check.** The same hand-read
@@ -88,7 +88,7 @@ PAIRS: dict[str, tuple[str, str]] = {
 #: What every published figure on these runs is a denominator of.
 UTTERANCES_PER_ARM = 200
 
-#: The reproducible prior figure - `RESUME.md`, error B re-scored by hand.
+#: The reproducible prior figure - `queue.md`, error B re-scored by hand.
 PRIOR_B = {"before": 11, "after": 4}
 
 #: Figures from the instrument that was never committed. Reported, never asserted.
@@ -284,7 +284,7 @@ def control(pairs: dict[str, dict]) -> list[str]:
         got = len(hand_read["after"]["B"])
         if got != PRIOR_B["after"]:
             bad.append(f"2026-08-27 after: error B scores {got}, the hand-read "
-                       f"re-score in RESUME.md says {PRIOR_B['after']} and "
+                       f"re-score in queue.md says {PRIOR_B['after']} and "
                        f"enumerates all four")
     return bad
 

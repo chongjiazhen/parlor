@@ -1,7 +1,7 @@
 # Evidence discipline - the rules this repo learned by breaking them
 
 Durable lessons about how parlor handles a number, a citation, a run and its own
-record. They lived in `RESUME.md` until 2026-08-28, wrapped in the terminal
+record. They lived in `queue.md` until 2026-08-28, wrapped in the terminal
 narrative of the slices that produced them; the queue keeps a pointer and the
 reasoning lives here. Each one is here because it has already cost something.
 
@@ -61,14 +61,14 @@ seeing that is the same error wearing a third hat.
   clause did not apply cleanly, record that it did not rather than smoothing it -
   both applied criteria have one such clause each.
 - **Stopping when a floor happens to cross is peeking**, and pooling runs after the
-  fact is the same move. `RESUME.md` carries the open row for the honest version:
+  fact is the same move. `queue.md` carries the open row for the honest version:
   a group-sequential boundary computed BEFORE a campaign, which must never be
   retrofitted to records already in hand.
 
 ## Projecting a rate from one draw
 
 **A rate whose denominator is another gate's outcome is not projectable from one
-draw.** After S6's arm 1 returned 4 hunts, `RESUME.md` projected ~8 for the campaign
+draw.** After S6's arm 1 returned 4 hunts, `queue.md` projected ~8 for the campaign
 and said the gate was "on course to return not shown for reasons of denominator, not
 of hunter skill". Arm 2 returned 16. The campaign returned **20 hunts, exactly the
 0.50/game the power table assumed**, so the gate failed on hunter skill at a sample
@@ -77,7 +77,7 @@ arms sit four-fold apart (0.20 vs 0.80 hunts/game, evil at 85% vs 60%) for exact
 that reason. Numbers: `docs/gate3b-verdict.md`.
 
 The same shape governs pace estimates for a run in flight, which is why
-`RESUME.local.md` carries a band rather than a number and `RESUME.md` carries
+`queue.local.md` carries a band rather than a number and `queue.md` carries
 neither.
 
 ## Freezing code across a campaign, and proving the freeze held
@@ -132,7 +132,7 @@ none of them.
 
 ## What the successors reached - moved from the queue 2026-08-28
 
-Verbatim from `RESUME.md`, whose 2026-08-27 prior-work sweep produced it. The
+Verbatim from `queue.md`, whose 2026-08-27 prior-work sweep produced it. The
 sources are in the off-repo ledger; what is stated here is in parlor's terms.
 
 **Three things the successors reached, and the first two are in the S6 verdict.**

@@ -1,6 +1,6 @@
 # Decisions already locked, and the criteria that were pre-committed
 
-Moved out of `RESUME.md` 2026-08-28: settled, not queue, and verbatim except where
+Moved out of `queue.md` 2026-08-28: settled, not queue, and verbatim except where
 an entry says otherwise. Nothing here is "below" or "above" anything in the queue -
 a pointer that survived the move as a deictic is a pointer at nothing.
 Code invariants are NOT here - they are in `CLAUDE.md`, which is always loaded,
@@ -75,7 +75,7 @@ being arithmetic (`eval/durf_camp1_verdict.py`) written mid-run.
   `docs/gate3b-verdict.md`, beside what each clause returned.
 - **The 2026-08-25 hunt run**, the first of them - superseded by S6's, which is the
   same statistic computed the honest way. Its one durable clause outlived it and is
-  a live row in `RESUME.md`: if the hunter lands marginal, **respecify the metric
+  a live row in `queue.md`: if the hunter lands marginal, **respecify the metric
   rather than buying games**, because gate #3 is bottlenecked on its lowest-power
   half.
 - The discipline itself, the `hunt20b` error it exists to refuse, and why pooling
@@ -85,7 +85,7 @@ being arithmetic (`eval/durf_camp1_verdict.py`) written mid-run.
 
 ## Three things recorded before they were measured - moved from the queue 2026-08-28
 
-Verbatim from `RESUME.md`. Pre-registered so that none of them reads as a
+Verbatim from `queue.md`. Pre-registered so that none of them reads as a
 surprise later; none has been run.
 
 **Three things to record before they are measured**, so none reads as a surprise

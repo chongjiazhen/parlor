@@ -331,7 +331,7 @@ THEME_GREEK = Theme(
 # a posting rather than a damnation. Deceiving and being caught are neither heroic
 # nor villainous; they are how the roll gets filled.
 #
-# Sourced across the shared pantheon but framed by ONE corpus, per RESUME: Journey to
+# Sourced across the shared pantheon but framed by ONE corpus, per queue.md: Journey to
 # the West supplies imagery and vocabulary, never the frame, because its polarity is
 # righteous-pilgrims-versus-impostors and mixing the two would leave this skin's
 # valence indeterminate - the `1984-en`-vs-`plain` confound rebuilt by hand. The
@@ -360,7 +360,7 @@ THEME_GREEK = Theme(
 # signatures do not. The same rule removed `Yellow Turban`, which collided lexically
 # rather than by ownership with the JTTW skin's `Yellow Wind` for the same slot.
 #
-# A JTTW-FRAMED skin is NOT built, and its reserved names are recorded in RESUME so a
+# A JTTW-FRAMED skin is NOT built, and its reserved names are recorded in queue.md so a
 # later session does not re-collide with them. Its polarity matches `folk`, so it
 # would be a second same-polarity fiction beside `greek` rather than a new arm - and
 # if it is ever built it takes `greek`'s slot rather than joining it, because two
@@ -370,9 +370,9 @@ THEME_GREEK = Theme(
 # and could not be read; the clean language control already exists in cabal
 # (`1984-en` vs `1984-cn`, fiction byte-identical) and has never been run. A CJK skin
 # here also still wants the `sys.stdout.reconfigure` line `eval/run_changeling.py`
-# has never had - see RESUME.
+# has never had - see queue.md.
 #
-# TEXT CHECK DONE 2026-08-27, and it moved a clause. RESUME asked for the reading to
+# TEXT CHECK DONE 2026-08-27, and it moved a clause. queue.md asked for the reading to
 # be checked against the novel before anything was built on it. Chapter 99, Jiang
 # Ziya at the investiture altar, reading Yuanshi Tianzun's edict: the dead are
 # enrolled "依劫運之輕重，循資品之高下" - by the weight of the calamity endured and by
@@ -453,7 +453,7 @@ THEME_FOLK_INV = Theme(
 # different mechanisms. `investiture` is neutral with total stakes - everyone dies and
 # it does not matter, because dying is a posting. This one is neutral by having no
 # stakes at all: a parlour game among guests who go home afterwards. That distinction
-# is exactly the objection RESUME raised against a masquerade as THE arm 4 ("neutral
+# is exactly the objection queue.md raised against a masquerade as THE arm 4 ("neutral
 # by being thin"), and it stops being an objection once both exist, because the pair
 # separates two things a single neutral arm confounds - an act with no moral weight,
 # and an act with no consequences. If arm 4 and arm 4' differ, what moved was stakes

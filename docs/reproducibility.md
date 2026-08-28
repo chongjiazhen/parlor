@@ -2,7 +2,7 @@
 
 Measured 2026-08-27 from two complete 20-game runs. This is the strongest evidence
 class in the repo - a demonstration, not a design read - and it settles one claim
-while invalidating a plan that three items in `RESUME.md` were waiting on.
+while invalidating a plan that three items in `queue.md` were waiting on.
 
 ## The measurement
 
@@ -34,7 +34,7 @@ So a local run is a function of its seed. Re-running one reproduces it.
 **A repeat run at the same seed cannot measure run-to-run spread.** The spread is
 zero by construction, and no number of repeats changes that.
 
-`RESUME.md` had queued `hunt20d` as "the paired re-run that measures the spread",
+`queue.md` had queued `hunt20d` as "the paired re-run that measures the spread",
 and hung the ONUW and cloud-arm decisions on the result. That was a contradiction
 nobody caught for a day: `2cfe9d5` pinned the sampler *in order to make runs
 reproducible*, and re-running to estimate variance requires them not to be. Those

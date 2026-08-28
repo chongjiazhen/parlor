@@ -1,7 +1,7 @@
 # Design notes and reference
 
-The index of this directory, moved out of `RESUME.md` 2026-08-28. Durable material
-lives beside the code, not in the queue; `RESUME.md` keeps the open rows.
+The index of this directory, moved out of `queue.md` 2026-08-28. Durable material
+lives beside the code, not in the queue; `queue.md` keeps the open rows.
 
 **When this flat directory should become folders.** Nothing here is broken by 23
 files in one namespace - the defects this layout has actually produced were stale
@@ -32,7 +32,7 @@ partly true is worse than none.
   notes. **Read before trusting any number in this repo.**
 - `docs/decisions.md` - settled calls and the pre-committed criteria, all applied.
 - `docs/open-arms.md` - 2026-08-28. The argument behind each open row in
-  `RESUME.md`, which carries only the ask and the entry condition. **Read the
+  `queue.md`, which carries only the ask and the entry condition. **Read the
   entry for a row before taking that row**, not before picking one.
 
 - `docs/information-model.md` - 2026-08-28. The settled vocabulary for what this

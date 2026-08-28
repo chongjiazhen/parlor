@@ -27,7 +27,7 @@ cd "$(git rev-parse --show-toplevel)"
 # ---------------------------------------------------------------------------
 # The queue does not grow once it is over budget.
 #
-# RESUME.md's own first rule is that done work leaves to git log. It stopped
+# queue.md's own first rule is that done work leaves to git log. It stopped
 # being kept and the file reached 1200 lines - a read every cold session pays
 # for, most of it work that had already landed. Prose could not enforce it,
 # because the rule had no destination: annotations had to stay somewhere, and
@@ -51,7 +51,7 @@ cd "$(git rev-parse --show-toplevel)"
 # the BLOB's - line endings are whatever git stores, and the same number comes
 # back on a CRLF checkout and an LF one.
 QUEUE_CEILING=30000
-QUEUE_PATH=RESUME.md
+QUEUE_PATH=queue.md
 
 # The old side of the ratchet has to follow a RENAME, or the rename reads as
 # growth from zero.
