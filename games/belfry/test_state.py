@@ -171,3 +171,43 @@ class TestDeterminism(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestInheritedRoleLookup(unittest.TestCase):
+    """Inheritance is the one thing that puts two rows on one role key.
+
+    ``_demon_died`` writes ``fiend`` onto the successor and leaves the dead
+    demon's row holding it, so ``find`` has to say which of the two ACTS. The
+    living one does: a first-match search returns the corpse, the night walk
+    skips the demon's step on the ``alive`` guard, and the living demon never
+    kills again for the rest of the game.
+    """
+
+    def _inherited(self, dead: int):
+        """Seats 0 and 1 both key ``fiend``; ``dead`` is the one that died."""
+        grim = dealt(5, 4, COMPACT)
+        fiend = ROLES["fiend"]
+        for seat in (0, 1):
+            grim.seat(seat).role = fiend
+            grim.seat(seat).believes = fiend
+        grim.seat(dead).alive = False
+        return grim
+
+    def test_a_living_holder_wins_over_a_dead_one_at_a_lower_seat(self):
+        grim = self._inherited(dead=0)
+        self.assertEqual(grim.find("fiend"), 1)
+        self.assertEqual(grim.find_believer("fiend"), 1)
+
+    def test_the_living_holder_is_found_when_it_sits_first(self):
+        grim = self._inherited(dead=1)
+        self.assertEqual(grim.find("fiend"), 0)
+
+    def test_a_role_whose_only_holder_is_dead_is_still_found(self):
+        grim = dealt(5, 4, COMPACT)
+        seat = grim.find("fiend")
+        grim.seat(seat).alive = False
+        self.assertEqual(grim.find("fiend"), seat)
+
+    def test_the_living_demon_agrees_with_the_role_search(self):
+        grim = self._inherited(dead=0)
+        self.assertEqual(grim.find("fiend"), grim.demon_seat())

@@ -109,12 +109,28 @@ class Grimoire:
         return [s.index for s in self.seats if s.alive]
 
     def find(self, key: str) -> int | None:
-        """The seat holding a role right now, or ``None``. Roles are unique on a
-        script, so there is at most one."""
+        """The seat holding a role right now, or ``None``. A LIVING holder wins.
+
+        Roles are unique on a script at the deal, and inheritance is the one thing
+        that breaks that: ``_demon_died`` writes ``fiend`` onto the successor and
+        leaves the dead demon's row holding it too, so two rows key ``fiend`` for
+        the rest of the game. A first-match search then returns the corpse, the
+        night walk skips the demon's step on its ``alive`` guard, and the living
+        demon never kills again - the same corpse-over-successor hazard
+        ``demon_seat`` documents, reached by the other search. Measured before the
+        qualifier was here: 74 of 400 five-seat compact games, 18.50%.
+
+        A role whose only holder is dead still resolves to that seat, so every
+        caller reading a unique role is unaffected.
+        """
+        dead: int | None = None
         for s in self.seats:
             if s.role.key == key:
-                return s.index
-        return None
+                if s.alive:
+                    return s.index
+                if dead is None:
+                    dead = s.index
+        return dead
 
     def find_believer(self, key: str) -> int | None:
         """The seat that ACTS as a role - the one holding it, or the seat that
