@@ -16,3 +16,9 @@ eval/records/
 /.scratch/
 
 .claude/settings.local.json
+
+# Build output from `pip install -e .`. The packaging INPUT is tracked
+# (pyproject.toml); what setuptools generates from it is not.
+*.egg-info/
+build/
+dist/

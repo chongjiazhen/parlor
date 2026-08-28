@@ -138,3 +138,49 @@ def test_play_with_no_game_is_an_error(capsys):
 def test_an_unknown_verb_is_an_error(capsys):
     assert cli(["score", "cabal"]) == 2
     assert "score" in capsys.readouterr().err
+
+
+# ---- the two commands beside `play` ---------------------------------------
+
+def test_doctor_is_reachable_from_the_command_line(monkeypatch):
+    """It answers a question about the BOX, which no game flag can, so it has to
+    be a sibling of `play` rather than a flag inside one."""
+    seen = []
+    monkeypatch.setattr("core.doctor.main", lambda argv: seen.append(argv) or 0)
+    assert cli(["doctor", "--probe"]) == 0
+    assert seen == [["--probe"]]
+
+
+def test_listing_costs_no_backend_import(monkeypatch):
+    """`--list` must keep working on a box with no network stack worth the name.
+    Asserted by making the import itself fatal."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def refuse(name, *a, **kw):
+        if name == "core.doctor":
+            raise AssertionError("--list imported the doctor")
+        return real_import(name, *a, **kw)
+
+    monkeypatch.setattr(builtins, "__import__", refuse)
+    assert cli(["--list"]) == 0
+
+
+def test_the_installed_command_answers_a_mistyped_game_with_the_list(capsys):
+    """The console script never runs the `__main__` block, so this handling had
+    to move into `cli()`. Without it, `parlor play cabla` is a traceback for the
+    installed command and a clean message for `py -3 -m parlor` - the same repo
+    behaving two ways depending on how it was reached.
+    """
+    import sys as _sys
+
+    from parlor.__main__ import cli
+
+    saved = _sys.argv
+    _sys.argv = ["parlor", "play", "cabla"]
+    try:
+        assert cli() == 2
+    finally:
+        _sys.argv = saved
+    assert "cabal" in capsys.readouterr().err

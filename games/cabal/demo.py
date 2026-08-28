@@ -29,6 +29,7 @@ import argparse
 import os
 import random
 import sys
+from pathlib import Path
 
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
@@ -38,6 +39,33 @@ from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
 from games.cabal.player import ACTION_KEYS, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee, Phase
 from games.cabal.roles import DEFAULT_THEME, THEMES
+
+#: The standing frame a person needs and the per-turn ask does not carry: what
+#: wins, what the counters on the board do, what stays secret. Printed by the
+#: CONSOLE only - see ``core.console.COMMANDS`` for why it is not in the payload.
+#: Written against ``RULES.md``, which ``rules`` prints in full.
+BRIEFING = """cabal in one screen. Five seats: three run the missions, two work against them.
+You are told your own role, whatever the night gave you, and nothing else.
+
+  Win      Good holds 3 of the 5 missions AND survives the hunt at the end.
+           Evil sinks 3 missions, OR draws 5 rejected proposals in a row, OR -
+           once good has held 3 - correctly names the seat the night showed both
+           evil seats to.
+  Round    the leader proposes a team; the table talks; every seat votes; a
+           strict majority (3 of 5) sends the team on the mission.
+  Teams    missions 1..5 take 2, 3, 2, 3, 3 seats. A single fail card sinks one.
+  Rejects  a rejected proposal passes leadership on and adds to the reject
+           streak. Five in a row and evil takes the game. A passed vote resets it.
+  Public   every vote and every approver, the proposal, and the NUMBER of fails.
+  Secret   who played which mission card, always. Good may not play a fail card -
+           the referee refuses it.
+
+'rules' prints the full rules.
+"""
+
+#: Read at ``rules`` time rather than at import: an unreadable file must cost a
+#: message and not a startup.
+RULES_PATH = str(Path(__file__).with_name("RULES.md"))
 
 
 def opening_view(ref: CabalReferee, humans: set[int]) -> str:
@@ -69,7 +97,9 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
     mistypes twice has not decided to hand their seat to the control policy.
     """
     fallback = RandomPolicy(rng=rng)
-    humans = {s: LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS),
+    humans = {s: LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
+                                                 briefing=BRIEFING,
+                                                 rules_path=RULES_PATH),
                            retries=args.human_retries, fallback=fallback)
               for s in human_seats(args.human, ref.n)}
     if not args.backend:

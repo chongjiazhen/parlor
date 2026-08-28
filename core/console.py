@@ -37,6 +37,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 #: Returned as the served-upstream id for every human decision. It lands in
@@ -58,8 +59,26 @@ Answer in shorthand:  <key> <value>       e.g.  vote y
 Several at once, separated by ';' before a key:
                                                 say I'll wait; think 1 and 4 look paired
 Or type a JSON object directly, on one or more lines: {"vote": true}
-'?' reprints the view. Ctrl-C ends the game.
+'?' reprints the view. 'rules' prints this game's full rules, 'help' this text.
+Ctrl-C ends the game.
 """
+
+#: Typed at the same prompt as a move, and not moves. A command is answered here,
+#: never reaches the game, never spends a retry and never enters the reply.
+#:
+#: **Why this does not touch the payload.** A seat's view is what the referee
+#: renders and gate #1 audits; none of this text is in it and none of it goes back.
+#: The console has always printed one such block - ``BANNER`` - for the same
+#: reason: a model arrives knowing how to emit JSON and a person does not, so the
+#: orientation a person needs is console furniture rather than context. Putting a
+#: standing objective into ``render_context`` instead would change the bytes every
+#: MODEL receives and re-baseline every number this repo has recorded, to save a
+#: person a lookup. That is the line - the ask stays byte-identical, the furniture
+#: around it is allowed to help.
+#:
+#: A game whose ``ACTION_KEYS`` held one of these words would have it shadowed, so
+#: the disjointness is asserted in ``core/test_console.py`` rather than noticed.
+COMMANDS = ("?", "help", "rules")
 
 
 class TooManyHumans(SystemExit):
@@ -116,6 +135,22 @@ class ConsoleBackend:
     #: the equivalent orientation here, and it says the same thing: this view is
     #: all there is.
     banner: str = BANNER
+    #: A few lines of standing frame - the win condition, the counters on the
+    #: board, what stays secret - printed once under the banner and reprinted by
+    #: ``help``. Passed in by the game for the same reason ``keys`` is: what wins
+    #: this game is a fact about the game, and this module is core.
+    #:
+    #: It exists because the per-turn ask is excellent at "what may I do now" and
+    #: silent on "what am I trying to do": measured on a real hand-played game, the
+    #: propose and vote prompts - where a player spends most of its turns - state
+    #: neither the win condition nor what the ``rejects 0/5`` counter does at 5.
+    #: A model can be indifferent to that; a person cannot play without it.
+    briefing: str = ""
+    #: This game's ``RULES.md``, printed in full on ``rules``. The file is already
+    #: the canonical statement of the game - the gates, the strata and the hunt
+    #: baseline all derive from it - so pointing the console at it means a player
+    #: and a scorer are never reading two different accounts of the same rule.
+    rules_path: str | None = None
     #: ``None`` resolves to the live ``sys.stdin``/``sys.stdout`` at call time
     #: rather than at import, so a test can hand in its own streams and a caller
     #: that reconfigures the console encoding still gets the reconfigured one.
@@ -159,7 +194,7 @@ class ConsoleBackend:
     def complete_meta(self, context: str) -> tuple[str, str]:
         """Show this seat's view, read an answer, return it as a model would."""
         if not self._greeted:
-            self._say(self.banner)
+            self._greet()
             self._greeted = True
         self._say("-" * 72)
         self._say(context)
@@ -168,8 +203,12 @@ class ConsoleBackend:
             line = self._readline().strip()
             if not line:
                 continue
-            if line == "?":
-                self._say(context)
+            # A command is checked against the game's own keys first, so a game
+            # that ever names an action ``rules`` keeps its action and merely
+            # loses the shortcut. The move always wins the word.
+            word = line.lower()
+            if word in COMMANDS and word not in self.keys:
+                self._command(word, context)
                 continue
             if line.startswith("{"):
                 return self._read_json(line), HUMAN
@@ -180,6 +219,39 @@ class ConsoleBackend:
                 # MOVE, so it must not spend one of the seat's retries. Only text
                 # that parsed into an action goes back to the game to be judged.
                 self._say(f"  ({exc}; keys are {', '.join(self.keys)})")
+
+    # ---- console commands, which are not moves ----------------------------
+
+    def _greet(self) -> None:
+        self._say(self.banner)
+        if self.briefing:
+            self._say(self.briefing.rstrip())
+            self._say()
+
+    def _command(self, word: str, context: str) -> None:
+        """Answer a command and return to the same ask. Nothing here is recorded,
+        because nothing here was a decision."""
+        if word == "?":
+            self._say(context)
+        elif word == "help":
+            self._greet()
+        elif word == "rules":
+            self._say(self._rules())
+
+    def _rules(self) -> str:
+        """This game's rules, or a straight account of why they are not here.
+
+        A missing or unreadable file is reported and the game continues: the rules
+        are orientation, and a seat that can still make its move must not be ended
+        by a failed read of a convenience.
+        """
+        if not self.rules_path:
+            return ("  (no rules file was passed to this seat - the game's own "
+                    "RULES.md is the canonical statement)")
+        try:
+            return Path(self.rules_path).read_text(encoding="utf-8")
+        except OSError as exc:
+            return f"  (cannot read {self.rules_path}: {exc})"
 
     def _read_json(self, first: str) -> str:
         """Keep reading while the braces are open, so a pasted multi-line object

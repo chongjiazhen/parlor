@@ -27,15 +27,21 @@ import sys
 from core.registry import UnknownRung, listing, lookup
 
 USAGE = """\
-usage: py -3 -m parlor play <game> [that game's own flags]
-       py -3 -m parlor --list
+usage: parlor play <game> [that game's own flags]
+       parlor doctor [--probe]
+       parlor --list
 
 Registered rungs:
 {listing}
 
 A game's flags are its own - `play cabal --help` prints cabal's.
+`doctor` reports which backend routes this box can reach and what they will
+serve - the question no --help can answer, because its answer is about the box.
 Each rung seats ONE person (`--human <seat>`): a terminal is one channel, so two
-people at it would read each other's private view."""
+people at it would read each other's private view.
+
+Installed (`pip install -e .`) the command is `parlor`; from a clone it is
+`py -3 -m parlor`. They are the same entry point."""
 
 
 def usage() -> str:
@@ -51,6 +57,12 @@ def main(argv: list[str] | None = None) -> int:
     if argv[0] in ("-l", "--list"):
         print(listing())
         return 0
+    if argv[0] == "doctor":
+        # Imported on dispatch, not at module scope, so `--list` and `play` cost
+        # no network module and a doctor that failed to import could not take the
+        # listing down with it - the rule the registry already applies to games.
+        from core.doctor import main as doctor
+        return doctor(argv[1:])
     if argv[0] != "play":
         print(f"unknown command {argv[0]!r}\n\n{usage()}", file=sys.stderr)
         return 2
@@ -83,8 +95,21 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
+def cli() -> int:
+    """The installed ``parlor`` console script.
+
+    It exists because ``console_scripts`` calls this function and never runs the
+    ``__main__`` block below, so the ``UnknownRung`` handling that turns a mistyped
+    game name into the list of the real ones would have been silently absent from
+    the installed command - the one a person actually types - while staying present
+    in the clone-local ``py -3 -m parlor``. Both entry points route through here.
+    """
     try:
-        raise SystemExit(main())
+        return main()
     except UnknownRung as exc:
-        raise SystemExit(str(exc))
+        print(str(exc), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(cli())

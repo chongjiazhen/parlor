@@ -46,6 +46,31 @@ view.
 No dependencies, no API key, no GPU. The referee and the leak audit are stdlib
 Python; a backend is only needed to put models in the other seats.
 
+`pip install -e .` puts the same entry point on PATH as `parlor`, which is worth
+one line of setup because `python -m parlor` silently requires you to be standing
+in a checkout. It adds no dependency: the referee and both gates stay stdlib, and a
+fresh clone with no install plays exactly the same games.
+
+**In a game, three words are not moves.** `?` reprints the view, `help` reprints the
+orientation, and `rules` prints that game's full `RULES.md`. They are answered by
+the console and never reach the referee - the per-turn ask tells you what you may
+play right now and deliberately says nothing about what wins, because THAT text
+would have to go into the payload every model receives and re-baseline every number
+in this repo. The console is allowed to help; the ask is not allowed to change.
+
+Before a live game, `parlor doctor` answers the part no `--help` can, because its
+answer is about the box and not the repo:
+
+```bash
+parlor doctor            # which routes are reachable, which key is set, what they list
+parlor doctor --probe    # one real one-token call per live route
+```
+
+The probe is the point. `/v1/models` answers from configuration, so a listed id can
+be cold and fail at call time with `model_not_armed` or `model_not_found`; only a
+call distinguishes a catalog from an armed model. It exits non-zero when no route
+can serve a game, so it can gate an unattended run.
+
 A rendered game to read instead:
 [`transcripts/local-q36-2rounds-game0.md`](transcripts/local-q36-2rounds-game0.md)
 - played on the `1984-en` skin, which the header states, so it does not look like
@@ -165,7 +190,9 @@ games/changeling/night.py  the night: roles move, and the seat is not told
 games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 8 themes
 
 core/registry.py           name -> the driver that plays that rung
-parlor/__main__.py         `python -m parlor play <game>`, and no game logic
+core/doctor.py             `parlor doctor` - what this BOX can serve, and a real probe
+parlor/__main__.py         `parlor play <game>`, and no game logic
+pyproject.toml             the console script; no runtime dependency, ever
 
 eval/run_cabal.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling

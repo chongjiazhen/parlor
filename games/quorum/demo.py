@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import random
 import sys
+from pathlib import Path
 
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
@@ -32,6 +33,30 @@ from games.quorum.audit import dependence_leaks, identity_leaks
 from games.quorum.player import ACTION_KEYS, LLMPolicy, RandomPolicy, play_game
 from games.quorum.referee import Phase, QuorumReferee
 from games.quorum.roles import DEFAULT_THEME, THEMES
+
+#: See ``games.cabal.demo.BRIEFING`` - console furniture, never the payload.
+BRIEFING = """quorum in one screen. Five seats legislating: three majority, two minority. The
+two minority seats know each other; the three majority seats know nothing. What
+a seat may SEE is a fact about the office it holds this event, not about its role.
+
+  Win       majority: 5 majority cards enacted, or the principal removed from
+            play. minority: 6 minority cards enacted, or the principal installed
+            as enactor on a passed vote once 3 minority cards are enacted.
+  Event     the proposer nominates an enactor; every living seat votes, publicly,
+            and a strict majority passes (a tie fails); the proposer is dealt 3
+            cards, discards 1 face down and passes 2; the enactor discards 1 and
+            the last card is enacted in the open; both may then claim what they
+            saw; a power fires if the enactment reached its threshold; discussion.
+  Stall     three failed votes in a row and the top card enacts unseen, with no
+            claim attached. Any passed vote resets that track.
+  Public    every vote in full, every enactment, every claim.
+  Secret    the hand of 3 and both discards. A claim about them is not checked by
+            any rule - and no seat's assertion can end the game.
+
+'rules' prints the full rules.
+"""
+
+RULES_PATH = str(Path(__file__).with_name("RULES.md"))
 
 
 def opening_view(ref: QuorumReferee, humans: set[int]) -> str:
@@ -84,7 +109,9 @@ def build_policies(ref: QuorumReferee, args, rng: random.Random) -> dict:
     because the fallback at the end of that loop plays a RANDOM move, and a person
     who mistypes twice has not decided to hand their seat to the control policy."""
     fallback = RandomPolicy(rng=rng)
-    humans = {s: LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS),
+    humans = {s: LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
+                                                 briefing=BRIEFING,
+                                                 rules_path=RULES_PATH),
                            retries=args.human_retries, fallback=fallback)
               for s in human_seats(args.human, ref.n)}
     if not args.backend:

@@ -167,3 +167,97 @@ def test_the_same_seat_twice_is_one_person_not_two():
     """``--human 0,0`` is a typo, not a second player - refusing it would be the
     guard firing on the wrong thing."""
     assert human_seats("0,0", 5) == {0}
+
+
+# ---- commands, which are furniture and not moves --------------------------
+
+RULES_STUB = "# stub rules\n\nThree missions held wins it.\n"
+
+
+def briefed(text, tmp_path=None, briefing="OBJECTIVE: hold three missions.",
+            rules=None):
+    backend = ConsoleBackend(keys=("team", "say", "vote", "card", "target",
+                                   "think", "note"),
+                             briefing=briefing, rules_path=rules)
+    backend.stdin = io.StringIO(text)
+    backend.stdout = io.StringIO()
+    return backend
+
+
+def test_a_command_is_not_a_move_and_does_not_reach_the_game():
+    """The whole safety argument for commands in one assertion: whatever the
+    console answered, the reply handed back is the MOVE and nothing else. If a
+    command could leak into the reply it would be an action nobody played."""
+    backend = briefed("help\nrules\n?\nvote y\n")
+    reply, served = backend.complete_meta("your view")
+    assert json.loads(reply) == {"vote": "y"}
+    assert served == HUMAN
+
+
+def test_the_briefing_prints_under_the_banner_and_only_once():
+    backend = briefed("vote y\nvote n\n")
+    backend.complete_meta("view")
+    backend.complete_meta("view")
+    assert backend.stdout.getvalue().count("OBJECTIVE: hold three missions.") == 1
+
+
+def test_help_reprints_the_briefing_mid_game():
+    backend = briefed("help\nvote y\n")
+    backend.complete_meta("view")
+    assert backend.stdout.getvalue().count("OBJECTIVE: hold three missions.") == 2
+
+
+def test_rules_prints_the_games_own_rules_file(tmp_path):
+    path = tmp_path / "RULES.md"
+    path.write_text(RULES_STUB, encoding="utf-8")
+    backend = briefed("rules\nvote y\n", rules=str(path))
+    backend.complete_meta("view")
+    assert "Three missions held wins it." in backend.stdout.getvalue()
+
+
+def test_an_unreadable_rules_file_costs_a_line_and_not_the_game(tmp_path):
+    """Orientation is a convenience, and a convenience must not be able to end a
+    seat that can still make its move."""
+    backend = briefed("rules\nvote y\n", rules=str(tmp_path / "gone.md"))
+    reply, _ = backend.complete_meta("view")
+    assert json.loads(reply) == {"vote": "y"}
+    assert "cannot read" in backend.stdout.getvalue()
+
+
+def test_no_command_word_is_also_an_action_key():
+    """A game that named an action ``rules`` would have it shadowed by the
+    console. Asserted over every REGISTERED game rather than the two that exist
+    today, so a rung added later is covered the day it lands."""
+    from importlib import import_module
+
+    from core.console import COMMANDS
+    from core.registry import RUNGS
+
+    for name, rung in RUNGS.items():
+        keys = import_module(rung.module).ACTION_KEYS
+        assert not set(keys) & set(COMMANDS), name
+
+
+def test_a_move_wins_the_word_if_a_game_ever_takes_it():
+    """The shadowing rule, stated as behaviour: if ``rules`` were an action key,
+    typing it plays the action. The guard above keeps that hypothetical, and this
+    keeps the precedence correct if it ever stops being one."""
+    backend = ConsoleBackend(keys=("rules",), rules_path="/nonexistent")
+    backend.stdin = io.StringIO("rules\n")
+    backend.stdout = io.StringIO()
+    reply, _ = backend.complete_meta("view")
+    assert json.loads(reply) == {"rules": ""}
+
+
+def test_the_briefing_never_enters_the_seats_view():
+    """Gate #1's neighbour. The briefing is console furniture: it is printed
+    around the view, never into it, so the bytes the referee rendered are what a
+    model would have received and a hand-played game stays evidence about the
+    payload."""
+    view = "You are seat 0. Board: mission 1."
+    backend = briefed("vote y\n")
+    backend.complete_meta(view)
+    printed = backend.stdout.getvalue()
+    assert view in printed
+    assert "OBJECTIVE" not in view
+    assert printed.index("OBJECTIVE") < printed.index(view)

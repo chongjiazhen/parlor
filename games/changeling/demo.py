@@ -28,6 +28,7 @@ import argparse
 import os
 import random
 import sys
+from pathlib import Path
 
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
@@ -37,6 +38,30 @@ from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                      play_game)
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import DEFAULT_THEME, THEMES
+
+#: See ``games.cabal.demo.BRIEFING`` - console furniture, never the payload.
+BRIEFING = """changeling in one screen. Five seats, eight cards: five dealt out, three left
+face down in the centre. Two of the eight are pack (evil).
+
+  The rule   you ACT on the card you were dealt, and you WIN with the card you
+             HOLD at dawn. The night moves cards, and a seat is never told that
+             its own card moved - so you can play a whole game sincerely wrong
+             about yourself.
+  Win        the village wins if any accused seat holds pack at dawn. Otherwise
+             the pack wins. Judged on dawn truth, never on the deal or on belief.
+  Day        one discussion round-robin, then every seat names exactly one OTHER
+             seat, simultaneously. Most votes is accused; on a tie, all tied
+             seats are accused. Naming yourself is refused.
+  Public     everything said in discussion, and the votes.
+  Secret     every card, the whole night. What you were shown, if anything, is
+             yours alone - and it was true when you saw it.
+  Given      at least one pack card is always dealt to a SEAT, never both to the
+             centre. That is a public rule, so every seat may reason from it.
+
+'rules' prints the full rules.
+"""
+
+RULES_PATH = str(Path(__file__).with_name("RULES.md"))
 
 
 def opening_view(ref: ChangelingReferee, humans: set[int]) -> str:
@@ -84,7 +109,9 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
 
     def policy(seat: int):
         if seat in humans:
-            return LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS),
+            return LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
+                                                   briefing=BRIEFING,
+                                                   rules_path=RULES_PATH),
                              retries=args.human_retries,
                              fallback=RandomPolicy(rng))
         if backend is None:

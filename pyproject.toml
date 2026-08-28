@@ -1,0 +1,52 @@
+# Packaging exists for one reason: `python -m parlor` only works from a checkout
+# root, so the command a person is told to type is a command that silently depends
+# on their working directory. `pip install -e .` puts `parlor` on PATH on Windows
+# and Linux alike, from the same file.
+#
+# It adds no runtime dependency and is not needed to run anything - the referee,
+# both gates and every demo are stdlib, and a fresh clone still plays with
+# `py -3 -m parlor`. This is a convenience layer over that, never a requirement in
+# front of it.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parlor"
+version = "0.1.0"
+description = "A table of AI players that genuinely do not know what you know."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+# Empty, and it stays empty. The stdlib-only referee is a property this file must
+# not be the thing that quietly ends.
+dependencies = []
+
+[project.scripts]
+# `cli`, not `main`: a console script never runs the `__main__` block, so pointing
+# at `main` would ship an installed command missing the mistyped-game-name handling.
+parlor = "parlor.__main__:cli"
+
+[tool.setuptools]
+# Listed rather than auto-discovered. Flat layout with four top-level packages is
+# exactly the shape setuptools refuses to guess at, and its guess would silently
+# omit one - a `games.quorum` that vanished from an install and nowhere else.
+# `games.durf` is here although the registry does not list it: it has no console
+# seat yet, and an installed tree missing a package its own tests import would fail
+# in a way that has nothing to do with why it is unregistered.
+packages = [
+    "parlor",
+    "core",
+    "eval",
+    "games",
+    "games.cabal",
+    "games.changeling",
+    "games.durf",
+    "games.quorum",
+]
+
+[tool.setuptools.package-data]
+# `rules` in a hand-played game prints the game's own RULES.md, so a non-editable
+# install that shipped only the .py files would answer it with a missing-file line.
+"*" = ["RULES.md"]
