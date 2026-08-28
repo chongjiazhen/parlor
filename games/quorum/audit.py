@@ -95,11 +95,24 @@ def identity_leaks(ref: QuorumReferee) -> list[tuple[int, int, str]]:
     Audits the referee-authored payload only. A player naming a role out loud is a
     claim, true or false, and therefore gameplay; the referee doing it is the leak.
     """
+    # Only audit when a seat has a defined ask; phases without one cannot produce
+    # a payload to audit; skip silently.
+    if ref.phase not in (
+        Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
+        Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
+    ):
+        return []
+    
     out: list[tuple[int, int, str]] = []
     terms = secret_terms(ref)
     for viewer in ref.assignment:
-        rendered = ref.render_context(viewer, include_speech=False)
-        rendered = rendered.replace(self_line(ref, viewer), "")
+        # Use the full outgoing payload, including the action prompt.
+        payload = ref.prompt_for(viewer, include_speech=False)
+        # The self line should appear exactly once; remove it before scanning.
+        self_line_text = self_line(ref, viewer)
+        assert payload.count(self_line_text) == 1, (
+            f"self_line occurs {payload.count(self_line_text)} times for viewer {viewer}")
+        rendered = payload.replace(self_line_text, "")
         for seat, term in find_leaks(rendered, terms, entitled={viewer},
                                      viewer=viewer):
             out.append((viewer, seat, term))
@@ -156,11 +169,19 @@ def dependence_leaks(ref: QuorumReferee) -> list[tuple[int, str]]:
     Empty means each seat's bytes are a function of what that seat is entitled to
     and of nothing else.
     """
+    # Only audit when a seat has a defined ask; phases without one cannot produce
+    # a payload to audit; skip silently.
+    if ref.phase not in (
+        Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
+        Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
+    ):
+        return []
+    
     out: list[tuple[int, str]] = []
     for viewer in ref.assignment:
-        base = ref.render_context(viewer, include_speech=False)
+        base = ref.prompt_for(viewer, include_speech=False)
         alt = _counterfactual(ref, viewer)
-        if alt.render_context(viewer, include_speech=False) != base:
+        if alt.prompt_for(viewer, include_speech=False) != base:
             out.append((viewer, _blame(ref, viewer)))
     return out
 
@@ -172,14 +193,14 @@ def _blame(ref: QuorumReferee, viewer: int) -> str:
     attributed is a leak somebody argues about. If no single field reproduces it,
     say so instead of guessing - two fields interacting is a real answer.
     """
-    base = ref.render_context(viewer, include_speech=False)
+    base = ref.prompt_for(viewer, include_speech=False)
     for field in ("proposer_hand", "enactor_hand", "deck", "discards",
                   "inspections", "recall"):
         alt = copy.copy(ref)
         alt.inspections = {k: dict(v) for k, v in ref.inspections.items()}
         full = _counterfactual(ref, viewer)
         setattr(alt, field, getattr(full, field))
-        if alt.render_context(viewer, include_speech=False) != base:
+        if alt.prompt_for(viewer, include_speech=False) != base:
             return field
     return "unattributed (no single field reproduces it)"
 

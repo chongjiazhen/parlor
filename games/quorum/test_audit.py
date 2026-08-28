@@ -106,6 +106,19 @@ class TestDependenceMutants(unittest.TestCase):
         assert ref.phase is Phase.PROPOSER_DISCARD
         return ref
 
+    def test_a_seat_seeing_its_own_prompt_for_leaks(self):
+        """A seat's prompt_for is what gate #1 audits, so a leak in render_context
+        must also leak in prompt_for."""
+        ref = QuorumReferee.new(5, seed=3, discussion_rounds=0)
+        ref.nominate(ref.proposer, ref.eligible_nominees()[0])
+        ref.vote({s: True for s in ref.living()})
+        assert ref.phase is Phase.PROPOSER_DISCARD
+        
+        # Test that prompt_for includes render_context and is audited
+        payload = ref.prompt_for(ref.proposer, include_speech=False)
+        self.assertIn("In your hand", payload)
+        self.assertIn("discard", payload)
+
     def test_showing_the_proposers_hand_to_the_table_is_caught(self):
         class Leaky(QuorumReferee):
             def render_context(self, seat, include_speech=True):
