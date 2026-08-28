@@ -376,6 +376,16 @@ arm is ~30 min against cabal's 13.2 h.
       not judgement (7 of 8 games died at five_rejects). `--simultaneous` is built
       and unmeasured; the salience line has no measured benefit anywhere and is a
       removal candidate, on its own measurement.
+- [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
+      0-byte lock appeared at 08:44 with no `git.exe` running and blocked a commit
+      40 minutes later, mid-session, with the index intact. Removing it was the
+      documented remedy and cost nothing - but an unattended run that commits its
+      own records would have died on it, silently, at a point where the run itself
+      was healthy. Candidates: the rtk PreToolUse hook, which is EXCLUDED for git
+      on WSL but **live on native Windows** (`RTK.md`), or a crashed helper. Cheap
+      probe: log the lock's ctime against the tool-call transcript next time it
+      appears. Until then, `/mingw64/bin/git` for anything whose answer gates a
+      commit, which is `RTK.md`'s standing rule anyway.
 - [ ] **Judge a detached run only by its own log/JSONL - never by a proxy.** Three
       times in one session CPU seconds, Win32 IO counters, and an exit code each
       read as liveness for network-bound work; the IO-counter one killed a healthy
@@ -791,7 +801,9 @@ arm is ~30 min against cabal's 13.2 h.
       sanctioned drill with no victim). Unrun, and adding them moved no number
       because nothing runs on a face until a run asks for it by name. (cabal's
       `DEFAULT_THEME` did later move, `1984-en` -> `plain` on 2026-08-28, for
-      publish-surface reasons and not as an arm - see the closed item above.) `bnw-en` was 84 words against `1984-en`'s 53, confounding the
+      publish-surface reasons and not as an arm; `games/cabal/roles.py` carries
+      that note beside both theme constants, which is where a reader of a number
+      will be.) `bnw-en` was 84 words against `1984-en`'s 53, confounding the
       vocabulary control with density; trimmed the same day, and all four English
       faces are now 53 words / 281-291 chars. Frozen from here - a blurb is a
       prompt, so a later edit orphans whatever has been recorded against it. One
@@ -818,28 +830,6 @@ arm is ~30 min against cabal's 13.2 h.
       all-heuristic arm's 99.5% hunter is a deterministic twin reading its own tell,
       and a mixed table is where that stops being a confound and starts being the
       measurement.
-- [x] **`DEFAULT_THEME` moved off `1984-en` to `plain` - DONE 2026-08-28.** The
-      `README.md` reasoning was and is sound (mechanics uncopyrightable, single
-      words and short phrases too, none of the novel's text in the repo); it was
-      surface a public tree carried for no benefit when the face that references
-      nothing costs the same. `1984-en` stays shipped and supported.
-      - **The gate it was queued behind had already passed, and the item sat
-        mis-gated.** It read "cannot land during S6" and "re-baselines every cabal
-        number". S6 is called, and the re-baselining cost went to ZERO when gate
-        #3b came back NOT SHOWN and cabal's GPU program stopped - there is no
-        future cabal run for the new default to be incomparable with. **An item
-        priced by a cost that a later decision deleted stays expensive until
-        someone re-reads it**; nothing in the queue recomputes itself.
-      - **EVERY recorded cabal number was played on `1984-en`.** `hunt20*`,
-        `hunt6*` and all four committed transcripts. A run meant to compare
-        against any of them passes `--theme 1984-en` explicitly. Recorded in
-        `games/cabal/roles.py` beside both theme constants, which is where a
-        reader of a number will be.
-      - The committed transcripts were NOT re-rendered - speech is model-authored
-        in the skin's vocabulary, so a record cannot be re-skinned after the fact,
-        and re-rendering one needs a GPU run cabal no longer has budget for. Each
-        transcript states its theme in its own header, and `README.md` says so at
-        the link.
 - [ ] **Group-sequential design instead of a pre-committed fixed N.** S6 commits
       40 games and forbids a third campaign, because stopping when a floor happens
       to cross is peeking - correct, and the named fix is not "don't look". It is
