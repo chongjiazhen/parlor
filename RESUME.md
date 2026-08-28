@@ -424,37 +424,19 @@ arm is ~30 min against cabal's 13.2 h.
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [x] **One CLI over the games, so a person can sit down and play the bots.**
-      **LANDED 2026-08-28.** `py -3 -m parlor play <game>` over a registry in
-      `core/registry.py`; `--list` names what is registered; `parlor/__main__.py`
-      is the whole command surface. cabal and changeling are registered, `durf`
-      is not.
-      - **A registry, not a wrapper, and no shared flag set.** An entry is
-        `(name, module, summary)` and nothing about arguments - each game keeps
-        its own parser and receives the tail of the command line verbatim, so
-        `play cabal --help` prints cabal's flags under cabal's own usage line.
-        The `(referee factory, driver, flags)` shape this item sketched lost its
-        factory: `play` needs the driver, `--list` needs a sentence, and nothing
-        needs a referee without a driver. It lands when something asks.
-      - **It moves no model-facing byte, proved rather than intended.** Both
-        games rendered at seeds 1000 and 7, old entry point vs `parlor play`,
-        with each game's own flags exercised (`--rounds`, `--theme`): the diff is
-        empty. Instrument controls both ways - old-vs-old is identical, and a
-        different seed DIFFERS, so the empty diff is not a dead comparison. The
-        reason it is this cheap is that the demos were not edited at all.
-      - **What is registered is a rung a PERSON can sit at, not a genre.** The
-        line is mechanical and asserted, not described:
-        `test_every_registered_rung_seats_a_person` requires a console seat in
-        the driver's module. `durf` fails it - its session engine has seats and
-        an entitlement audit but no `ConsoleBackend` - so it is out for a reason
-        that dissolves the day it grows one. Genre would have been the wrong
-        axis: the endgame rung is an RPG, and a CLI scoped to social deduction
-        would need renaming when it arrives.
-      - The one-human-seat refusal is untouched and passes through intact
-        (`--human "0 1"` still exits with `core.console`'s complaint). 13 tests
-        in `core/test_registry.py`; four guards mutation-checked - argv
-        restoration, the missing-`main()` refusal, tail passthrough of a flag
-        this layer owns, and the console-seat registration line.
+- [ ] **`python -m unittest discover` claims "all tests" and collects 472 of 682.**
+      `README.md:189` offers it as the no-dependency way to run the suite. Every
+      pytest-fixture file imports cleanly and contributes ZERO tests - silently,
+      and it still prints `OK`. `core/test_console.py` and `core/test_registry.py`
+      are two; the gap is 210 tests, including every mutation-checked guard in
+      them. A green that proves less than it claims, in the public README, which
+      is the shape `docs/evidence-discipline.md` exists to refuse.
+      - The fix is one of two and they are not equivalent: reword the README to
+        name pytest as the suite runner and unittest as a partial smoke, or move
+        the fixture files to plain `TestCase` so the claim becomes true. The
+        second keeps the no-dependency property the line is selling.
+      - **Done when** the number the README implies and the number the command
+        collects are the same number, by either route.
 - [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,
