@@ -46,6 +46,23 @@ The three things a later session has to know before it re-opens this:
   both games and moving it re-baselines every recorded cabal and changeling number
   for a rung that is still void. Pass `--temperature 0.0` on any later durf run.
 
+**S11 landed and the engine half is DONE - the rung now has seats, and gate #1
+has its first read where a model is the referee.** Held in 3/6 sessions, 0/88
+fallback. Everything about it is in `docs/durf-rung.md` §The session engine and
+§The read - **do not restate it here.** Two things a later session needs before
+it touches this:
+
+- **ONE DECISION IS OPEN AND IT VOIDS THE READ EITHER WAY.** Two of the three
+  leaks are the same line, where the character SEARCHES for a loose flagstone
+  rather than being told one exists. The invariant says a colliding term gets
+  renamed; renaming it (to `shallow cavity` / `40 GP`) would resolve it. It was
+  deliberately not decided in the session that produced the number, because
+  editing an instrument after seeing model output is the failure
+  `docs/reference-policies.md` exists to prevent. Decide it in a session scoped
+  for it, and re-run - an arm is 2.3 minutes.
+- **`durf-sess1` is SUPERSEDED by `durf-sess2`** and its 21.18% recovered rate
+  was a schema ambiguity in the parser, not the model. Quote sess2.
+
 **The powers re-run LANDED 2026-08-28** and the accuracy gain it was run to settle
 is banked: on identical deals and clean code, blind accuracy **+40.00pp** [+13.64,
 +66.67] and villager accuracy **+23.81pp** [+4.55, +42.42], both floors clearing
