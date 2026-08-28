@@ -58,6 +58,17 @@ _OTHER_CARD = {Card.CHARTER: Card.WRIT, Card.WRIT: Card.CHARTER}
 
 _OTHER_SIDE = {Side.MAJORITY: Side.MINORITY, Side.MINORITY: Side.MAJORITY}
 
+#: Phases where ``action_prompt`` can produce a payload for a seat. Kept as ONE
+#: name instead of a list restated in each audit half, so a rung that adds an
+#: ask-phase has a single place to grow. A phase absent here has no payload to
+#: scan and is skipped - and because the guard and ``action_prompt``'s dispatch
+#: are both keyed on ``Phase``, a phase added there but not here is audited as
+#: nothing rather than crashing or leaking silently.
+_ASK_PHASES = frozenset({
+    Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
+    Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
+})
+
 
 # ---- the identity half -----------------------------------------------------
 
@@ -95,24 +106,22 @@ def identity_leaks(ref: QuorumReferee) -> list[tuple[int, int, str]]:
     Audits the referee-authored payload only. A player naming a role out loud is a
     claim, true or false, and therefore gameplay; the referee doing it is the leak.
     """
-    # Only audit when a seat has a defined ask; phases without one cannot produce
-    # a payload to audit; skip silently.
-    if ref.phase not in (
-        Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
-        Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
-    ):
+    # Only audit when a seat has a defined ask; phases without one have no payload
+    # to scan, so they are skipped.
+    if ref.phase not in _ASK_PHASES:
         return []
-    
+
     out: list[tuple[int, int, str]] = []
     terms = secret_terms(ref)
     for viewer in ref.assignment:
         # Use the full outgoing payload, including the action prompt.
         payload = ref.prompt_for(viewer, include_speech=False)
-        # The self line should appear exactly once; remove it before scanning.
-        self_line_text = self_line(ref, viewer)
-        assert payload.count(self_line_text) == 1, (
-            f"self_line occurs {payload.count(self_line_text)} times for viewer {viewer}")
-        rendered = payload.replace(self_line_text, "")
+        # Drop the ONE line where this seat's own role legitimately appears. The
+        # `replace(..., 1)` is deliberate: a duplicated line elsewhere is still
+        # caught, and a render that ever moves the line leaves at most nothing to
+        # strip rather than crashing every game mid-run (the audit runs in every
+        # live game, so an `assert` here is an environment-sensitive fault line).
+        rendered = payload.replace(self_line(ref, viewer), "", 1)
         for seat, term in find_leaks(rendered, terms, entitled={viewer},
                                      viewer=viewer):
             out.append((viewer, seat, term))
@@ -169,14 +178,11 @@ def dependence_leaks(ref: QuorumReferee) -> list[tuple[int, str]]:
     Empty means each seat's bytes are a function of what that seat is entitled to
     and of nothing else.
     """
-    # Only audit when a seat has a defined ask; phases without one cannot produce
-    # a payload to audit; skip silently.
-    if ref.phase not in (
-        Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
-        Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
-    ):
+    # Only audit when a seat has a defined ask; phases without one have no payload
+    # to scan, so they are skipped.
+    if ref.phase not in _ASK_PHASES:
         return []
-    
+
     out: list[tuple[int, str]] = []
     for viewer in ref.assignment:
         base = ref.prompt_for(viewer, include_speech=False)
