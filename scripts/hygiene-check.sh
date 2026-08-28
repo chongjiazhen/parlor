@@ -89,7 +89,14 @@ function report(label,   text) {
     if (line ~ /superpowers|atelier cluster|spec-lite|Co-Authored-By|claude -p /)
         report("harness vocabulary - it reads as process leakage in a public tree")
 
-    if (index(line, endash) || index(line, emdash))
+    # House style is about prose written HERE. A transcript is verbatim model
+    # output and it is the EVIDENCE a claim ships with - editing one to satisfy
+    # a style rule falsifies the thing it exists to prove. So the dash check
+    # alone skips that directory; every material pattern above still applies to
+    # it, because a personal path or an endpoint in a transcript is a leak
+    # whoever typed it. Same shape as the exemption this file makes for itself: it
+    # is a directory, not a string, so it maps nothing.
+    if ((index(line, endash) || index(line, emdash)) && file !~ /^transcripts\//)
         report("en- or em-dash - house style is ASCII hyphen-minus")
 
     ln++
