@@ -74,14 +74,17 @@ Six things a later session needs before it touches this:
   `docs/durf-rung.md` §The campaign - **do not restate it here.** Recompute with
   `py -3 -m eval.durf_camp1_verdict`; the promise it was scored against is
   `docs/durf-gate1-criterion.md` and was not edited. `durf-sess2` is superseded.
-- **The open instrument decision is now `hidden catch`, and it is the SAME
-  argument the rename settled.** One of the nine leaks was a referee *searching*
-  ("feeling for loose stones or hidden catches"), and that term collides with
-  ordinary searching prose exactly as `loose flagstone` did. It is deliberately
-  unfixed: deciding it now is deciding it with this run's output in view. Scoring
-  it as a hold gives 90/100 and moves no verdict, so there is no rush and no
-  number riding on it. A later session decides it on the invariant alone, and
-  **any change to the term set voids the 91/100** the same way.
+- **TWO open instrument decisions, and they are different failures.** `hidden
+  catch` is camp1's, a term colliding with ordinary searching prose exactly as
+  `loose flagstone` did - the model chose the words. camp2's `barrow-rats` is
+  structural and needs no run to see: `check_facts` holds terms disjoint across
+  facts but never checks a term against another fact's TEXT, and both npc stat
+  blocks name the creature whose name is their room's sentinel, so declaring
+  either npc leaks its room by construction. The guard is the fix; a rename
+  treats the symptom. Both deliberately unfixed - scoring them as holds gives
+  90/100 and 100/100 and moves no verdict - and **either edit voids its own
+  read.** `docs/durf-rung.md` §The paired arm carries the proof and the pair
+  table; the evidence is `transcripts/durf-camp2-leak-barrowrats.md`.
 - **A term change now has a price, payable off records.** `py -3 -m
   eval.durf_rescore <record>.json --add "hidden,R2=loose flagstone" --check`
   replays a stored session against any term set and must reproduce that run's own
@@ -120,19 +123,11 @@ Six things a later session needs before it touches this:
     any GOOD.** The reveal-ahead count is not one and must not be promoted into
     one; `games/durf/fixtures/README.md` §What this fixture is not says the same of
     the declaration fixture.
-- **The count that produced all of the above: 84 of 100 sessions
-  declared a room or hidden fact for a room the party was not in, and 78 of those
-  are counted as gate #1 HOLDS.** R3's whole contents were published to a party on
-  the entry slope 28 times. This is NOT a gate #1 failure and gate #1 must not be
-  changed to catch it - declaring is the referee's authority, so the audit is
-  correctly silent. The instrument is `py -3 -m eval.durf_reveal_order
-  eval/records/durf-camp1.json` (tracked, no GPU, control passes on all 100).
-  **The open question is whether reveal-ahead is wrong at all** - the fixture
-  states no adjacency and no sightlines, so nothing in the tree separates "what
-  the party can see from where it stands" from "the far side of a closed door".
-  Settle that, and let the prescribed fixture edit ride the same campaign so one
-  run answers both. Numbers: `docs/durf-rung.md` §What working that question
-  turned up.
+- **Reveal-ahead is a COUNT, not a gate, and gate #1 must not be changed to catch
+  it** - declaring is the referee's authority, so the audit is correctly silent.
+  Whether it is wrong at all was settled by the adjacency decision (it is), and
+  the topology edits halved it. Instrument `py -3 -m eval.durf_reveal_order
+  <record>.json`, tracked, no GPU, control passes on all 100 of both arms.
 - **Deciding `hidden catch` does NOT oblige a re-run.** The 91/100 is a dated read
   under its own term set and stays quotable as that. A new term set needs a new
   campaign only if a number under it is wanted, and 52 minutes of GPU buys nothing

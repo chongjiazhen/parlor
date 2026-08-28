@@ -918,14 +918,40 @@ per-session rows, and `py -3 -m eval.durf_rescore eval/records/durf-camp2.json
 --check` replays every referee entry against entitlement reconstructed from the
 transcript and reproduces the recorded leak exactly.
 
-**The one surviving leak is the `hidden catch` argument again, on a third term.**
-Seat 0's context took `["room", "R3"]` via `barrow-rats`, carried by the referee
-line *"Three barrow-rats: Skill 2, 0 HD, no Armor, ML 6, bite, 2 dmg. 0 HD dies to
-any Wound."* - a monster stat block naming the creature whose room has not been
-declared. The remedy the invariant names is the same remedy, and as with `hidden
-catch` it is **not being applied here**, because deciding a term with this run's
-output in view is the promote-a-statistic failure the rename decision was careful
-to avoid.
+**The one surviving leak is NOT the `hidden catch` argument, and reading the
+transcript is what said so.** Seat 0's context took `["room", "R3"]` via
+`barrow-rats`, carried by *"Three barrow-rats: Skill 2, 0 HD, no Armor, ML 6,
+bite, 2 dmg. 0 HD dies to any Wound."* - and the audit's own declared list
+(`transcripts/durf-camp2-leak-barrowrats.md`) shows the adjudicator had DECLARED
+`["npc", "barrow-rats"]` before that line. The line is the kernel publishing a
+legally declared fact's canonical text, verbatim, on a wandering-monster
+encounter. No referee judgement is involved.
+
+**It is a fixture defect with a structural proof, and the proof needs no run.**
+`games/durf/facts.check_facts` holds terms pairwise disjoint across facts, which
+is the rename remedy made mechanical. What it does not check is a term against
+another fact's TEXT - and the fixture has exactly two such pairs, both the same
+shape:
+
+| the fact whose text carries it | the term | whose sentinel it is |
+|---|---|---|
+| `["npc", "barrow-rats"]` | `barrow-rats` | `["room", "R3"]` |
+| `["npc", "barrow-wight"]` | `barrow-wight` | `["room", "R4"]` |
+
+A creature's stat block names the creature, and the creature's name is a sentinel
+for the room it lives in. So **declaring either npc legally leaks its room**, every
+time, by construction. That is checkable by reading `facts.json` alone - which is
+what makes it an instrument argument this file's rule permits, exactly as the
+`loose flagstone` rename was.
+
+**Not applied here, and the fix is a guard rather than a rename.** Extending
+`check_facts` to term-against-text would have refused this fixture at load rather
+than scoring it, which is where a guarantee belongs; renaming the sentinel treats
+the symptom. Either edit moves the instrument and **voids this 99/100** the way the
+rename voided the 3/6. Scoring the leak as a hold gives 100/100 and moves no
+verdict, so nothing is riding on the timing. `hidden catch` remains separately
+open and is a genuinely different failure - a collision with ordinary prose, where
+the model chose the words.
 
 **Reveal-ahead, the comparison this arm existed to make.** Re-run with `py -3 -m
 eval.durf_reveal_order eval/records/durf-camp2.json`; its control reproduced each
