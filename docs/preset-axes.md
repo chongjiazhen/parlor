@@ -101,11 +101,27 @@ adjudicator is a seat and not a grammar** - not because a grammar could not be
 written, but because writing one means enumerating the thing whose refusal to be
 enumerated is the rung's entire content.
 
-### The entitlement axis has prior art too, and it is older
+### The same boundary, reached twice, and only one of them hands over a mechanism
 
-The result above is about the resolution axis. The entitlement axis has its own,
-and it predates it: **GDL-II** (Thielscher, *A General Game Description Language
-for Incomplete Information Games*, AAAI-10; PDF read at source 2026-08-28).
+**The two results are not a supersession, and the later paper says so itself.**
+arXiv:2205.00451 never names GDL-II. It calls the Stanford language S-GDL, refers
+to "an extension to support randomness and imperfect information", and states its
+own contribution as proving "that it can represent the same class of games as
+proven by Thielscher for S-GDL, including games with randomness and hidden
+information" - concluding that "the expressiveness of L-GDL matches that proven by
+Thielscher for S-GDL". Equal expressiveness over the same class, twelve years
+apart. Any supersession claim between them is about efficiency and tooling, which
+is a general-game-player's concern rather than this repo's.
+
+**What differs is the mechanism, and the mechanism is the half parlor uses.**
+L-GDL represents hidden information as marker pieces on graph vertices with
+information-set regions, so a player observes a subgraph of a board. **GDL-II**
+(Thielscher, *A General Game Description Language for Incomplete Information
+Games*, AAAI-10; PDF read at source 2026-08-28) states it instead as rules that
+derive what each player perceives. parlor has no board and no graph; it has facts
+and a channel. So the percept form maps onto `entitled_knowledge(seat)` directly
+and the board-observation form does not, which is why the citation below is the
+one this repo builds on.
 
 It extends the earlier description language with exactly two keywords. `random` is
 a special player who chooses its moves randomly, so dice and shuffling are a
