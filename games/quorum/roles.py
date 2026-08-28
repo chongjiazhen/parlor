@@ -203,7 +203,14 @@ THEME_GUILD = Theme(
 
 DEFAULT_THEME = THEME_GUILD
 
+#: Ordering is a decision, not a tidy-up, so it is stated here: **`plain` first**,
+#: then one block per FAMILY in the order the family was created, and inside a
+#: family the translations sit together with any later variant after them. It reads
+#: as the rung's own history - which face came first, what was built off it - and
+#: alphabetical order destroys exactly that. A later pass that sorts this dict
+#: alphabetically is undoing the decision; re-derive the order from
+#: `git log -S"THEME_<NAME> = Theme"` rather than from the names.
 THEMES: dict[str, Theme] = {
-    "guild": THEME_GUILD,
-    "plain": THEME_PLAIN,
+    "plain": THEME_PLAIN,          # 2026-08-28, the sterile baseline
+    "guild": THEME_GUILD,          # 2026-08-28, and the default since
 }

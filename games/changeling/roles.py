@@ -583,13 +583,20 @@ THEME_GREEK_NAMED = Theme(
 
 DEFAULT_THEME = THEME_FOLK
 
+#: Ordering is a decision, not a tidy-up, so it is stated here: **`plain` first**,
+#: then one block per FAMILY in the order the family was created, and inside a
+#: family the translations sit together with any later variant after them. It reads
+#: as the rung's own history - which face came first, what was built off it - and
+#: alphabetical order destroys exactly that. A later pass that sorts this dict
+#: alphabetically is undoing the decision; re-derive the order from
+#: `git log -S"THEME_<NAME> = Theme"` rather than from the names.
 THEMES: dict[str, Theme] = {
-    "folk": THEME_FOLK,
-    "folk-inv": THEME_FOLK_INV,
-    "greek": THEME_GREEK,
-    "greek-named": THEME_GREEK_NAMED,
-    "investiture": THEME_INVESTITURE,
-    "journey": THEME_JOURNEY,
-    "masquerade": THEME_MASQUERADE,
-    "plain": THEME_PLAIN,
+    "plain": THEME_PLAIN,                  # 2026-08-26, the sterile baseline
+    "folk": THEME_FOLK,                    # 2026-08-26, and the default since
+    "folk-inv": THEME_FOLK_INV,            # 2026-08-27, polarity inverted off `folk`
+    "greek": THEME_GREEK,                  # 2026-08-27
+    "greek-named": THEME_GREEK_NAMED,      # 2026-08-27, `greek` with named seats
+    "investiture": THEME_INVESTITURE,      # 2026-08-27
+    "masquerade": THEME_MASQUERADE,        # 2026-08-27
+    "journey": THEME_JOURNEY,              # 2026-08-27
 }

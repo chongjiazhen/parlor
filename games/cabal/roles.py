@@ -444,13 +444,20 @@ THEME_LODGE = Theme(
 # run was made on it.
 DEFAULT_THEME = THEME_LODGE
 
+#: Ordering is a decision, not a tidy-up, so it is stated here: **`plain` first**,
+#: then one block per FAMILY in the order the family was created, and inside a
+#: family the translations sit together with any later variant after them. It reads
+#: as the rung's own history - which face came first, what was built off it - and
+#: alphabetical order destroys exactly that. A later pass that sorts this dict
+#: alphabetically is undoing the decision; re-derive the order from
+#: `git log -S"THEME_<NAME> = Theme"` rather than from the names.
 THEMES: dict[str, Theme] = {
-    "1984-en": THEME_1984_EN,
-    "1984-cn": THEME_1984_CN,
-    "1984-inv": THEME_1984_INV,
-    "bnw-en": THEME_BNW_EN,
-    "bnw-cn": THEME_BNW_CN,
-    "drill-en": THEME_DRILL_EN,
-    "lodge": THEME_LODGE,
-    "plain": THEME_PLAIN,
+    "plain": THEME_PLAIN,          # 2026-08-25, the sterile baseline
+    "1984-en": THEME_1984_EN,      # 2026-08-25
+    "1984-cn": THEME_1984_CN,      # 2026-08-25, the same face in Chinese
+    "1984-inv": THEME_1984_INV,    # 2026-08-27, polarity inverted off `1984-en`
+    "bnw-en": THEME_BNW_EN,        # 2026-08-27
+    "bnw-cn": THEME_BNW_CN,        # 2026-08-27, the same face in Chinese
+    "drill-en": THEME_DRILL_EN,    # 2026-08-27, the neutral-valence arm
+    "lodge": THEME_LODGE,          # 2026-08-28, and the default since
 }
