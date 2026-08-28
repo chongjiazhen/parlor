@@ -31,9 +31,9 @@ def draw(index: int, drew, passed, enacted, forced=False,
 
 
 def claim(event: int, office: str, cards, seat: int = 0,
-          seat_side: str = "majority") -> dict:
+          seat_side: str = "majority", fell_back: bool = False) -> dict:
     return {"turn": event, "seat": seat, "office": office, "cards": list(cards),
-            "event": event, "seat_side": seat_side}
+            "event": event, "seat_side": seat_side, "fell_back": fell_back}
 
 
 def game(claims, draws, decisions=10, fallbacks=0, error=None) -> dict:
@@ -76,6 +76,9 @@ def summary_for(derived: dict) -> dict:
     return {"score": {
         "games": derived["games"], "played": derived["played"],
         "decisions": derived["decisions"], "fallbacks": derived["fallbacks"],
+        "model_decisions": derived["model_decisions"],
+        "model_fallbacks": derived["model_fallbacks"],
+        "model_fallback_rate": derived["model_fallback_rate"],
         "recovered": 0, "writs_with_a_choice": 0,
         "claims": claims}}
 
@@ -151,8 +154,51 @@ def test_fallback_over_ten_percent_voids_before_any_bar():
     rows = honest_proposer(28, 79)
     rows[0]["decisions"] = 100
     rows[0]["fallbacks"] = 11
+    rows[0]["decision_log"] = [{"turn": i, "seat": 0, "phase": "vote",
+                                "played": "votes yes", "fell_back": i < 11,
+                                "model_controlled": True} for i in range(100)]
     text, code, _ = run(rows)
     assert "VOID" in text
+    assert "clause B" not in text
+    assert code == 2
+
+
+def test_the_void_reads_the_MODEL_rate_not_the_all_seat_rate():
+    """A mixed arm: 10 model decisions with 2 fallbacks (20%, over the bar)
+    inside 100 decisions overall (2%, under it). The pre-committed ceiling is
+    about the policy that can fall back."""
+    rows = honest_proposer(28, 79)
+    rows[0]["decisions"] = 100
+    rows[0]["fallbacks"] = 2
+    rows[0]["decision_log"] = (
+        [{"turn": i, "seat": 0, "phase": "vote", "played": "votes yes",
+          "fell_back": i < 2, "model_controlled": True} for i in range(10)]
+        + [{"turn": 10 + i, "seat": 2, "phase": "vote", "played": "votes no",
+            "fell_back": False, "model_controlled": False} for i in range(90)])
+    text, code, derived = run(rows)
+    assert derived["model_decisions"] == 10
+    assert derived["model_fallback_rate"] == 0.2
+    assert "VOID" in text
+    assert code == 2
+
+
+def test_an_arm_with_no_model_decisions_is_void_never_zero_percent():
+    rows = honest_proposer(28, 79)
+    text, code, derived = run(rows)
+    assert derived["model_fallback_rate"] is None
+    assert "VOID" in text
+    assert code == 2
+
+
+def test_legacy_claims_refuse_before_any_clause():
+    rows = honest_proposer(28, 79)
+    rows[0]["decision_log"] = [{"turn": i, "seat": 0, "phase": "vote",
+                                "played": "votes yes", "fell_back": False,
+                                "model_controlled": True} for i in range(10)]
+    for c in rows[0]["claims"]:
+        del c["fell_back"]
+    text, code, _ = run(rows)
+    assert "legacy" in text
     assert "clause B" not in text
     assert code == 2
 

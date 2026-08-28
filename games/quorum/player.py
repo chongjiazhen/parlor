@@ -320,6 +320,11 @@ class Decision:
     refusals: int = 0
     rule_refusals: int = 0
     fell_back: bool = False
+    #: Could this decision's policy fall back at all? Set by the driver from
+    #: ``isinstance(policy, LLMPolicy)`` at the moment the decision is made, so
+    #: a mixed arm's fallback ceiling reads the MODEL's decisions off the JSONL
+    #: without inferring a policy class from a side or an arm name later.
+    model_controlled: bool = False
     served_by: str = ""
 
 
@@ -363,6 +368,9 @@ class ClaimEntry:
     cards: list[str]
     event: int
     seat_side: str
+    #: True when the random fallback filed this claim; the claim scorer drops it
+    #: rather than scoring noise as the model's honesty.
+    fell_back: bool = False
 
 
 @dataclass
@@ -378,6 +386,9 @@ class VoteRecord:
     #: any stratum that conflated the two would be reading the win condition rather
     #: than the knowledge.
     knowledge_class: str = "none"
+    #: True when the random fallback cast this vote. The row stays record
+    #: evidence but never enters a model vote figure.
+    fell_back: bool = False
 
 
 @dataclass
@@ -442,12 +453,18 @@ def play_game(
     """
     rec = GameRecord(assignment={s: r.key for s, r in ref.assignment.items()})
 
-    def decide(seat: int) -> dict:
+    def decide(seat: int, keep: dict | None = None) -> dict:
+        """One decision. ``keep`` is an out-dict for the caller that lands a
+        record from this decision (a claim, a vote): the driver writes the SAME
+        decision's provenance into it, because ``last_fell_back`` belongs to
+        whatever turn ran last and is stale the moment another one does."""
         rec.decisions += 1
         phase = ref.phase
         policy = policies[seat]
         action = policy.act(ref, seat)
         fell_back = bool(getattr(policy, "last_fell_back", False))
+        if keep is not None:
+            keep["fell_back"] = fell_back
         refusals = int(getattr(policy, "last_refusals", 0) or 0)
         rule_refusals = int(getattr(policy, "last_rule_refusals", 0) or 0)
         if fell_back:
@@ -463,6 +480,7 @@ def play_game(
             refused=(str(getattr(policy, "last_refusal", "") or "")
                      if refusals else ""),
             refusals=refusals, rule_refusals=rule_refusals, fell_back=fell_back,
+            model_controlled=isinstance(policy, LLMPolicy),
             served_by=("" if fell_back
                        else str(getattr(policy, "last_upstream", "") or "")),
         ))
@@ -483,7 +501,8 @@ def play_game(
             ref.nominate(ref.proposer, decide(ref.proposer)["nominate"])
         elif p is Phase.DISCUSS:
             seat = ref.next_speaker()
-            action = decide(seat)
+            provenance: dict = {}
+            action = decide(seat, keep=provenance)
             # only "say" crosses to the table; "think" is dropped here, on purpose
             ref.speak(seat, action["say"])
             rec.utterances.append(f'seat {seat}: {action["say"]}')
@@ -492,19 +511,22 @@ def play_game(
                 rec.claims.append(ClaimEntry(
                     turn=rec.turns, seat=seat, office=filed.office,
                     cards=list(filed.cards), event=len(rec.draws) - 1,
-                    seat_side=ref.assignment[seat].side.value))
+                    seat_side=ref.assignment[seat].side.value,
+                    fell_back=provenance["fell_back"]))
         elif p is Phase.VOTE:
             nominee = ref.nominee
             votes: dict[int, bool] = {}
             for seat in ref.living():
                 klass = _knowledge_class(ref, seat)
-                votes[seat] = decide(seat)["vote"]
+                provenance = {}
+                votes[seat] = decide(seat, keep=provenance)["vote"]
                 rec.votes.append(VoteRecord(
                     turn=rec.turns, seat=seat, approved=votes[seat],
                     nominee=nominee,
                     seat_side=ref.assignment[seat].side.value,
                     nominee_side=ref.assignment[nominee].side.value,
                     knowledge_class=klass,
+                    fell_back=provenance["fell_back"],
                 ))
             ref.vote(votes)
             if ref.phase is Phase.PROPOSER_DISCARD:

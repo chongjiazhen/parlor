@@ -222,6 +222,46 @@ class TestLLMPolicy(unittest.TestCase):
         self.assertEqual(rec.fallback_rate, rec.fallbacks / rec.decisions)
 
 
+class TestProvenance(unittest.TestCase):
+    """A claim or vote the random fallback filed is not a model observation.
+    The driver writes the same decision's provenance onto the record it lands,
+    and a mixed arm's fallback ceiling is over the MODEL's decisions only."""
+
+    def test_a_fallback_vote_and_claim_carry_true_and_clean_ones_false(self):
+        ref = QuorumReferee.new(5, seed=7, discussion_rounds=1)
+        broken = LLMPolicy(backend=_Backend([]), retries=0, backoff=0,
+                           fallback=RandomPolicy(rng=random.Random(1)))
+        policies = {s: RandomPolicy(rng=random.Random(s))
+                    for s in ref.assignment}
+        policies[ref.proposer] = broken
+        rec = play_game(ref, policies)
+        self.assertEqual(rec.error, "")
+        self.assertTrue(rec.votes)
+        self.assertTrue(rec.claims or rec.votes)
+        for v in rec.votes:
+            decision = next(d for d in rec.decision_log
+                            if d.turn == v.turn and d.seat == v.seat
+                            and d.phase == "vote")
+            self.assertEqual(v.fell_back, decision.fell_back)
+        for c in rec.claims:
+            decision = next(d for d in rec.decision_log
+                            if d.turn == c.turn and d.seat == c.seat)
+            self.assertEqual(c.fell_back, decision.fell_back)
+
+    def test_every_decision_knows_whether_a_model_controlled_it(self):
+        ref = QuorumReferee.new(5, seed=7, discussion_rounds=1)
+        model_seat = ref.proposer
+        policies = {s: RandomPolicy(rng=random.Random(s))
+                    for s in ref.assignment}
+        policies[model_seat] = LLMPolicy(backend=_Backend([]), retries=0,
+                                         backoff=0,
+                                         fallback=RandomPolicy(
+                                             rng=random.Random(1)))
+        rec = play_game(ref, policies)
+        for d in rec.decision_log:
+            self.assertEqual(d.model_controlled, d.seat == model_seat)
+
+
 class TestConsoleSeat(unittest.TestCase):
     def _console(self, typed: str) -> ConsoleBackend:
         return ConsoleBackend(keys=ACTION_KEYS, stdin=io.StringIO(typed),

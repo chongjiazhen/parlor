@@ -116,6 +116,15 @@ def score(records: list[GameRecord]) -> dict:
     events = [d for r in played for d in r.draws]
     decisions = sum(r.decisions for r in played)
     fallbacks = sum(r.fallbacks for r in played)
+    # The fallback ceiling belongs over decisions a policy could fall back ON:
+    # model-controlled ones. In a mixed arm the all-seat rate reads low while
+    # the model's own rate voids; in a pure llm arm the two are the same
+    # number, and in a random arm there is no model rate at all (None, never
+    # a clean 0%).
+    model_log = [d for r in played for d in r.decision_log
+                 if getattr(d, "model_controlled", False)]
+    model_decisions = len(model_log)
+    model_fallbacks = sum(1 for d in model_log if d.fell_back)
     forced = [d for d in events if d.forced]
     writs = [d for d in events if d.enacted == "writ"]
     return {
@@ -125,6 +134,10 @@ def score(records: list[GameRecord]) -> dict:
         "decisions": decisions,
         "fallbacks": fallbacks,
         "fallback_rate": (fallbacks / decisions) if decisions else 0.0,
+        "model_decisions": model_decisions,
+        "model_fallbacks": model_fallbacks,
+        "model_fallback_rate": (model_fallbacks / model_decisions
+                                if model_decisions else None),
         "recovered": sum(r.recovered for r in played),
         "majority_wins": sum(1 for r in played if r.winner == Side.MAJORITY.value),
         "events": len(events),
@@ -153,7 +166,25 @@ def report(s: dict, args, elapsed: float) -> str:
     rate = s["fallback_rate"]
     out.append(f"fallback rate: {rate:.2%} over {s['decisions']} decisions, "
                f"{s['recovered']} recovered after a refusal")
-    if rate > 0.10:
+    if "model_fallback_rate" in s:
+        model_rate = s["model_fallback_rate"]
+        if model_rate is None:
+            out.append("  model fallback: no model-controlled decisions - a "
+                       "random arm, whose rate is unreadable as a model figure, "
+                       "not 0%")
+            out.append("  VOID: nothing the model played is in this run to "
+                       "score.")
+        else:
+            out.append(f"  model fallback {s['model_fallbacks']}/"
+                       f"{s['model_decisions']} = {model_rate:.2%} over the "
+                       f"decisions a model-controlled policy made")
+            if model_rate > 0.10:
+                out.append("  VOID: the model's own fallback rate is above 10%, "
+                           "so every figure below is the random policy wearing a "
+                           "model's name. Report the rate, not the results.")
+    elif rate > 0.10:
+        # A summary written before model-scoped rates is read under the rule it
+        # was published with, not silently upgraded.
         out.append("  VOID: above 10%, so every figure below is the random policy "
                    "wearing a model's name. Report the rate, not the results.")
 

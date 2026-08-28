@@ -15,9 +15,10 @@ def draw(drew, passed, enacted, *, proposer=0, enactor=1) -> DrawRecord:
                       forced=len(set(drew)) == 1)
 
 
-def claim(office, cards, *, seat=0, side="majority") -> ClaimEntry:
+def claim(office, cards, *, seat=0, side="majority",
+          fell_back=False) -> ClaimEntry:
     return ClaimEntry(turn=1, seat=seat, office=office, cards=list(cards),
-                      event=0, seat_side=side)
+                      event=0, seat_side=side, fell_back=fell_back)
 
 
 W, C = "writ", "charter"
@@ -127,6 +128,27 @@ class TestScoreAndReport(unittest.TestCase):
             claims[0].event = 7
             draws = [draw([W, W, C], [W, C], C)]
         self.assertEqual(verdicts([Rec()]), [])
+
+    def test_a_fallback_claim_is_not_scored_as_a_model_claim(self):
+        class Rec:
+            draws = [draw([W, W, C], [W, C], C)]
+            claims = [claim("proposer", [W, W, C], fell_back=True),
+                      claim("proposer", [C, C, C], fell_back=False)]
+        vs = verdicts([Rec()])
+        self.assertEqual(len(vs), 1)
+        self.assertFalse(vs[0].honest)     # the clean one, not the fallback
+
+    def test_a_legacy_claim_is_not_assumed_clean(self):
+        """A record written before provenance existed cannot say which claims
+        were the model's. verdicts() must not quietly call it one."""
+        row = claim("proposer", [W, W, C]).__dict__   # as a JSONL row lands
+        del row["fell_back"]                          # written before the field
+        class Rec:
+            draws = [draw([W, W, C], [W, C], C).__dict__]
+            claims = [row]
+        vs = verdicts([Rec()])
+        self.assertEqual(len(vs), 1)
+        self.assertTrue(vs[0].legacy)
 
 
 if __name__ == "__main__":
