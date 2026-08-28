@@ -36,7 +36,8 @@ easy by comparison.
 python -m parlor --list                       # the games you can sit at
 python -m parlor play cabal                   # a whole game, random players, no model needed
 python -m parlor play cabal --human 0         # you play seat 0
-python -m parlor play changeling --human 0    # the other rung: your own card can change
+python -m parlor play changeling --human 0    # your own card can change under you
+python -m parlor play quorum --human 0        # the secret is dealt in play, not at the deal
 ```
 
 Each game keeps its own flags - `play cabal --help` prints cabal's. One person per
@@ -89,7 +90,8 @@ each other's private view. A second human seat needs a second channel.
 |---|---|---|
 | **cabal** (hidden-role missions) | pure deterministic code | spike #1 |
 | **changeling** (belief can diverge from truth) | deterministic, one night | spike #2 |
-| Secret Hitler | deterministic + forced reveals | **not planned** - same rung as cabal, so it buys recognition and no engine progress |
+| **quorum** (entitlement cascades over a secret created in play) | deterministic, per event | spike #3 |
+| Secret Hitler | deterministic + forced reveals | **not as a port** - a port buys recognition and no engine progress. `quorum` is that shape, built for the entitlement axis below rather than the recognition |
 | Blood on the Clocktower | a Storyteller with discretion | next, as an ADJUDICATOR spike against 3-4 characters, not the game |
 | Freeform TTRPG (5e SRD) | mostly LLM judgment | the actual product |
 
@@ -104,9 +106,22 @@ missions held wins it for the majority; three sunk wins it for the saboteurs, wh
 get one last shot at naming the seat that secretly knew them. **changeling** is a
 different question, modelled on One Night Ultimate Werewolf: roles move during the
 night, so a seat is told what it was *dealt* and never what it now *holds*, and it
-can play a whole game sincerely wrong about itself. Full rules and the
-night-knowledge tables:
-`games/cabal/RULES.md`, `games/changeling/RULES.md`.
+can play a whole game sincerely wrong about itself. **quorum** is a legislative
+cascade, modelled on Secret Hitler: each event deals a fresh hand that narrows as
+it passes down the offices - three cards to the proposer, two to the enactor, one
+enacted in public - so what a seat may see is a fact about the office it holds at
+that event and not about the role it was dealt.
+
+That last one is the second axis this ladder is ordered on, and it is why a third
+deterministic rung was worth building. Entitlement is **dealt once** in cabal,
+**mutable but still role-shaped** in changeling, and in quorum it **cascades over
+an object that did not exist at the deal** - so the audit question changes from
+*may this seat know this fact* to *may this seat know it at this point in the
+chain*, and a referee that caches entitlement per seat rather than per event
+passes every earlier test while being wrong.
+
+Full rules and the knowledge tables: `games/cabal/RULES.md`,
+`games/changeling/RULES.md`, `games/quorum/RULES.md`.
 
 ## Two public channels, and the line between them
 
@@ -189,6 +204,10 @@ games/changeling/RULES.md  rules, and what a seat can and cannot know about itse
 games/changeling/night.py  the night: roles move, and the seat is not told
 games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 8 themes
 
+games/quorum/RULES.md      rules, and what an OFFICE entitles a seat to see
+games/quorum/referee.py    the deck and the cascade - a hand narrows as it passes down
+games/quorum/roles.py, audit.py, player.py, demo.py   as above, 2 themes
+
 core/registry.py           name -> the driver that plays that rung
 core/doctor.py             `parlor doctor` - what this BOX can serve, and a real probe
 parlor/__main__.py         `parlor play <game>`, and no game logic
@@ -196,6 +215,7 @@ pyproject.toml             the console script; no runtime dependency, ever
 
 eval/run_cabal.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling
+eval/run_quorum.py         the same for quorum
 eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
 eval/s6_verdict.py         the gate-#3b verdict, reproduced from each arm's own records
 eval/strata.py             changeling's knowledge strata, counted over N nights
@@ -203,7 +223,8 @@ eval/derivable.py          what a seat could derive with no model at all
 eval/ladder.py             the control ladder: random, rules-only, model
 eval/audit_decisions.py    mine a finished run for moves wrong on their own terms
 
-games/durf/fixtures/       a third rung, scoped - a labelled fixture and no engine yet
+games/durf/                a fourth rung, scoped - a session engine and a labelled
+                           fixture, and no console seat yet, so it is not registered
 
 scripts/hygiene-check.sh   a pre-commit gate over the lines a commit ADDS
 scripts/install-hooks.sh   installs it (`.git/hooks` is per-clone, so this is one command)
@@ -285,19 +306,21 @@ is baked into the engine. Naming a game in prose as the thing a rung is modelled
 on is reference, not reliance: nothing here needs a licence from anyone.
 
 Fiction lives only in swappable **themes**, which are display-only and sit outside
-that guarantee. `plain` is the sterile functional skin in both games. cabal ships
-7 (default `plain`; `1984-en` is a dystopia skin evoking Orwell's *Nineteen
-Eighty-Four*);
-changeling ships 8 (default `folk`, plain folk-game vocabulary). What a theme
-carries is coined vocabulary and prose written here - single words and short
-phrases are not copyrightable, the novels' text is, and none of it is in this
-repo.
+that guarantee. `plain` is the sterile functional skin in all three games. cabal
+ships 8 (default `lodge`, fraternal-order vocabulary; `1984-en` is a dystopia skin
+evoking Orwell's *Nineteen Eighty-Four*); changeling ships 8 (default `folk`, plain
+folk-game vocabulary); quorum ships 2 (default `guild`). What a theme carries is
+coined vocabulary and prose written here - single words and short phrases are not
+copyrightable, the novels' text is, and none of it is in this repo.
 
-**cabal defaulted to `1984-en` until 2026-08-28 and now defaults to `plain`.**
+**cabal defaulted to `1984-en` until 2026-08-28 and now defaults to `lodge`.**
 Nothing about the reasoning above changed; the skin is still shipped and still
-supported. It is simply surface a public tree carries for no benefit when the face
-that references nothing costs the same. **Every recorded cabal number was played on
-`1984-en`**, so a run meant to compare against one passes `--theme 1984-en`.
+supported. It is simply surface a public tree carries for no benefit when a face
+that references nothing costs the same. It went to `plain` first and then to
+`lodge` the same day, which puts all three rungs on one rule rather than on a
+coincidence: default to a rights-free fiction, keep `plain` as the sterile
+fallback. **Every recorded cabal number was played on `1984-en`**, so a run meant
+to compare against one passes `--theme 1984-en`.
 
 Themes are also an experimental dial, not just decoration - length-matched arms
 exist for polarity and vocabulary controls. Design and the confounds:

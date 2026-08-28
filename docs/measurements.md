@@ -55,11 +55,17 @@ Two things this table now shows that no single column does:
 - **The GATE row's point estimate is stable (+8.82 -> +9.00) while its floor verdict
   INVERTS** (+0.94 -> -0.25). At n=20 the floor's position relative to 0 is noise.
   Do not report "the floor cleared 0" as a finding at this N.
-- **The taint-level row is a STEP, not a slope, in both runs that have it** - a real
-  0->1 drop and no further response at 2 (`hunt20c`'s 1->2 leg is exactly flat). The
-  linear "per extra saboteur" statistic is mis-specified for this shape, and the
-  binary row is the better-behaved one. The scorer's "superseded by the graded slope"
-  note has it backwards.
+- **The taint-level row read as a STEP rather than a slope** - a 0->1 drop and
+  little further response at 2 - which would make the linear "per extra saboteur"
+  statistic mis-specified for this shape.
+  **SUPERSEDED 2026-08-27, and the scorer was right.** Read across all four legs on
+  the S6 records they run +7.4, +0.2, -1.6, -6.8: noise around a small negative, not
+  a step, so the trigger for a non-monotone caveat did not fire and
+  `run_cabal.py`'s "superseded by the graded slope" note stands as written.
+  `docs/gate3b-verdict.md` §The three draw-dependent items, resolved carries the
+  table. **Do not act on the
+  sentence above** - it is kept because it is what two runs looked like on
+  2026-08-26, and deleting a superseded reading hides that the correction happened.
 - `hunt20c`'s fail-card distribution is DERIVED (62 missions, 27 sunk, 39 cards, max 2
   fails at 5 seats => `{0:35, 1:15, 2:12}`), not read from a scorer field. The JSONL
   carries `fails_played` per GAME only.

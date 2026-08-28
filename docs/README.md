@@ -1,10 +1,17 @@
 # Design notes and reference
 
 The index of this directory, moved out of `RESUME.md` 2026-08-28. Durable material
-lives beside the code, not in the queue.
+lives beside the code, not in the queue; `RESUME.md` keeps the open rows.
 
-Durable material lives beside the code, not in the queue. This file stays the
-queue, the dated measurements, and the route decisions.
+**Three of the files below are the queue's own drained halves** rather than design
+notes - what landed, what was measured, what was settled - and they are listed here
+because this file claims to be the index of the directory and an index that is
+partly true is worse than none.
+- `docs/slices.md` - the closed slice ledger, S1-S7 and S9-S11, struck and kept
+  because live rows cite them by name.
+- `docs/measurements.md` - the dated numbers, the route call and the backend
+  notes. **Read before trusting any number in this repo.**
+- `docs/decisions.md` - settled calls and the pre-committed criteria, all applied.
 
 - `docs/information-model.md` - 2026-08-28. The settled vocabulary for what this
   repo calls entitlement, cited by identifier: information set, percept,
@@ -48,6 +55,20 @@ queue, the dated measurements, and the route decisions.
   4 (`drill-en`) on cabal and the whole changeling set are BUILT and unrun; read it
   before running any of them, and before editing any blurb - the faces are
   length-matched on purpose and frozen.
+- `docs/content-packs.md` - the engine/content split the endgame rung needs: what
+  ships, what stays local, why the example pack is required rather than a courtesy,
+  and why "local" is not the same as "untransmitted". Read before laying out
+  `games/<rung>/`, not after.
+- `docs/preset-axes.md` - the question after content packs, answered no: entitlement
+  schema, resolution kernel and authority topology are three different kinds of
+  axis, only the first is flag-shaped, and a flag list is 2^N unmeasured fallback
+  rates wearing one measured number's name. Carries the boundary of the formal
+  prior art (`arXiv:2205.00451`).
+- `docs/scripted-rungs-cabal.md` - why the control ladder keeps climbing on hand
+  rules rather than a learned policy, and the three rungs that follow. Unmeasured.
+- `docs/quorum-live1-criterion.md` - quorum's pre-commitment for its first live
+  arm, written before any model played a seat; arithmetic
+  `eval/quorum_live1_verdict.py`. Not to be edited.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

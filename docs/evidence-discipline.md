@@ -52,8 +52,11 @@ figure, which cleared zero in both runs that had it, because promoting it after
 seeing that is the same error wearing a third hat.
 
 - A pre-commitment is reproduced verbatim and never edited to agree with the
-  outcome. The two on file: `docs/gate3b-verdict.md` (cabal #3b, applied) and
-  `docs/changeling-gate3-criterion.md` (changeling #3, applied).
+  outcome. Four on file: `docs/gate3b-verdict.md` (cabal #3b, applied),
+  `docs/changeling-gate3-criterion.md` (changeling #3, applied),
+  `docs/durf-gate1-criterion.md` (DURF #1, applied) and
+  `docs/quorum-live1-criterion.md` (quorum's first live arm, written before any
+  model played a seat and not yet applied). `docs/decisions.md` is the roll-up.
 - Clause-by-clause outcomes go in the verdict, not back into the promise. Where a
   clause did not apply cleanly, record that it did not rather than smoothing it -
   both applied criteria have one such clause each.
