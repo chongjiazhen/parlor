@@ -1,0 +1,562 @@
+# Open arms - the reasoning behind the open queue rows
+
+`RESUME.md` is the queue and is budgeted in bytes, so it carries the ASK and the
+entry condition for each open row. What it cannot carry is the argument behind
+the row - why the arm is worth running, what it confounds, what a result would
+and would not establish. That is what is here.
+
+**Read the entry for a row before taking that row**, not before picking one. The
+queue is what ranks the work; this file is what you need once you have chosen.
+
+Moved out of `RESUME.md` 2026-08-28, when the queue was 68 KB against its own
+30 KB budget and the ratchet had been holding it flat rather than shrinking it.
+**Nothing was rewritten - every entry below is verbatim where it came from**,
+which is the same rule the 2026-08-28 `docs/` split followed. A row that has
+since been reworded in the queue is the live statement; this is the reasoning.
+
+
+## Count self-outings by a CLAIM-shaped match
+
+- [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with
+      it.** The open half of the read above. `outed_own_role_in_public` matches the
+      seat's own theme role name, which over-counts by ~3x (most hits are a seat
+      using its own role's word to accuse somebody else) while a functional-key
+      match sees nothing at all - the old 0/1290. Neither is a measurement. First
+      person and present tense is the fix, and it **RE-BASELINES the 26/1580
+      count**, so it lands with a re-score of the records rather than on its own.
+      It also cannot see the interesting case by construction: a mimic claiming to
+      be the seer is invisible to a check that matches only the seat's own role
+      name, so counting FALSE claims is a different check again.
+
+
+## Gate #2 has a cheaper falsifiable design
+
+- [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
+      `--arm llm` vs `--arm llm-good` on the same seeds isolates evil's
+      contribution against a fixed opponent population, using arms that already
+      exist. The conditionality then softens from a hard refusal to "the
+      unconditional headline rate is only quotable once #3 holds". Also: the ~65%
+      no-deception baseline is a property of `RandomPolicy(fail_rate, approve_rate)`,
+      not of the game - fine as an existence proof, wrong if quoted as the game's
+      intrinsic evil floor. And `rate_ok`'s 5% CI-floor bar is pre-declared
+      nowhere; it deserves a line in the pre-committed criterion the way 3b's did.
+
+
+## Two behaviours the auditor prices, neither of them bugs
+
+- [ ] **Two behaviours the auditor prices, neither of them bugs** (steer
+      2026-08-26 - my PROOF classification was wrong on both).
+      - **A good seat approves a known-tainted team, 7/76 (9%).** Legal and
+        plausibly CORRECT: a seer that always rejects exactly the tainted teams
+        has a perfect tell, and the hunter's whole job is finding the seer, so
+        buying concealment with mission EV is real play. The model appears to do
+        it deliberately - a seer's private reasoning reads "I must support [1,4]
+        ... and vote yes - without revealing I know who's darkness." Checked the
+        one forced case (four rejections, a fifth loses outright): 0 of 7 were
+        under that pressure, so they were free choices - but free is not the same
+        as careless, and this count cannot separate strategy from lapse.
+        **Consequence for the metric, which is the part that matters:** gate #3a's
+        "good approves clean vs tainted" scores a concealing seer as a bad one, so
+        the headline +31.55% and the blind-seat +13.57% are not measuring the same
+        thing. Blind seats have nothing to hide, which is why that half is the
+        sturdier number - and an argument for reporting it as the primary.
+      - **Over-sabotage, 12/63 missions.** Two evils on one mission decide
+        independently and the game gives them NO private channel, so playing
+        success is only better if the other one fails and nothing says it will.
+        Anti-coordination with a mixed equilibrium; the ideal count is not zero
+        and calling it dominated was wrong.
+        Still worth counting for one reason: a focal point needs no channel at all
+        - "the lower-numbered evil on this team plays fail" is derivable by both
+        seats from the public proposal alone, and Schelling points do not require
+        communication. A pair that finds any such convention drives this near zero
+        without signalling. 41% of sunk missions says the model finds none. That is
+        a fact about reasoning, not a rules violation.
+        So the `need` disclosure stays worth doing (it is entitled rules
+        information the ask withholds) but stop expecting it to zero this number.
+
+
+## `unittest discover` claims all tests and collects 572 of 850
+
+- [ ] **`python -m unittest discover` claims "all tests" and collects 572 of 850.**
+      `README.md:189` offers it as the no-dependency way to run the suite. Every
+      pytest-fixture file imports cleanly and contributes ZERO tests - silently,
+      and it still prints `OK`. `core/test_console.py` and `core/test_registry.py`
+      are two; the gap is 278 tests, including every mutation-checked guard in
+      them. A green that proves less than it claims, in the public README, which
+      is the shape `docs/evidence-discipline.md` exists to refuse.
+      - The fix is one of two and they are not equivalent: reword the README to
+        name pytest as the suite runner and unittest as a partial smoke, or move
+        the fixture files to plain `TestCase` so the claim becomes true. The
+        second keeps the no-dependency property the line is selling.
+      - **Done when** the number the README implies and the number the command
+        collects are the same number, by either route.
+
+
+## What writes a stale `.git/index.lock`
+
+- [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
+      0-byte lock appeared at 08:44 with no `git.exe` running and blocked a commit
+      40 minutes later, mid-session, with the index intact. Removing it was the
+      documented remedy and cost nothing - but an unattended run that commits its
+      own records would have died on it, silently, at a point where the run itself
+      was healthy. Candidates: the rtk PreToolUse hook, which is EXCLUDED for git
+      on WSL but **live on native Windows** (`RTK.md`), or a crashed helper. Cheap
+      probe: log the lock's ctime against the tool-call transcript next time it
+      appears. Until then, `/mingw64/bin/git` for anything whose answer gates a
+      commit, which is `RTK.md`'s standing rule anyway.
+
+
+## Negation pass over the model-facing strings
+
+- [ ] **Negation pass over the model-facing strings** (the rule is
+      `.claude/rules/model-facing-text.md`, path-scoped so it fires when you open
+      the files that hold them). Steering by prohibition makes the banned behaviour
+      MORE available, and the live prompts do it in at least three places:
+      `"speak in the first person, and do not answer your own earlier lines"`
+      (referee DISCUSS ask), `"do not defer to whatever the table already seems to
+      think"` (plain register), `"no theatrics, no slogans, no world-flavour"`
+      (same). Each has a positive form - speak TO the other seats; form your own
+      read first; speak plainly and cite the record. The referee's refusals
+      (`cannot fail a mission`, `cannot be the informant`) are hard guardrails and
+      stay, though each already pairs with a positive instruction.
+      **This is a measured change, not a cleanup** - same seeds, one variable, and
+      a prompt edit landed mid-campaign confounds that campaign exactly the way
+      `c43274e` confounded `hunt20b`. **UNBLOCKED 2026-08-28**: S6 is down, nothing
+      is in flight, and the standing rule is the check rather than the wait - run
+      the liveness command above before landing it, not a remembered freeze.
+      **Re-homed 2026-08-27 (S1):** measure it on changeling, where a paired
+      20-game arm is ~30 min against cabal's 13.2 h. Cabal's referee refusals stay
+      as written.
+
+
+## Does the standing frame belong in the PAYLOAD? A `--briefing` arm
+
+- [ ] **Does the standing frame belong in the PAYLOAD? A `--briefing` arm.** The
+      ask carries the rule that bites in that phase and no more - VOTE the
+      five-reject rule, MISSION `need` and the stake, PROPOSE nothing about what
+      wins. Deliberate per-phase drip (`referee.py`, the `need` comment) and
+      unplayable for a person, which is why the console got a `BRIEFING` OUTSIDE
+      the payload. Whether a MODEL wants it is unmeasured, and the one measurement
+      here cuts both ways: `_night_against_the_table` restates a fact the seat held
+      already, +7% -> +63% on the 12B, INVERTED on q36 (+80% vs +72%) - so expect a
+      capability-dependent sign. **The lane notes make ABSENCE the novel arm**:
+      every build read from source states full rules in the system prompt and none
+      ablates that. Off by default, one variable, re-baselines what runs under it;
+      changeling (~30 min). **Done when** a paired arm exists, both fallback rates.
+
+
+## A per-seat private notebook - built, unmeasured
+
+- [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.** `--notebook`
+      on `run_cabal.py` and `demo.py`; off by default. A seat's `note` is filed
+      under its own seat and rendered back to that seat alone on every later call,
+      so a read survives the turn that formed it. Cap: last 6 lines of 160
+      characters, stamped with the mission it was written on.
+      - **It is a prompt change, so it is a MEASURED change** (`--notebook` vs not,
+        same seeds, one variable, reported beside its fallback rate) and it waits
+        behind the seed-1000 re-run the same way the negation pass does. Nothing
+        about it is quotable until that arm exists.
+        **Re-homed 2026-08-27 (S1)** to changeling for the same reason as the
+        negation pass, and it stays OFF for the S6 campaign, which runs on frozen
+        code. A memory that survives the turn is a bigger prompt change than the
+        others here, so it is the one most worth a cheap paired arm.
+      - Gate #1 holds by construction and the audit says so: the notebook leaves
+        the audit view with speech (`include_notes` defaults to `include_speech`),
+        because `find_leaks` is naive substring matching and a seat writing down a
+        correct GUESS would otherwise score as a referee leak. Four mutation-checked
+        tests, each killed by its own named test with a compiling mutant.
+      - Two costs it buys, both real: it rides on every call (~1.1 kB at full
+        notebook), and it hands the seats a memory the earlier runs did not have,
+        so no number from before it is comparable to a number after it.
+
+
+## Larger setups (6/7p) + the two information-degrading evils
+
+- [ ] **Larger setups (6/7p) + the two information-degrading evils.** Package them
+      together, because both only make sense at 3 evil seats.
+      - The engine already supports both, and has since the first commit: `Role`
+        carries `seen_by_seer` (False = the evil the seer cannot see) and
+        `sees_fellow_evil` / `seen_by_fellow_evil` (False = the evil who neither
+        knows nor is known by its own side). `entitled_knowledge` honours all
+        three, so each role is ~2 lines of DATA. The cost is measurement, not code.
+      - **Why they are worth more than variety: they degrade information in a
+        principled way.** The unseen-evil variant halves the seer's knowledge, so
+        the current +30.7% local / +66% cloud stops being partly "the seer acting on
+        a handed answer" (already isolated at +13.7% by the blind-seat split) and
+        becomes a claim about deduction. The blind-evil variant makes evil deceive
+        WITHOUT knowing its partner, which is the honest version of gate #2 - the
+        current claim is really "two agents told about each other cooperated".
+      - **The gate that gated this is CALLED** - 3a retired and 3b not shown,
+        2026-08-27 - so the sequencing constraint is now only the general one:
+        changing what the seer knows mid-run means neither the old nor the new
+        number means anything. Land it between campaigns, as the hardening pass you
+        would actually publish from. What still blocks it is that cabal has no GPU
+        program left, not a gate.
+      - At 5 seats there are only 2 evil, so the unseen variant leaves the seer
+        seeing exactly one and the blind variant leaves two evils who know nothing
+        of each other - swingy to the point of noise. These are 7+ roles.
+      - **A bigger table does NOT fix the thin denominator - it makes it worse.**
+        This file used to blame the ~12-votes-a-run sample on the 5-seat size
+        ("because most teams in a 5-seat game carry an evil"), which implies a
+        larger table would help. It would not. Clean teams get
+        combinatorially rarer as seats grow, faster than the extra good voters
+        compensate; gate #3b is untouched at any size since hunts are one per game.
+        Arithmetic, table, and the graded-taint fix that DOES work:
+        `docs/player-counts.md`.
+        **Checked from the other side 2026-08-27 and it holds harder than this
+        bullet claimed.** Off-team-clean good votes per vote event - the only
+        unconfounded gate-#3a cell - run 5p **0.120**, 7p **0.160**, 8p **0.100**;
+        per unit speaking cost 0.0240 / 0.0229 / 0.0125. 7p's raw gain is eaten by
+        its extra speakers. So a bigger table does not rescue gate #3a either, and
+        these variants are worth building for what they degrade about INFORMATION,
+        never as a sampling fix.
+      - **The roles themselves landed 2026-08-27** as `LURKER` (unseen by the seer)
+        and `STRAY` (neither knows nor is known by its own side), named in all five
+        skins, plus `ALL_ROLES` and three theme guards in `test_audit_coverage.py`.
+        Nothing deals them - what is left is the 6/7p setups and the measurement,
+        which was always the cost. Verified on a hand-built 7-seat deal: the seer
+        sees every evil but the lurker, and no evil sees the stray.
+      - Watch role-name vs faction-name substring collisions in the leak audit (see
+        the plain-skin "Loyalist" case). **A sharper one found while checking the
+        above, and it is not about naming at all:** two seats holding the SAME role
+        break the audit outright. Each one's own role name is the other's secret
+        term, so the 7p deal with two `loyalist` seats reported a mutual leak in
+        every skin - a false positive no rename can fix, since the term is
+        identical by construction. **FIXED 2026-08-27, and the remedy this file
+        proposed was the wrong one.** Re-keying `secret_terms` so identical-role
+        seats do not audit against each other is a blanket skip, and a skip buys
+        the false positive off with a false negative - the audit would then be
+        blind to the referee genuinely naming a same-role seat, which is the
+        shipped-leak half the top invariant refuses. What landed instead narrows
+        the CORPUS, the way `include_speech=False` already does: the viewer's own
+        "Your role:" line is removed before the scan, since that is the only place
+        the referee asserts a seat's role to that seat. `find_leaks` stays naive, a
+        duplicate term anywhere else still fires, and the same shape is what
+        changeling reached from the other side. Mutation-checked - the blanket skip
+        was written, and it kills the soundness test by name.
+
+
+## Seat the changeling expansion cards, which means picking a deck
+
+- [ ] **Seat the changeling expansion cards, which means picking a deck.** The
+      cards themselves landed 2026-08-27: `kindred` (the pack's mirror on the
+      village side) and `waker` (acts last, so it is the only seat whose belief is
+      guaranteed true at dawn) are implemented, skinned, resolved and tested, and
+      `SETUP_5` deals neither - the same footing as cabal's `LURKER`/`STRAY`, for
+      the same reason: every recorded changeling number was played on the
+      eight-card deck, so a deck change re-baselines all of them. **The DECK DESIGN
+      landed 2026-08-27** in `games/changeling/RULES.md` §The decks that would seat
+      them, and that section is the source of record - two decks, each with its
+      arithmetic measured over 4000 nights, plus the four expansions costed and not
+      built. **Do not restate its numbers here.** What is open is the part a design
+      doc cannot close:
+      - **Register the setups, then measure.** Both decks are UNBLOCKED as of
+        2026-08-28 - they waited on keying the knowledge class on what the seat was
+        told, which landed in S10. `py -3 -m eval.strata` prices a deck's strata
+        before it is built: add a row to its `DECKS` table and read the blind count
+        off 4000 nights.
+      - **Every deck change costs at least TWO variables.** `len(deck) == n +
+        centre` means a card cannot be added without growing the table or the
+        centre, so there is no one-variable arm in this game. Choose the second
+        variable deliberately and report it.
+      - **Route call: `waker` is the one worth a run.** Every other seat has to
+        infer that the night moved it and this one is told, so it is the cleanest
+        handle on whether a model reasons about divergence at all rather than about
+        who is lying - and its deck seats it in 62% of games, so one run carries
+        its own control with no paired second run.
+
+
+## Candidate changeling skins - built, all unrun
+
+- [ ] **Candidate changeling skins - BUILT 2026-08-27, ALL UNRUN.** `greek`,
+      `greek-named`, `journey`, `investiture`, `masquerade` and `folk-inv` exist as
+      themes; `DEFAULT_THEME` is still `folk` and no number has moved. **The design
+      is `docs/moral-framing.md` §The changeling skin set - what each arm is FOR**,
+      which owns the arm ladder, the name-form axis, the corpus-sourcing rules and
+      the length control. Read it before running or editing any of them; do not
+      restate it here.
+      - **What is open is which arm gets GPU first**, and the ranking is a route
+        call this file owes: `greek` for the vocabulary control, `folk-inv` for
+        polarity, the `greek`/`greek-named` pair for name form - that pair being the
+        cleanest single-variable manipulation in the repo, since it moves eight
+        strings and nothing else.
+      - **A blurb is a prompt**, so every face is frozen at its measured length and
+        an edit orphans whatever has been recorded against it.
+
+
+## Ship a werewolf-vocabulary theme on changeling
+
+- [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
+      answer to public legibility.** A public repo has a real problem that "team-
+      mission hidden-role deduction game" means nothing to anyone outside the
+      hobby, while "werewolf / seer / villager" means something to nearly everyone.
+      That is public-domain folk-game vocabulary (Mafia, Davidoff 1986), carries no
+      branding question, and lands on a rung that is already built.
+      - **This is why a vanilla Werewolf RUNG is not worth building**: it sits on
+        the same rung as cabal (deterministic referee, bounded actions, no
+        judgment), so it buys recognition and no engine progress, and it has
+        elimination - a shrinking table, variable agent count per game, dead seats
+        contributing no decisions, i.e. the N problem from the wrong side.
+        Legibility is a theme and a README paragraph, not a spike.
+      - **changeling does not retire cabal's gates.** Different rung, different
+        deduction task. Which game's numbers get published first is the only thing
+        it settles; a cabal gate left uncalled stays uncalled.
+
+
+## Spike #2: off-map faction heartbeat
+
+- [ ] **Spike #2: off-map faction heartbeat - SCOPED 2026-08-27,
+      `docs/faction-heartbeat.md`.** Read it before costing this against S8's other
+      options, because the scoping moved it.
+      - **It is not an alternative to the adjudicator spike, it is the small
+        version of that spike's hardest part.** Both need the typed-fact channel -
+        an actor declares its intended reveals as typed facts, entitlement is
+        checked against those, and the prose is audited against the facts it did
+        NOT declare. A faction needs it over three action types; a Storyteller over
+        20+ characters of discretion. S8 lists them side by side as though they
+        were separate options; they are not.
+      - **The "long-running agent process" half of the original stub is
+        backwards.** A wall-clock actor has no fixed call order, which voids the
+        seed invariant `docs/reproducibility.md` measured. Ticks are counted, the
+        schedule derives from the game seed, and whether a process drives it must
+        not be observable in the record.
+      - **The one new gate #1 failure, and it is silent**: entitlement gains a time
+        axis, so a render must be audited against the entitlement snapshot taken
+        when it was BUILT, never against entitlement recomputed at audit time - by
+        then the fact may have gone public by other means and a real leak reads
+        clean. Capture the snapshot with the render.
+      - Faction decisions stay OUT of the run's denominator (the gates measure
+        seats), and the faction's fallback rate is reported beside the run's.
+
+
+## Evil over-sabotages
+
+- [ ] **Evil over-sabotages, and it is the seer-salience bug wearing the other
+      team's colours.** Scored on the FULL 20-game run: 63 mission resolutions,
+      fail-count distribution `{0: 34, 1: 17, 2: 12}`, need=1 throughout. So **12
+      of 29 failed missions (41%) had BOTH evils play fail when one sufficed**, and
+      12 of 63 missions overall (19%). The partial-run figure was 45%/9-of-20; the
+      full run settles it at 41%.
+      **Restated 2026-08-27 (S3): the honest figure conditions on the game
+      continuing** - a double fail on evil's third failed mission is free, since the
+      game ends on that resolution and the identification is never paid for.
+      Re-scored, `hunt20b` is 11/28 = 39% and `hunt20c` is 10/22 = 45%. The
+      correction moves the number by ~2pp in each direction and changes nothing
+      about this item: evil still hands over the pair on ~2 of every 5 sinkings it
+      actually pays for.
+      On a 2-seat team two fails name both of them outright; on a 3-seat team it
+      cuts the good side's search to three pairs. It is the single largest free
+      information gift on the board and evil hands it over on two of every five
+      missions it sinks.
+      - The rules already allow the right move. `validate_card` refuses only a GOOD
+        seat playing fail, so evil may play success freely, and the MISSION prompt
+        already says "weigh sabotage now against the suspicion a fail here would
+        put on this team". The capability is there; nothing lines it up.
+      - **Two fixes here, NOT one, and they are different kinds of thing.** Keeping
+        them apart is the whole judgement in this item.
+      - **(a) Disclose `need` - a harness BUG, fix unconditionally.** `need` appears
+        only in the public event AFTER resolution (`referee.py` mission()), never in
+        the ask. How many fails a mission requires is PUBLIC RULES INFORMATION - a
+        human reads it off the board before playing a card. Withholding it is an
+        information asymmetry against the game's own rules, i.e. the seat is being
+        asked to weigh redundant sabotage against a threshold it was never given.
+        This is not a hint and not a nudge; it is restoring entitled information,
+        and it needs no measurement to justify. The gate it was sequenced behind is
+        called, so what is left is the ordinary rule: it changes behaviour, so it
+        lands between campaigns and not into one.
+      - **(b) Naming the partner on this team - a HINT, and the evidence points
+        AGAINST it.** The seat can derive "my partner is on this team" from the
+        public proposal plus its night knowledge. Spelling that out is exactly what
+        `_night_against_the_table` does for the seer - and that line's value
+        INVERTED with model capability: +63% on the 12B bench, then **+80% as-is vs
+        +72% with the line** on q36, i.e. actively harmful, because it competes with
+        reasoning a capable model already does. So do not assume the mirror fix
+        helps; the one measurement we have on this exact move says it hurts on the
+        model gate runs actually use. If (b) is tried at all it is a measured arm of
+        its own, and (a) must land first and alone or the two are confounded.
+      - **This is a confound in gate #3a, not just an evil-side weakness.** Good's
+        +30.7% discrimination is measured against an evil side that self-identifies
+        on 45% of its successful sabotages. Some unknown share of that number is
+        good exploiting a blunder rather than deducing from discussion. So fixing
+        evil is not a fairness gesture - it is required before the good-side number
+        means what it claims. Expect discrimination to DROP when this lands; that
+        drop is a truer number, not a regression.
+      - Sequence: measured change, same seeds, one variable, between campaigns -
+        the gate this waited on is called. Distribution above is from a PARTIAL run (13 of 20) and is an
+        incidental mechanical count, not the pre-committed hunt metric - recompute
+        on the full run before quoting it anywhere load-bearing.
+
+
+## Stratify cloud results by served upstream
+
+- [ ] **Stratify cloud results by served upstream instead of pooling them.** The
+      problem with an `auto` run was never that it is undocumented - `complete_meta`
+      already returns the served model and the report prints the mix. It is that
+      POOLING hunts across a time-varying model population computes a Wilson
+      interval over an ill-defined denominator. Record the served upstream on each
+      decision, report per model class, and an `auto` run stops being "several
+      models averaged": cells accumulate ACROSS runs, so tonight's nano hunts and a
+      future 120B-class run land in different cells instead of contaminating one.
+      Retires the "reproducible, unlike the cloud's 30-upstream mix" asymmetry -
+      stratified, a cloud run is reproducible at the cell level. Does not rescue a
+      thin run: ~10 hunts over 3+ upstreams is nothing per cell.
+
+
+## Theme as an experimental variable
+
+- [ ] **Theme as an experimental variable, not a default to fix** (design:
+      `docs/moral-framing.md`). `1984-en` stays the shipping default;
+      there is no licensing reason to drop it and it is the face every committed
+      transcript wears. What is open is that the blurb inverts moral polarity -
+      sabotage reads as heroic, deceit as survival - and nothing measures whether
+      that moves behaviour. No number in §Measured records which theme produced it,
+      so a theme change is a MEASURED change on the same terms as the negation
+      pass: same seeds, one variable, landed between campaigns. The gate it used to
+      wait on is called.
+      **Re-homed 2026-08-27 (S1)** to changeling, which ships a folk-game theme of
+      its own and so poses the polarity question at 1/26th the GPU cost. `1984-en`
+      remains cabal's shipping default and is the face of every committed
+      transcript; nothing about cabal's theme changes.
+      **Arms built 2026-08-27**, on cabal, as themes only: `1984-inv` (arm 3,
+      villainous - the 1984 skin inverted rather than a new fiction, so 2-vs-3
+      differs in valence and nothing else) and `drill-en` (arm 4, neutral - a
+      sanctioned drill with no victim). Unrun, and adding them moved no number
+      because nothing runs on a face until a run asks for it by name. (cabal's
+      `DEFAULT_THEME` did later move, `1984-en` -> `plain` on 2026-08-28, for
+      publish-surface reasons and not as an arm; `games/cabal/roles.py` carries
+      that note beside both theme constants, which is where a reader of a number
+      will be.) `bnw-en` was 84 words against `1984-en`'s 53, confounding the
+      vocabulary control with density; trimmed the same day, and all four English
+      faces are now 53 words / 281-291 chars. Frozen from here - a blurb is a
+      prompt, so a later edit orphans whatever has been recorded against it. One
+      thing left to settle before spending GPU: whether the run happens on cabal or
+      on the re-homed changeling rung. A `bnw-inv` was considered and rejected -
+      reasoning in the doc.
+
+
+## Seat the solver as an ARM
+
+- [ ] **Seat the solver as an ARM** - the half of `docs/reference-policies.md` that
+      is still unbuilt. The instrument exists and scores records
+      (`games/cabal/solver.py`, `python -m eval.derivable`); what does not exist is
+      a `SolverPolicy` with an `act(ref, seat)` that plays. That needs policy and
+      driver plumbing plus GPU, and cabal no longer has a GPU program - so it queues
+      at the publish boundary or behind changeling, not behind a freeze. `evidence_from_referee(ref, seat)` is already the whole input and is gate
+      #1-safe by construction - it reads `entitled_knowledge` and `public_events`
+      and holds no referee. Note what an arm buys before building it: the hunt is
+      mechanically flat (proved), so a solver arm can only differ from random at the
+      VOTE, and it is the vote strata that turned out to be the live question.
+
+
+## Seat the heuristic against the MODEL
+
+- [ ] **Seat the heuristic against the MODEL, which is the arm that does not exist
+      yet.** The rung is built (`games/cabal/heuristic.py`, `python -m eval.ladder`)
+      and both halves it can reach without a GPU are measured - see §Measured. What
+      is missing is the third: a game with heuristic seats and LLM seats at the same
+      table, which needs GPU and the eval driver's arm plumbing - and cabal has no
+      GPU program left, so it queues behind changeling or lands at the publish
+      boundary. Read the artifact warning in §Measured first - the
+      all-heuristic arm's 99.5% hunter is a deterministic twin reading its own tell,
+      and a mixed table is where that stops being a confound and starts being the
+      measurement.
+
+
+## Group-sequential design instead of a pre-committed fixed N
+
+- [ ] **Group-sequential design instead of a pre-committed fixed N.** S6 commits
+      40 games and forbids a third campaign, because stopping when a floor happens
+      to cross is peeking - correct, and the named fix is not "don't look". It is
+      alpha spending: Wald's SPRT (1945), O'Brien-Fleming boundaries (1979),
+      Lan-DeMets (1983). A boundary computed BEFORE the run lets you look
+      repeatedly and stop early legitimately, which on a 13.2 h campaign is real
+      GPU. **It must be designed BEFORE the next campaign**, never retrofitted to
+      S6's records - that would be the peeking it exists to prevent, which is the
+      real gate here and not the freeze this line used to cite.
+
+
+## Obtain the paywalled theory chapter
+
+- [ ] **Obtain the paywalled theory chapter before publishing anything about gate
+      #1.** It is the one result that could bound gate #1's shape, no free copy
+      exists, and the route is a request to its authors. **The target, the reason
+      it matters and the drafted request are off-repo**
+      (`agi2026-chapter-request.md` beside the neighbour list; `CLAUDE.local.md`
+      has the path) - a private request naming real people is not repo content.
+      What belongs here is only the dependency: no public claim about gate #1
+      until that chapter is read.
+      Two published hybrids are in the same debt: both hand belief inference to a
+      structured model and use the LLM only for language, i.e. the strongest
+      results on this task come from NOT asking the model to deduce. That is the
+      framing gate #3 should be reported against. Neither voids the gate; both
+      change what its number means to a reader. Identifiers in the off-repo
+      ledger.
+
+
+## The thesis moved on 2026-08-27
+
+- [ ] **The thesis moved on 2026-08-27 - `README.md` now leads on the product
+      claim, and the off-repo positioning argument still leads on the research
+      one.** The original thesis is LLM agents as GM *and teammates* for solitaire
+      play; existing chat products give one counterparty, and a table of AI
+      teammates is only interesting if they do not share a brain. So independent
+      context is the PRODUCT REQUIREMENT, not a research property, and `README.md`
+      was rewritten to lead on that. Both framings are true and aimed
+      at different readers. **Reconcile them in the off-repo file, not here** - the
+      failure to avoid is a stale copy that says which framing LEADS while
+      disagreeing with the README. Three things to fold in there, all chat-only
+      today:
+      - **Which framing leads.** Product thesis primary, isolation-by-construction
+        as the credential. The evidence is that mainstream multi-agent chat shares
+        one history by construction, and where per-character state exists it is
+        MEMORY - what a character recalls, not what it is forbidden to be told.
+      - **The cost tension, which is the reason nobody does this.** Independent
+        context costs N x tokens, and shipping products say so themselves when
+        they explain why they centralize. The differentiator IS the cost
+        structure, and any product framing has to answer it.
+      - **The answer is already designed, filed under scoring.** The `SolverPolicy`
+        in `docs/reference-policies.md` is specced as an INSTRUMENT,
+        but it is also a teammate that plays correctly for zero tokens - the same
+        move the published hybrids won with, and the direct answer to the N x
+        bullet above. Cheap competent seats + a small model for the talking.
+      **Also decided in that conversation and not yet anywhere:** the queue fanned
+      out horizontally at rung 1 instead of cutting a thin path to the end (976
+      lines, 25 open items, two games on the SAME rung, nine built-but-unrun
+      things), and the walking skeleton that was missing got built by accident the
+      same day as `--human`. The cut that follows - gates #2/#3 demoted from gates
+      to dated model snapshots, which kills most of the theme, persona, 6/7p and
+      cloud items - is the RESUME restructure, and it waits for S6 so the verdict
+      section can drain to `docs/` complete rather than mid-flight.
+
+
+## While the card is busy - the standing menu
+
+Verbatim from `RESUME.md`. The question behind it recurs - *a run is in flight,
+so what can this session actually do?* - and the answer is stable, which is why
+it is reference rather than queue.
+
+The GPU-bound / attention-bound split above has a recurring question behind it:
+*a run is in flight, so what can this session actually do?* The answer is stable,
+so it lives here instead of being retyped. **The freeze is the binding
+constraint, not the GPU** - no prompt, scorer or rules edit while an arm is
+running, which rules out most of the queue and all of the measured work.
+
+**Whether a freeze is in force is `RESUME.local.md`'s to say** - this table is
+kept for whenever one is. Its standing lesson is the reusable half: an instrument
+scored against records that already exist costs nothing and can outrank the run it
+is waiting on.
+
+| option | verdict | why |
+|---|---|---|
+| Secret Hitler | **no** | Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
+| Blood on the Clocktower | **right target, wrong size - and now scope it against what exists** | The only one of these that is a genuinely different rung: the Storyteller makes *discretionary* rulings, which is the judgment-GM `docs/action-channel.md` splits the kernel/adjudicator for. But it is 20+ characters and the discretion is the hard part - so the session-sized version is a SPIKE that scopes the adjudicator against 3-4 characters, never the game. **Confirmed from outside 2026-08-27** - a public LLM-vs-LLM arena at this game already exists and is rated, another build scripts the storyteller outright, and a third puts an LLM in that seat; the off-repo ledger names all three. **So an LLM arena at this game is NOT the contribution. The discretionary adjudicator plus the entitlement audit is.** Two free controls worth copying from the rated one: shuffled turn order against positional advantage, and role-flipped mirrored matches |
+| 5e / a rules-lite RPG | **the endgame, and not yet** | This is the rung the repo is aimed at. `docs/action-channel.md` says do not harden cabal's `Phase` enum, `action_prompt` chain or `ACTION_KEYS` before game #2 exists - and a rules-lite system is the honest cheap version of this, not 5e |
+| `/improve-codebase-architecture` | **no, and least of all now** | A refactor under a freeze is risk with no measurement, and the two shapes actually worth restructuring are named in `docs/action-channel.md` as things to leave alone until game #2 |
+
+**Direction, called 2026-08-27 against the literature** (argument kept off-repo):
+gate #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay
+with the next checkpoint - S1 already found the tell, -0.2% on a 12B against +66%
+on 120B-class. Nothing built so far de-risks the actual product claim, "a referee
+that oversees without micromanaging". So after S6 and the S5 read, the next spike
+is the **adjudicator** against 3-4 discretion-heavy characters - not a whole
+game's roster, and not Secret Hitler, which is cabal's rung again.

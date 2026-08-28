@@ -31,6 +31,9 @@ partly true is worse than none.
 - `docs/measurements.md` - the dated numbers, the route call and the backend
   notes. **Read before trusting any number in this repo.**
 - `docs/decisions.md` - settled calls and the pre-committed criteria, all applied.
+- `docs/open-arms.md` - 2026-08-28. The argument behind each open row in
+  `RESUME.md`, which carries only the ask and the entry condition. **Read the
+  entry for a row before taking that row**, not before picking one.
 
 - `docs/information-model.md` - 2026-08-28. The settled vocabulary for what this
   repo calls entitlement, cited by identifier: information set, percept,

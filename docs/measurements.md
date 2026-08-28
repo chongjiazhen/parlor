@@ -170,3 +170,34 @@ fallback. **9/20 = 45.00%**, Wilson [25.82%, 65.79%] vs the derived bar 33.33% -
 SHOWN, at exactly the 0.50 hunts/game the power table assumed. All three
 draw-dependent items came back negative there; **carry no run-length caveat
 forward.**
+
+
+## Three changes that re-read an old record differently - moved from the queue 2026-08-28
+
+Verbatim from `RESUME.md`. Each one changes what a number recorded before it
+means, which is why they live beside the numbers rather than in the queue.
+
+class) and S5 (the `--out` convention), so a reader has one sha per change rather
+than a scatter. Done rows are gone; the struck 5 stays because the S6 slice cites
+it. Three things a later reader has to know, because each re-reads an old record
+differently:
+
+- **`fallback_rate` is unchanged and keeps its name** - every record in
+  `eval/records/` and every published summary quotes it, and both reproducers still
+  agree with the recorded runs. What is NEW beside it, in `core/integrity.py` and
+  shared by both games: a witnessed rate per seat-game, a `recovered` count for
+  decisions the parser or the rules sent back and the model then got right, and a
+  clean-game count. **Old records carry no `recovered` field and read as 0 - that
+  is absence, not a measurement**, and a re-scored pre-S9 run must not be quoted
+  for it.
+- **changeling's knowledge class is keyed on what the seat was TOLD**, which
+  re-baselines every recorded changeling number: a pre-S10 record's blind stratum
+  is ~19% smaller than the night produced and its `identity` stratum is diluted by
+  the same seats, so a figure quoted across the change answers two different
+  questions. `py -3 -m eval.strata` prints both rules side by side and is where
+  every stratum size in `games/changeling/RULES.md` comes from.
+- **`--out` is the summary path VERBATIM and the JSONL is its sibling
+  `{out}.jsonl`** (`core/runlog.py`, `record_paths`) - which is what every record
+  already on disk is named, so settling it renamed one run's files rather than
+  every run's. One test pins the two drivers TOGETHER: the defect was that they
+  disagreed, and a test beside either one cannot see that.

@@ -81,3 +81,33 @@ being arithmetic (`eval/durf_camp1_verdict.py`) written mid-run.
 - The discipline itself, the `hunt20b` error it exists to refuse, and why pooling
   runs after the fact is the same move as peeking:
   `docs/evidence-discipline.md` §Pre-committing a statistic.
+
+
+## Three things recorded before they were measured - moved from the queue 2026-08-28
+
+Verbatim from `RESUME.md`. Pre-registered so that none of them reads as a
+surprise later; none has been run.
+
+**Three things to record before they are measured**, so none reads as a surprise
+later:
+- **`--notebook` should show no gain.** Three independent 2026 results on three
+  different games report that reasoning and memory scaffolds do not deliver what
+  they are assumed to; `--notebook` is one such scaffold. A null is the expected
+  result, not a failed run.
+- **The strawman answer is a scaffolding-ladder arm, not an argument.** parlor's
+  bare seats are weaker PLAYERS than a purpose-built search-and-belief agent, and
+  no framing changes that. Same referee, three rungs - bare prompt, prompt plus a
+  carried belief vector, then determinized rollouts - reported as parlor's own
+  curve. **Do not run a head-to-head against someone else's harness**: the ones
+  surveyed are variously unlicensed, dependency-rotted or pinned to retired
+  models, and a head-to-head then measures their rot rather than either player.
+- **A neutral canonical key can mislead a model about STATE, and that is the cost
+  side of the branding-free invariant.** Read outside this repo, not measured
+  here, and no number attached to it: seats reading a state key by its everyday
+  sense inferred the wrong thing about the game from it, and renaming that state
+  fixed the reading; separately, an evocative role name drew threat assessment out
+  of proportion to what the role mechanically did. Both cut the same way for
+  parlor - branding-free keys buy the second effect and can lose the first. So a
+  key that names a STATE rather than a role is a prompt variable, and renaming one
+  is a MEASURED change on the same terms as a theme change, not a tidy-up. The
+  invariant stands; what is new is that it has a cost worth watching for.

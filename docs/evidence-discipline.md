@@ -128,3 +128,29 @@ cabal run to be incomparable with. Nothing in the queue recomputes itself.
 **A rule stated in two places loses to whichever copy the reader opens.** Code
 invariants live in `CLAUDE.md` and nowhere else, for that reason; this file states
 none of them.
+
+
+## What the successors reached - moved from the queue 2026-08-28
+
+Verbatim from `RESUME.md`, whose 2026-08-27 prior-work sweep produced it. The
+sources are in the off-repo ledger; what is stated here is in parlor's terms.
+
+**Three things the successors reached, and the first two are in the S6 verdict.**
+Stated in parlor's own terms; the sources are in the off-repo ledger.
+- **S1's capability tell has been independently reproduced elsewhere** - a
+  different game, a different model family, one agent scaled down across three
+  sizes, win rate falling monotonically with parameters. parlor measured identical
+  prompts at -0.2% on a 12B against +66% on 120B-class and drew the conclusion
+  alone. It is no longer alone, and that is the argument for reporting gates #2 and
+  #3 as dated snapshots rather than as parlor's result.
+- **The nearest outside baseline on this task does not cover gate #3b.** It drops
+  the role the hunter hunts, on purpose, to study detecting deception rather than
+  producing it - so there is no hunt in it at all. The honest version is **3a
+  only**, not the wider claim the ledger first recorded.
+- **A fourth precedent for the `--notebook` null, and the oldest of them** - a 2024
+  game-theoretic evaluation reporting that step-by-step and tree-search scaffolds
+  do not reliably help. That prediction now rests on four results across two years.
+- **One thing NOT to quote against it**: a large multi-round result shows memory
+  producing real effects, but its memory persists ACROSS games where `--notebook`
+  is per-seat memory WITHIN one. Different lever, different timescale; it neither
+  supports nor refutes the null.
