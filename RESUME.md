@@ -424,37 +424,37 @@ arm is ~30 min against cabal's 13.2 h.
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [ ] **One CLI over both games, so a person can sit down and play the bots.**
-      Today the human seat is two per-game entry points - `games/cabal/demo.py` and
-      `games/changeling/demo.py`, each with `--human 0` - and a player has to know
-      which module a game lives in before they can join it.
-      - **The hard half is already built and shared.** `core/console.py` reaches
-        its backend through exactly `complete_meta(context) -> (reply, served_by)`,
-        the same slot `LLMPolicy` occupies, so a console seat inherits the prompt,
-        the parser and the refuse-and-retell loop from the game it sits in. What is
-        NOT shared is the argument surface: cabal's driver takes `--rounds` and
-        `--transcript-dir`, changeling's takes `--no-thinking`, and the two demos
-        have drifted apart flag by flag.
-      - **So the work is a registry, not a wrapper.** `core/` gains a name ->
-        (referee factory, driver, that game's own flags) table and one
-        `py -3 -m parlor play <game>` over it; a `--list` names what is registered.
-        Each game keeps its own flags - a lowest-common-denominator flag set is how
-        two games come to share one denominator, which this file forbids elsewhere
-        for the same reason. **This is the promote-on-evidence case the `core/`
-        invariant asks for**: game #2 exists and needs it, which is exactly the
-        condition, so it is not speculative generality.
-      - **It must not move a model-facing byte.** A CLI that reaches a prompt is a
-        MEASURED change and would re-baseline both games' recorded numbers for a
-        convenience. Prove it rather than intending it: render both games at fixed
-        seeds before and after and diff, the way the 2026-08-27 freeze check did.
-      - **The one-human-seat refusal stays.** `human_seats` in `core/` refuses a
-        second person and is mutation-checked - a terminal is one channel, so two
-        people at it read each other's private view scroll past, and the referee's
-        audit cannot see that because both renders are correct. A CLI that makes
-        seating easier is exactly where someone would try to seat two.
-      - **Done when** `py -3 -m parlor play cabal --human 0` and
-        `... play changeling --human 0` both deal a game a person can finish,
-        `--list` names both, and the render diff above is empty.
+- [x] **One CLI over the games, so a person can sit down and play the bots.**
+      **LANDED 2026-08-28.** `py -3 -m parlor play <game>` over a registry in
+      `core/registry.py`; `--list` names what is registered; `parlor/__main__.py`
+      is the whole command surface. cabal and changeling are registered, `durf`
+      is not.
+      - **A registry, not a wrapper, and no shared flag set.** An entry is
+        `(name, module, summary)` and nothing about arguments - each game keeps
+        its own parser and receives the tail of the command line verbatim, so
+        `play cabal --help` prints cabal's flags under cabal's own usage line.
+        The `(referee factory, driver, flags)` shape this item sketched lost its
+        factory: `play` needs the driver, `--list` needs a sentence, and nothing
+        needs a referee without a driver. It lands when something asks.
+      - **It moves no model-facing byte, proved rather than intended.** Both
+        games rendered at seeds 1000 and 7, old entry point vs `parlor play`,
+        with each game's own flags exercised (`--rounds`, `--theme`): the diff is
+        empty. Instrument controls both ways - old-vs-old is identical, and a
+        different seed DIFFERS, so the empty diff is not a dead comparison. The
+        reason it is this cheap is that the demos were not edited at all.
+      - **What is registered is a rung a PERSON can sit at, not a genre.** The
+        line is mechanical and asserted, not described:
+        `test_every_registered_rung_seats_a_person` requires a console seat in
+        the driver's module. `durf` fails it - its session engine has seats and
+        an entitlement audit but no `ConsoleBackend` - so it is out for a reason
+        that dissolves the day it grows one. Genre would have been the wrong
+        axis: the endgame rung is an RPG, and a CLI scoped to social deduction
+        would need renaming when it arrives.
+      - The one-human-seat refusal is untouched and passes through intact
+        (`--human "0 1"` still exits with `core.console`'s complaint). 13 tests
+        in `core/test_registry.py`; four guards mutation-checked - argv
+        restoration, the missing-`main()` refusal, tail passthrough of a flag
+        this layer owns, and the console-seat registration line.
 - [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It was
       model capability: identical prompts scored -0.2% on the 12B and +66% on
       120B-class. `--register plain` helped the 12B (+16.7%) but bought suspicion,

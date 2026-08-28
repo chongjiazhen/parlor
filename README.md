@@ -33,10 +33,15 @@ easy by comparison.
 ## Try it
 
 ```bash
-python -m games.cabal.demo                    # a whole game, random players, no model needed
-python -m games.cabal.demo --human 0          # you play seat 0
-python -m games.changeling.demo --human 0     # the other rung: your own card can change
+python -m parlor --list                       # the games you can sit at
+python -m parlor play cabal                   # a whole game, random players, no model needed
+python -m parlor play cabal --human 0         # you play seat 0
+python -m parlor play changeling --human 0    # the other rung: your own card can change
 ```
+
+Each game keeps its own flags - `play cabal --help` prints cabal's. One person per
+game: a terminal is one channel, so two seats at it would read each other's private
+view.
 
 No dependencies, no API key, no GPU. The referee and the leak audit are stdlib
 Python; a backend is only needed to put models in the other seats.
@@ -158,6 +163,9 @@ games/cabal/heuristic.py   a rules-only policy, the rung the model is scored aga
 games/changeling/RULES.md  rules, and what a seat can and cannot know about itself
 games/changeling/night.py  the night: roles move, and the seat is not told
 games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 8 themes
+
+core/registry.py           name -> the driver that plays that rung
+parlor/__main__.py         `python -m parlor play <game>`, and no game logic
 
 eval/run_games.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling
