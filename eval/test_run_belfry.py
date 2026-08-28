@@ -210,6 +210,19 @@ class TestIntegrityAndRefusals(unittest.TestCase):
         self.assertEqual(s["games_completed"], 1)
         self.assertEqual(len(s["errors"]), 1)
 
+    def test_an_errored_game_is_excluded_from_integrity_too(self):
+        """The outcome figures already drop errored games; integrity must sum the
+        SAME population, or one recorded error reads as the summary and the
+        criterion controller disagreeing about the instrument."""
+        clean = self.rec()
+        dirty = self.rec(error="RuntimeError: boom", decisions=40, fallbacks=3,
+                         decision_log=[{"seat": 0, "fell_back": True},
+                                       {"seat": 1, "fell_back": False}] * 20)
+        s = score([clean, dirty])
+        self.assertEqual(s["integrity"]["decisions"], clean.decisions)
+        self.assertEqual(s["integrity"]["fallbacks"], clean.fallbacks)
+        self.assertEqual(s["integrity"]["games_finished"], 1)
+
     def test_the_fallback_rate_is_over_decisions_and_not_games(self):
         s = score([self.rec(decisions=100, fallbacks=5)])
         self.assertAlmostEqual(s["integrity"]["fallback_rate"], 0.05)

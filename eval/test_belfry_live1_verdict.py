@@ -227,6 +227,33 @@ class Voids(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("59 played games", text)
 
+    def test_an_errored_row_is_not_an_instrument_control_disagreement(self):
+        """One recorded error must reach the partial-run void, not read as the
+        summary and the rows disagreeing about decisions. The scorer excludes
+        errored games from integrity; ``recompute`` always has - this pair is
+        what proves they now exclude the SAME games."""
+        from games.belfry.player import (ExecutionRecord, GameRecord, VoteRecord)
+        from eval.run_belfry import score
+        clean = game([vote(True, True), vote(False, False)], [], decisions=48)
+        errored = game([], [], decisions=48, error="RuntimeError: boom")
+        rows = [clean, errored]
+
+        def record(r: dict) -> GameRecord:
+            return GameRecord(
+                winner=r["winner"], reason=r["reason"], cause=r["cause"],
+                days=r["days"], seats=r["seats"], script=r["script"],
+                executions=[ExecutionRecord(**e) for e in r["executions"]],
+                votes=[VoteRecord(**v) for v in r["votes"]],
+                decisions=r["decisions"], fallbacks=r["fallbacks"],
+                recovered=r["recovered"], error=r["error"])
+
+        records = [record(r) for r in rows]
+        summary = {"score": score(records)}
+        derived = verdict.recompute(rows)
+        self.assertEqual(verdict.control(summary, derived), [])
+        self.assertTrue(any("1 played games against 2 promised" in v
+                            for v in verdict.voids(derived, promised=2)))
+
     def test_a_loud_recovered_rate_warns_and_does_not_void(self):
         rows = arm(60, 0.7, 0.3, seed=35)
         for r in rows:

@@ -202,7 +202,7 @@ def score(records: list[GameRecord]) -> dict:
         "vote_good_misled": _votes(votes, False, misled=True),
         "vote_good_clear": _votes(votes, False, misled=False),
         "vote_evil": _votes(votes, True),
-        "integrity": integrity.summarise(records),
+        "integrity": integrity.summarise(played),
     }
 
 
