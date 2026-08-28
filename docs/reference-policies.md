@@ -241,7 +241,7 @@ its row has no unsure cell at all.
 
 So the discrimination that a pooled gate #3a number would report is carried by the
 seat that was told the answer. This is not a contradiction of the `+8.82%/+9.00%`
-blind-taint rows in `RESUME.md` §Measured - those score response to **actual**
+blind-taint rows in `docs/measurements.md` §Measured - those score response to **actual**
 taint, and this scores response to **derivable** taint. Read together they say
 something sharper than either: whatever the blind seats are responding to, it is
 not the mechanically derivable part of the record, so it is behavioural signal or

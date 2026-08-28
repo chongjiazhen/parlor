@@ -2,12 +2,14 @@
 
 Queue only. Done work leaves to git log - **delete the row**.
 
-**One exception, and it is the slice table below: a finished slice is struck
-through and annotated, never deleted.** Live rows cite slices by name - S6's
-pre-committed criterion rests on "the baseline derived by S3", and four items read
-"re-homed 2026-08-27 (S1)". Delete the row and those pointers dangle, which costs
-more than the two lines it saves. Everything else in this file follows the rule
-above.
+**One exception, and it is the slice table: a finished slice is struck through
+and annotated, never deleted.** Live rows cite slices by name - S6's pre-committed
+criterion rests on "the baseline derived by S3", and four items read "re-homed
+2026-08-27 (S1)". Delete the row and those pointers dangle, which costs more than
+the two lines it saves. **The struck rows live in `docs/slices.md`, not here** -
+kept, cited by name, and out of the read a cold session pays for. Everything else
+in this file follows the rule above, and it stopped being followed once: the file
+reached 1200 lines before the split of 2026-08-28.
 
 What's next:
 
@@ -318,9 +320,13 @@ The queue is two dozen open items and a cold session cannot rank them - and it i
 deliberately not counted here, because a count in a queue file is wrong on the next
 edit and nothing objects. These are the units: each is one session's worth, has a stated entry condition, and ends in a
 thing that exists. **Take exactly one.** They are ordered by what unblocks what,
-not by appeal - so **the numbers are IDs, not positions**, and S9/S10 sit above S2
+not by appeal - so **the numbers are IDs, not positions**, and S9/S10 sat above S2
 because the code-debt batch re-baselines what S2 would record. Live rows cite
 slices by name; do not renumber them to tidy the column.
+
+**Only live rows are below. The closed ones - S1-S7 and S9-S11, struck and
+annotated - are `docs/slices.md`**, which is where an ordering argument like the
+S9/S10 one above is still readable.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail; it does not need a session watching it. So an S with a run
@@ -329,17 +335,7 @@ table says which pairs.
 
 | # | slice | needs | entry condition | done when |
 |---|---|---|---|---|
-| ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. Verdicts: `docs/gate3a-retired.md`, `docs/gate3b-verdict.md`. | - | - | done |
-| ~~**S9**~~ | ~~Code debt, commit one - the integrity surface.~~ **LANDED 2026-08-28** - items 7, 1, 2 and 4 in one commit. `over_sabotage`'s docstring now states the benchmark as "the pair failed to find a convention"; the integrity block moved to `core/integrity.py`, shared by both games, and gained a witnessed rate per seat-game, a `recovered` third outcome, and a clean-game count. `fallback_rate` is unchanged and keeps its name - both reproducers still agree with the recorded runs. Seven guards mutation-checked, each killed by its own named test. | - | - | done |
-| ~~**S10**~~ | ~~Code debt, commit two - changeling's knowledge class.~~ **LANDED 2026-08-28** - the class is keyed on what the seat was TOLD; a MEET card that met nobody is `none`, not `identity`. The pin was replaced, not deleted: `..._never_the_DAWN_card` keeps the half that still holds, beside `..._keyed_on_what_the_seat_was_TOLD` and the property itself. Four guards mutation-checked. Stratum sizes re-measured and now recomputable - `py -3 -m eval.strata` - which moves 2375 of 20000 seat-nights from `identity` to `none` and recovers ~19% of the blind stratum. Both expansion decks are unblocked. | - | - | done |
-| ~~**S2**~~ | ~~changeling: clean re-run, then 200 games.~~ **BOTH HALVES LANDED 2026-08-28.** `PARLOR DONE rc=0 games=200/200 elapsed=18250s`, `--arm llm`, seed 4000, `qwen36-35b-a3b-iq3` at 100% attribution, 0.40% fallback. Records `eval/records/s2.json` + `s2.json.jsonl`. The powers half ran the same day: 2x20 on the fixed lane, identical deals, `PARLOR PAIR DONE rc=0 arms=2/2`, recipe `eval/runs/changeling-powers-pair.cmd`. The `RULES.md` powers table is on clean numbers and its caveat block is gone; the accuracy gain is banked. The two rule-error counts were the half it could not close; they were re-measured 2026-08-28 with a tracked instrument (`eval/rule_errors.py`) and the fall turned out not to be established. | - | - | done |
-| ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
-| ~~**S4**~~ | ~~Ops hygiene.~~ **LANDED 2026-08-27** - `core/runlog.py` writes `PARLOR DONE rc=N games=L/R elapsed=Ns` from both eval drivers; both games record a fallback's REASON per decision on a `refused` field; the untracked `run-hunt20.cmd` is retired and its exact invocation preserved in `eval/runs/hunt-local.cmd`. Records changed, play did not - the bytes a model receives are identical, so S6 may freeze on this code. | - | - | done |
-| ~~**S5**~~ | ~~changeling: read the 200-game run.~~ **READ 2026-08-28 - GATE #3 HOLDS.** Blind villager accuracy **110/247 = 44.53%**, Wilson floor **38.47%** and the scorer's game-bootstrap floor **37.36%**, both clearing the pre-committed 35.95%. Gate #2 readable at **59.49%** [52.48%, 66.13%] and given **no verdict**, per the criterion. Two clauses did not apply cleanly and are recorded rather than smoothed: the criterion said Wilson where the scorer publishes a bootstrap, and S2 ran no random arm so the own-arm clause had nothing to fire on. Writeup `games/changeling/RULES.md` §S2 read; arithmetic `py -3 -m eval.s5_verdict`. Code-debt item 4 settled in the same session because the writeup had to quote a path. | - | - | done |
-| ~~**S6**~~ | ~~The gate #3b campaign - cabal's LAST GPU program.~~ **CALLED 2026-08-27 - gate #3b NOT SHOWN, cabal's GPU program stops.** 40/40 games, both arms `rc=0`, 1.35% campaign fallback. Pooled 9/20 = 45.00%, Wilson [25.82%, 65.79%] against the derived bar 33.33% - floor does not clear, so the pre-committed answer applies and there is no third campaign. All three draw-dependent items resolved off the same records: step-not-slope did NOT fire, the `five_rejects` shift is not established, run-length degradation did not reproduce. Verdict and arithmetic: `docs/gate3b-verdict.md`, `py -3 -m eval.s6_verdict`. | - | - | done |
-| ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed; reasoning in `docs/gate3a-retired.md`. | - | - | done |
 | **S8** | **Next rung or publish. TAKEN 2026-08-28 on the adjudicator branch, and NOT closed** - the DURF fixture got its scorer and four runs; the read is VOID on the instrument control and lives in `docs/durf-rung.md`. What is still open under this slice is the session engine (a kernel, player seats, and the entitlement audit this instrument does not exercise), and the 6/7p and publish options below, untouched. Original scope: 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt; **the TTRPG IP posture is no longer unchecked - it was answered 2026-08-28 and its answer is in the tree, `docs/content-packs.md`**: the engine, schema and loader ship, a rung's source material is a pack, most packs stay local, and every rung ships one example pack whose terms permit it. That decides the tree's shape before the first rung, which is the part that gets expensive to retrofit. Which particular systems can ship a pack is a per-source reading and stays off-repo. **The DESIGN half of that literature is now in the tree** - `docs/action-channel.md` carries the call-vocabulary constraints (one blocking call, referee-side free-text seat tokens, a prompt split along its seams) and the two failures the kernel has to catch, all stated in parlor's terms, so the spike does not depend on the ledger surviving. What stays off-repo is the competitive half: which builds exist, what they are rated, and their licences - including that one of them was read in full from source under a licence that forbids reuse, so the call vocabulary above is written from the game's own public rules and stays that way. | varies | S5 done (S1 is called) | the discretion number exists, VOID and dated; the engine does not |
-| ~~**S11**~~ | ~~The DURF session engine.~~ **LANDED 2026-08-28 - gate #1 measured on this rung for the first time, and it HELD IN 3 OF 6 SESSIONS.** The engine, the fact-keyed entitlement, the audit and the transcript renderer are in `games/durf/` (`facts.py`, `kernel.py`, `session.py`, `seats.py`, `transcript.py`), driver `eval/durf_session.py`, recipe `eval/runs/durf-session.cmd`, fact set `games/durf/fixtures/facts.json`. `core/` was not touched and `find_leaks` is unchanged - the rung's adapter NUMBERS its facts and hands the matching to the primitive, so there is one naive matcher in the repo and not two. 86 tests, seven guards mutation-checked. **The read, the three leaks and the one term that is on the record as arguable live in `docs/durf-rung.md` §The session engine - do not restate them here.** Evidence: `transcripts/durf-session-q36-{leak,held}.md`. | - | - | done |
 
 ## While the card is busy - the standing menu
 
@@ -900,301 +896,21 @@ arm is ~30 min against cabal's 13.2 h.
       the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
       constraint: `docs/action-channel.md`.
 
-## Pre-committed criteria - all applied, all moved out
 
-None is edited to agree with its outcome; that is the whole value of a
-pre-commitment, and clause-by-clause outcomes belong in the verdict rather than
-back in the promise. **DURF gate #1's applied cleanly 2026-08-28** -
-`docs/durf-gate1-criterion.md`, outcome in `docs/durf-rung.md` §The campaign.
-Every clause held as written and none needed smoothing, helped by its verdict
-being arithmetic (`eval/durf_camp1_verdict.py`) written mid-run.
+## Where the rest of this file went - 2026-08-28
 
-- **changeling gate #3**, written 2026-08-28 before S2 -
-  `docs/changeling-gate3-criterion.md`, applied in `games/changeling/RULES.md`
-  §S2 read. Two clauses did not apply cleanly and are recorded rather than smoothed.
-- **cabal gate #3b**, written 2026-08-27 before S6 - reproduced verbatim inside
-  `docs/gate3b-verdict.md`, beside what each clause returned.
-- **The 2026-08-25 hunt run**, the first of them - superseded by S6's, which is the
-  same statistic computed the honest way. Its one durable clause outlived it and is
-  a live row below: if the hunter lands marginal, **respecify the metric rather
-  than buying games**, because gate #3 is bottlenecked on its lowest-power half.
-- The discipline itself, the `hunt20b` error it exists to refuse, and why pooling
-  runs after the fact is the same move as peeking:
-  `docs/evidence-discipline.md` §Pre-committing a statistic.
+`RESUME.md` was 1200 lines, and most of it was work that had already landed. The
+split is by lifetime: a row that can still change lives here, a reading that is
+dated and finished lives in `docs/`. Nothing was rewritten - every line below is
+verbatim where it went.
 
-## Measured, dated - numbers before opinions
+- `docs/slices.md` - the closed slice ledger, S1-S7 and S9-S11. Live rows cite
+  them by name, so they are struck and kept, never deleted.
+- `docs/measurements.md` - §Measured, dated, §Route, §Backend notes. Read before
+  trusting a number or picking a route.
+- `docs/decisions.md` - §Decisions already locked and §Pre-committed criteria.
+- `docs/README.md` - the `docs/` index that used to sit at the bottom of this file.
 
-All local `rocinante-x-12b-heretic-q4`, seed 400, 8 games, 2 rounds, <1% fallback
-unless said otherwise. Fallback rate is quoted because a number without it is the
-random policy wearing a model's name.
-
-| what | result | 2026-08-25 |
-|---|---|---|
-| good vote discrimination, baseline | -0.2% (n=138 votes) | at chance |
-| seer approving a team carrying a KNOWN evil | 42% baseline -> 43% with the salience line | the line does nothing in a live game |
-| same seer decision, isolated bench, no discussion | 83% -> 37% (n=30/cell, p<0.001) | the line works when nothing buries it |
-| `--rounds 2` vs 1 round | 1 of 8 games deadlocked vs 2 of 2 | two rounds is the floor |
-| vote unanimity | 11% of 46 votes (spread 1/5..4/5) | votes are ALREADY independent, just uninformed |
-| record length vs the 60-line cap | 10 of 16 games over, speech:facts ~4:1 | the trim was deleting missions 1-2 (fixed, `e3249ec`) |
-| cap at 512 vs 1536 max_tokens, `nemotron-3-super` | 0/4 -> 2/4 parsed, failures truncated at BOTH caps | no cap fixes a model that thinks out loud; pin one that does not |
-| **cloud `auto` (mixed 120B-class), character register, 12 games** | **discrimination +66.0%** (clean 94.4%, tainted 28.4%, n=192; 2.5% fallback) | **gate #3a HOLDS - it was model capability, not the prompt** |
-| same run, hunter | 33.3% (3/9, CI floor 12.1%) | exactly chance - gate #3b is now the blocker |
-| local 12B, `--register plain`, same seeds as the salient run | discrimination +16.7% (blind seats +11.4%, n=76) | first positive on the 12B, but 7 of 8 games died at five_rejects |
-| **local `qwen36-35b-a3b-iq3` (MoE 35B-A3B APEX), 12 games, 0.69% fallback** | **discrimination +30.7%** (blind seats +13.7%, n=222); evil 66.7% with 6 wins by SINKING missions and 32 fail cards | gate #3a holds on ONE pinned local model - reproducible, unlike the cloud's 30-upstream `auto` mix |
-| same model, seer bench | +80% as-is vs +72% with the salience line | the salience line is now HARMFUL - it competes with reasoning a capable model already does |
-| hunts across ALL live runs | 8/26 = 31%, and **5 of 26 named the hunter's own ally** | fixed in `hunt()`: a seat the night named as yours cannot be the seer, so the referee refuses it |
-| cost, `q36` local | ~14.6 min/game (reasoning distill, long generations) | a 50-game hunter run is ~12h overnight; cloud is ~3 min/game when quota allows |
-
-Added 2026-08-26, all `qwen36-35b-a3b-iq3`, seed 1000, 20 games, 2 rounds. **NONE of
-these three columns is a controlled comparison of another.** `hunt20` vs `hunt20b`
-differ by three things (see the `hunt20b` item); `hunt20b` vs `hunt20c` differ by the
-sampler pin `2cfe9d5`, which landed between them. They are three draws, which is all
-they are. `hunt20d` is not a fourth column - it reproduced `hunt20c` exactly
-(`docs/reproducibility.md`), so a controlled pair still needs a different seed.
-
-| what | `hunt20` (08-25 19:54) | `hunt20b` (08-26 08:56) | `hunt20c` (08-26 14:52) |
-|---|---|---|---|
-| blind taint sensitivity - THE GATE | +1.20% [-8.44%, +9.63%] | +8.82% [+0.94%, +16.82%] | +9.00% [**-0.25%**, +18.18%] |
-| blind, binary (superseded - see below) | +2.53% [-13.45%, +18.04%] | +19.94% [+6.27%, +32.02%] | +18.11% [+3.52%, +33.53%] |
-| approval by taint level, blind | - | 93% / 70% / 77% (41/44, 28/40, 24/31) | 82% / 64% / 64% (41/50, 37/58, 32/50) |
-| hunter | 3/9 = 33.33%, floor 12.06% | 6/11 = 54.55%, floor 28.01% | 5/9 = 55.56%, floor 26.66% |
-| evil win rate | 70%, 5 of 14 by `five_rejects` | 75%, **0** by `five_rejects` | 80%, **6 of 16** by `five_rejects` |
-| evil win paths | 6 missions / 5 rejects / 3 hunts | 9 missions / 0 rejects / 6 hunts | 5 missions / 6 rejects / 5 hunts |
-| missions, fail-card distribution | 63, `{0:34, 1:17, 2:12}` | 74, `{0:37, 1:22, 2:15}` | 62, `{0:35, 1:15, 2:12}` (derived) |
-| over-sabotage, share of sunk, UNCONDITIONED (superseded 2026-08-27) | 12/29 = 41% | 15/37 = 41% | 12/27 = 44% |
-| over-sabotage, **conditioned on the game continuing** - the honest figure | - | **11/28 = 39%** | **10/22 = 45%** |
-| fallback rate | 0.49% (11/2231) | 0.54% (11/2033) | 1.78% (48/2691) |
-| wall clock | - | 4h42m | 6h37m |
-
-Two things this table now shows that no single column does:
-
-- **The GATE row's point estimate is stable (+8.82 -> +9.00) while its floor verdict
-  INVERTS** (+0.94 -> -0.25). At n=20 the floor's position relative to 0 is noise.
-  Do not report "the floor cleared 0" as a finding at this N.
-- **The taint-level row is a STEP, not a slope, in both runs that have it** - a real
-  0->1 drop and no further response at 2 (`hunt20c`'s 1->2 leg is exactly flat). The
-  linear "per extra saboteur" statistic is mis-specified for this shape, and the
-  binary row is the better-behaved one. The scorer's "superseded by the graded slope"
-  note has it backwards.
-- `hunt20c`'s fail-card distribution is DERIVED (62 missions, 27 sunk, 39 cards, max 2
-  fails at 5 seats => `{0:35, 1:15, 2:12}`), not read from a scorer field. The JSONL
-  carries `fails_played` per GAME only.
-
-| what | result | 2026-08-26 |
-|---|---|---|
-| **the sampler was never seeded** | same 20 games, seed 1000, twice: 63 missions / 9 hunts vs 74 / 11 | **`--seed` fixed the deal and the fallback RNG and NOTHING about the model.** Every "same seeds, one variable" number in this file was read against an unmeasured run-to-run spread |
-| sampler pinned (`2cfe9d5`), verified on the instrument | two calls at seed 1000 to local `q36` byte-identical; seed 7 differs | llama.cpp honours `seed`; on cloud it is a best-effort hint and unproven until a repeat run shows it |
-| `need` disclosure vs over-sabotage | 41% of sunk missions in both runs | disclosing the threshold did NOT reduce redundant sabotage - the problem is the missing focal point, not missing rules |
-
-**2026-08-27 (S1)** - `docs/gate3a-retired.md`, `py -3 -m eval.gate3_arithmetic`.
-Arithmetic only, no new games. The unconfounded gate-#3a cell splits in OPPOSITE
-directions across the two runs and accrues at 0.30-0.40 votes/game; no cabal table
-size reopens it.
-
-Added 2026-08-27 (S3). No new games - the four scorer/audit numbers re-derived and
-re-run over `hunt20b`/`hunt20c`. Each fix is mutation-checked: the pre-fix
-derivation restored as a compiling mutant, killed by its own named test, restored.
-
-| what | result | what it decides |
-|---|---|---|
-| **hunter baseline, derived** `1/len(legal_targets)` per hunt, meaned over hunts | **1/3 on `SETUP_5`** - unchanged, because the legal set is 3 in every game of it | **S6's pre-committed bar and power table stand as written.** The bar was RIGHT; what was wrong was that it was a constant. A 7p or blind-evil deal makes it 1/4 and the scorer now follows |
-| a run whose hunts record no legal-target count | **REFUSED**, not defaulted | fails closed, same shape as the empty blind stratum - a default grades a record against whichever chance the reader assumed |
-| **over-sabotage, conditioned on the game continuing** | `hunt20b` 15/37 -> **11/28 = 39%**; `hunt20c` 12/27 -> **10/22 = 45%** | the correction is real and it does NOT rescue the finding - 4 and 2 of the redundant cards were free, and the rate barely moves. Evil still over-sabotages ~2 of every 5 payable sinkings |
-| **`outed_own_role_in_public`, matched against theme names** | 0/1290 (matcher-blind) -> `hunt20b` **4/1150**, `hunt20c` **26/1580 = 1.6%** | **the old zero was a property of the matcher, not of the play.** It looked for `seer`/`mimic` in speech that can only ever say "Thought Police"/"Inner Party". Seats DO name their own role in public, and `hunt20c` seat 0 does it repeatedly as cover |
-| `hunt_named_impossible`, allies from `known_allies` | 0/11 and 0/9, unchanged on these runs | no regression on the shipping deal, and it stops flagging a legal hunt on a `stray` - which is a wrong PROOF-class finding, the worst kind this file can emit |
-
-**2026-08-27, the mechanical denominator and the control ladder** -
-`docs/reference-policies.md` §Results and §The control ladder,
-`python -m eval.derivable`. 60 games of existing records, no GPU. Three findings:
-derivable bits at the hunt are **0.000 and that is a theorem** (192,000
-combinations), so a hunter above 1/3 reads BEHAVIOUR necessarily; the un-entitled
-good seats read **flat** against what the record proved (+3.0%, gap crosses zero),
-and the seer's +82.4% is entitlement rather than reading; a 60-line rule out-hunts
-the model **94.3% to 48.3%**, so `captured` = 24.5%.
-
-**This does NOT re-specify gate #3a or #3b**, and the S1 verdict stands in its own
-words. The blind rows above score response to DERIVABLE taint; §Measured's
-`+8.82%/+9.00%` rows score response to ACTUAL taint. Read together they say
-something sharper than either: whatever the blind seats respond to, it is not the
-mechanically derivable part.
-
-## Decisions already locked
-
-**Code invariants moved to `CLAUDE.md`** - it is always loaded, these are not,
-and two copies of one rule is how the stale copy wins an argument. What stays
-here is project state: the route calls and what a run measured.
-
-- **A run writes its own terminal marker; a wrapper cannot be trusted to outlive
-  it.** `core/runlog.py`, used by both eval drivers: `PARLOR DONE rc=N
-  games=landed/requested elapsed=Ns`, written from a `finally` so it survives a
-  crash, a `sys.exit` and a Ctrl-C. It contains `DONE rc=` so old greps still find
-  it. **A log whose last line is a progress line is a killed run** - that is the
-  whole point, and nothing writes the marker for a process killed outright. The
-  `.cmd` echo stays for the one case python cannot cover: a crash before the driver
-  runs at all.
-- **`refused` is the fallback census; `note` is cabal's notebook.** Both games
-  record the refusal that produced a fallback on the decision itself, so a run's
-  refusal diagnosis is a census in the JSONL rather than a sampled trace (8/game)
-  and an end-of-run report that does not exist until the run ends. It holds the
-  last ATTEMPT's complaint, not the "N attempts failed" summary. Two consequences
-  for old records: pre-2026-08-27 JSONL has no `refused` at all, and changeling's
-  records before that date carry the same string under `note`.
-- Independent context = one model + per-seat private context slice, not N brains.
-- Referee is deterministic code; LLM only for players (and, later, judgment-GMs).
-- Cloud is fine for game-fiction secrets (not credentials); local for deception checks.
-- **`--rounds 2` cleared the rejection deadlock.** 1 of 8 games ended `five_rejects`
-  at two discussion rounds, against 2 of 2 at one round. One round gives a vote
-  nothing to reason from; treat 2 as the floor for any live run.
-- **Pin a model for attribution, use `auto` for capacity - and record the served
-  upstream either way.** The gateway fails over across its keys, but a pinned id can
-  only hop between keys for providers serving that exact id, so a cooled provider
-  returns an instant 429 with no hop available. `auto` has the whole catalog and
-  keeps answering. The response body's top-level `model` is the ONLY thing that
-  says who answered; `Backend.complete_meta` returns it and the report prints the
-  mix, so an `auto` run is honest about being several models averaged.
-
-## Design notes and reference - `docs/`
-
-Durable material lives beside the code, not in the queue. This file stays the
-queue, the dated measurements, and the route decisions.
-
-- `docs/action-channel.md` - why free-text JSON stays the action channel, and the
-  kernel/adjudicator split the RPG rung needs. Read before adding a second game's
-  phases or touching `parse_action`.
-- `docs/durf-rung.md` - the cheap version of the endgame rung, scoped 2026-08-27:
-  a DURF session with a deterministic kernel under a model adjudicator, the
-  False Pass / False Check / refusal number it produces against CoC-Seduce's
-  9.58% floor, and the finding that DURF's secrets belong to the WORLD rather
-  than to seats, which is the first evidence for fact-keyed entitlement in
-  `core/`. Read before scoping any RPG rung, and before widening `find_leaks`.
-  Its kernel table is pinned to DURF 2.2 and the doc now carries the fetchable
-  source URL plus the version line to check on any re-read.
-- `games/durf/fixtures/` - that rung's INSTRUMENT, labelled 2026-08-27 before any
-  model ran: 48 declarations and 12 morale events, each carrying the rule it
-  rests on. **Read its README before quoting any number from it.** Degenerate
-  baselines are **61.9% always-roll / 38.1% never-roll** over the 42 declarations
-  that admit a roll answer (54.2% / 33.3% over all 48) - the first draft's
-  "never-roll 46%" pooled the six refusal traps into the no-roll bucket and is
-  retracted there. Re-derived and source-verified the same day, which killed
-  three of the six traps: the slot costs made `d013`, `d017` and `d018`
-  satisfiable, so a model ruling them correctly would have scored a False Pass.
-  The state moved to the labels, never the reverse, and every `slots_used` is now
-  derivable from a `slot_costs` block. **The scorer landed 2026-08-28**
-  (`eval/durf_score.py`); there is still no durf engine, and nothing here needs
-  one - the fixture is 60 independent items against a fixed scenario.
-- `docs/moral-framing.md` - the theme-polarity experiment, its confound, the
-  verified deception/framing prior work, the name-form axis, and **§The changeling
-  skin set, which owns every skin's design and sourcing rules** (moved out of this
-  file 2026-08-28 - it was 134 lines of design in a queue). Arms 3 (`1984-inv`) and
-  4 (`drill-en`) on cabal and the whole changeling set are BUILT and unrun; read it
-  before running any of them, and before editing any blurb - the faces are
-  length-matched on purpose and frozen.
-- `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
-  native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
-- **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
-  argument and the raw notes behind both: who else has built this, what parlor
-  claims and against whom, the licence and `DEFAULT_THEME` calls, and the ledger
-  of what is still owed a first-hand read. **Read before publishing or writing an
-  abstract, and before any writeup that quotes a gate #2 or #3 number.** It is out
-  of the tree deliberately - see §Outstanding debt - and it does not come back in.
-- `docs/reference-policies.md` - what a number is scored AGAINST: the mechanical
-  solver (120 assignments, hard constraints only), the pinned spec and corpus, the
-  additive-not-substitutive rule, the heuristic rung, and **§Results plus §The
-  control ladder, which carry the three findings of 2026-08-27** - the hunt's
-  MECHANICAL denominator is zero by proof, the un-entitled good seats read flat
-  against what the record proved, and a 60-line rule out-hunts the model 94.3% to
-  48.3% on the model's own records. Read before implementing any reference arm or
-  quoting a gate as a fraction. Note §Results carries a same-day supersession: its
-  "captured is undefined" line is about the mechanical arm only, and the ladder
-  section is where the behavioural denominator lands.
-- `docs/evidence-discipline.md` - how this repo handles a number, a citation, a
-  run and its own record: the three rules for citing work nobody here has read,
-  pre-commitment, why a rate over another gate's outcome is not projectable from
-  one draw, and the render-control method that proves a freeze held. Read before
-  quoting an outside source, before writing a criterion, and before claiming a
-  refactor moved no model-facing byte.
-- `docs/gate3a-retired.md` / `docs/gate3b-verdict.md` - cabal's two gate #3
-  verdicts, each recomputable (`eval.gate3_arithmetic`, `eval.s6_verdict`). Read
-  before restarting any cabal run or quoting either half.
-- `eval/durf_rescore.py` - re-audits a stored DURF session against any term set,
-  no GPU and no re-run: entitlement is reconstructible from the transcript because
-  publishing a fact writes its own text as a referee entry. Prices a sentinel
-  change against records already on disk. A counterfactual, never a read.
-- `eval/durf_camp1_verdict.py` - the DURF gate #1 criterion as arithmetic,
-  written before the campaign landed and pinned by `eval/test_durf_camp1_verdict.py`
-  against synthetic records, so the promise cannot drift to fit the result.
-- `docs/durf-gate1-criterion.md` - DURF's pre-commitment for the campaign that
-  replaces the voided 3/6 read: 100 sessions, the Wilson-floor-clears-50% bar and
-  the power arithmetic behind it. Written before the run; not to be edited.
-- `docs/changeling-gate3-criterion.md` - changeling's pre-commitment, verbatim and
-  not to be edited; the outcome is `games/changeling/RULES.md` §S2 read.
-- `docs/gate3-modelling-review.md` - the 2026-08-26 review that sharpened the old
-  blind gate, closed on all six items. **Read its header before its body** - its
-  line citations are stale.
-- `docs/faction-heartbeat.md` - Spike #2 scoped: the typed-fact channel, why it is
-  the small version of the adjudicator's hardest part, and the one new gate #1
-  failure it introduces (entitlement gains a time axis).
-- `docs/reproducibility.md` - two 20-game runs at one seed came back byte-identical,
-  so a same-seed repeat cannot measure spread. Read before scheduling ANY run whose
-  purpose is variability, and before quoting a "+X% vs +Y%" comparison.
-
-## Route: local IS the gate lane - corrected 2026-08-28
-
-This section read "local is for spot-checks, not for gates", priced when a game cost
-~9 min on a 12B and cabal was the only rung. Both gates have since been called on
-local: S6's 40 games and S2's 200, the latter at 91s/game on `qwen36-35b-a3b-iq3`.
-**A route claim priced against a retired model stays true-sounding until someone
-re-reads it** - same failure as a queue item priced by a deleted cost
-(`docs/evidence-discipline.md`).
-
-Local is serial, exact-match and 100%-attributed, which beats a time-varying `auto`
-mix as evidence. Cloud is capacity, not gates - its composition is anti-correlated
-with what you are measuring (§Backend notes). Reach for a bigger local model only if
-a cloud model turns out to REFUSE to deceive, or you want games beside image gen.
-
-## Backend notes (measured 2026-08-25)
-
-- `local` armed: `rocinante-x-12b-heretic-q4`. The heretic 12B
-  deceives without any prompt escalation - the mimic fabricated a prior private
-  conversation to build credibility, the hunter played concerned-loyalist and then
-  correctly named the seer. `PLAYER_SYSTEM_PROMPT` needed no jailbreak. Cost: ~3s
-  per decision, ~9 min per game, serial.
-- **Burst-probe result, gray, 2026-08-25 23:10 - the single-call trap firing
-  exactly as documented.** Pinned `gpt-oss-120b`: **1/12 served, 11 instant 429s**
-  (`All models exhausted: 8 routes checked, 7 rate-limited or on cooldown, 1 no
-  usable key`), and the ONE success was the FASTEST call of the set at 0.4s. A
-  single-call probe would have reported the tier healthy and fast. This is why the
-  `huntcloud` run sat alive for 72 minutes and wrote zero games: pinned to a model
-  whose whole route pool was cooled, refused in 40ms, nothing to fail over to.
-  Killed rather than waited out - free-tier cooldowns clear on nobody's schedule.
-- **`auto` availability is NOT `auto` capability** (same probe, same minute).
-  `auto` served **12/12 at 0.3s median** - but the upstreams were
-  `gpt-oss-20b`, `gpt-oss-safeguard-20b` (x5), `nemotron-3-nano-30b-a3b` (x6). Not
-  one 120B-class model: the big ones are exactly what is cooled. So `auto`'s
-  composition is time-varying and **anti-correlated with the thing being measured**
-  - it degrades precisely when capacity is short, which is when you reach for it.
-  A gate run on tonight's `auto` would most likely read "hunter at chance" while
-  actually measuring which models were uncooled at 23:10. Given -0.2% on the 12B
-  vs +66% on 120B-class, a 20B/30B-nano mix sits near the at-chance end. False
-  negative wearing a real number; worse than no run.
-- `clean` needs `PARLOR_API_KEY`. Pin a model - `glm-4.7` is in `/v1/models`
-  and 404s at call time (stale catalog entry), and `auto` silently varies the
-  upstream per request. Live and answering: `minimax-m3`, `nemotron-3-super`,
-  `qwen3-30b-a3b-fp8`, `gpt-oss-120b`, `glm-4.7-flash`. Bursts draw 429s - hence the
-  transport backoff and `--workers 3`.
-- **The cap was the cause, and 1536 is not enough for a rambler** (measured
-  2026-08-25, same VOTE prompt, n=4 per cell, `clean`). `nemotron-3-super`:
-  `max_tokens=512` -> 0/4 parsed, every reply ~2100 chars of visible reasoning cut
-  mid-sentence; at 1536 -> 2/4, and both failures were ~6000 chars, i.e. truncated
-  at the new cap too. So a model that thinks out loud does it at whatever length it
-  likes and no cap is a fix. `gpt-oss-120b` answers in 80-125 chars, 4/4 at both
-  caps - pin it for gate runs. `minimax-m3` itself is still unverified: the
-  provider has been 429ing it since the void run, and a 429 is a transport failure,
-  not a refusal. `qwen3-30b-a3b-fp8` and `glm-4.7-flash` currently 502.
-
-**2026-08-27 (S6), the gate-#3b campaign** - `docs/gate3b-verdict.md`,
-`py -3 -m eval.s6_verdict`. 40 games, seeds 2000/3000, frozen at `2c0e2a3`, 1.35%
-fallback. **9/20 = 45.00%**, Wilson [25.82%, 65.79%] vs the derived bar 33.33% - NOT
-SHOWN, at exactly the 0.50 hunts/game the power table assumed. All three
-draw-dependent items came back negative there; **carry no run-length caveat
-forward.**
+**What that leaves here is the rule this file already had and stopped keeping:**
+done work leaves to git log, delete the row. The slice table is the one exception
+and its closed half is now `docs/slices.md`.

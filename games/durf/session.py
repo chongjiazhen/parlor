@@ -12,7 +12,7 @@ adjudicator declared, with ``find_leaks`` still naive. Everything else here exis
 to make that question askable.
 
 Three constraints this module implements rather than argues, because
-``RESUME.md`` §S11 settled them and re-litigating them would silently change what
+``docs/slices.md`` §S11 settled them and re-litigating them would silently change what
 a run measures:
 
 - **Fact-keyed entitlement lives in ``games/durf/``**, not ``core/``. One rung is

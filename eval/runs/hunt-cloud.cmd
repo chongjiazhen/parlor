@@ -8,7 +8,7 @@ rem The gate exists because of 2026-08-25: this run launched pinned to a model
 rem whose route pool had cooled, sat alive for 72 minutes, and wrote zero games.
 rem Every call was refused in 40ms. A single call would have looked healthy - the
 rem one request that did serve was the FASTEST of the set - so the precondition
-rem has to be a burst, not a ping. See docs/../RESUME.md Backend notes.
+rem has to be a burst, not a ping. See docs/measurements.md Backend notes.
 
 cd /d "%~dp0..\.."
 

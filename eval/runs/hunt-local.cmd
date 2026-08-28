@@ -21,7 +21,7 @@ rem     --transcript eval\records\hunt20-game0.md
 rem
 rem i.e.  eval\runs\hunt-local.cmd hunt20 20 1000 qwen36-35b-a3b-iq3
 rem
-rem The gate is a burst, not a ping (RESUME.md Backend notes). Local's failure
+rem The gate is a burst, not a ping (docs/measurements.md Backend notes). Local's failure
 rem mode is different from cloud's - the router is exact-match, so a cold model
 rem answers 503 model_not_armed naming what IS live rather than silently serving
 rem the 0.6B floor - but a run that spends five hours discovering that is the

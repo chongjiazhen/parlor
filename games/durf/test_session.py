@@ -1,6 +1,6 @@
 """Gate #1 on this rung: a render audited against the facts the adjudicator declared.
 
-``RESUME.md`` §S11 names one acceptance criterion and this file is it. Three
+``docs/slices.md`` §S11 names one acceptance criterion and this file is it. Three
 things it has to establish, and the middle one is the whole reason the slice
 exists:
 
@@ -101,7 +101,7 @@ def test_declaring_the_fact_first_makes_the_same_narration_legal():
 def test_entitlement_is_the_snapshot_taken_with_the_render():
     """Declaring a fact AFTER a render must not retroactively legalise it.
 
-    This is the constraint ``RESUME.md`` §S11 names and it is invisible in a
+    This is the constraint ``docs/slices.md`` §S11 names and it is invisible in a
     passing session: an audit that looked entitlement up at scoring time would
     read this render clean, because by then the fact is public.
     """

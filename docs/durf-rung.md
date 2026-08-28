@@ -540,7 +540,7 @@ only thing built here that tests the product claim rather than the model.
 same fixed dungeon the declaration fixture uses. 86 tests; seven guards
 mutation-checked, each killed by its own named test.
 
-**The three constraints `RESUME.md` §S11 fixed, and how each is implemented
+**The three constraints `docs/slices.md` §S11 fixed, and how each is implemented
 rather than promised.**
 
 - **Fact-keyed entitlement lives in `games/durf/`.** `find_fact_leaks` numbers the
