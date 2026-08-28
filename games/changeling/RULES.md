@@ -596,8 +596,9 @@ a gate and none promotable to one**.
 **The powers re-run did not happen in S2** - its scope was the 2x20 powers arms on
 the fixed lane *and then* the 200 games, and only the second landed. **It ran
 2026-08-28** and the section above is now on clean numbers: the accuracy gain is
-banked, and what remains open is the two rule-error counts, whose instrument was
-never committed.
+banked. The two rule-error counts were re-measured with a tracked instrument the
+same day (`eval/rule_errors.py`) and the four old figures are retired - see §The two
+rule-error counts, and note that the fall those figures asserted is not established.
 
 ## The chance baseline, MEASURED (2026-08-26)
 
@@ -642,8 +643,11 @@ Two misconceptions recurred, both rules errors rather than bad play:
   which negates the belief/truth split outright - a seat that believes its belief
   IS its truth is playing `cabal` in its head.
 - **The switcher believing it swapped its OWN card.** It exchanges two other seats'
-  cards and its own is untouched, so it is the one seat that always knows what it
-  holds. Exactly inverted.
+  cards and its own act never touches its own card. Exactly inverted.
+  **It is still not the seat that always knows what it holds**, which this section
+  used to claim: `TAKE` runs before `SWITCH`, so the swapper robs it in 15.0% of
+  deals (§The two rule-error counts). Its own power tells it nothing; another card
+  can still move it.
 
 Fixed by listing the deck **in night order, with each card's power**. The order is
 public rules and does real work: it is what lets a seat reason about whether a
@@ -690,30 +694,68 @@ each arm's own published figure before deriving any delta, and both arms are
 
 Cost of the fix is **1.9% wall clock**, not the 16% the seed-bug pair reported.
 
-### The two rule-error counts are NOT re-measured, and their instrument is gone
+### The two rule-error counts, RE-MEASURED 2026-08-28 - and the fall is not significant
+
+The instrument is `eval/rule_errors.py`, its definitions are stated in that module's
+docstring, and it scores both pairs off records already on disk:
+
+```
+py -3 -m eval.rule_errors            # both pairs, both errors, the paired delta
+py -3 -m eval.rule_errors --show B   # every matching sentence, for hand-reading
+```
+
+On the clean 2026-08-28 pair, out of 200 utterances per arm:
 
 | | before | after |
 |---|---|---|
-| utterances claiming own card unmoved | 18/200 = 9.0% | 2/200 = 1.0% |
-| utterances with the switcher self-swap error | 4/200 = 2.0% | 0/200 = 0.0% |
+| A, claiming own card unmoved | 5/200 = 2.5% | 2/200 = 1.0% |
+| B, the switcher self-swap error | 13/200 = 6.5% | 6/200 = 3.0% |
+| **either** | **18/200 = 9.0%** | **8/200 = 4.0%** |
+| fallback rate | 1.00% | 0.67% |
+
+**The paired fall is -5.0pp, 95% CI [-10.5pp, +0.0pp] over a 10k game bootstrap -
+the floor touches zero.** The same instrument on the 2026-08-27 pair gives
+7.0% -> 2.5%, -4.5pp [-9.5pp, +0.0pp]. So the direction is consistent across two
+independent pairs and the effect is not established at n=20 games per arm. **The
+powers text is still the right rules text** - a public rules statement that omits
+what each card does is wrong whatever the error count says - but it is no longer
+carrying a measured -10pp behind it.
+
+**The four figures below are RETIRED. Do not quote them.**
+
+| | before | after |
+|---|---|---|
+| A, from the uncommitted script | 18/200 = 9.0% | 2/200 = 1.0% |
+| B, from the uncommitted script | 4/200 = 2.0% | 0/200 = 0.0% |
 | **either** | **11.0%** | **1.0%** |
 
-Those are the 2026-08-27 figures and they are **not reproducible**: the script that
-produced them was never committed, and no tracked module counts either error. The
-`-10pp` claim built on them (95% CI [-18.3pp, -1.7pp]) inherits that.
+They came from a script that was never committed, and with it went the `-10pp` claim
+and its 95% CI [-18.3pp, -1.7pp]. Three things the re-measurement establishes about
+them, each of which changes how an old record reads:
 
-**One of them is contradicted by a hand-read of the same records.** Scoring the
-switcher error as "the speaker claims its OWN card moved", first person, with a
-word-boundary guard so `without` cannot match as `with`, gives 11/200 before and
-**4/200 after** - not 0. All four after-arm hits were read in full and all four are
-genuine; two of them carry no correct statement at all, e.g. *"I exchanged cards
-with seats 1 and 3, but I have no idea what I'm holding now"* from a seat that was
-dealt switcher and still held it, so its card never moved and it is the one seat
-that always knows what it holds. **So the fix reduced this error; it did not
-eliminate it**, and a reader should not take the 0.0% at face value.
+- **B's `0.0%` was never true.** The tracked instrument scores 4/200 on that same
+  after arm - reproducing the hand-read in `RESUME.md` sentence for sentence, which
+  is this module's control - and 6/200 on the clean one. Two of those hits carry no
+  correct statement at all, e.g. *"I exchanged cards with seats 1 and 3, but I have
+  no idea what I'm holding now"* from a seat dealt `switcher`.
+- **A's `18/200` is not recoverable.** The tracked proxy scores 5-6 before, and no
+  definition consistent with the semantics above reaches 18. The original was much
+  broader than anything written down about it. It is retired rather than
+  reconstructed: tuning a pattern until it reaches its target is fitting the
+  instrument to its answer.
+- **One disagreement is stated rather than reconciled.** On the 2026-08-27 before
+  arm the tracked instrument scores 8 for error B against the hand-read's 11. The
+  hand-read's own pattern was never written down either, so there is nothing to
+  reconcile against; the module prints the gap on every run.
 
-The open row in `RESUME.md` is to build the counter as a tracked instrument with its
-definition stated, score both pairs with it, and retire these four numbers.
+**And B is an upper bound, because `RULES.md` was wrong about the switcher.** This
+file used to call it "the one seat that always knows what it holds". It is not:
+`TAKE` runs before `SWITCH` in `NIGHT_ORDER`, so the swapper can rob the switcher.
+Measured over 4000 nights of the shipped deck, **350/2340 = 15.0%** of seats dealt
+`switcher` diverge anyway (`py -3 -m eval.rule_errors --floor`). A seat correctly
+suspecting it was robbed is lexically indistinguishable from one that misread its
+own power, so a residue of a few percent is expected and is not evidence the fix
+failed.
 
 ### The deal constraint does not do what it was written to do
 
