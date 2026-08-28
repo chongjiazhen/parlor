@@ -36,6 +36,12 @@ The three things a later session has to know before it re-opens this:
 - **The instrument voids on its own floor control**, which is derived from the
   fixture's labels rather than picked - so a fixture edit moves the bar with them.
   Both degenerate arms fail it by construction, which is what makes it a control.
+- **An adjudicator seat should not inherit a player seat's temperature.** Measured,
+  not argued: greedy decoding is byte-identical across seeds and buys ~9.5pp of
+  decision-1 accuracy over the 0.8 default, which exists so a table's SPEECH
+  varies. `Backend.temperature` is deliberately NOT changed - it is shared with
+  both games and moving it re-baselines every recorded cabal and changeling number
+  for a rung that is still void. Pass `--temperature 0.0` on any later durf run.
 
 **The powers re-run LANDED 2026-08-28** and the accuracy gain it was run to settle
 is banked: on identical deals and clean code, blind accuracy **+40.00pp** [+13.64,

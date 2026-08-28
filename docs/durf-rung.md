@@ -465,6 +465,65 @@ What greedy should buy is stability, not correctness.
   **an adjudicator seat should not inherit a player seat's temperature** - a
   default worth changing on evidence rather than on taste.
 
+## The temperature arm, read 2026-08-28 - the prediction held where it mattered and missed one clause
+
+Records `eval/records/durf-q36-t0` (seed 5000) and `durf-q36-t0-s6000`, both
+`--temperature 0.0`, 161s and 162s.
+
+| | arm 1, t=0.8 | seed 6000, t=0.8 | **t=0.0** | t=0.0, seed 6000 |
+|---|---|---|---|---|
+| floor tier - THE CONTROL, bar 55.88% | 38.24% | 38.24% | **50.00%** [34.07, 65.93] | 50.00% |
+| decision 1 over the 42 | 33.33% | 35.71% | **42.86%** [29.12, 57.79] | 42.86% |
+| over-refusal | 28.57% | 26.19% | 26.19% | 26.19% |
+| refusal | 27.08% | 25.00% | 25.00% | 25.00% |
+| False Pass | 6.25% | 15.62% | 3.12% [0.55, 15.74] | 3.12% |
+| False Check | 6.25% | - | **0.00%** [0, 19.36] | 0.00% |
+| morale | 8/12 | 9/12 | 7/12 | 7/12 |
+
+**The control passes and it is unambiguous.** The two 0.0 runs are byte-identical
+on all 60 items, reasoning text included, at different seeds. Greedy decoding is
+seed-invariant here, so the endpoint is not nondeterministic for some reason
+temperature does not explain, and the churn measured above was the sampler.
+
+**The main clause held: still VOID.** Floor-tier accuracy 50.00% [34.07%, 65.93%]
+against the 55.88% bar. The slot gate is softened but not gone - 5 of 11
+over-refusals still cite inventory slots, against 9 of 12 - and it is the same
+failure, so the two sections above stand as written.
+
+**The clause that missed, stated plainly: greedy bought correctness, not just
+stability.** The pre-registration said "greedy should buy stability, not
+correctness". Decision 1 went 33.33% -> **42.86%**, four more items right, which
+is four times the 2.4pp a reseed moved it. False Check went to zero. That was
+wrong, and it is the kind of wrong worth keeping: the prediction treated the slot
+gate as the whole failure, and some of the 0.8 error was the sampler picking off
+a near-indifferent distribution rather than the model reasoning badly.
+
+**The consequence, and it is a default worth changing on evidence:** an
+adjudicator seat should not inherit a player seat's temperature. `Backend`'s 0.8
+exists so a table's speech varies; a referee ruling on rules gets nothing from it
+and pays ~9.5pp of decision-1 accuracy plus every rate's reproducibility. **Any
+later durf run is at 0.0 unless it is deliberately measuring sampling**, and the
+0.8 figures in the sections above are not retracted - they are a sampled draw of a
+model whose greedy answer is better, and the comparison to publish from is this
+one. The default itself is not changed in code here: `Backend.temperature` is
+shared with both games, and moving it would re-baseline every recorded cabal and
+changeling number for a rung that is still void.
+
+**Two things this arm makes visible that neither earlier section could.**
+
+- **Even the temperature move is inside the item-level noise band.** It changed 19
+  of 48 rulings against a reseed's 23. So it is now three variables - a reseed, 87
+  prompt bytes, and the whole temperature - that all move roughly half the fixture
+  at item level while separating cleanly only in aggregate. The rule from the seed
+  control generalises: **on this instrument, quote counts, never a ruling.**
+- **The two independent improvements are about the same size.** Dropping `decline`
+  at 0.8 bought +11.9pp; greedy decoding with `decline` intact bought +9.5pp. Two
+  unrelated levers returning nearly the same amount is what it looks like when both
+  are moving the same near-indifferent mass rather than fixing adjudication - and
+  neither reaches the bar. **`decline` itself is not sampling noise**: 12 declines
+  at 0.0 against 13 at 0.8, on a run that is deterministic. It is what this model
+  does.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no
