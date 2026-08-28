@@ -167,7 +167,7 @@ games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 
 core/registry.py           name -> the driver that plays that rung
 parlor/__main__.py         `python -m parlor play <game>`, and no game logic
 
-eval/run_games.py          run-N-games scoring for cabal's gates
+eval/run_cabal.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling
 eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
 eval/s6_verdict.py         the gate-#3b verdict, reproduced from each arm's own records
@@ -208,9 +208,9 @@ python -m games.cabal.demo --backend clean --speaker    # model on the discussio
 python -m games.cabal.demo --human 0 --backend local --model <armed-model>
 
 # scoring
-python -m eval.run_games --games 200 --arm random                 # the chance baseline
-python -m eval.run_games --games 20 --backend clean --model <id> --workers 3
-python -m eval.run_games --games 20 --arm llm-good --backend clean --model <id>
+python -m eval.run_cabal --games 200 --arm random                 # the chance baseline
+python -m eval.run_cabal --games 20 --backend clean --model <id> --workers 3
+python -m eval.run_cabal --games 20 --arm llm-good --backend clean --model <id>
 python -m eval.run_changeling --games 200 --arm random
 
 # a game a human can read

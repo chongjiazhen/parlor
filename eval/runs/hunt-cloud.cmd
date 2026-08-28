@@ -43,7 +43,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo [gate] probe passed - launching %GAMES% games, seed %SEED%.>>"%LOG%"
 
-python -m eval.run_games --games %GAMES% --arm llm --backend gray ^
+python -m eval.run_cabal --games %GAMES% --arm llm --backend gray ^
   --model "%MODEL%" --rounds 2 --workers 2 --seed %SEED% --timeout 180 ^
   --out "%OUTDIR%\huntcloud-auto.json" ^
   --transcript-dir "%OUTDIR%\huntcloud-transcripts" ^

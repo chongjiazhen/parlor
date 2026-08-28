@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     endpoint = ENDPOINTS[args.backend]
-    # same key convention as eval.run_games - never a path into anyone's config
+    # same key convention as eval.run_cabal - never a path into anyone's config
     key = os.environ.get("PARLOR_API_KEY") or os.environ.get("FREELLMAPI_KEY")
     if args.backend != "local" and not key:
         print(f"{args.backend} needs a key: set PARLOR_API_KEY or FREELLMAPI_KEY", file=sys.stderr)

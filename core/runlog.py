@@ -37,7 +37,7 @@ MARKER = "PARLOR DONE rc="
 def record_paths(out: str) -> tuple[str, str]:
     """``--out`` is the SUMMARY path, verbatim; the per-game JSONL is ``out.jsonl``.
 
-    One convention, in ``core/``, because the two drivers had one each. ``run_games``
+    One convention, in ``core/``, because the two drivers had one each. ``run_cabal``
     wrote ``args.out`` verbatim while ``run_changeling`` composed ``f"{out}.json"``,
     so a launcher written from cabal's twin passed ``--out eval/records/s2.json`` and
     S2's records landed as ``s2.json.json`` beside ``s2.json.jsonl``. Editing the one

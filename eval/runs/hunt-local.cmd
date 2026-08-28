@@ -13,7 +13,7 @@ rem RESUME.md and the launcher that produced them was an untracked file in the
 rem gitignored records dir (retired 2026-08-27, S4). It is this file's defaults
 rem with no probe gate:
 rem
-rem   python -m eval.run_games --games 20 --arm llm --backend local
+rem   python -m eval.run_cabal --games 20 --arm llm --backend local
 rem     --model qwen36-35b-a3b-iq3 --rounds 2 --seed 1000 --timeout 240
 rem     --out eval\records\hunt20-q36.json
 rem     --transcript-dir eval\records\hunt20-transcripts
@@ -57,16 +57,16 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo [gate] probe passed - launching %GAMES% games, seed %SEED%, model %MODEL%.>>"%LOG%"
 
-rem Serial by construction: one model on one GPU. run_games forces 1 worker on a
+rem Serial by construction: one model on one GPU. run_cabal forces 1 worker on a
 rem non-parallel endpoint anyway; --workers is not passed so the forcing is
 rem visible in the log rather than hidden behind a number that does nothing.
-python -m eval.run_games --games %GAMES% --arm llm --backend local ^
+python -m eval.run_cabal --games %GAMES% --arm llm --backend local ^
   --model "%MODEL%" --rounds 2 --seed %SEED% --timeout 240 ^
   --out "%OUTDIR%\%TAG%.json" ^
   --transcript-dir "%OUTDIR%\%TAG%-transcripts" ^
   --transcript "%OUTDIR%\%TAG%-game0.md" ^
   >>"%LOG%" 2>&1
-rem run_games writes its own `PARLOR DONE rc=` line from a finally, and THAT is the
+rem run_cabal writes its own `PARLOR DONE rc=` line from a finally, and THAT is the
 rem authoritative one: `hunt20b` finished cleanly and wrote no completion line
 rem because cmd.exe did not survive to echo one after python exited. This echo
 rem stays for the case python's marker cannot cover - a crash before the driver

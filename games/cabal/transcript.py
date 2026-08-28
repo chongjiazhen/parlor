@@ -24,7 +24,7 @@ meant to be visible, and without it a transcript shows what happened and never w
 The public record above stays clean either way.
 
 Two inputs, one output. A live ``CabalReferee`` (``from_referee``) or a
-``GameRecord`` - live or loaded from a ``run_games.py --out`` JSON. Records
+``GameRecord`` - live or loaded from a ``run_cabal.py --out`` JSON. Records
 written before ``GameRecord`` carried ``public_events`` have no timeline to
 render; those degrade to a clearly-labelled reconstruction rather than a
 plausible fake.
@@ -300,8 +300,8 @@ def write(path: str, text: str) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="render a run_games.py --out JSON as a readable transcript")
-    ap.add_argument("path", help="a run_games.py --out JSON")
+        description="render a run_cabal.py --out JSON as a readable transcript")
+    ap.add_argument("path", help="a run_cabal.py --out JSON")
     ap.add_argument("--game", type=int, default=0, help="which game in the file")
     ap.add_argument("--out", help="write here instead of stdout")
     args = ap.parse_args()

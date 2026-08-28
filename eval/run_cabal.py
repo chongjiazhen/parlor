@@ -1,9 +1,9 @@
 """Run N games and score gates #2 and #3.
 
-    python -m eval.run_games --games 20 --backend clean --model gpt-oss-120b
-    python -m eval.run_games --games 200 --arm random          # the chance baseline
-    python -m eval.run_games --games 20 --arm llm-good --backend clean --model gpt-oss-120b
-    python -m eval.run_games --games 6 --backend local --model rocinante-x-12b-heretic-q4
+    python -m eval.run_cabal --games 20 --backend clean --model gpt-oss-120b
+    python -m eval.run_cabal --games 200 --arm random          # the chance baseline
+    python -m eval.run_cabal --games 20 --arm llm-good --backend clean --model gpt-oss-120b
+    python -m eval.run_cabal --games 6 --backend local --model rocinante-x-12b-heretic-q4
 
 Four arms, because ``llm`` on both sides measures deduction and deception
 entangled - good failing to deduce and evil deceiving well look identical in the
@@ -374,7 +374,7 @@ def assert_scoreable(path: str) -> None:
             "lands. Check knowledge_class assignment before spending the rest.")
 
 
-def run_games(args, workers: int, started: float) -> list[GameRecord]:
+def run_cabal(args, workers: int, started: float) -> list[GameRecord]:
     """All N games, reporting each as it lands. Order is preserved regardless of
     completion order - a seeded run must produce the same records either way."""
     total = args.games
@@ -720,7 +720,7 @@ def main() -> None:
               file=sys.stderr)
 
     started = time.time()
-    records = run_games(args, workers, started)
+    records = run_cabal(args, workers, started)
     elapsed = time.time() - started
 
     s = score(records)

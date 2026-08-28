@@ -1,6 +1,6 @@
 """Small-sample statistics, shared by every game in the arena.
 
-Promoted from ``eval/run_games.py`` when the second game needed it, which is the
+Promoted from ``eval/run_cabal.py`` when the second game needed it, which is the
 bar this repo sets for anything entering ``core/``: a primitive earns its place on
 evidence that game #2 uses it, never on a guess that one might.
 

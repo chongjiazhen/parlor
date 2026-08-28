@@ -530,7 +530,7 @@ arm is ~30 min against cabal's 13.2 h.
       20-game arm is ~30 min against cabal's 13.2 h. Cabal's referee refusals stay
       as written.
 - [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.** `--notebook`
-      on `run_games.py` and `demo.py`; off by default. A seat's `note` is filed
+      on `run_cabal.py` and `demo.py`; off by default. A seat's `note` is filed
       under its own seat and rendered back to that seat alone on every later call,
       so a read survives the turn that formed it. Cap: last 6 lines of 160
       characters, stamped with the mission it was written on.

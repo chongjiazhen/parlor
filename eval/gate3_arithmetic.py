@@ -55,7 +55,7 @@ def blind(rec: dict) -> list[dict]:
 
 def slope(votes: list[dict]) -> float | None:
     """OLS of approval on team evil count, sign-flipped. Mirrors
-    ``run_games.taint_sensitivity`` - kept as a separate implementation on
+    ``run_cabal.taint_sensitivity`` - kept as a separate implementation on
     purpose, so agreeing with the scorer is evidence rather than a tautology."""
     if len({v["team_evil_count"] for v in votes}) < 2:
         return None
@@ -83,7 +83,7 @@ def bootstrap(games: list[dict], stat, resamples: int = 4000, seed: int = 7):
     """Percentile CI resampling GAMES, matching the scorer's clustering unit.
 
     Seats nest inside games, so the game is the independent cluster. Same seed
-    and resample count as ``run_games`` so the intervals are comparable to the
+    and resample count as ``run_cabal`` so the intervals are comparable to the
     published ones rather than merely similar.
     """
     rng = random.Random(seed)

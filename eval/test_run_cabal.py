@@ -17,7 +17,7 @@ import tempfile
 import unittest
 from dataclasses import asdict
 
-from eval.run_games import (LIVE_TEAMS, assert_scoreable, build_policies, report,
+from eval.run_cabal import (LIVE_TEAMS, assert_scoreable, build_policies, report,
                             score)
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
@@ -91,7 +91,7 @@ class TestGameSeedReachesTheModel(unittest.TestCase):
         of the argument the test itself supplied. ``one_game`` offsets by the game
         index, so game 3 of a seed-1000 run deals seed 1003 and must sample 1003."""
         from unittest import mock
-        from eval import run_games as rg
+        from eval import run_cabal as rg
         seen = []
 
         def spy(ref, args, rng, seed=None):
@@ -107,7 +107,7 @@ class TestGameSeedReachesTheModel(unittest.TestCase):
 
     def test_an_unseeded_run_reaches_one_game_unseeded_too(self):
         from unittest import mock
-        from eval import run_games as rg
+        from eval import run_cabal as rg
         seen = []
 
         def spy(ref, args, rng, seed=None):
@@ -391,7 +391,7 @@ class TestGradedTaint(unittest.TestCase):
     def test_it_degenerates_to_the_binary_number_at_two_levels(self):
         """Same quantity, better estimator - not a different claim. With only
         levels 0 and 1 the slope IS p_clean - p_tainted."""
-        from eval.run_games import taint_sensitivity
+        from eval.run_cabal import taint_sensitivity
         v = self.votes({0: (8, 10), 1: (3, 10)})
         slope, _ = taint_sensitivity(v)
         self.assertAlmostEqual(slope, 0.8 - 0.3)
@@ -400,7 +400,7 @@ class TestGradedTaint(unittest.TestCase):
         """Two runs identical under the binary split - both 80% clean, 40%
         tainted - but one keeps discriminating between 1 and 2 saboteurs and the
         other does not. The binary figure cannot tell them apart."""
-        from eval.run_games import taint_sensitivity
+        from eval.run_cabal import taint_sensitivity
         graded, _ = taint_sensitivity(self.votes({0: (8, 10), 1: (6, 10), 2: (2, 10)}))
         flat, _ = taint_sensitivity(self.votes({0: (8, 10), 1: (4, 10), 2: (4, 10)}))
         for v in (graded, flat):
@@ -411,7 +411,7 @@ class TestGradedTaint(unittest.TestCase):
         """A seat that rejects 1 saboteur but approves 2 is not a weak deducer, it
         is responding to something other than taint. The slope alone hides that,
         which is why the per-level table ships beside it."""
-        from eval.run_games import taint_sensitivity
+        from eval.run_cabal import taint_sensitivity
         slope, levels = taint_sensitivity(self.votes({0: (9, 10), 1: (2, 10),
                                                       2: (5, 10)}))
         self.assertGreater(slope, 0)                       # slope looks fine
@@ -419,7 +419,7 @@ class TestGradedTaint(unittest.TestCase):
         self.assertLess(rates[1], rates[2])                # but it goes back UP
 
     def test_one_taint_level_is_refused_not_scored_as_zero(self):
-        from eval.run_games import taint_sensitivity
+        from eval.run_cabal import taint_sensitivity
         slope, levels = taint_sensitivity(self.votes({0: (5, 10)}))
         self.assertIsNone(slope)
         self.assertEqual(levels, {0: (5, 10)})

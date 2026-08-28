@@ -10,7 +10,7 @@ rem A launcher is an INPUT, not run output, so this is tracked - eval\records\ i
 rem gitignored and a run recipe that is not versioned cannot be reviewed after it
 rem misfires. Same contract as hunt-local.cmd, which is cabal's.
 rem
-rem WHY THIS EXISTS SEPARATELY. hunt-local.cmd runs `eval.run_games`, which is
+rem WHY THIS EXISTS SEPARATELY. hunt-local.cmd runs `eval.run_cabal`, which is
 rem cabal's driver and takes flags this one does not have (--rounds 2 is cabal's
 rem discussion default, --transcript-dir has no changeling equivalent) and lacks
 rem --no-thinking, which every recorded changeling arm used. Pointing the cabal

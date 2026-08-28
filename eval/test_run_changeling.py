@@ -17,7 +17,7 @@ import tempfile
 import unittest
 
 import eval.run_changeling
-import eval.run_games
+import eval.run_cabal
 from core.runlog import record_paths
 from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
@@ -217,7 +217,7 @@ class TestBothDriversAgreeOnWhatOutMeans(unittest.TestCase):
                          ("eval/records/s2.json", "eval/records/s2.json.jsonl"))
 
     def test_neither_driver_composes_its_own_suffix(self):
-        for module in (eval.run_changeling, eval.run_games):
+        for module in (eval.run_changeling, eval.run_cabal):
             source = inspect.getsource(module)
             self.assertNotIn('f"{args.out}.json"', source, module.__name__)
             self.assertNotIn('f"{args.out}.jsonl"', source, module.__name__)
