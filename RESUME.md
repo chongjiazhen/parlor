@@ -20,8 +20,13 @@ What's next:
 | cabal gate #3b **NOT SHOWN** - 2026-08-27 (S6). cabal's GPU program stops | `docs/gate3b-verdict.md` | `py -3 -m eval.s6_verdict` |
 | cabal gate #3a **RETIRED** - 2026-08-27 (S1), on arithmetic not budget | `docs/gate3a-retired.md` | `py -3 -m eval.gate3_arithmetic` |
 
-**The next thing is the powers re-run**, the half of S2 that did not happen - two
-20-game arms, both or the pairing is lost. Its row is below. Then S8.
+**The powers re-run LANDED 2026-08-28** and the accuracy gain it was run to settle
+is banked: on identical deals and clean code, blind accuracy **+40.00pp** [+13.64,
++66.67] and villager accuracy **+23.81pp** [+4.55, +42.42], both floors clearing
+zero where the 2026-08-27 pair's touched it. `games/changeling/RULES.md` §The public
+rules text has to state what each card DOES. What it did NOT close is the two
+rule-error counts, whose instrument was never committed - that row is below. **Then
+S8**, whose entry condition is met.
 
 **First command of any session that thinks a run is live:**
 
@@ -172,7 +177,7 @@ table says which pairs.
 | ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. Verdicts: `docs/gate3a-retired.md`, `docs/gate3b-verdict.md`. | - | - | done |
 | ~~**S9**~~ | ~~Code debt, commit one - the integrity surface.~~ **LANDED 2026-08-28** - items 7, 1, 2 and 4 in one commit. `over_sabotage`'s docstring now states the benchmark as "the pair failed to find a convention"; the integrity block moved to `core/integrity.py`, shared by both games, and gained a witnessed rate per seat-game, a `recovered` third outcome, and a clean-game count. `fallback_rate` is unchanged and keeps its name - both reproducers still agree with the recorded runs. Seven guards mutation-checked, each killed by its own named test. | - | - | done |
 | ~~**S10**~~ | ~~Code debt, commit two - changeling's knowledge class.~~ **LANDED 2026-08-28** - the class is keyed on what the seat was TOLD; a MEET card that met nobody is `none`, not `identity`. The pin was replaced, not deleted: `..._never_the_DAWN_card` keeps the half that still holds, beside `..._keyed_on_what_the_seat_was_TOLD` and the property itself. Four guards mutation-checked. Stratum sizes re-measured and now recomputable - `py -3 -m eval.strata` - which moves 2375 of 20000 seat-nights from `identity` to `none` and recovers ~19% of the blind stratum. Both expansion decks are unblocked. | - | - | done |
-| ~~**S2**~~ | ~~changeling: clean re-run, then 200 games.~~ **THE 200 GAMES LANDED 2026-08-28; THE POWERS RE-RUN DID NOT.** `PARLOR DONE rc=0 games=200/200 elapsed=18250s`, `--arm llm`, seed 4000, `qwen36-35b-a3b-iq3` at 100% attribution, 0.40% fallback. Records `eval/records/s2.json` + `s2.json.jsonl`. The powers half is **still open** and carried by its own row below (`Re-run changeling's powers arms on the FIXED lane`) - so the `RULES.md` powers table is NOT yet on clean numbers and its caveat block stands. | - | - | half done |
+| ~~**S2**~~ | ~~changeling: clean re-run, then 200 games.~~ **BOTH HALVES LANDED 2026-08-28.** `PARLOR DONE rc=0 games=200/200 elapsed=18250s`, `--arm llm`, seed 4000, `qwen36-35b-a3b-iq3` at 100% attribution, 0.40% fallback. Records `eval/records/s2.json` + `s2.json.jsonl`. The powers half ran the same day: 2x20 on the fixed lane, identical deals, `PARLOR PAIR DONE rc=0 arms=2/2`, recipe `eval/runs/changeling-powers-pair.cmd`. The `RULES.md` powers table is on clean numbers and its caveat block is gone; the accuracy gain is banked. The two rule-error counts are NOT re-measured - their instrument was never committed - and that is a row of its own. | - | - | done |
 | ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
 | ~~**S4**~~ | ~~Ops hygiene.~~ **LANDED 2026-08-27** - `core/runlog.py` writes `PARLOR DONE rc=N games=L/R elapsed=Ns` from both eval drivers; both games record a fallback's REASON per decision on a `refused` field; the untracked `run-hunt20.cmd` is retired and its exact invocation preserved in `eval/runs/hunt-local.cmd`. Records changed, play did not - the bytes a model receives are identical, so S6 may freeze on this code. | - | - | done |
 | ~~**S5**~~ | ~~changeling: read the 200-game run.~~ **READ 2026-08-28 - GATE #3 HOLDS.** Blind villager accuracy **110/247 = 44.53%**, Wilson floor **38.47%** and the scorer's game-bootstrap floor **37.36%**, both clearing the pre-committed 35.95%. Gate #2 readable at **59.49%** [52.48%, 66.13%] and given **no verdict**, per the criterion. Two clauses did not apply cleanly and are recorded rather than smoothed: the criterion said Wilson where the scorer publishes a bootstrap, and S2 ran no random arm so the own-arm clause had nothing to fire on. Writeup `games/changeling/RULES.md` §S2 read; arithmetic `py -3 -m eval.s5_verdict`. Code-debt item 4 settled in the same session because the writeup had to quote a path. | - | - | done |
@@ -309,17 +314,31 @@ arm is ~30 min against cabal's 13.2 h.
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [ ] **Re-run changeling's powers arms on the FIXED lane - the paired result
-      stands, the absolute rates do not.** Both arms of the 2026-08-27 comparison
-      ran with `run_changeling` sending the run's base seed as the sampler seed for
-      every game (fixed in `af7e6a0`), plus the game-weighted `_chance` and the
-      wrong-denominator random reference. Both arms carried all three identically on
-      identical deals, so the -10pp rule-error finding is unaffected; the villager
-      accuracy, village win rate and chance figures quoted in `RULES.md` are not
-      clean estimates of what this model does per game. ~30 min for 20 games each
-      arm at `--no-thinking`; re-run both, not just the after arm, or the pairing is
-      lost. Update the table in `games/changeling/RULES.md` and drop the caveat
-      block above it.
+- [ ] **Count the two powers rule-errors with a TRACKED instrument, and retire the
+      2026-08-27 figures.** The powers re-run itself landed 2026-08-28 (below); this
+      is the half it could not close. The script that produced `18/200 -> 2/200`
+      (own card unmoved) and `4/200 -> 0/200` (switcher self-swap) **was never
+      committed**, so the `-10pp` claim those two feed has no reproducer, and
+      nothing in the tree counts either error.
+      - **One of them is already contradicted.** Scoring the switcher error as "the
+        speaker claims its OWN card moved", first person, with a word-boundary guard
+        so `without` cannot match as `with`, gives 11/200 before and **4/200 after** -
+        not 0. All four after-arm hits were hand-read and all four are genuine; two
+        carry no correct statement at all. The fix reduced the error, it did not
+        eliminate it.
+      - **The other is not recoverable from its description.** A narrow pattern for
+        "own card unmoved" finds 3 where the original counted 18, so the original
+        definition was much broader than anything the commit message states. Do not
+        tune a pattern until it reaches 18 - that is fitting the instrument to its
+        target, and it is the `hunt20b` error in a third costume.
+      - **So write the definition down first and score BOTH pairs with it**, the
+        2026-08-27 records and the 2026-08-28 ones, and report the old figures as
+        from an instrument that no longer exists. Same discipline as
+        `eval.gate3_arithmetic`: reproduce something already published before
+        deriving anything new, and exit non-zero when the reproduction stops
+        checking. Where it lands is `eval/`, beside the other scorers.
+      - `games/changeling/RULES.md` carries all of this in §The two rule-error counts
+        are NOT re-measured, so the tree does not quote 0.0% as if it held.
 - [ ] **One CLI over both games, so a person can sit down and play the bots.**
       Today the human seat is two per-game entry points - `games/cabal/demo.py` and
       `games/changeling/demo.py`, each with `--human 0` - and a player has to know

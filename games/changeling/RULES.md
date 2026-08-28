@@ -593,11 +593,11 @@ a gate and none promotable to one**.
 
 ### What S2 did NOT deliver
 
-**The powers re-run did not happen.** S2's scope was the 2x20 powers arms on the
-fixed lane *and then* the 200 games; only the second landed. So the caveat block
-above the powers table stands as written, and those absolute rates are still not
-clean estimates of what this model does per game. The paired -10pp rule-error
-finding is unaffected, as that block already says.
+**The powers re-run did not happen in S2** - its scope was the 2x20 powers arms on
+the fixed lane *and then* the 200 games, and only the second landed. **It ran
+2026-08-28** and the section above is now on clean numbers: the accuracy gain is
+banked, and what remains open is the two rule-error counts, whose instrument was
+never committed.
 
 ## The chance baseline, MEASURED (2026-08-26)
 
@@ -652,35 +652,68 @@ card, so the text stays byte-identical across seats and carries no association a
 leak could ride on - the audit exclusion in the previous section still holds, and
 `audit_all` is clean over 500 deals with it in.
 
-> **Both arms below predate the review fixes of 2026-08-27** - the sampler seed was
-> pinned to the run's base rather than each game's. Both arms carried it identically
-> on identical deals, so the PAIRED comparison stands; the absolute rates inherit it
-> and are not a clean estimate of what this model does per game.
+**RE-RUN ON THE FIXED LANE 2026-08-28, and the accuracy gain is now BANKED.** The
+2026-08-27 pair predated the review fixes - the sampler seed was pinned to the run's
+base rather than each game's - so its paired comparison stood while its absolute
+rates did not. Both arms were re-run at `af7e6a0`-and-later on identical deals,
+confirmed game for game, and the table below is that pair.
 
 **Measured, same seeds, one variable** - 20 games, `qwen36-35b-a3b-iq3`,
 `--no-thinking`, seed 1000, deals confirmed identical across arms:
 
+| | before (name only) | after (night order + powers) |
+|---|---|---|
+| **BLIND accuracy** - the cut the gate is taken on | 15.00% (3/20) | **55.00%** (11/20) |
+| villager accuracy | 30.16% (19/63) | **53.97%** (34/63) |
+| village win rate (18 scored games) | 22.22% | 50.00% |
+| pack win rate | 77.78% | 50.00% |
+| fallback rate | 3/300 = 1.00% | 2/300 = 0.67% |
+| recovered | 23/300 = 7.67% | 18/300 = 6.00% |
+| clean games | 3/20 | 8/20 |
+| wall clock | 1756s | 1789s (+1.9%) |
+
+**The accuracy gain IS claimed now, and that is what the re-run bought.** Paired
+bootstrap over games, resampling the 18 scored games as units:
+
+| | paired delta | 95% CI | floor |
+|---|---|---|---|
+| villager accuracy | **+23.81pp** | [+4.55pp, +42.42pp] | clears zero |
+| **blind accuracy** | **+40.00pp** | [+13.64pp, +66.67pp] | clears zero |
+
+The 2026-08-27 pair put villager accuracy at +17.46pp with a floor of -1.56pp and
+this file declined to bank it, citing `hunt20b`'s +8.82% [+0.94%] inverting to
+`hunt20c`'s +9.00% [-0.25%] on identical code. That caution was right and the redraw
+answered it: on clean code and identical deals the effect is larger and the floor
+clears. **Reproduce with the arm records themselves** - the derivation reproduces
+each arm's own published figure before deriving any delta, and both arms are
+`eval/records/cl-powers-{before,after}2.json`.
+
+Cost of the fix is **1.9% wall clock**, not the 16% the seed-bug pair reported.
+
+### The two rule-error counts are NOT re-measured, and their instrument is gone
+
 | | before | after |
 |---|---|---|
-| utterances claiming own card unmoved | 18/200 = 9.0% | 2/200 = **1.0%** |
-| utterances with the switcher self-swap error | 4/200 = 2.0% | 0/200 = **0.0%** |
+| utterances claiming own card unmoved | 18/200 = 9.0% | 2/200 = 1.0% |
+| utterances with the switcher self-swap error | 4/200 = 2.0% | 0/200 = 0.0% |
 | **either** | **11.0%** | **1.0%** |
-| villager accuracy | 38.10% | 55.56% |
-| village win rate (18 scored games) | 33.33% | 55.56% |
-| fallback rate | 0/300 | 1/300 |
-| wall clock | 1631.7s | 1896.2s (+16%) |
 
-**The rule-error rate is what justifies the change**: -10pp, 95% CI [-18.3pp,
--1.7pp], 99.1% of resamples showing a decrease, on a 200-utterance denominator.
+Those are the 2026-08-27 figures and they are **not reproducible**: the script that
+produced them was never committed, and no tracked module counts either error. The
+`-10pp` claim built on them (95% CI [-18.3pp, -1.7pp]) inherits that.
 
-**The accuracy gain is NOT claimed.** +17.46pp looks large and is in the predicted
-direction, but a paired bootstrap over games gives 95% CI [-1.56pp, +36.07pp] - the
-floor touches zero at n=18 games. This repo watched `hunt20b`'s +8.82% [+0.94%]
-invert to `hunt20c`'s +9.00% [-0.25%] on identical code the same week. A floor
-within 2pp of zero is the number that flips on redraw, so it is recorded and not
-banked.
+**One of them is contradicted by a hand-read of the same records.** Scoring the
+switcher error as "the speaker claims its OWN card moved", first person, with a
+word-boundary guard so `without` cannot match as `with`, gives 11/200 before and
+**4/200 after** - not 0. All four after-arm hits were read in full and all four are
+genuine; two of them carry no correct statement at all, e.g. *"I exchanged cards
+with seats 1 and 3, but I have no idea what I'm holding now"* from a seat that was
+dealt switcher and still held it, so its card never moved and it is the one seat
+that always knows what it holds. **So the fix reduced this error; it did not
+eliminate it**, and a reader should not take the 0.0% at face value.
 
-Cost of the fix is 16% wall clock, from the longer preamble on every call.
+The open row in `RESUME.md` is to build the counter as a tracked instrument with its
+definition stated, score both pairs with it, and retire these four numbers.
 
 ### The deal constraint does not do what it was written to do
 
