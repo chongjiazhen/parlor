@@ -177,7 +177,12 @@ def _votes(votes: list, evil_voter: bool, misled=None) -> dict:
 
 def score(records: list[GameRecord]) -> dict:
     played = [r for r in records if r.error is None]
-    votes = [v for r in played for v in r.votes]
+    all_votes = [v for r in played for v in r.votes]
+    # A fallback vote is the random policy wearing the model's name, so nothing
+    # below the vote metrics is allowed to score it. The run-wide fallback rate
+    # stays the integrity metric; votes get their OWN rate, because a low
+    # overall rate can sit on top of votes that are half noise.
+    votes = [v for v in all_votes if not v.fell_back]
     wins = Counter(r.winner for r in played)
     decided = wins["good"] + wins["evil"]
     misled_seats = sum(1 for r in played for v in r.misled.values() if v)
@@ -202,6 +207,11 @@ def score(records: list[GameRecord]) -> dict:
         "vote_good_misled": _votes(votes, False, misled=True),
         "vote_good_clear": _votes(votes, False, misled=False),
         "vote_evil": _votes(votes, True),
+        "vote_decisions": len(all_votes),
+        "vote_fallbacks": sum(1 for v in all_votes if v.fell_back),
+        "vote_fallback_rate": (sum(1 for v in all_votes if v.fell_back)
+                               / len(all_votes) if all_votes else None),
+        "model_votes": len(votes),
         "integrity": integrity.summarise(played),
     }
 
@@ -238,6 +248,17 @@ def report(s: dict, args, elapsed: float) -> str:
         out.append(f"  VOID: above {integrity.VOID_BAR:.0%}, so every figure below "
                    f"is the random policy wearing a model's name. Report the rate, "
                    f"not the results.")
+    vote_rate = s["vote_fallback_rate"]
+    if vote_rate is not None:
+        out.append(f"  vote fallback {s['vote_fallbacks']}/{s['vote_decisions']} "
+                   f"= {vote_rate:.2%}; vote figures below are over "
+                   f"{s['model_votes']} model-cast votes only")
+        if vote_rate > integrity.VOID_BAR:
+            out.append(f"  VOID: vote fallback rate {vote_rate:.2%} is above the "
+                       f"{integrity.VOID_BAR:.0%} ceiling within votes alone, even "
+                       f"though the run-wide rate is under it - enough of the "
+                       f"vote record is noise that no vote figure below is the "
+                       f"model's.")
 
     w = s["wins"]
     out.append(f"outcome: good {w['good']}, evil {w['evil']}, no winner "

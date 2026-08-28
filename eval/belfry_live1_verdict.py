@@ -105,8 +105,18 @@ def tally(row: dict) -> dict:
         "misled_votes", "misled_correct",
         "alive_votes", "alive_correct", "dead_votes", "dead_correct",
         "day1_live", "day1_hits", "day1_chance_num",
-        "live", "hits", "chance_num", "dead_seat", "executions")}
+        "live", "hits", "chance_num", "dead_seat", "executions",
+        "vote_decisions", "vote_fallbacks", "provenance_missing")}
     for v in row.get("votes", []):
+        # A vote the random fallback cast is not a model vote. Old records carry
+        # no field; tally counts them apart rather than assuming clean, and the
+        # verdict refuses to read a vote-specific void off them.
+        if "fell_back" not in v:
+            t["provenance_missing"] += 1
+        t["vote_decisions"] += 1
+        t["vote_fallbacks"] += int(bool(v.get("fell_back", False)))
+        if v.get("fell_back", False):
+            continue
         evil_nominee = bool(v["nominee_evil"])
         yes = bool(v["yes"])
         if v["voter_evil"]:
@@ -204,13 +214,20 @@ def recompute(rows: list[dict]) -> dict:
         "recovered": recovered,
         "fallback_rate": fallbacks / decisions if decisions else 0.0,
         "recovered_rate": recovered / decisions if decisions else 0.0,
+        "vote_decisions": total(units, "vote_decisions"),
+        "vote_fallbacks": total(units, "vote_fallbacks"),
+        "provenance_missing": total(units, "provenance_missing"),
+        "vote_fallback_rate": (total(units, "vote_fallbacks")
+                               / total(units, "vote_decisions")
+                               if total(units, "vote_decisions") else None),
         "days_mean": (sum(r.get("days", 0) for r in played) / len(played)
                       if played else 0.0),
         "units": units,
     }
 
 
-def control(summary: dict, derived: dict) -> list[str]:
+def control(summary: dict, derived: dict,
+            rows: list[dict] | None = None) -> list[str]:
     """Disagreements between the published summary and the rows behind it."""
     score = summary.get("score", {})
     units = derived["units"]
@@ -223,6 +240,12 @@ def control(summary: dict, derived: dict) -> list[str]:
          derived["decisions"]),
         ("fallbacks", score.get("integrity", {}).get("fallbacks"),
          derived["fallbacks"]),
+        ("vote decisions", score.get("vote_decisions"),
+         derived["vote_decisions"]),
+        ("vote fallbacks", score.get("vote_fallbacks"),
+         derived["vote_fallbacks"]),
+        ("model votes", score.get("model_votes"),
+         derived["vote_decisions"] - derived["vote_fallbacks"]),
         ("good-seat votes", good.get("votes"), total(units, "votes")),
         ("evil-seat votes", score.get("vote_evil", {}).get("votes"),
          total(units, "evil_n_evil") + total(units, "evil_n_good")),
@@ -238,6 +261,28 @@ def control(summary: dict, derived: dict) -> list[str]:
         ("hits", pooled.get("hits"), total(units, "hits")),
     ]
     bad = []
+    if rows is not None:
+        # The decision log is the cross-check join source: the same
+        # (day, seat, kind="vote") must say the same thing about provenance in
+        # both records. A mismatch is a driver bug, so the controller fails on
+        # it rather than picking one record to believe.
+        for i, row in enumerate(rows):
+            if row.get("error"):
+                continue
+            log_votes = {(d["day"], d["seat"]): bool(d["fell_back"])
+                         for d in row.get("decision_log", [])
+                         if d.get("kind") == "vote"}
+            if not log_votes:
+                continue    # no log to join against (legacy or synthetic row)
+            for j, v in enumerate(row.get("votes", [])):
+                key = (v["day"], v["seat"])
+                if key not in log_votes:
+                    bad.append(f"game {i} vote {j}: no matching vote entry in "
+                               f"the decision log ({key})")
+                elif log_votes[key] != bool(v.get("fell_back", False)):
+                    bad.append(f"game {i} vote {j}: record says fell_back="
+                               f"{v.get('fell_back', False)}, decision log says "
+                               f"{log_votes[key]}")
     for name, published, mine in checks:
         if published is None:
             bad.append(f"the summary published no {name}")
@@ -262,6 +307,20 @@ def control(summary: dict, derived: dict) -> list[str]:
 def voids(derived: dict, promised: int) -> list[str]:
     """The pre-committed void conditions, in the criterion's own words."""
     out = []
+    if derived["provenance_missing"]:
+        out.append(
+            f"{derived['provenance_missing']} vote record(s) carry no provenance "
+            f"field - a legacy pre-fix record cannot say which votes were the "
+            f"model's, so the vote-specific void cannot be checked and no vote "
+            f"figure from it is a new-criterion observation")
+    elif (derived["vote_fallback_rate"] is not None
+          and derived["vote_fallback_rate"] > integrity.VOID_BAR):
+        out.append(
+            f"vote fallback rate {derived['vote_fallback_rate']:.2%} "
+            f"({derived['vote_fallbacks']}/{derived['vote_decisions']} votes) is "
+            f"above the {integrity.VOID_BAR:.0%} ceiling within votes alone, "
+            f"even with the run-wide rate under it - enough of the vote record "
+            f"is noise that no vote figure is the model's")
     if derived["fallback_rate"] > integrity.VOID_BAR:
         out.append(
             f"fallback rate {derived['fallback_rate']:.2%} is above the "
@@ -314,7 +373,7 @@ def _band(ci) -> str:
 
 
 def report(summary: dict, derived: dict, path: Path,
-           promised: int) -> tuple[list[str], int]:
+           promised: int, rows: list[dict] | None = None) -> tuple[list[str], int]:
     units = derived["units"]
     score = summary.get("score", {})
     out = [f"belfry live arm #1 - {path.as_posix()}",
@@ -323,7 +382,7 @@ def report(summary: dict, derived: dict, path: Path,
         out += ["", f"** NOT the pre-committed arm ({CAMPAIGN}). The arithmetic "
                     f"below is an audit of this record, not a verdict. **"]
 
-    bad = control(summary, derived)
+    bad = control(summary, derived, rows)
     out += ["", "instrument control - the summary against the rows behind it"]
     if bad:
         out += [f"  DISAGREES: {b}" for b in bad]
@@ -344,6 +403,14 @@ def report(summary: dict, derived: dict, path: Path,
             f"  {derived['played']} played games, as promised"
             + (f" ({derived['errors']} errored, excluded from every figure)"
                if derived["errors"] else "")]
+    if derived["vote_fallback_rate"] is not None:
+        out.append(
+            f"  vote fallback {derived['vote_fallbacks']}/"
+            f"{derived['vote_decisions']} = "
+            f"{derived['vote_fallback_rate']:.2%} within votes; vote figures "
+            f"below are over "
+            f"{derived['vote_decisions'] - derived['vote_fallbacks']} "
+            f"model-cast votes only")
     if derived["recovered_rate"] > integrity.RECOVERED_WARN_BAR:
         out.append(
             f"  WARN: {derived['recovered_rate']:.2%} of decisions were sent back "

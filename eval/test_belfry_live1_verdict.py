@@ -25,7 +25,7 @@ def vote(nominee_evil: bool, yes: bool, voter_evil: bool = False,
     """One ``VoteRecord`` as ``asdict`` lands it in the JSONL."""
     return {"day": 1, "seat": 0, "nominee": 1, "yes": yes,
             "voter_evil": voter_evil, "nominee_evil": nominee_evil,
-            "voter_alive": alive, "voter_misled": misled}
+            "voter_alive": alive, "voter_misled": misled, "fell_back": False}
 
 
 def execution(day: int, evil: bool, was_alive: bool = True,
@@ -111,6 +111,10 @@ def summary_for(rows: list[dict]) -> dict:
         "vote_good_misled": {"votes": t(u, "misled_votes")},
         "vote_good_clear": {"votes": votes - t(u, "misled_votes")},
         "vote_evil": {"votes": t(u, "evil_n_evil") + t(u, "evil_n_good")},
+        "vote_decisions": d["vote_decisions"],
+        "vote_fallbacks": d["vote_fallbacks"],
+        "vote_fallback_rate": d["vote_fallback_rate"],
+        "model_votes": d["vote_decisions"] - d["vote_fallbacks"],
         "integrity": {"decisions": d["decisions"], "fallbacks": d["fallbacks"],
                       "recovered": d["recovered"]},
     }}
@@ -121,7 +125,7 @@ def run(rows: list[dict], summary: dict | None = None,
     from pathlib import Path
     summary = summary_for(rows) if summary is None else summary
     lines, code = verdict.report(summary, verdict.recompute(rows), Path(path),
-                                 promised)
+                                 promised, rows)
     return "\n".join(lines), code
 
 
@@ -254,6 +258,42 @@ class Voids(unittest.TestCase):
         self.assertTrue(any("1 played games against 2 promised" in v
                             for v in verdict.voids(derived, promised=2)))
 
+    def test_a_vote_fallback_rate_over_the_bar_voids_before_clause_a(self):
+        """Run-wide the rate is clean; within votes it is not. A vote the random
+        policy cast is not evidence about the model, and enough of them voids
+        the arm on its own."""
+        rows = arm(60, 0.9, 0.1, seed=36)
+        for r in rows:
+            for v in r["votes"][:7]:        # 7 of 16 votes per game, 44%
+                v["fell_back"] = True
+            r["decisions"], r["fallbacks"] = 480, 7    # run-wide 1.5%
+        text, code = run(rows)
+        self.assertEqual(code, 2)
+        self.assertIn("VOID:", text)
+        self.assertIn("vote fallback", text)
+        self.assertNotIn("VERDICT:", text)
+
+    def test_an_empty_vote_sample_is_unreadable_never_zero(self):
+        rows = [game([], []) for _ in range(3)]
+        derived = verdict.recompute(rows)
+        self.assertIsNone(derived["vote_fallback_rate"])
+        self.assertFalse(any("vote fallback" in v
+                             for v in verdict.voids(derived, promised=3)))
+
+    def test_legacy_rows_fail_closed_with_a_named_reason(self):
+        """A pre-fix JSONL cannot say which votes were the model's. Calling that
+        'zero fallback votes' is exactly the silent assumption this slice
+        exists to forbid, so the verdict refuses the vote-specific void and
+        says why."""
+        rows = arm(60, 0.9, 0.1, seed=37)
+        for r in rows:
+            for v in r["votes"]:
+                del v["fell_back"]
+        text, code = run(rows)
+        self.assertEqual(code, 2)
+        self.assertIn("VOID:", text)
+        self.assertIn("legacy", text)
+
     def test_a_loud_recovered_rate_warns_and_does_not_void(self):
         rows = arm(60, 0.7, 0.3, seed=35)
         for r in rows:
@@ -302,6 +342,36 @@ class InstrumentControl(unittest.TestCase):
                          path="eval/records/somebody-elses.json")
         self.assertEqual(code, 0)
         self.assertIn("NOT the pre-committed arm", text)
+
+    def test_vote_provenance_reproduces_from_the_rows(self):
+        rows = arm(60, 0.9, 0.1, seed=46)
+        for r in rows:
+            r["votes"][0]["fell_back"] = True
+            r["decisions"], r["fallbacks"] = 480, 1
+        summary = summary_for(rows)
+        self.assertEqual(verdict.control(summary, verdict.recompute(rows)), [])
+        self.assertEqual(summary["score"]["vote_fallbacks"], 60)
+
+    def test_a_summary_that_disagrees_on_vote_fallbacks_blocks_the_verdict(self):
+        rows = arm(60, 0.7, 0.3, seed=47)
+        summary = summary_for(rows)
+        summary["score"]["vote_fallbacks"] += 1
+        text, code = run(rows, summary)
+        self.assertEqual(code, 1)
+        self.assertIn("vote fallbacks: summary", text)
+
+    def test_a_vote_record_disagreeing_with_its_decision_log_blocks_the_verdict(self):
+        """The decision log is the cross-check join source. A VoteRecord and its
+        Decision saying different things about the SAME vote is a driver bug,
+        and the controller fails on it rather than picking one to believe."""
+        rows = arm(60, 0.7, 0.3, seed=48)
+        rows[0]["votes"][0]["fell_back"] = True
+        rows[0]["decision_log"] = [
+            {"turn": i, "day": 1, "seat": 0, "kind": "vote",
+             "fell_back": False} for i in range(len(rows[0]["votes"]))]
+        text, code = run(rows)
+        self.assertEqual(code, 1)
+        self.assertIn("decision log", text)
 
 
 class Descriptive(unittest.TestCase):

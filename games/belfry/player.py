@@ -268,6 +268,12 @@ class VoteRecord:
     #: and folding those into the misled column would credit the poison with the
     #: seat's earlier play.
     voter_misled: bool = False
+    #: Was THIS vote cast by the random fallback after the retry budget ran out?
+    #: Snapshotted from the same decision that landed the vote - never re-read
+    #: from the policy later, by which time another turn has overwritten it. A
+    #: fallback vote is the random policy wearing the model's name, so the
+    #: scorer must be able to drop it without asking the policy anything.
+    fell_back: bool = False
 
 
 @dataclass
@@ -392,6 +398,11 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
             # alone, which is the defect the removed coercion in `changeling` had.
             ref.submit(seat, action)
             _record_decision(rec, policies[seat], turn_no, day, turn, action)
+            # Snapshot the SAME decision's provenance before anything else can
+            # overwrite the policy's last_* fields (the fallback's own act()
+            # resets them). The vote record below carries this value, so a
+            # scorer never re-derives it from aggregate totals or policy state.
+            fell_back = getattr(policies[seat], "last_fell_back", False)
             turn_no += 1
             if kind == "speak":
                 # What the referee PUBLISHED, not what the policy proposed: it
@@ -405,7 +416,8 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
                     nominee_evil=ref.grim.seat(nominee).align is Align.EVIL,
                     voter_alive=ref.grim.seat(seat).alive,
                     voter_misled=any(not r.truthful
-                                     for r in ref.knowledge[seat])))
+                                     for r in ref.knowledge[seat]),
+                    fell_back=fell_back))
     except Exception as exc:                  # a broken run is recorded, not hidden
         rec.error = f"{type(exc).__name__}: {exc}"
         if isinstance(exc, AssertionError):   # a leak is never scoreable

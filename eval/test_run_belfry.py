@@ -36,10 +36,10 @@ def execution(evil: bool, alive: int = 5, evil_alive: int = 2, day: int = 1,
 
 
 def vote(yes: bool, nominee_evil: bool, voter_evil: bool = False,
-         misled: bool = False) -> VoteRecord:
+         misled: bool = False, fell_back: bool = False) -> VoteRecord:
     return VoteRecord(day=1, seat=0, nominee=1, yes=yes, voter_evil=voter_evil,
                       nominee_evil=nominee_evil, voter_alive=True,
-                      voter_misled=misled)
+                      voter_misled=misled, fell_back=fell_back)
 
 
 class TestSeeding(unittest.TestCase):
@@ -195,6 +195,42 @@ class TestVoteScoring(unittest.TestCase):
         self.assertEqual(s["vote_good_misled"]["votes"], 0)
         self.assertIsNone(s["vote_good_misled"]["accuracy"])
         self.assertIn("no sample", report(s, args(), 1.0))
+
+    def test_fallback_votes_are_not_model_votes(self):
+        """Every vote fell back, but the non-vote decisions keep the run-wide
+        rate under the void bar. The model-vote strata must have NO sample, and
+        the vote fallback rate is 100%, not the run's."""
+        r = self.rec([vote(True, True, fell_back=True),
+                      vote(False, False, fell_back=True),
+                      vote(True, False, voter_evil=True, fell_back=True)])
+        r.decisions, r.fallbacks = 100, 3
+        s = score([r])
+        self.assertEqual(s["vote_good"]["votes"], 0)
+        self.assertIsNone(s["vote_good"]["accuracy"])
+        self.assertEqual(s["vote_evil"]["votes"], 0)
+        self.assertEqual(s["vote_decisions"], 3)
+        self.assertEqual(s["vote_fallbacks"], 3)
+        self.assertEqual(s["vote_fallback_rate"], 1.0)
+        self.assertLess(s["integrity"]["fallback_rate"], 0.10)
+
+    def test_model_votes_keep_their_own_denominator(self):
+        r = self.rec([vote(True, True),
+                      vote(False, False, fell_back=True)])
+        r.decisions, r.fallbacks = 10, 1
+        s = score([r])
+        self.assertEqual(s["vote_good"]["votes"], 1)
+        self.assertEqual(s["vote_good"]["accuracy"], 1.0)
+        self.assertEqual(s["vote_fallback_rate"], 0.5)
+
+    def test_a_vote_fallback_rate_over_the_bar_voids_the_report(self):
+        r = self.rec([vote(True, True), vote(False, False, fell_back=True)])
+        r.decisions, r.fallbacks = 100, 1     # run-wide 1%, votes at 50%
+        self.assertIn("VOID", report(score([r]), args(), 1.0))
+
+    def test_no_votes_at_all_is_not_a_zero_rate(self):
+        s = score([self.rec([])])
+        self.assertIsNone(s["vote_fallback_rate"])
+        self.assertNotIn("VOID", report(s, args(), 1.0))
 
 
 class TestIntegrityAndRefusals(unittest.TestCase):

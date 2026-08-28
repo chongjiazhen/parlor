@@ -194,6 +194,69 @@ class TestTheRetryLoop(unittest.TestCase):
         self.assertEqual(policy.last_rule_refusals, 0)
 
 
+class TestVoteProvenance(unittest.TestCase):
+    """A vote cast by the random fallback is not a model vote. The driver writes
+    the same decision's provenance onto the VoteRecord it lands, so the scorer
+    can drop it without asking the policy anything."""
+
+    class Stubborn:
+        """Answers every ask with garbage, so every decision falls back."""
+
+        def __init__(self, rng):
+            self.rng = rng
+            self.last_fell_back = False
+            self.last_refusals = 0
+            self.last_rule_refusals = 0
+            self.last_refusal = ""
+            self.last_upstream = ""
+            self.trace = []
+            self.upstreams = {}
+
+        def act(self, ref, seat):
+            self.last_fell_back = True
+            return RandomPolicy(self.rng).act(ref, seat)
+
+    def _run_game(self, policy_for, seed=0):
+        ref = BelfryReferee.new(5, seed=seed, max_days=2)
+        policies = {s: policy_for(s) for s in range(5)}
+        return play_game(ref, policies)
+
+    def test_a_fallback_vote_carries_its_own_provenance(self):
+        rec = self._run_game(lambda s: self.Stubborn(random.Random(s)))
+        self.assertIsNone(rec.error)
+        votes = [d for d in rec.decision_log if d.kind == "vote"]
+        self.assertTrue(votes)
+        for v, d in zip(rec.votes, votes):
+            self.assertTrue(v.fell_back)
+            self.assertTrue(d.fell_back)
+            self.assertEqual((v.day, v.seat), (d.day, d.seat))
+
+    def test_a_clean_vote_carries_no_fallback(self):
+        rec = self._run_game(lambda s: RandomPolicy(random.Random(s)))
+        self.assertIsNone(rec.error)
+        self.assertTrue(rec.votes)
+        for v, d in zip(rec.votes,
+                        [d for d in rec.decision_log if d.kind == "vote"]):
+            self.assertFalse(v.fell_back)
+            self.assertFalse(d.fell_back)
+            self.assertEqual((v.day, v.seat), (d.day, d.seat))
+
+    def test_an_llm_vote_that_fell_back_is_marked_on_both_records(self):
+        ref = BelfryReferee.new(5, seed=0, max_days=2)
+        rng = random.Random(0)
+        policies = {s: LLMPolicy(backend=Canned(["not json at all"]), retries=0,
+                                 backoff=0,
+                                 fallback=RandomPolicy(random.Random(s)))
+                    for s in range(5)}
+        rec = play_game(ref, policies)
+        self.assertIsNone(rec.error)
+        for v in rec.votes:
+            self.assertTrue(v.fell_back)
+        for d in rec.decision_log:
+            if d.kind == "vote":
+                self.assertTrue(d.fell_back)
+
+
 class TestTheDriver(unittest.TestCase):
     def run_random(self, n=7, seed=0):
         ref = BelfryReferee.new(n, seed=seed)
