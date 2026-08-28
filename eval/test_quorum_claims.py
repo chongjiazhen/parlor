@@ -150,6 +150,24 @@ class TestScoreAndReport(unittest.TestCase):
         self.assertEqual(len(vs), 1)
         self.assertTrue(vs[0].legacy)
 
+    def test_a_legacy_claim_is_labelled_in_the_standalone_report(self):
+        """The live1 verdict refuses a legacy record; the standalone scorer
+        still scores it (the old criterion predates the field), but it must SAY
+        so rather than read as ordinary model claims."""
+        row = claim("proposer", [W, W, C]).__dict__
+        del row["fell_back"]
+        class Rec:
+            draws = [draw([W, W, C], [W, C], C).__dict__]
+            claims = [row]
+        s = score(verdicts([Rec()]))
+        self.assertEqual(s["legacy"], 1)
+        self.assertIn("LEGACY", "\n".join(report(s)))
+        s_clean = score(verdicts([type("R", (), {
+            "draws": [draw([W, W, C], [W, C], C)],
+            "claims": [claim("proposer", [W, W, C])]})()]))
+        self.assertEqual(s_clean["legacy"], 0)
+        self.assertNotIn("LEGACY", "\n".join(report(s_clean)))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -365,13 +365,30 @@ class InstrumentControl(unittest.TestCase):
         Decision saying different things about the SAME vote is a driver bug,
         and the controller fails on it rather than picking one to believe."""
         rows = arm(60, 0.7, 0.3, seed=48)
+        for i, v in enumerate(rows[0]["votes"]):
+            v["turn"] = 100 + i
         rows[0]["votes"][0]["fell_back"] = True
         rows[0]["decision_log"] = [
-            {"turn": i, "day": 1, "seat": 0, "kind": "vote",
+            {"turn": 100 + i, "day": 1, "seat": 0, "kind": "vote",
              "fell_back": False} for i in range(len(rows[0]["votes"]))]
         text, code = run(rows)
         self.assertEqual(code, 1)
         self.assertIn("decision log", text)
+
+    def test_an_early_mutated_vote_cannot_hide_behind_a_later_duplicate_key(self):
+        """Regression: the join used to be keyed (day, seat), which repeats the
+        moment one seat votes twice in a day - the dict kept the LAST entry and
+        a mutation to an earlier vote escaped the controller whole."""
+        rows = arm(60, 0.9, 0.1, seed=49)
+        for i, v in enumerate(rows[0]["votes"]):
+            v["turn"] = 100 + i
+        rows[0]["decision_log"] = [
+            {"turn": 100 + i, "day": 1, "seat": 0, "kind": "vote",
+             "fell_back": False} for i in range(len(rows[0]["votes"]))]
+        rows[0]["votes"][0]["fell_back"] = True     # the EARLY one
+        text, code = run(rows)
+        self.assertEqual(code, 1)
+        self.assertIn("turn 100", text)
 
 
 class Descriptive(unittest.TestCase):

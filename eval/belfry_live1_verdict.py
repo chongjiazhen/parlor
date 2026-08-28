@@ -262,27 +262,33 @@ def control(summary: dict, derived: dict,
     ]
     bad = []
     if rows is not None:
-        # The decision log is the cross-check join source: the same
-        # (day, seat, kind="vote") must say the same thing about provenance in
-        # both records. A mismatch is a driver bug, so the controller fails on
-        # it rather than picking one record to believe.
+        # The decision log is the cross-check join source, on ``turn`` - the
+        # one key that names ONE decision. (day, seat) is not a key at all: a
+        # day has many nominations and a seat votes in each, so a dict keyed by
+        # it silently keeps the LAST vote's provenance and lets an earlier
+        # mutated one through. A mismatch is a driver bug, so the controller
+        # fails on it rather than picking one record to believe.
         for i, row in enumerate(rows):
             if row.get("error"):
                 continue
-            log_votes = {(d["day"], d["seat"]): bool(d["fell_back"])
+            log_votes = {d["turn"]: bool(d["fell_back"])
                          for d in row.get("decision_log", [])
                          if d.get("kind") == "vote"}
             if not log_votes:
                 continue    # no log to join against (legacy or synthetic row)
             for j, v in enumerate(row.get("votes", [])):
-                key = (v["day"], v["seat"])
-                if key not in log_votes:
-                    bad.append(f"game {i} vote {j}: no matching vote entry in "
-                               f"the decision log ({key})")
-                elif log_votes[key] != bool(v.get("fell_back", False)):
+                turn = v.get("turn", -1)
+                if turn < 0:
+                    bad.append(f"game {i} vote {j}: no turn field - a record "
+                               f"written before the join key existed cannot be "
+                               f"cross-checked and is not assumed to agree")
+                elif turn not in log_votes:
+                    bad.append(f"game {i} vote {j}: no vote decision at turn "
+                               f"{turn} in the decision log")
+                elif log_votes[turn] != bool(v.get("fell_back", False)):
                     bad.append(f"game {i} vote {j}: record says fell_back="
                                f"{v.get('fell_back', False)}, decision log says "
-                               f"{log_votes[key]}")
+                               f"{log_votes[turn]} (turn {turn})")
     for name, published, mine in checks:
         if published is None:
             bad.append(f"the summary published no {name}")

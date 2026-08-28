@@ -268,6 +268,10 @@ class VoteRecord:
     #: and folding those into the misled column would credit the poison with the
     #: seat's earlier play.
     voter_misled: bool = False
+    #: The same ``turn_no`` the Decision for this vote carries. A day has many
+    #: nominations and a seat votes in each, so (day, seat) is NOT a join key -
+    #: turn is. -1 marks a record written before the field existed.
+    turn: int = -1
     #: Was THIS vote cast by the random fallback after the retry budget ran out?
     #: Snapshotted from the same decision that landed the vote - never re-read
     #: from the policy later, by which time another turn has overwritten it. A
@@ -412,6 +416,7 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
             if kind == "vote" and nominee is not None:
                 rec.votes.append(VoteRecord(
                     day=day, seat=seat, nominee=nominee, yes=action["vote"],
+                    turn=turn_no - 1,
                     voter_evil=ref.grim.seat(seat).align is Align.EVIL,
                     nominee_evil=ref.grim.seat(nominee).align is Align.EVIL,
                     voter_alive=ref.grim.seat(seat).alive,

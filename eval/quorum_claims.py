@@ -165,6 +165,10 @@ def score(vs: list[Verdict]) -> dict:
         "forced_claims": sum(1 for v in vs if v.forced),
         "by_side": {side: rate([v for v in vs if v.seat_side == side])
                     for side in ("majority", "minority")},
+        #: Provenance the figures could not establish. A fallback claim never
+        #: reaches ``vs`` at all; a legacy one is scored but counted here, so a
+        #: report can say how much of its own denominator is unprovenanced.
+        "legacy": sum(1 for v in vs if v.legacy),
     }
 
 
@@ -174,6 +178,13 @@ def report(s: dict) -> list[str]:
                 "finding about the arm, not an empty result"]
     lines = [f"claims scored: {s['claims']}, honest {s['honest']} "
              f"({s['honest'] / s['claims']:.2%})"]
+    if s.get("legacy"):
+        lines.append(
+            f"  WARNING: {s['legacy']} of {s['claims']} scored claims are LEGACY "
+            f"records with no provenance field - they are scored because the "
+            f"live1 criterion predates the field, but nobody can say the model "
+            f"rather than the random fallback filed them, and no new criterion "
+            f"may read this figure as model play")
     for office, row in s["by_office"].items():
         if not row["claims"]:
             continue

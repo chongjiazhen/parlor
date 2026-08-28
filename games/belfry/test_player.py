@@ -229,7 +229,7 @@ class TestVoteProvenance(unittest.TestCase):
         for v, d in zip(rec.votes, votes):
             self.assertTrue(v.fell_back)
             self.assertTrue(d.fell_back)
-            self.assertEqual((v.day, v.seat), (d.day, d.seat))
+            self.assertEqual(v.turn, d.turn)
 
     def test_a_clean_vote_carries_no_fallback(self):
         rec = self._run_game(lambda s: RandomPolicy(random.Random(s)))
@@ -239,7 +239,20 @@ class TestVoteProvenance(unittest.TestCase):
                         [d for d in rec.decision_log if d.kind == "vote"]):
             self.assertFalse(v.fell_back)
             self.assertFalse(d.fell_back)
-            self.assertEqual((v.day, v.seat), (d.day, d.seat))
+            self.assertEqual(v.turn, d.turn)
+
+    def test_vote_turns_are_unique_and_joinable(self):
+        """A day holds many votes by the same seat, so (day, seat) cannot join
+        a vote to its decision. turn can, and every vote has one."""
+        ref = BelfryReferee.new(7, seed=0)
+        rng = random.Random(0)
+        rec = play_game(ref, {s: RandomPolicy(rng) for s in range(7)})
+        turns = [v.turn for v in rec.votes]
+        self.assertEqual(len(turns), len(set(turns)))
+        self.assertNotIn(-1, turns)
+        # and the game DID put one seat at the same (day, seat) more than once,
+        # or the uniqueness above is not exercising the defect
+        self.assertLess(len({(v.day, v.seat) for v in rec.votes}), len(turns))
 
     def test_an_llm_vote_that_fell_back_is_marked_on_both_records(self):
         ref = BelfryReferee.new(5, seed=0, max_days=2)
