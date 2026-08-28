@@ -376,18 +376,6 @@ sit behind the freeze - the solver arm, the mixed heuristic/LLM table,
 move landed 2026-08-28; the other two need GPU cabal no longer has, so they queue
 behind changeling or land at the publish boundary.
 
-**Publish hygiene stopped being a round, 2026-08-28.** It is now a pre-commit gate
-over the lines a commit ADDS - `scripts/hygiene-check.sh`, installed by
-`scripts/install-hooks.sh`, invariant in `CLAUDE.md` - so the mechanical half rides
-every commit instead of waiting for a publish-day pass, and nothing accrues between
-passes. It found zero violations in the tracked tree the day it landed, which is the
-point: the value is forward, on the next commit. The judgement half a grep cannot
-see - a doc that assesses a third party, quotes unread work, or names an author
-where an identifier would do - is the scope rule in `CLAUDE.md`, and it is the thing
-to check a new doc against rather than a pass to re-run. The three route base URLs are environment variables with loopback defaults
-(`PARLOR_ENDPOINT_LOCAL` / `_CLEAN` / `_GRAY`), so a clone runs with nothing set and
-no box's topology is in the tree. Nothing is queued behind it.
-
 **S1 is called, and it freed half the queue.** S6 survives in a changed and
 bounded form; S7 and the cloud arm are dead. Read `docs/gate3a-retired.md` before
 restarting any cabal run.
@@ -488,11 +476,11 @@ arm is ~30 min against cabal's 13.2 h.
         a fact about reasoning, not a rules violation.
         So the `need` disclosure stays worth doing (it is entitled rules
         information the ask withholds) but stop expecting it to zero this number.
-- [ ] **`python -m unittest discover` claims "all tests" and collects 472 of 682.**
+- [ ] **`python -m unittest discover` claims "all tests" and collects 572 of 850.**
       `README.md:189` offers it as the no-dependency way to run the suite. Every
       pytest-fixture file imports cleanly and contributes ZERO tests - silently,
       and it still prints `OK`. `core/test_console.py` and `core/test_registry.py`
-      are two; the gap is 210 tests, including every mutation-checked guard in
+      are two; the gap is 278 tests, including every mutation-checked guard in
       them. A green that proves less than it claims, in the public README, which
       is the shape `docs/evidence-discipline.md` exists to refuse.
       - The fix is one of two and they are not equivalent: reword the README to
@@ -543,6 +531,18 @@ arm is ~30 min against cabal's 13.2 h.
       **Re-homed 2026-08-27 (S1):** measure it on changeling, where a paired
       20-game arm is ~30 min against cabal's 13.2 h. Cabal's referee refusals stay
       as written.
+- [ ] **Does the standing frame belong in the PAYLOAD? A `--briefing` arm.** The
+      ask carries the rule that bites in that phase and no more - VOTE the
+      five-reject rule, MISSION `need` and the stake, PROPOSE nothing about what
+      wins. Deliberate per-phase drip (`referee.py`, the `need` comment) and
+      unplayable for a person, which is why the console got a `BRIEFING` OUTSIDE
+      the payload. Whether a MODEL wants it is unmeasured, and the one measurement
+      here cuts both ways: `_night_against_the_table` restates a fact the seat held
+      already, +7% -> +63% on the 12B, INVERTED on q36 (+80% vs +72%) - so expect a
+      capability-dependent sign. **The lane notes make ABSENCE the novel arm**:
+      every build read from source states full rules in the system prompt and none
+      ablates that. Off by default, one variable, re-baselines what runs under it;
+      changeling (~30 min). **Done when** a paired arm exists, both fallback rates.
 - [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.** `--notebook`
       on `run_cabal.py` and `demo.py`; off by default. A seat's `note` is filed
       under its own seat and rendered back to that seat alone on every later call,

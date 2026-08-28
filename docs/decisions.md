@@ -6,6 +6,19 @@ and two copies of one rule is how the stale copy wins an argument.
 
 ## Decisions already locked
 
+**Publish hygiene stopped being a round, 2026-08-28.** It is now a pre-commit gate
+over the lines a commit ADDS - `scripts/hygiene-check.sh`, installed by
+`scripts/install-hooks.sh`, invariant in `CLAUDE.md` - so the mechanical half rides
+every commit instead of waiting for a publish-day pass, and nothing accrues between
+passes. It found zero violations in the tracked tree the day it landed, which is the
+point: the value is forward, on the next commit. The judgement half a grep cannot
+see - a doc that assesses a third party, quotes unread work, or names an author
+where an identifier would do - is the scope rule in `CLAUDE.md`, and it is the thing
+to check a new doc against rather than a pass to re-run. The three route base URLs
+are environment variables with loopback defaults (`PARLOR_ENDPOINT_LOCAL` /
+`_CLEAN` / `_GRAY`), so a clone runs with nothing set and no box's topology is in
+the tree. Nothing is queued behind it.
+
 **Code invariants moved to `CLAUDE.md`** - it is always loaded, these are not,
 and two copies of one rule is how the stale copy wins an argument. What stays
 here is project state: the route calls and what a run measured.
