@@ -11,6 +11,14 @@ above.
 
 What's next:
 
+**changeling's GATE #3 HOLDS - called 2026-08-28 (S5), on S2's 200 games.** Blind
+villager accuracy 44.53% (110/247), floors 38.47% Wilson and 37.36% bootstrap
+against the pre-committed 35.95%. Gate #2 is readable at 59.49% and deliberately
+carries **no verdict** - the criterion scores it against the run's own random arm
+and S2 has none. Writeup `games/changeling/RULES.md` §S2 read; recompute with
+`py -3 -m eval.s5_verdict`. **The next thing is the powers re-run**, the half of S2
+that did not happen - two 20-game arms, ~30 min, both or the pairing is lost.
+
 **THE FREEZE IS LIFTED and S6 IS CALLED - 2026-08-27.** Both arms down and valid:
 `hunt6a` (seed 2000) `rc=0 games=20/20 elapsed=17988s`, `hunt6b` (seed 3000)
 `rc=0 games=20/20 elapsed=22035s`. Campaign fallback 1.35% (62/4588), 100% served
@@ -155,8 +163,9 @@ rather than provenance - **a figure copied out of a source records WHOSE it is, 
 the same sentence.** A bare percentage inverts silently, and this one sat inverted
 long enough to be quoted in an argument.
 
-**Code debt - COMMIT ONE LANDED 2026-08-28 (S9). Items 1, 2, 4 and 7 are done and
-their rows are gone; 3 and 6 remain, plus the struck 5.** The batch existed so a
+**Code debt - ONLY ITEM 3 REMAINS, and it is gated outside the tree.** Commit one
+landed 2026-08-28 (S9), commit two the same day (S10), commit three in S5. Done rows
+are gone; the struck 5 stays because the S6 slice cites it. The batch existed so a
 reader has one sha where the scoring semantics changed, and the integrity surface
 now has one: caused vs witnessed, the recovered third outcome and the clean-game
 count all land together in `core/integrity.py`, shared by both games.
@@ -181,6 +190,15 @@ quoted across the change answers two different questions. `py -3 -m eval.strata`
 prints both rules side by side and is where every stratum size in
 `games/changeling/RULES.md` now comes from.
 
+**Commit three landed 2026-08-28 (S5)** - item 4, the `--out` split. One convention
+now lives in `core/runlog.py` as `record_paths`: **`--out` is the summary path
+VERBATIM and the per-game JSONL is its sibling `{out}.jsonl`**, which is what every
+record already on disk is named, so settling it renamed one run's files rather than
+every run's. Both drivers call it, three guards mutation-checked, and S2's summary
+is `eval/records/s2.json` (was `s2.json.json`). A test pins the two drivers
+TOGETHER - the defect was that they disagreed, and a test beside either one cannot
+see that.
+
 **Item 3 is all that remains of the batch, and it is gated outside the tree** - the
 termination-depth diagnostic needs the published threshold the off-repo ledger
 records, with its citation. It held up nothing and still does not.
@@ -191,37 +209,12 @@ whatever log is current - S6's arms and S2 are all down as of 2026-08-28:
 
 3. Adopt a **termination-depth diagnostic** against the published threshold the
    off-repo ledger records, with that citation.
-4. **The two eval drivers disagree on what `--out` means, and it cost a filename
-   on the first run that used both conventions.** `run_games` writes `args.out`
-   VERBATIM (`hunt6a.json`), while `run_changeling` composes `f"{args.out}.json"`
-   and `f"{args.out}.jsonl"` - so a launcher written from cabal's twin passes
-   `--out eval\records\s2.json` and gets `s2.json.json` beside `s2.json.jsonl`.
-   S2's records are named that way now, 2026-08-28. **Pick one convention in
-   `core/`, not one per game** - it is the same class as the integrity block and
-   the void bar, and the cheap wrong fix is editing one launcher and leaving the
-   drivers disagreeing. Whichever way it lands, the S2 files need renaming or the
-   scorer needs to accept both, so decide it BEFORE S5 quotes a path.
 5. ~~Fix the **scorer note** on the mis-specified statistic.~~ **CLOSED 2026-08-27,
    no code change.** The trigger required a third flat or RISING 1->2 leg in the
    blind taint table; arm 2's fell 6.8pp, the largest fall of the four runs (legs
    run +7.4, +0.2, -1.6, -6.8). Not a step, so `_blind_line` stands as written and
    `taint_sensitivity` needs no non-monotone caveat. Table in
    `docs/gate3b-verdict.md`. Kept as a struck row because the S6 slice cites it.
-6. **changeling: key the knowledge class on what the seat was TOLD, not on the
-   card it was DEALT** - found 2026-08-27 while designing the expansion decks,
-   measured on the SHIPPED deck over 4000 nights, argued in
-   `games/changeling/RULES.md`. A MEET card's reveal is conditional on another
-   seat's deal, so a `pack` seat whose partner went to the centre gets no reveal at
-   all and still carries the `identity` label: **59.7% of games seat exactly one
-   `pack`, and 17.4% of villager seats in the `identity` stratum were told
-   nothing**. Those are blind villagers, THE GATE is cut on blind villagers, so the
-   bottleneck stratum is running ~19% smaller than the deal produced. The current
-   behaviour is PINNED on purpose
-   (`test_knowledge_class_is_keyed_on_the_DEALT_card`), so this is a decision, not a
-   bugfix - and it re-baselines every stratum on every recorded run, which is
-   exactly why it belongs in this batch. **It also blocks both expansion decks**:
-   each changes how much of `identity` is blind seats, so a deck comparison across
-   an unsettled scorer measures the scorer.
 **Open question, undecided - turn-taking has FOUR options, not two.** cabal's
 fixed seat order; the built-but-unmeasured `--simultaneous`; bidding, where seats
 bid for the right to speak, so the measurement covers WHEN as well as what; and
@@ -263,10 +256,10 @@ table says which pairs.
 | ~~**S1**~~ | ~~Call cabal gate #3.~~ **CALLED 2026-08-27** - 3a abandoned at every table size, 3b gets one pre-committed 40-game campaign. See the verdict section below. | - | - | done |
 | ~~**S9**~~ | ~~Code debt, commit one - the integrity surface.~~ **LANDED 2026-08-28** - items 7, 1, 2 and 4 in one commit. `over_sabotage`'s docstring now states the benchmark as "the pair failed to find a convention"; the integrity block moved to `core/integrity.py`, shared by both games, and gained a witnessed rate per seat-game, a `recovered` third outcome, and a clean-game count. `fallback_rate` is unchanged and keeps its name - both reproducers still agree with the recorded runs. Seven guards mutation-checked, each killed by its own named test. | - | - | done |
 | ~~**S10**~~ | ~~Code debt, commit two - changeling's knowledge class.~~ **LANDED 2026-08-28** - the class is keyed on what the seat was TOLD; a MEET card that met nobody is `none`, not `identity`. The pin was replaced, not deleted: `..._never_the_DAWN_card` keeps the half that still holds, beside `..._keyed_on_what_the_seat_was_TOLD` and the property itself. Four guards mutation-checked. Stratum sizes re-measured and now recomputable - `py -3 -m eval.strata` - which moves 2375 of 20000 seat-nights from `identity` to `none` and recovers ~19% of the blind stratum. Both expansion decks are unblocked. | - | - | done |
-| **S2** | **changeling: clean re-run, then 200 games.** The powers re-run (~30m), then the run its blind stratum actually needs (~5h). **Read §PRE-COMMITTED CRITERION below before launching** - it is written and dated 2026-08-28 and must not be edited once the run starts. | GPU all session | **MET 2026-08-28** - S9 and S10 both landed, so the code-debt batch has finished re-baselining every stratum and every integrity line. 200 games run now are scored once | `RULES.md` table is on clean numbers and a 200-game record exists |
+| ~~**S2**~~ | ~~changeling: clean re-run, then 200 games.~~ **THE 200 GAMES LANDED 2026-08-28; THE POWERS RE-RUN DID NOT.** `PARLOR DONE rc=0 games=200/200 elapsed=18250s`, `--arm llm`, seed 4000, `qwen36-35b-a3b-iq3` at 100% attribution, 0.40% fallback. Records `eval/records/s2.json` + `s2.json.jsonl`. The powers half is **still open** and carried by its own row below (`Re-run changeling's powers arms on the FIXED lane`) - so the `RULES.md` powers table is NOT yet on clean numbers and its caveat block stands. | - | - | half done |
 | ~~**S3**~~ | ~~cabal scorer honesty.~~ **LANDED 2026-08-27** - all four derived numbers now come from the knowledge model or the record. The bar for S6 is unchanged (`SETUP_5` legal set is 3, so the derived chance IS 1/3); the audit's role-outing count was near-zero by construction and is not. See the measured rows below. | - | - | done |
 | ~~**S4**~~ | ~~Ops hygiene.~~ **LANDED 2026-08-27** - `core/runlog.py` writes `PARLOR DONE rc=N games=L/R elapsed=Ns` from both eval drivers; both games record a fallback's REASON per decision on a `refused` field; the untracked `run-hunt20.cmd` is retired and its exact invocation preserved in `eval/runs/hunt-local.cmd`. Records changed, play did not - the bytes a model receives are identical, so S6 may freeze on this code. | - | - | done |
-| **S5** | **changeling: read the 200-game run.** Apply §PRE-COMMITTED CRITERION clause by clause - blind villager accuracy against 35.95%, gate #2 only if #3 holds - then the three free reads it names (`false` stratum, sleeper-decoy rate, diverged-vs-intact). | no GPU | S2 landed | a dated writeup in `RULES.md`, each clause answered, and the criterion left as written |
+| ~~**S5**~~ | ~~changeling: read the 200-game run.~~ **READ 2026-08-28 - GATE #3 HOLDS.** Blind villager accuracy **110/247 = 44.53%**, Wilson floor **38.47%** and the scorer's game-bootstrap floor **37.36%**, both clearing the pre-committed 35.95%. Gate #2 readable at **59.49%** [52.48%, 66.13%] and given **no verdict**, per the criterion. Two clauses did not apply cleanly and are recorded rather than smoothed: the criterion said Wilson where the scorer publishes a bootstrap, and S2 ran no random arm so the own-arm clause had nothing to fire on. Writeup `games/changeling/RULES.md` §S2 read; arithmetic `py -3 -m eval.s5_verdict`. Code-debt item 4 settled in the same session because the writeup had to quote a path. | - | - | done |
 | ~~**S6**~~ | ~~The gate #3b campaign - cabal's LAST GPU program.~~ **CALLED 2026-08-27 - gate #3b NOT SHOWN, cabal's GPU program stops.** 40/40 games, both arms `rc=0`, 1.35% campaign fallback. Pooled 9/20 = 45.00%, Wilson [25.82%, 65.79%] against the derived bar 33.33% - floor does not clear, so the pre-committed answer applies and there is no third campaign. All three draw-dependent items resolved off the same records: step-not-slope did NOT fire, the `five_rejects` shift is not established, run-length degradation did not reproduce. Verdict and arithmetic: `docs/gate3b-verdict.md`, `py -3 -m eval.s6_verdict`. | - | - | done |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed: see the verdict section. | - | - | done |
 | **S8** | **Next rung or publish.** 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. | varies | S5 done (S1 is called) | scoped in its own session, not here |
@@ -307,9 +300,12 @@ owed next. The changeling deck design landed 2026-08-27
 (`games/changeling/RULES.md`), and what it left behind - registering the setups -
 is not free. Item 6 of the code-debt batch, its other blocker, landed in S10.
 
-**With S9 and S10 landed the queue reads: S2, then S5.** The code-debt batch is
-done except item 3, which is gated outside the tree and holds up nothing, so S2's
-200 games can now be run once and scored once. The three cabal items that used to
+**With S2 and S5 landed the queue reads: the powers re-run, then S8.** The
+code-debt batch is done except item 3, which is gated outside the tree and holds up
+nothing. The powers re-run is the only thing between here and a `RULES.md` whose
+every table is on clean numbers - ~30 min of GPU for two 20-game arms, and both
+arms or the pairing is lost. After that S8 is unblocked, and its entry condition
+(S5 done, S1 called) is now met. The three cabal items that used to
 sit behind the freeze - the solver arm, the mixed heuristic/LLM table,
 `DEFAULT_THEME` off `1984-en` - were unblocked when the freeze lifted. The theme
 move landed 2026-08-28; the other two need GPU cabal no longer has, so they queue

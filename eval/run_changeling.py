@@ -38,7 +38,7 @@ from dataclasses import asdict
 
 from core import integrity
 from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
-from core.runlog import RunState, run_with_marker
+from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import bootstrap_ci, wilson
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
@@ -360,7 +360,7 @@ RUN_STATE = RunState()
 
 def land(index: int, rec: GameRecord, args) -> None:
     if args.out:
-        with open(f"{args.out}.jsonl", "a", encoding="utf-8") as fh:
+        with open(record_paths(args.out)[1], "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"game": index, **asdict(rec)}) + "\n")
     RUN_STATE.landed += 1
 
@@ -424,8 +424,9 @@ def main() -> None:
     scored = score(records)
     print(report(scored, args, time.time() - started))
     if args.out:
-        with open(f"{args.out}.json", "w", encoding="utf-8") as fh:
+        with open(record_paths(args.out)[0], "w", encoding="utf-8") as fh:
             json.dump({"score": scored, "args": vars(args)}, fh, indent=2)
+        print(f"\nwrote {record_paths(args.out)[0]}")
 
 
 if __name__ == "__main__":

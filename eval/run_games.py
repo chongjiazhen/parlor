@@ -51,7 +51,7 @@ from dataclasses import asdict
 
 from core import integrity
 from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
-from core.runlog import RunState, run_with_marker
+from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import wilson
 from games.cabal import transcript
 from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
@@ -309,7 +309,7 @@ def land(index: int, rec: GameRecord, args) -> None:
     is still a dataset - one short of what was asked for, not empty.
     """
     if args.out:
-        with open(f"{args.out}.jsonl", "a", encoding="utf-8") as fh:
+        with open(record_paths(args.out)[1], "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"game": index, **asdict(rec)}) + "\n")
     if getattr(args, "transcript_dir", None):
         os.makedirs(args.transcript_dir, exist_ok=True)
@@ -386,7 +386,7 @@ def run_games(args, workers: int, started: float) -> list[GameRecord]:
         nonlocal checked
         land(index, records[index], args)
         if not checked and args.out:
-            assert_scoreable(f"{args.out}.jsonl")
+            assert_scoreable(record_paths(args.out)[1])
             checked = True
         print(progress_line(done, total, index, records[index],
                             time.time() - started), file=sys.stderr, flush=True)
@@ -726,7 +726,7 @@ def main() -> None:
     s = score(records)
     print(report(s, args, elapsed))
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as fh:
+        with open(record_paths(args.out)[0], "w", encoding="utf-8") as fh:
             json.dump({"args": vars(args), "summary": s,
                        "games": [asdict(r) for r in records]}, fh, indent=2)
         print(f"\nwrote {args.out}")

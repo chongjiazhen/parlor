@@ -10,10 +10,16 @@ plausible output.
 from __future__ import annotations
 
 import argparse
+import inspect
+import os
 import random
+import tempfile
 import unittest
 
-from eval.run_changeling import (_chance, one_game, report, score,
+import eval.run_changeling
+import eval.run_games
+from core.runlog import record_paths
+from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
 
 
@@ -194,6 +200,35 @@ class TestReviewFixes(unittest.TestCase):
         live = [p for p in policies.values() if hasattr(p, "upstreams")]
         self.assertEqual(len(live), 5)
         self.assertEqual(len({id(p) for p in live}), 5, "seats share one policy")
+
+
+class TestBothDriversAgreeOnWhatOutMeans(unittest.TestCase):
+    """``--out`` is the summary path verbatim; the JSONL is ``out.jsonl``.
+
+    The two drivers had one convention each until 2026-08-28, and the disagreement
+    cost S2's records their names: a launcher written from cabal's twin passed
+    ``--out eval/records/s2.json`` and ``run_changeling`` composed ``s2.json.json``.
+    Pinned here rather than in one driver's file because the defect was that the two
+    disagreed - a test living beside either one cannot see that.
+    """
+
+    def test_the_summary_path_is_verbatim_and_the_jsonl_is_its_sibling(self):
+        self.assertEqual(record_paths("eval/records/s2.json"),
+                         ("eval/records/s2.json", "eval/records/s2.json.jsonl"))
+
+    def test_neither_driver_composes_its_own_suffix(self):
+        for module in (eval.run_changeling, eval.run_games):
+            source = inspect.getsource(module)
+            self.assertNotIn('f"{args.out}.json"', source, module.__name__)
+            self.assertNotIn('f"{args.out}.jsonl"', source, module.__name__)
+
+    def test_a_landed_record_goes_to_the_sibling_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "run.json")
+            args = make_args(out=out)
+            land(0, one_game(0, args), args)
+            self.assertTrue(os.path.exists(out + ".jsonl"))
+            self.assertFalse(os.path.exists(out + ".json.jsonl"))
 
 
 if __name__ == "__main__":

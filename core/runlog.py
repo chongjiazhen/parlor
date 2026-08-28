@@ -34,6 +34,23 @@ from dataclasses import dataclass
 MARKER = "PARLOR DONE rc="
 
 
+def record_paths(out: str) -> tuple[str, str]:
+    """``--out`` is the SUMMARY path, verbatim; the per-game JSONL is ``out.jsonl``.
+
+    One convention, in ``core/``, because the two drivers had one each. ``run_games``
+    wrote ``args.out`` verbatim while ``run_changeling`` composed ``f"{out}.json"``,
+    so a launcher written from cabal's twin passed ``--out eval/records/s2.json`` and
+    S2's records landed as ``s2.json.json`` beside ``s2.json.jsonl``. Editing the one
+    launcher was the cheap wrong fix: it leaves the drivers disagreeing and the next
+    launcher rediscovers it.
+
+    Verbatim won because it is what every record already on disk is named - cabal's
+    ``hunt*.json`` beside ``hunt*.json.jsonl`` - so settling it here renames one run's
+    files rather than every run's.
+    """
+    return out, f"{out}.jsonl"
+
+
 @dataclass
 class RunState:
     """What a run knows about itself, readable from an exception handler.

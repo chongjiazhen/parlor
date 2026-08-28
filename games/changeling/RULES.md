@@ -471,6 +471,134 @@ affordable here. At ~1.6 min/game a 200-game run is ~5 hours and yields ~140 bli
 votes, which is the whole reason this rung was queued. Do not read a gate off 20
 games; on this rung the N is the cheap part.
 
+**Run and read 2026-08-28. It yielded 247 blind votes in 5.07 h** - the ~140 above
+is a pre-S10 estimate and understates it for the same reason the 14 does. The read
+is the section immediately below.
+
+## S2 read - 200 games, gate #3 HOLDS (2026-08-28)
+
+**The run.** `s2`, `--arm llm`, 200 games, `--seed 4000`, `--no-thinking`,
+`qwen36-35b-a3b-iq3` local and 100% of the attribution, `PARLOR DONE rc=0
+games=200/200 elapsed=18250s`. Recipe `eval/runs/changeling-local.cmd`, records
+`eval/records/s2.json` and `s2.json.jsonl`. Five games seated no wolf at dawn and
+are excluded and reported; 195 scored.
+
+**Every number below is recomputable**: `py -3 -m eval.s5_verdict`, which
+reproduces the published summary from the per-game records before deriving
+anything and exits non-zero if it stops checking. The criterion it applies is
+`RESUME.md` §PRE-COMMITTED CRITERION, written 2026-08-28 before the run and left
+exactly as written.
+
+### THE GATE, clause by clause
+
+| clause | what landed |
+|---|---|
+| statistic: blind villager accuracy, `none` stratum, S10's told-based rule | **110/247 = 44.53%** |
+| the bar: 35.95%, measured `--arm random`, n=4000 | **cleared** |
+| it holds only if the **Wilson** 95% floor clears the bar | **Wilson floor 38.47%** [38.47%, 50.77%] |
+| the scorer's own published interval (bootstrap over games) | floor **37.36%** [37.36%, 51.82%] |
+| power: ~260 blind votes predicted | **247 landed** |
+| the stratum floor: REFUSED below 150 votes | 247, clear |
+| fallback above 10% voids | **0.40%** (12/3000), clear |
+| recovered above 25% is flagged, never voids | **7.37%** (221/3000), under the bar |
+
+**Gate #3 HOLDS.** The floor clears the bar on either interval and against every
+bar on the table, so the call does not turn on which was used.
+
+**Two clauses did not apply cleanly, and neither moves the call.** Recording them
+rather than smoothing them over is the whole value of writing the criterion first.
+
+- **The criterion says Wilson; the scorer publishes a bootstrap over games.** The
+  bootstrap is the more conservative of the two - votes inside one game share a
+  deal, a night and a table, so treating them as independent draws reports an
+  interval tighter than the data supports. Both are printed above, both clear, and
+  **the bootstrap is the one to quote** because it is the honest one. The criterion
+  named the wrong instrument, not a wrong test.
+- **S2 ran no random arm, so one clause had nothing to fire on.** The criterion
+  said "the run must also report its own random arm; if that arm disagrees with
+  35.95% by more than a point, the run's own arm is the bar". The 34.91% the log
+  calls chance is a *derived* per-vote figure - the run's own mix of one- and
+  two-wolf dawns, weighted by villager votes - not a measured arm, and the two are
+  different objects. The bar used is therefore **35.95%**, the measured figure the
+  criterion named. Three bars were on the table and the floor clears all three:
+
+  | bar | value | what it is |
+  |---|---|---|
+  | criterion | 35.95% | measured `--arm random`, n=4000, pooled per vote |
+  | the run's log | 34.91% | derived from this run's dawn-wolf mix, all villager votes |
+  | diagnostic | 33.81% | the same derivation over the blind votes only |
+
+  The third is a **diagnostic and never a bar** - promoting it would be choosing a
+  statistic with the numbers in view. It is here because blind seats sit
+  disproportionately in one-wolf dawns, so the run's own derived figure is already
+  conservative for the stratum the gate is cut on.
+
+  **35.95% survives S10 untouched**, which is why it is still usable: it is pooled
+  villager accuracy under a random policy, and a random voter's accuracy does not
+  depend on what the night told it. S10 re-keyed the knowledge class; it did not
+  move a number that never conditioned on one.
+
+**The power table reproduces at the N that landed.** At n=247 a true 42% clears
+35.95% at the Wilson floor (36.11%) and a true 41% does not (34.94%) - the
+criterion's "42% upward", computed before the run, is exactly right. So this run
+could show a moderately good blind villager, and did; it could not have settled a
+marginal one, and was not asked to.
+
+### Gate #2 - readable, and still not a verdict
+
+**Pack win rate 59.49%, Wilson [52.48%, 66.13%]**, on 195 scored games. Gate #3
+holds, so the conditionality lifts and the rate is readable as deception rather
+than as villagers handing the pack a win.
+
+**It gets no verdict, and the criterion says why.** Gate #2 is scored against that
+run's own random arm, which does not exist here, and `rate_ok`'s 5% CI-floor bar is
+pre-declared nowhere and was explicitly not adopted. So gate #2 is **a rate with an
+interval and no verdict**.
+
+The 39.51% reference implies the pack takes 60.49% against villagers voting at
+random - which sits *inside* the interval above. That is worth seeing and is not a
+result: it is a different model on a different day, a reference point rather than a
+control, and reading it as one is the comparison this file already warns against.
+The honest statement is that this run cannot separate 59.49% from the no-deception
+reference, and that a paired `--arm random` on the same seeds is what would.
+
+### The three free reads
+
+Named in the criterion before the run, scored off the same records, **none of them
+a gate and none promotable to one**.
+
+| read | result |
+|---|---|
+| `false` vs `none` | 42.86% (n=98) vs 44.53% (n=247), diff **-1.68%** [-11.54%, +8.52%] |
+| sleeper-decoy rate | **72/689 village-holding seat-games = 10.45%**, in 68/195 games; they vote at 47.22% [36.13%, 58.60%] |
+| diverged vs intact | 39.02% (n=305) vs 47.14% (n=384), diff **-8.12%** [-15.27%, -1.08%] |
+
+- **A villager told a lie votes like a villager told nothing.** The `false`
+  stratum's interval spans zero against `none`. The seat whose entitled knowledge
+  is wrong by construction is the thing `cabal` has no analogue for, and on this
+  run it is not distinguishable from the blind seat. One draw, and the interval is
+  wide enough to hide a real effect either way.
+- **Sleepers are a tenth of the village.** 10.45% of village-holding seat-games
+  believed they were pack. They vote at 47.22% - above the blind stratum's point
+  estimate, on overlapping intervals - which is the small surprise: a seat playing
+  the day for the wrong side still points at wolves about as well as one that
+  knows it is a villager.
+- **Divergence costs about 8 points, and the interval excludes zero.** 98.9% of
+  4000 game-resampled bootstraps put diverged below intact. This is the
+  observation the rung was built to make - a seat playing the day as a card it no
+  longer holds has every incentive of that card and none of the facts - and it is
+  the first time the game has put a number on it. **It stays an observation.** It
+  was named as a free read before the run and reporting it as a gate afterwards is
+  the `hunt20b` error this repo has refused three times by name.
+
+### What S2 did NOT deliver
+
+**The powers re-run did not happen.** S2's scope was the 2x20 powers arms on the
+fixed lane *and then* the 200 games; only the second landed. So the caveat block
+above the powers table stands as written, and those absolute rates are still not
+clean estimates of what this model does per game. The paired -10pp rule-error
+finding is unaffected, as that block already says.
+
 ## The chance baseline, MEASURED (2026-08-26)
 
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set
