@@ -142,7 +142,7 @@ core/backends.py           one adapter, three routes (local / clean / gray), plu
 core/console.py            a human seat wearing the backend interface (--human)
 core/replies.py            model reply -> values (JSON out of prose, salvage, coercion)
 core/runlog.py             a run writes its own terminal marker, from a finally
-core/stats.py              Wilson intervals, bootstrap CIs
+core/stats.py              Wilson intervals, bootstrap CIs
 core/integrity.py          what a run's numbers are worth: three outcomes, caused vs witnessed
 
 games/cabal/RULES.md       rules + the night-knowledge table the gates stratify on
@@ -151,7 +151,7 @@ games/cabal/referee.py     deterministic state machine (propose -> discuss -> vo
 games/cabal/audit.py       gate #1 as an executable guarantee - the driver runs it, and it raises
 games/cabal/player.py      policies (random / LLM / human), phase->key mapping, retry loop, driver
 games/cabal/transcript.py  one game -> readable markdown, straight off the public record
-games/cabal/demo.py        one game, random or live or hand-played
+games/cabal/demo.py        one game, random or live or hand-played
 games/cabal/solver.py      the mechanical reference - what the rules alone determine
 games/cabal/heuristic.py   a rules-only policy, the rung the model is scored against
 
@@ -161,7 +161,7 @@ games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 
 
 eval/run_games.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling
-eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
+eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
 eval/s6_verdict.py         the gate-#3b verdict, reproduced from each arm's own records
 eval/strata.py             changeling's knowledge strata, counted over N nights
 eval/derivable.py          what a seat could derive with no model at all
@@ -169,7 +169,14 @@ eval/ladder.py             the control ladder: random, rules-only, model
 eval/audit_decisions.py    mine a finished run for moves wrong on their own terms
 
 games/durf/fixtures/       a third rung, scoped - a labelled fixture and no engine yet
+
+scripts/hygiene-check.sh   a pre-commit gate over the lines a commit ADDS
+scripts/install-hooks.sh   installs it (`.git/hooks` is per-clone, so this is one command)
 ```
+
+After cloning, `sh scripts/install-hooks.sh`. The gate reads added lines only,
+so it never argues with what is already in the tree, and it holds no literal
+name, address or key - only the shapes of one.
 
 `core/` holds what the next game up the ladder inherits; `games/<name>/` holds
 what is about *that* game. Reply-reading is in `core/` because a truncated reply

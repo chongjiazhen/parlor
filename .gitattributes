@@ -1,0 +1,4 @@
+# Shell scripts stay LF in the worktree on every platform. A .sh checked out
+# with CRLF dies at its shebang under sh, and the failure reads as a missing
+# command rather than a line-ending problem.
+*.sh text eol=lf

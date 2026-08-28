@@ -51,3 +51,12 @@ Change them against a measurement, and change them HERE.
 - **Judge a detached run by its own log or JSONL** - CPU, IO counters and exit codes
   all read as healthy while a run sleeps, and one such call killed a live run. Probe
   a cloud tier with a burst: a cooled key serves single requests and fails a stream.
+- **Publish hygiene is a GATE, not a pass.** `scripts/hygiene-check.sh` runs from
+  `.git/hooks/pre-commit` and reads the lines a commit ADDS, which is why it needs
+  no list of what is excused - and a list of what is excused would be a map to the
+  material anyway. It carries pattern SHAPES, never a literal name, address or key:
+  a public checker that grepped for the forbidden value would ship that value to
+  every clone. A hit that is a reviewed keep means the PATTERN is wrong. What the
+  gate cannot see is the judgement half - whether a new doc assesses a third party,
+  quotes work nobody here has read, or names an author where an identifier would
+  do. That is the invariant above, and it is checked when a doc lands, by a reader.
