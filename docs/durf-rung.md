@@ -258,6 +258,48 @@ Written before any run, per house rule.
   weak backends.
 - **No claim about play quality.** Whether the session was fun, coherent or
   well-narrated is not measured and must not be asserted from a transcript.
+- **The floor tier's bar, written 2026-08-28 before any model had run, and
+  DERIVED rather than picked.** This section asked for a floor set and called its
+  bar "near-ceiling", which is not a number and would have been chosen with the
+  first run's output in view. It is now: floor-tier decision-1 accuracy must have
+  a **Wilson floor clearing the better of the two degenerate baselines computed on
+  the floor tier itself** (`eval/durf_score.py`, `_floor_bar`). Derived from the
+  labels, so a fixture edit moves the bar with them rather than leaving a stale
+  literal behind, and graded on the interval floor like every other verdict here.
+  Both degenerate arms fail it by construction, which is the check that it means
+  anything.
+
+## The instrument, built 2026-08-28 - what it scores and what it does NOT
+
+`eval/durf_score.py` asks one arm to rule on all 48 declarations and all 12 morale
+events and reports False Pass, False Check and Refusal beside the run's fallback
+rate, voided above the same 10% both games void on. `games/durf/adjudicate.py` is
+the seat: the envelope, the parser, and `LLMPolicy`'s refuse-and-retell loop.
+Four arms - `always-roll`, `never-roll`, `random`, `llm`.
+
+**Three things it does not do, stated here because each is a claim someone would
+otherwise read into a number it prints.**
+
+- **It does not exercise gate #1.** There is no player seat, so there is nothing
+  for a world fact to leak TO; the adjudicator is handed the referee's whole view,
+  hidden room contents included, because that is what a referee sees. The
+  entitlement audit arrives with the session engine, and no rate from this
+  instrument may be quoted about the leak boundary.
+- **No kernel executes.** Nothing rolls, nothing takes damage, no state moves. The
+  fixture is 60 independent items against one fixed scenario, which is why the
+  interval is Wilson and there is no game-clustered bootstrap - the unit is a
+  declaration, and a declaration is not a cluster.
+- **Decision 5 is recorded and never scored.** The envelope asks for `narrate` and
+  the record keeps it. There is no fixture for it and no judge is built for one.
+
+**Three refusals share the word and the scorer keeps them apart**, because pooling
+any two reports a model's silence as a ruling: `illegal` is a RULING and the
+correct answer to all six traps; `decline` is the refusal to rule, counted in the
+denominator per the criterion above; a reply nothing parses out of is a fallback,
+played by the random adjudicator and carried by the fallback rate. A fourth count
+sits beside them - **over-refusal**, `illegal` on a declaration the rules permit -
+because without it an arm that refused everything would post a perfect False Pass
+and a perfect False Check.
 
 ## The cheapest version that tests anything
 
