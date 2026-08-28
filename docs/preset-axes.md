@@ -101,6 +101,50 @@ adjudicator is a seat and not a grammar** - not because a grammar could not be
 written, but because writing one means enumerating the thing whose refusal to be
 enumerated is the rung's entire content.
 
+### The entitlement axis has prior art too, and it is older
+
+The result above is about the resolution axis. The entitlement axis has its own,
+and it predates it: **GDL-II** (Thielscher, *A General Game Description Language
+for Incomplete Information Games*, AAAI-10; PDF read at source 2026-08-28).
+
+It extends the earlier description language with exactly two keywords. `random` is
+a special player who chooses its moves randomly, so dice and shuffling are a
+**role** rather than referee bookkeeping. `sees(R,P)` means "R perceives P in the
+next position", and it carries the entire information model:
+
+> players are no longer informed about each other's moves by default; rather, they
+> only get to see what the game rules entail about their percepts
+
+and, on the same page:
+
+> despite full initial information, both incomplete knowledge about later states
+> and asymmetry of information result from the individual and partial percepts
+
+**That is default-deny as a language semantics, and it is the property this repo's
+README argues for.** Reading it makes parlor's claim narrower and better: the idea
+of per-seat percepts is formalised prior art, so what is left is the part that was
+always the actual contribution - a machine-checked audit over a channel a MODEL
+writes, where the sender can paraphrase and the entitlement has to be checked
+rather than derived.
+
+Three things worth taking, and they are free because a semantics is not code:
+
+- **Vocabulary.** *Percept* and *information set* are the established terms for an
+  entitled fact and for what a seat can distinguish. Same reason to borrow as the
+  megagame terms already noted elsewhere.
+- **Randomness as a role.** If the deal is an actor with legal moves, the same gate
+  audits it that audits every other seat. parlor's referee currently owns the dice,
+  so the deal is bookkeeping the audit has to be told about separately.
+- **A refusal is a percept.** Their arbiter pattern is `sees(R,badMoveTryAgain)`
+  when a submitted move is invalid. parlor's refuse-and-re-prompt loop treats the
+  kernel's error text as plumbing and counts a fallback. Under this reading that
+  text is information delivered to one seat, which makes it entitled bytes and puts
+  it inside gate #1's scope rather than beside it. **This is the actionable one.**
+
+Its limits are the same shape as the result above: enumerable moves, automated
+players, and no discretionary seat anywhere in the model. So it bounds the axis
+without covering the rung that leaves the bound.
+
 **It is also a reason not to build a DSL.** That work needed one because an
 automated player had to read the description and a whole corpus had to be written
 in it. Here a person picks the preset, so a typed interface per axis is the whole
