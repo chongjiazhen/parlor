@@ -18,9 +18,9 @@ is building its engine, DURF is between measurements. Run
 `grep -L 'PARLOR DONE' eval/records/*.log` first (see below for what it lies
 about), then pick a front:
 
-- **DURF** - the adjacency question is DECIDED 2026-08-28 and the two prescribed
-  edits are APPLIED, so what is left of this front is a 52-minute campaign to run
-  them and one open question that is not code. Both are in the DURF block below.
+- **DURF** - the adjacency question is DECIDED 2026-08-28, the two prescribed
+  edits are APPLIED and the campaign that measured them has LANDED. What is left
+  is a term decision and two questions that are not code, in the DURF block.
 - **quorum** - engine DONE, playable and registered 2026-08-28. What is left is
   the first live arm: a criterion to write, then the card. Rows head the queue.
 
@@ -29,6 +29,7 @@ about), then pick a front:
 | verdict | where it lives | recompute |
 |---|---|---|
 | DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%]. Read under the PRE-TOPOLOGY fixture; two model-facing edits landed the same day | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
+| the same gate under those edits - 2026-08-28, `durf-camp2` 99/100 [94.55%, 99.82%], iron-door leaks 8 -> 0. An AUDIT: the criterion binds camp1 by name | `docs/durf-rung.md` §The paired arm | `py -3 -m eval.durf_camp1_verdict --record eval/records/durf-camp2.json` |
 | its pre-committed criterion, unedited | `docs/durf-gate1-criterion.md` | - |
 | changeling gate #3 **HOLDS** - 2026-08-28 (S5), 200 games | `games/changeling/RULES.md` §S2 read | `py -3 -m eval.s5_verdict` |
 | its pre-committed criterion, as promised | `docs/changeling-gate3-criterion.md` | - |
@@ -93,9 +94,8 @@ Six things a later session needs before it touches this:
   and the party was in R1 for all eight. All eight follow one scripted line,
   `I listen at the door before touching it.` in `games/durf/seats.py`
   §`ScriptedPlayer.LINES` - fixture text that presupposes an object the room does
-  not have. The prescribed edit is that one line and it is deliberately UNAPPLIED:
-  a fixture change cannot be replayed off records the way `durf_rescore` prices a
-  term change, so it buys nothing until a campaign is run. Reasoning and the
+  not have. The edit is that one line, it is APPLIED, and `durf-camp2` measured
+  it: the vehicle gone, the eight leaks gone with it. Reasoning and the
   evidence: `docs/durf-rung.md` §The iron-door question. **Do not re-derive this.**
 - **THE ADJACENCY QUESTION IS DECIDED 2026-08-28, and it did not exonerate the
   referee.** The fixture states its topology now - every room carries an `exits`
@@ -107,14 +107,10 @@ Six things a later session needs before it touches this:
   the topology's fault. Reasoning, the table and what it does NOT establish:
   `docs/durf-rung.md` §The adjacency question - **do not restate them here.**
   Recompute with `py -3 -m eval.durf_reveal_order eval/records/durf-camp1.json`.
-  - **What is now OWED is one campaign, and its two variables are already
-    landed.** The referee's world view states the way out of the party's room and
-    whether it can be seen through, and the scripted line behind all eight
-    campaign leaks no longer listens at a door R1 does not have. Both are
-    model-facing, so **the 91/100 is a read under the pre-topology fixture** and is
-    marked as one in the rung doc. 52 minutes, recipe
-    `eval/runs/durf-session.cmd`, and the sensible read is the same instrument
-    pair against the new bytes.
+  - **That campaign RAN and is terminal**: `durf-camp2`, same seed and model,
+    99/100 with zero iron-door leaks and ahead-reveals 141 -> 62, none of them
+    more than one room away. `docs/durf-rung.md` §The paired arm - **do not
+    restate it here.**
   - **Movement is deliberately still unconstrained by the exit graph.** `call_move`
     accepts any room, so the party can be moved R1 to R4 in one call. Making it
     respect adjacency is a RULES change - it moves what is legal and therefore

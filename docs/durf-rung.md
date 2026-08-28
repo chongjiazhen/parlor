@@ -881,6 +881,87 @@ rubric here and none is known to exist. The reveal-ahead count is not it -
 `games/durf/fixtures/README.md` §What this fixture is not says the same thing about
 the declaration fixture. Nothing above should be read as approaching one.
 
+### The paired arm, 2026-08-28: durf-camp2 under the topology edits - 99 of 100, and the iron door has no vehicle left
+
+**This is camp1's recipe with one variable and it is an AUDIT, not a verdict.**
+`docs/durf-gate1-criterion.md` binds `durf-camp1` by name, and
+`eval.durf_camp1_verdict` marks any other record as such when it scores it. What
+the arithmetic below buys is a like-for-like comparison, not a second reading of
+the pre-committed campaign.
+
+`qwen36-35b-a3b-iq3` local, greedy, `--no-thinking`, seed 5100, 100 sessions x 3
+rounds, 3230s, started 09:15:25Z and landed 10:09Z. Records
+`eval/records/durf-camp2.json` + `.jsonl` + `.log`; recipe `eval/runs/durf-session.cmd
+durf-camp2 5100 qwen36-35b-a3b-iq3 100 3`. Same seed, same model, same rounds; what
+moved is the two edits the section above landed - the referee's world view now
+states the way out of the party's room and whether it can be seen through, and the
+scripted door line is gone.
+
+| | camp1, fixture v1 | camp2, under the edits |
+|---|---|---|
+| gate #1 held | 91/100 [83.77%, 95.19%] | **99/100 [94.55%, 99.82%]** |
+| fallback | 0.16% of 1913 | 0.00% of 1996 |
+| leaks, `iron door` | 8 | **0** |
+| leaks, other | 1 (`hidden catch`) | 1 (`barrow-rats`) |
+| decisions sent back | 23 of 1913 | 30 of 1996 |
+| clean sessions | 71 | 72 |
+
+Both arms clear the bar, so the verdict clause does not discriminate between them
+and is not the interesting column. **The leak column is.** All eight iron-door
+leaks had one vehicle - a scripted line presupposing a door R1 does not have - and
+with the line replaced the vehicle produced nothing. That is the edit doing exactly
+what §The iron-door question predicted, on the one axis that could not be replayed
+off records.
+
+Instrument control passed twice: the published summary reproduces from the
+per-session rows, and `py -3 -m eval.durf_rescore eval/records/durf-camp2.json
+--check` replays every referee entry against entitlement reconstructed from the
+transcript and reproduces the recorded leak exactly.
+
+**The one surviving leak is the `hidden catch` argument again, on a third term.**
+Seat 0's context took `["room", "R3"]` via `barrow-rats`, carried by the referee
+line *"Three barrow-rats: Skill 2, 0 HD, no Armor, ML 6, bite, 2 dmg. 0 HD dies to
+any Wound."* - a monster stat block naming the creature whose room has not been
+declared. The remedy the invariant names is the same remedy, and as with `hidden
+catch` it is **not being applied here**, because deciding a term with this run's
+output in view is the promote-a-statistic failure the rename decision was careful
+to avoid.
+
+**Reveal-ahead, the comparison this arm existed to make.** Re-run with `py -3 -m
+eval.durf_reveal_order eval/records/durf-camp2.json`; its control reproduced each
+session's own `declared` list across all 100.
+
+| | camp1 | camp2 |
+|---|---|---|
+| ahead-reveal events | 141 | **62** |
+| sessions revealing ahead | 84/100 | **51/100** |
+| blocked / in sight | 135 / 6 | 62 / 0 |
+| of the blocked, `hidden` facts | 27 | 11 |
+| events more than one room away | 28 of 141 | **0 of 62** |
+
+**The referee stopped reaching past the adjacent room.** camp1's `R3 declared from
+R1` - the Gallery, chasm, rope bridge and rats published to a party still on the
+entry slope - was 28 events and is now zero; the maximum distance any reveal
+travels is one room. What remains is one-room peeking, all of it blocked, 11 of it
+`hidden` facts no sightline could ever carry. The prompt forbade this before the
+edit and the referee did it anyway; what the topology added was the material to
+obey the existing instruction with, and the count halved.
+
+**Two things this does NOT say, and the first is the one a later session will want
+to overclaim.** camp2 grades **0 in sight** against camp1's 6, and that is not
+straightforwardly an improvement: camp1's six were `R4 from R3` across a chasm the
+fixture marks visible, which the grade calls unfaulted. Removing the scripted door
+line plausibly suppressed the legal forward look along with the illegal ones. The
+fixture and the sightline grading are unchanged between the arms, so what moved is
+the model's behaviour - it now declines a category the fixture permits. Whether a
+referee that never describes what the party can actually see is better refereeing
+is the good-session question, which still has no rubric and none is known to exist.
+
+And it says nothing about a leak RATE being lower "because the fixture got easier".
+It is: the edit removed a defective declaration, and the honest statement is that
+99/100 is a read under fixture v2 exactly as 91/100 is a read under v1. Neither
+supersedes the other and the criterion binds only camp1.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no
