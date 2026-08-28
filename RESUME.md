@@ -67,6 +67,13 @@ before it touches this:
   `eval\runs\durf-session.cmd durf-camp1 5100 qwen36-35b-a3b-iq3 100 3`, model
   armed via `llm-serve` first. Mark `durf-sess2` superseded when it lands and
   write the outcome clause by clause into `docs/durf-rung.md` §The campaign.
+  **The verdict is already arithmetic: `py -3 -m eval.durf_camp1_verdict`**,
+  written while the campaign was still running so its statistic could not be
+  chosen with the numbers in view. It reproduces the published summary from the
+  per-session rows before it will report anything, applies the void conditions
+  ahead of the bar, and refuses the comparison with the voided 3/6. Exit 0
+  applied, 1 control disagreed or no record, 2 void. The criterion file itself
+  was NOT touched to add that pointer - it stays as promised.
 - **The tell question is a SEPARATE instrument and must not be folded back in.**
   The rename makes this instrument blind to a referee that names the flagstone
   without naming the cavity or the coin. That is evidence that catching a
@@ -1052,6 +1059,9 @@ queue, the dated measurements, and the route decisions.
 - `docs/gate3a-retired.md` / `docs/gate3b-verdict.md` - cabal's two gate #3
   verdicts, each recomputable (`eval.gate3_arithmetic`, `eval.s6_verdict`). Read
   before restarting any cabal run or quoting either half.
+- `eval/durf_camp1_verdict.py` - the DURF gate #1 criterion as arithmetic,
+  written before the campaign landed and pinned by `eval/test_durf_camp1_verdict.py`
+  against synthetic records, so the promise cannot drift to fit the result.
 - `docs/durf-gate1-criterion.md` - DURF's pre-commitment for the campaign that
   replaces the voided 3/6 read: 100 sessions, the Wilson-floor-clears-50% bar and
   the power arithmetic behind it. Written before the run; not to be edited.
