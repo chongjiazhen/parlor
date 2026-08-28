@@ -1,0 +1,66 @@
+{
+  "fixture_version": "1",
+  "scenario_id": "hollow-barrow",
+  "ruleset": "DURF 2.2 (2021), Emiel Boven, CC BY 4.0",
+  "note": "The world facts the session engine audits gate #1 against. Derived from scenario.json's rooms, hidden entries and NPC stat blocks - the same fixed dungeon the declaration fixture is evaluated against - but a SEPARATE file, because scenario.json's rendering is a model-facing byte of the recorded instrument runs and must not move.",
+  "terms_note": "Naive sentinels. They are held pairwise disjoint by games/durf/facts.check_facts, because the repo's remedy for a colliding term is to rename it, never to weaken the matcher.",
+
+  "public_at_start": [["room", "R1"]],
+
+  "facts": [
+    {
+      "fact_id": ["room", "R1"],
+      "label": "what the entry slope looks like",
+      "terms": ["steep scree slope", "daylight behind"],
+      "text": "R1 Entry slope: a steep scree slope down into the barrow, loose stone underfoot, daylight behind and dark ahead."
+    },
+    {
+      "fact_id": ["room", "R2"],
+      "label": "what is in the antechamber",
+      "terms": ["stone bier", "iron door"],
+      "text": "R2 Antechamber: bare stone, a low stone bier standing empty, an iron door to R3 that is closed but not locked."
+    },
+    {
+      "fact_id": ["room", "R3"],
+      "label": "what is in the gallery",
+      "terms": ["twenty-foot chasm", "rope bridge", "rusted brazier", "barrow-rats"],
+      "text": "R3 Gallery: a twenty-foot chasm spanned by an old rope bridge, three barrow-rats on the far side, a rusted brazier hanging over the chasm on a chain."
+    },
+    {
+      "fact_id": ["room", "R4"],
+      "label": "what is in the tomb",
+      "terms": ["sealed stone sarcophagus", "grave goods", "barrow-wight"],
+      "text": "R4 Tomb: a sealed stone sarcophagus with a barrow-wight standing over it, and grave goods worth 300 GP."
+    },
+    {
+      "fact_id": ["hidden", "R2"],
+      "label": "the cavity under the antechamber floor",
+      "terms": ["loose flagstone", "shallow cavity", "40 GP"],
+      "text": "A loose flagstone by the bier covers a shallow cavity holding 40 GP."
+    },
+    {
+      "fact_id": ["hidden", "R3"],
+      "label": "the condition of the bridge's far anchor",
+      "terms": ["anchor is rotted", "under two people at once"],
+      "text": "The bridge's far anchor is rotted and will fail under two people at once."
+    },
+    {
+      "fact_id": ["hidden", "R4"],
+      "label": "how the sarcophagus opens",
+      "terms": ["counterweighted", "hidden catch"],
+      "text": "The sarcophagus lid is counterweighted and opens easily once the hidden catch is found."
+    },
+    {
+      "fact_id": ["npc", "barrow-rats"],
+      "label": "the barrow-rats' statistics",
+      "terms": ["ML 6", "bite, 2 dmg"],
+      "text": "Three barrow-rats: Skill 2, 0 HD, no Armor, ML 6, bite, 2 dmg. 0 HD dies to any Wound."
+    },
+    {
+      "fact_id": ["npc", "barrow-wight"],
+      "label": "the barrow-wight's statistics",
+      "terms": ["Skill 6", "ML 10", "chill touch", "ignores Armor"],
+      "text": "The barrow-wight: Skill 6, 3 HD, 3 Armor, ML 10, chill touch for 4 dmg dealt directly as Wounds, ignores Armor. Undead."
+    }
+  ]
+}

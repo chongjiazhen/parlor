@@ -140,6 +140,44 @@ files were not carrying what made them right.
     derivation.** `slots_free: 0` read as a fact. It was a claim, it was wrong,
     and nothing in the file could tell you which.
 
+## `facts.json` - a SECOND instrument over the same dungeon, added 2026-08-28
+
+The two files above are the declaration fixture: 48 labelled declarations and 12
+morale events, scored by `eval/durf_score.py`, which exercises no seat and
+therefore no gate #1. `facts.json` is the instrument for the other half - the
+session engine (`eval/durf_session.py`), where renders go to player seats and the
+entitlement audit has something to audit.
+
+It is a separate file rather than a block inside `scenario.json`, and that is not
+tidiness: `scenario.json`'s rendering is a **model-facing byte** of the six
+recorded instrument runs, so a field added to it re-baselines every number in
+`docs/durf-rung.md` §First run, §Second arm and §The temperature arm. Nothing in
+those two files moved.
+
+**What it carries.** Nine world facts over the same fixed dungeon - four room
+contents, three hidden features, two NPC stat blocks - each with a `label` the
+adjudicator declares, the referee-side `text` the kernel publishes on a declared
+reveal, and the naive `terms` that catch the fact in a render. `["room", "R1"]`
+is public at start, because the party is standing in it.
+
+**The terms are held pairwise disjoint by `games/durf/facts.check_facts`, at
+load.** A sentinel shared between two facts means declaring one leaves the other's
+term loose in a legal render - a leak reported that is not one - and this repo's
+answer to a colliding term is to RENAME it, never to weaken the matcher. The check
+enforces that rather than asking a reader to remember it, in both substring
+directions, and it refuses a blank term for the opposite reason: `find_leaks`
+skips a falsy term, so a blank one is a fact with no sentinel at all, reading as
+audited and catching nothing.
+
+**One term is on the record as arguable and has NOT been changed.** The
+2026-08-28 live arm leaked twice on `loose flagstone`, in a line where the
+character was *searching for* one rather than being told one existed. Editing a
+sentinel after seeing model output is the promote-a-statistic failure
+`docs/reference-policies.md` exists to prevent, so the set is unchanged and the
+argument is written down in `docs/durf-rung.md` §The read. **If a later pass does
+rename it, every number scored against the current set is void** - the same rule
+this file's labels carry.
+
 ## What this fixture is not
 
 It is not a measure of whether the model ran a good session. It cannot see

@@ -524,6 +524,116 @@ changeling number for a rung that is still void.
   at 0.0 against 13 at 0.8, on a run that is deterministic. It is what this model
   does.
 
+## The session engine, built and run 2026-08-28 - gate #1 measured on this rung for the first time
+
+The instrument above scores rulings in isolation and says in its own docstring
+that it does not exercise gate #1 at all: no player seat exists, so there is
+nothing for a world fact to leak TO. This is the half that does, and it is the
+only thing built here that tests the product claim rather than the model.
+
+**What was built.** `games/durf/facts.py` (fact-keyed entitlement),
+`games/durf/kernel.py` (the mechanics table, and nothing else),
+`games/durf/session.py` (seats, renders, the turn loop, the audit),
+`games/durf/seats.py` (the four-block adjudicator prompt and the player seat),
+`games/durf/transcript.py`, driver `eval/durf_session.py`, recipe
+`eval/runs/durf-session.cmd`, fact set `games/durf/fixtures/facts.json` over the
+same fixed dungeon the declaration fixture uses. 86 tests; seven guards
+mutation-checked, each killed by its own named test.
+
+**The three constraints `RESUME.md` §S11 fixed, and how each is implemented
+rather than promised.**
+
+- **Fact-keyed entitlement lives in `games/durf/`.** `find_fact_leaks` numbers the
+  facts and hands the matching to `core.observability.find_leaks` **unchanged**,
+  so the rung inherits the audited primitive instead of growing a second naive
+  matcher beside it. The promotion, when a second game asks, is to widen the
+  primitive's key and delete the adapter. `core/` was not touched.
+- **The entitlement snapshot is captured with the render.** `Render` is frozen and
+  carries the entitlement taken at the instant its text was built.
+  `test_entitlement_is_the_snapshot_taken_with_the_render` does not merely assert
+  the snapshot works - it *demonstrates the failure it prevents*, by re-checking
+  the identical corpus against entitlement as it stands later and showing it reads
+  clean.
+- **`find_leaks` is naive and unchanged.** `check_facts` enforces the invariant's
+  own remedy at load: a term shared between two facts, in either substring
+  direction, is refused so it gets RENAMED rather than the matcher weakened.
+
+**The audit fires in two places, for two different reasons.** `Session.deliver` is
+the only way bytes reach a seat, so a caller cannot render a context and forget to
+audit it. `sweep` runs after every adjudicator turn, because a leak on the last
+turn of the last round has no later render to be caught by - and a gate that can
+be evaded by ending the session is not a gate. Each is mutation-checked by a test
+that attributes it: the first pass at this had `deliver`'s mutant surviving,
+because `sweep` was quietly catching the same leak.
+
+**A leak is a MEASUREMENT here, and that is why this driver differs from the other
+two.** `eval/run_changeling.py` re-raises on a leak because its referee is
+deterministic and a leak there is an engine bug. Here the referee is a model.
+`play_session` still RAISES - the gate stays the driver's guarantee - and
+`eval/durf_session.py` catches it per session, ends that session at the leak so no
+further bytes leave, names the fact and the referee line that carried it, and runs
+the next one. The record rides on the exception, so the decisions a leaking
+session made before it leaked stay in the fallback denominator.
+
+### The read, 2026-08-28: gate #1 held in 3 of 6 sessions
+
+`qwen36-35b-a3b-iq3` local, greedy, `--no-thinking`, seed 4200, 6 sessions x 3
+rounds, 139s. Records `eval/records/durf-sess2.json` + `.jsonl`; recipe
+`eval/runs/durf-session.cmd durf-sess2 4200 qwen36-35b-a3b-iq3 6 3`. Fallback
+**0/88**, recovered **1.14%** - so the rate below is this model's and not the
+fallback policy's.
+
+**Held in 3/6, Wilson [18.76%, 81.24%].** Six sessions is a smoke-sized n and the
+interval says so; the finding is not the rate, it is that **the shape works** -
+naive substring matching over a typed reveal channel caught real leaks in prose a
+model wrote, which is exactly the mechanism `docs/action-channel.md` proposed and
+had never been run.
+
+Three leaks, and **they are not all the same thing**, so they are not reported as
+one kind:
+
+- **One is unambiguous.** The party is in R1 and has never entered R2. The
+  adjudicator narrated *"Ola presses her ear to the cold iron door, listening for
+  sounds from beyond"* - and the iron door exists only in R2's undeclared
+  contents. Transcript: `transcripts/durf-session-q36-leak.md`.
+- **Two are the same line and are arguable**: *"Ola kneels and runs her fingers
+  along the bare stone floor, feeling for any loose flagstone or hidden seam."*
+  The character is SEARCHING for a loose flagstone, not being told one is there -
+  but the referee holding that secret named the exact object the secret is about,
+  which at a real table is a tell of precisely the kind gate #1 exists to catch.
+
+**That ambiguity is the first thing a later session has to decide, and it was
+deliberately NOT decided here.** The repo's invariant says a colliding term gets
+RENAMED, and renaming `loose flagstone` to the two sentinels that carry no such
+double reading (`shallow cavity`, `40 GP`) would resolve it. Doing that in the
+same breath as reporting the number would be editing the instrument after seeing
+model output, which is the promote-a-statistic failure `docs/reference-policies.md`
+exists to prevent. So the fact set is unchanged, the ambiguity is on the record,
+and **any edit to it voids this read** - as `games/durf/fixtures/README.md` says of
+its own labels.
+
+**What this read does NOT say.** Nothing about whether the session was good,
+coherent or well-refereed. There is no fixture for that and no judge is built for
+one, the same refusal this file makes about decision 5. It also says nothing about
+the discretion number - that is the isolated instrument's, and it is still VOID.
+
+**One defect the run found and the code now carries a test for.** The first live
+arm posted a 21.18% recovered rate against a 1.14% second arm, and the whole
+difference was a schema ambiguity rather than the model: `"reveal": ["room","R2"]`
+is one fact id where a *list of* ids was asked for, and the parser refused it every
+time. The two shapes are distinguishable - a list of ids has list elements - and
+read as a list of ids the flat form names two single-part ids, of which no fact has
+any. So the parser accepts it and `dry_run` still refuses an id that names no fact:
+the SHAPE widened and no meaning was guessed. The first arm (`durf-sess1`) is
+superseded by `durf-sess2` and its rates should not be quoted.
+
+**What the engine deliberately does not have.** No campaign state, no levelling, no
+downtime, no spells beyond the one the fixture's caster knows, and the players are
+SCRIPTED even on the live arm unless `--llm-players` is passed. That last one is a
+measurement decision rather than a saving: this rung's question is about the
+referee's declarations, and a party that varies makes the adjudicator's job vary
+with it. A live party is a second variable and it has its own flag.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no
@@ -534,6 +644,10 @@ declares its reveals as typed facts.
 **Score it on one thing: can a render be audited against the facts the
 adjudicator declared, with `find_leaks` still naive.** Everything else is
 downstream of that answer, exactly as the heartbeat note says of its own scope.
+
+**BUILT AND RUN 2026-08-28** - the section above carries what it is and what it
+measured. This paragraph is the scope it was built to, kept because the build
+answers it rather than replaces it.
 
 ## Ordering against the two other unbuilt spikes
 
