@@ -270,6 +270,7 @@ pyproject.toml             the console script; no runtime dependency, ever
 eval/run_cabal.py          run-N-games scoring for cabal's gates
 eval/run_changeling.py     the same for changeling
 eval/run_quorum.py         the same for quorum
+eval/run_belfry.py         the same for belfry - executions against the chance rate on their own boards
 eval/gate3_arithmetic.py   the gate-#3 verdict's arithmetic, re-runnable with its own control
 eval/s6_verdict.py         the gate-#3b verdict, reproduced from each arm's own records
 eval/strata.py             changeling's knowledge strata, counted over N nights

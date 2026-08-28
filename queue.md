@@ -188,20 +188,17 @@ Reference already written down, unmeasured unless it says otherwise:
 - `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
   and the graded-taint fix that does.
 
-belfry - engine DONE, playable and registered 2026-08-28. No model has played a
-seat, and there is no eval lane yet, so nothing about it belongs in
-`docs/measurements.md`. `games/belfry/RULES.md` carries the knowledge model, the
-discretion table and the random-policy control (520 games: good 49.2 / evil 47.5 /
-none 3.3).
+belfry - engine and scoring lane DONE 2026-08-28. No model has played a seat.
+`games/belfry/RULES.md` carries the knowledge model and the discretion table;
+`docs/measurements.md` carries the random control at the settings the first live
+run should use, and the instrument check inside it.
 
-- [ ] **`eval/run_belfry.py`, the scoring lane.** Twin of `run_quorum`, over the
-      same `core/integrity.py` block. Blocked on nothing. Until it exists belfry
-      can be PLAYED and cannot be MEASURED, which is the only reason it is not a
-      third live front.
-- [ ] **The first live game, and a criterion written before it.** Cost is the
+- [ ] **The first live game, and a criterion written before it.** The lane is
+      `eval.run_belfry`; the control to beat is day-1 execution accuracy 41.04%
+      against a chance rate of 40.00% (5 seats, compact, seed 6100). Cost is the
       binding constraint and it is measured: 5 seats ~49 decisions, 7 ~119, 9
-      ~183, one call each. Start at 5 seats on the compact script; the full
-      script re-baselines every number, so pick one and say which.
+      ~183, one call each. Start at 5 seats on the compact script; the full script
+      re-baselines every number, so pick one and say which.
 - [ ] **A model in the referee's seat, for the discretionary choices only.** The
       spike the ladder was pointed at, and belfry makes it small: the choices are
       already isolated in one place and logged, so the arm replaces the seeded

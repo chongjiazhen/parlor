@@ -109,6 +109,39 @@ something sharper than either: whatever the blind seats respond to, it is not th
 mechanically derivable part.
 
 
+## belfry's control arm, and the instrument check inside it - 2026-08-28
+
+**No model has played this rung.** Both rows are the RANDOM policy, which is why
+they are here rather than in a verdict doc: they are what the rules alone do, and
+the live arm has to be read against them.
+
+| run | 5 seats, compact, `--rounds 1`, seed 6100, 200 games | 9 seats, full, `--rounds 1`, seed 7000, 300 games |
+|---|---|---|
+| good win rate, decided games | 48.24% [41.40%, 55.15%] | 60.55% [54.82%, 66.01%] |
+| how they ended | attrition 103, demon-dead 96, day-bound 1 | demon-dead 168, attrition 64, bad-execution 50, day-bound 11, speaker 7 |
+| **day-1 execution accuracy** | 41.04% [33.08%, 49.51%] | 20.57% [15.65%, 26.56%] |
+| chance on the same boards | **40.00%** | **22.22%** |
+| good-seat vote accuracy | 51.54% [49.67%, 53.40%], n=2763 | - |
+| fallback rate | 0.00% (0/9719) | 0.00% |
+
+**The third and fourth rows are an instrument control, and that is the point of
+running this at all.** The scorer computes the chance rate per execution off that
+execution's own board (`evil_before / alive_before`), and a policy that picks at
+random has to land on it. It does, at both table sizes and on both scripts, which
+is what earns the figure the right to be read as evidence when a model moves it.
+The first draw at 9 seats looked 5.5 points low; it was 209 executions and the
+gap was inside the interval, so nothing was wrong with the instrument and the
+answer was more games, not a theory about which role caused it.
+
+Two properties of the RULES worth carrying into any live read, both visible above:
+the good side wins more often on a bigger table under identical play, and 58 of
+the 5-seat run's 257 executions carried against a seat that was **already dead**
+(the day ends, nobody dies). Those are counted apart, because a table that spent
+its days on corpses is not a table that executed badly.
+
+Recipe, and it needs no GPU: `py -3 -m eval.run_belfry --games 200 --seats 5
+--script compact --rounds 1 --seed 6100 --out eval/records/belfry-control-5seat.json`.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost

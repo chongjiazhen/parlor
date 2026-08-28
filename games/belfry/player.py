@@ -260,6 +260,29 @@ class VoteRecord:
     voter_evil: bool
     nominee_evil: bool
     voter_alive: bool
+    #: Had this seat been told something FALSE by the time it voted? The stratum
+    #: this rung exists to measure, and it has to be recorded per vote rather than
+    #: per game: a seat poisoned on night 3 voted four times before it was misled,
+    #: and folding those into the misled column would credit the poison with the
+    #: seat's earlier play.
+    voter_misled: bool = False
+
+
+@dataclass
+class ExecutionRecord:
+    """One execution and the board it happened on. ``alive_before`` and
+    ``evil_before`` travel with it because they are the denominator: hitting an
+    evil seat with two of four alive is not the same event as hitting one with two
+    of nine, and the board has moved by the time anybody scores it."""
+
+    day: int
+    seat: int
+    evil: bool
+    #: Was the seat alive when it was executed? A dead seat can be nominated and
+    #: voted up; the day ends and nobody dies.
+    was_alive: bool
+    alive_before: int
+    evil_before: int
 
 
 @dataclass
@@ -268,7 +291,11 @@ class GameRecord:
 
     winner: str | None = None
     reason: str = ""
+    #: A short key for HOW it ended, beside the sentence. A scorer matching on the
+    #: sentence would be parsing prose that is free to be reworded.
+    cause: str = ""
     days: int = 0
+    seats: int = 0
     script: str = ""
     #: Seat -> the role it was dealt, and seat -> the role it held at the end. Both,
     #: because the demon can change hands and a record with one column could not say
@@ -276,7 +303,7 @@ class GameRecord:
     dealt: dict[int, str] = field(default_factory=dict)
     final: dict[int, str] = field(default_factory=dict)
     alive: tuple[int, ...] = ()
-    executions: list[tuple[int, int, bool]] = field(default_factory=list)
+    executions: list[ExecutionRecord] = field(default_factory=list)
     votes: list[VoteRecord] = field(default_factory=list)
     decisions: int = 0
     fallbacks: int = 0
@@ -289,6 +316,10 @@ class GameRecord:
     log: list[str] = field(default_factory=list)
     upstreams: dict[str, int] = field(default_factory=dict)
     trace_sample: list[str] = field(default_factory=list)
+    #: Seat -> how many of the things it was told were false. Zero for every seat
+    #: on a table with nothing that switches an ability off, which is what makes it
+    #: readable as a check that the stratum below has a sample at all.
+    misled: dict[int, int] = field(default_factory=dict)
     error: str | None = None
 
 
@@ -336,7 +367,7 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
     by default and stays that way: the property this arena exists to prove must not
     be something a caller can forget to switch on.
     """
-    rec = GameRecord(script=ref.grim.script.name)
+    rec = GameRecord(script=ref.grim.script.name, seats=ref.n)
     rec.dealt = {s.index: s.dealt.key for s in ref.grim.seats}
     turn_no = 0
     try:
@@ -370,7 +401,9 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
                     day=day, seat=seat, nominee=nominee, yes=action["vote"],
                     voter_evil=ref.grim.seat(seat).align is Align.EVIL,
                     nominee_evil=ref.grim.seat(nominee).align is Align.EVIL,
-                    voter_alive=ref.grim.seat(seat).alive))
+                    voter_alive=ref.grim.seat(seat).alive,
+                    voter_misled=any(not r.truthful
+                                     for r in ref.knowledge[seat])))
     except Exception as exc:                  # a broken run is recorded, not hidden
         rec.error = f"{type(exc).__name__}: {exc}"
         if isinstance(exc, AssertionError):   # a leak is never scoreable
@@ -380,8 +413,15 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
     rec.reason = ref.reason
     rec.days = ref.day
     rec.final = {s.index: s.role.key for s in ref.grim.seats}
-    rec.executions = [(day, seat, ref.grim.seat(seat).align is Align.EVIL)
-                      for day, seat in ref.executions]
+    rec.cause = ref.cause
+    rec.misled = {s: sum(1 for r in ref.knowledge[s] if not r.truthful)
+                  for s in range(ref.n)}
+    rec.executions = [
+        ExecutionRecord(day=e.day, seat=e.seat,
+                        evil=ref.grim.seat(e.seat).align is Align.EVIL,
+                        was_alive=e.was_alive, alive_before=e.alive_before,
+                        evil_before=e.evil_before)
+        for e in ref.executions]
     rec.alive = tuple(ref.grim.alive_seats())
     rec.public_events = list(ref.public_events)
     rec.log = list(ref.referee_log)

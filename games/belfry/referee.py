@@ -109,6 +109,30 @@ class Turn:
     kind: str
 
 
+@dataclass(frozen=True)
+class Execution:
+    """One execution, with the board it happened on.
+
+    ``alive_before`` and ``evil_before`` are read at the moment of the execution
+    and stored, because they are the DENOMINATOR of the only honest question to
+    ask of an execution: a table with two evil seats among four alive hits one by
+    chance half the time, and the same hit on a table of nine does not mean the
+    same thing. Recomputing them afterwards is not possible - the board has moved
+    by the time anybody scores it.
+    """
+
+    day: int
+    seat: int
+    #: Was the executed seat alive? A dead seat may be nominated and voted up, and
+    #: the day ends on it having killed nobody. Recorded rather than inferred: it
+    #: is a real move with a real cost, and folding it in with the executions that
+    #: killed somebody is how a table that spent three days on corpses reads as a
+    #: table that executed badly.
+    was_alive: bool
+    alive_before: int
+    evil_before: int
+
+
 @dataclass
 class BelfryReferee:
     grim: Grimoire
@@ -123,6 +147,10 @@ class BelfryReferee:
     day: int = 1
     winner: str | None = None
     reason: str = ""
+    #: A short key for HOW the game ended, beside the sentence saying it. The
+    #: sentence is for a person; a scorer that had to match on it would be parsing
+    #: prose that is free to be reworded.
+    cause: str = ""
 
     knowledge: dict[int, list[Reveal]] = field(default_factory=dict)
     entitled: dict[int, set[int]] = field(default_factory=dict)
@@ -150,7 +178,7 @@ class BelfryReferee:
     #: by a reader from ``executed_today``, which is a field that is cleared at the
     #: next dawn - a driver watching it has to guess whether the day it is reading
     #: is the day the execution happened on.
-    executions: list[tuple[int, int]] = field(default_factory=list)
+    executions: list[Execution] = field(default_factory=list)
     #: What the last speaking seat actually PUBLISHED - normalised and truncated.
     #: A record that kept the raw reply would hold text no seat ever saw.
     last_said: str = ""
@@ -442,14 +470,20 @@ class BelfryReferee:
         both paths and a second copy is how it comes to fire on only one."""
         self.executed_today = seat
         self.last_executed_role = self.grim.registers_as(seat).key
-        self.executions.append((self.day, seat))
+        alive = self.grim.alive_seats()
+        self.executions.append(Execution(
+            day=self.day, seat=seat, was_alive=self.grim.seat(seat).alive,
+            alive_before=len(alive),
+            evil_before=sum(1 for s in alive
+                            if self.grim.seat(s).align is Align.EVIL)))
         self._execution_done = True
         role = self.grim.role_of(seat)
         self.public_events.append(("event", f"Seat {seat} is executed."))
         self._kill(seat, "execution", announce=False)
         if role.key == "pilgrim" and not self.grim.droisoned(seat):
             self._finish(Align.EVIL,
-                         f"seat {seat} was executed and is the {role.display}")
+                         f"seat {seat} was executed and is the {role.display}",
+                         "bad-execution")
 
     def _dusk(self) -> None:
         if self.block is not None:
@@ -463,7 +497,7 @@ class BelfryReferee:
                     and not self.grim.droisoned(speaker) \
                     and len(self.grim.alive_seats()) == 3:
                 self._finish(Align.GOOD, "three seats were alive at dusk and "
-                                         "nobody was executed")
+                                         "nobody was executed", "speaker")
                 return
         self._check_win()
         if self.phase is Phase.DONE:
@@ -471,6 +505,7 @@ class BelfryReferee:
         if self.day >= self.max_days:
             self.phase = Phase.DONE
             self.winner = None
+            self.cause = "day-bound"
             self.reason = (f"no winner: the {self.max_days}-day bound was reached. "
                            f"A game this long is a result about the table, not a "
                            f"win for either side.")
@@ -486,15 +521,16 @@ class BelfryReferee:
             return
         demon = self.grim.demon_seat()
         if demon is None or not self.grim.seat(demon).alive:
-            self._finish(Align.GOOD, "no demon is alive")
+            self._finish(Align.GOOD, "no demon is alive", "demon-dead")
             return
         if len(self.grim.alive_seats()) <= 2:
             self._finish(Align.EVIL, "two seats are alive and the demon is one "
-                                     "of them")
+                                     "of them", "attrition")
 
-    def _finish(self, side: Align, why: str) -> None:
+    def _finish(self, side: Align, why: str, cause: str) -> None:
         self.phase = Phase.DONE
         self.winner = side.value
+        self.cause = cause
         self.reason = f"WINNER: {side.value} ({why})"
         self._turn = None
         self.public_events.append(
