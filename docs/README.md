@@ -3,6 +3,25 @@
 The index of this directory, moved out of `RESUME.md` 2026-08-28. Durable material
 lives beside the code, not in the queue; `RESUME.md` keeps the open rows.
 
+**When this flat directory should become folders.** Nothing here is broken by 23
+files in one namespace - the defects this layout has actually produced were stale
+claims and a partly-true index, which folders do not fix. The split worth making,
+if one is, is the two classes with OPPOSITE maintenance rules: docs that must
+track the code (`action-channel`, `content-packs`, `model-facing-text`,
+`evidence-discipline`, `preset-axes`, `information-model`) against dated records
+that must never be edited (every criterion and verdict, `measurements`, `slices`).
+Four triggers, any one of which flips the answer - the first is checked by
+`scripts/hygiene-check.sh` as an advisory and the rest are judgement:
+
+1. This file passes **150 lines**, at which point the index that stands in for
+   folders is skimmed rather than used.
+2. A doc has **two plausible homes** and the answer matters - i.e. it is cited
+   from two different reader contexts.
+3. A **second contributor**, or external readers after publishing. Folders are a
+   coordination tool; a single author with `CLAUDE.md` as the map does not need
+   them, and someone who cannot ask does.
+4. **~40 files**, as a crude backstop on scanning a flat directory.
+
 **Three of the files below are the queue's own drained halves** rather than design
 notes - what landed, what was measured, what was settled - and they are listed here
 because this file claims to be the index of the directory and an index that is

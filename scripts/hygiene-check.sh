@@ -62,6 +62,9 @@ if [ "$1" = "--budget" ]; then
     else
         echo "Under budget: free to grow by $((QUEUE_CEILING - QUEUE_NOW)) bytes."
     fi
+    IDX=$(git show HEAD:docs/README.md 2>/dev/null | wc -l | tr -d ' ')
+    [ -z "$IDX" ] && IDX=0
+    echo "docs/README.md at HEAD: $IDX lines, advisory ceiling 150."
     exit 0
 fi
 
@@ -109,6 +112,47 @@ fi
 
 [ -z "$DIFF" ] && exit 0
 
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# The docs index is what stands in for folders, and it has a scanning limit.
+#
+# ADVISORY, never fatal, and that is the whole design. Nothing is broken at 151
+# lines; what happens is that `docs/README.md` stops being an index somebody uses
+# and becomes a document somebody skims, at which point the flat `docs/` layout
+# is being held together by a file nobody reads. That is a prompt to think, not
+# a commit to refuse - a gate that blocked here would be enforcing a taste.
+#
+# It fires only when the commit TOUCHES the index, so it reaches the person who
+# can act on it and nobody else. The judgement triggers that go with it - a doc
+# with two plausible homes, a second contributor, ~40 files - cannot be counted
+# and live at the top of the file itself.
+DOCS_INDEX_CEILING=150
+
+if [ "$1" = "--range" ] && [ -n "$2" ]; then
+    INDEX_CHANGED=$(git diff --name-only "$2" -- docs/README.md)
+    INDEX_REF="${2##*..}:docs/README.md"
+    [ "$INDEX_REF" = ":docs/README.md" ] && INDEX_REF="HEAD:docs/README.md"
+else
+    INDEX_CHANGED=$(git diff --cached --name-only -- docs/README.md)
+    INDEX_REF=":docs/README.md"
+fi
+
+if [ -n "$INDEX_CHANGED" ]; then
+    INDEX_LINES=$(git show "$INDEX_REF" 2>/dev/null | wc -l | tr -d ' ')
+    [ -z "$INDEX_LINES" ] && INDEX_LINES=0
+    if [ "$INDEX_LINES" -gt "$DOCS_INDEX_CEILING" ]; then
+        cat >&2 <<MSG
+
+[hygiene] advisory, not a failure: docs/README.md is $INDEX_LINES lines, past $DOCS_INDEX_CEILING.
+
+That file is what stands in for folders in a flat docs/ directory. Past this
+length it is skimmed rather than used, and the layout is resting on a file
+nobody reads. Its own header carries the other three triggers and what the
+split would be if one fires. This commit is not blocked.
+MSG
+    fi
+fi
 # ---------------------------------------------------------------------------
 
 # Built at runtime from octal escapes so this file holds no literal en- or
