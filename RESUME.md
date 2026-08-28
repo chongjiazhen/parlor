@@ -11,6 +11,22 @@ above.
 
 What's next:
 
+**Cold start, 2026-08-28.** Two fronts are live and they are independent - quorum
+is building its engine, DURF is between measurements. Run
+`grep -L 'PARLOR DONE' eval/records/*.log` first (see below for what it lies
+about), then pick a front:
+
+- **DURF** - the iron-door question is decided and the next slice is *is
+  reveal-ahead wrong at all*, which is BLOCKED on two things that are not code:
+  the fixture states no adjacency and no sightlines, so nothing separates "what
+  the party sees from where it stands" from "the far side of a closed door"; and
+  no rubric for whether a refereed session was any GOOD is known to exist. Both
+  are in the DURF block below. A campaign is 52 minutes and should carry the
+  prescribed fixture edit and the adjacency decision together, or it buys one
+  answer at the price of two.
+- **quorum** - has RULES.md, roles, referee and a second gate mechanism as of
+  2026-08-28; its own rows are further down.
+
 **Every called gate has left this file, and DURF now has one of its own.**
 
 | verdict | where it lives | recompute |
