@@ -153,9 +153,10 @@ and the seat would learn what it is from the silence.
 1. **Talk.** `--rounds` passes; every seat speaks once per pass, **the dead
    included**. The dead keep their voice all game: they have lost their ability and
    most of their vote and they keep the only thing this game runs on.
-2. **The public power.** A speaking seat may name a seat out loud. Any seat may do
-   this, whether or not it holds the role that makes it work, and the referee
-   answers in the same words either way. A power only its true holder could invoke
+2. **The public power.** A speaking seat may name a seat out loud. Any LIVING seat
+   may do this - the dead keep their voice, not their power - whether or not it
+   holds the role that makes it work, and the referee answers in the same words
+   either way. A power only its true holder could invoke
    would make every invocation a proof of the role.
 3. **Nominations.** Each living seat may nominate once; each seat may be nominated
    once per day, alive or dead.

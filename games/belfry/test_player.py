@@ -254,3 +254,34 @@ class TestTheDriver(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheDeadMaySpeakButNotSlay(unittest.TestCase):
+    """The dead speak every round, and the speak ask advertises ``slay``
+    unconditionally. ``_apply_slay`` refuses a dead seat, so a pre-check that
+    does not is how a legal-looking action reaches ``submit`` and raises - which
+    ends the game and drops the record from every figure.
+    """
+
+    def _dead_speaker(self):
+        ref = rigged(FIVE)
+        turn = advance_to(ref, "speak")
+        ref.grim.seat(turn.seat).alive = False
+        return ref, turn
+
+    def test_a_dead_seat_naming_a_target_is_refused_before_submit(self):
+        ref, turn = self._dead_speaker()
+        target = next(t for t in range(ref.grim.n) if t != turn.seat)
+        reason = illegal_reason(ref, turn, {"say": "I accuse.", "slay": target})
+        self.assertIn("dead", reason)
+
+    def test_a_dead_seat_may_still_speak(self):
+        ref, turn = self._dead_speaker()
+        self.assertEqual(illegal_reason(ref, turn, {"say": "I accuse."}), "")
+
+    def test_a_living_seat_is_untouched(self):
+        ref = rigged(FIVE)
+        turn = advance_to(ref, "speak")
+        allowed = ref.legal_targets(turn.seat, "slay")
+        self.assertEqual(
+            illegal_reason(ref, turn, {"say": "hi", "slay": allowed[0]}), "")

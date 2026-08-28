@@ -101,6 +101,8 @@ def illegal_reason(ref: BelfryReferee, turn: Turn, action: dict) -> str:
     legal = ref.legal_targets(seat, kind)
     if kind == "speak":
         if "slay" in action:
+            if not ref.grim.seat(seat).alive:
+                return f"seat {seat} is dead and cannot use a day power"
             allowed = ref.legal_targets(seat, "slay")
             if ref.grim.seat(seat).used_power:
                 return f"seat {seat} has already spent its public day power"
