@@ -6,6 +6,17 @@ lives beside the code, not in the queue.
 Durable material lives beside the code, not in the queue. This file stays the
 queue, the dated measurements, and the route decisions.
 
+- `docs/information-model.md` - 2026-08-28. The settled vocabulary for what this
+  repo calls entitlement, cited by identifier: information set, percept,
+  synchronous perfect recall, the chance move that turns incomplete information
+  into imperfect, public versus private observation. Gate #1 in one line - a
+  seat's bytes must be a function of its information set - and the three rungs as
+  one percept function of increasing generality. Carries its own read-depth note;
+  two citations are deliberately not first-hand and nothing rests on them.
+- `docs/model-facing-text.md` - the two rules for a string a model actually reads:
+  prompt the positive, and a prompt edit is a measured change, not a cleanup.
+  Read before touching `core/backends.py` or either game's `referee.py` /
+  `player.py`.
 - `docs/action-channel.md` - why free-text JSON stays the action channel, and the
   kernel/adjudicator split the RPG rung needs. Read before adding a second game's
   phases or touching `parse_action`.
