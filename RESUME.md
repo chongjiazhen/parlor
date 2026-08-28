@@ -332,6 +332,12 @@ arm is ~30 min against cabal's 13.2 h.
   the endgame rung: what ships, what stays local, why the example pack is
   required rather than a courtesy, and why "local" is not the same as
   "untransmitted". Read it before laying out `games/<rung>/`, not after.
+- `docs/preset-axes.md` - 2026-08-28, unmeasured. The question after content
+  packs: is every system a preset of flags over one engine? No - entitlement
+  schema, resolution kernel and authority topology are three different kinds of
+  axis, only the first is flag-shaped, and a flag list is 2^N unmeasured fallback
+  rates wearing one measured number's name. Carries the boundary of the formal
+  prior art (`arXiv:2205.00451`) and why a DSL is the wrong reach here.
 
 - [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with
       it.** The open half of the read above. `outed_own_role_in_public` matches the
