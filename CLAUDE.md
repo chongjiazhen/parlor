@@ -70,7 +70,8 @@ Change them against a measurement, and change them HERE.
 - **Judge a detached run by its own log or JSONL** - CPU, IO counters and exit codes
   all read as healthy while a run sleeps, and one such call killed a live run. Probe
   a cloud tier with a burst: a cooled key serves single requests and fails a stream.
-- **`queue.md` is the queue, and the pre-commit gate holds it to that.** Done work
+- **`queue.md` keeps only what can still change, and the pre-commit gate holds it
+  to that.** Done work
   leaves - a landed slice struck and moved to `docs/slices.md`, a dated reading to
   `docs/measurements.md`, a settled call to `docs/decisions.md`. The rule is as old
   as the file and was broken anyway, because it had no destination and appending
