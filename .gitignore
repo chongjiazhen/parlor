@@ -14,3 +14,5 @@ eval/records/
 *.local.md
 
 /.scratch/
+
+.claude/settings.local.json

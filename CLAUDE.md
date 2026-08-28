@@ -55,6 +55,16 @@ Change them against a measurement, and change them HERE.
 - **Judge a detached run by its own log or JSONL** - CPU, IO counters and exit codes
   all read as healthy while a run sleeps, and one such call killed a live run. Probe
   a cloud tier with a burst: a cooled key serves single requests and fails a stream.
+- **`RESUME.md` is the queue, and the pre-commit gate holds it to that.** Done work
+  leaves - a landed slice struck and moved to `docs/slices.md`, a dated reading to
+  `docs/measurements.md`, a settled call to `docs/decisions.md`. The rule is as old
+  as the file and was broken anyway, because it had no destination and appending
+  was the only move available; the file reached 1200 lines, which every cold
+  session then paid to read. It has destinations now, so
+  `scripts/hygiene-check.sh` enforces it as a RATCHET rather than prose: under 400
+  lines the file is free, over it a commit may shrink or hold but never grow. A
+  flat ceiling would have failed the very next commit and taught the author to
+  reach for `--no-verify`.
 - **Publish hygiene is a GATE, not a pass.** `scripts/hygiene-check.sh` runs from
   `.git/hooks/pre-commit` and reads the lines a commit ADDS, which is why it needs
   no list of what is excused - and a list of what is excused would be a map to the

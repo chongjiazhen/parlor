@@ -32,6 +32,55 @@ fi
 
 [ -z "$DIFF" ] && exit 0
 
+# ---------------------------------------------------------------------------
+# The queue does not grow once it is over budget.
+#
+# RESUME.md's own first rule is that done work leaves to git log. It stopped
+# being kept and the file reached 1200 lines - a read every cold session pays
+# for, most of it work that had already landed. Prose could not enforce it,
+# because the rule had no destination: annotations had to stay somewhere, and
+# appending was the only move available. They have one now (docs/slices.md,
+# docs/measurements.md, docs/decisions.md), so the rule can be a gate.
+#
+# It is a RATCHET, not a ceiling. Under CEILING lines the file is free. Over
+# it, a commit may shrink the file or leave it flat, never grow it. A flat
+# ceiling would have blocked the next commit outright at today's 916 lines,
+# which teaches the author to pass --no-verify rather than to prune.
+QUEUE_CEILING=400
+
+if [ "$1" = "--range" ] && [ -n "$2" ]; then
+    QUEUE_BASE=${2%%..*}
+    QUEUE_TIP=${2##*..}
+    [ -z "$QUEUE_TIP" ] && QUEUE_TIP=HEAD
+    QUEUE_CHANGED=$(git diff --name-only "$2" -- RESUME.md)
+    QUEUE_OLD_REF="$QUEUE_BASE:RESUME.md"
+    QUEUE_NEW_REF="$QUEUE_TIP:RESUME.md"
+else
+    QUEUE_CHANGED=$(git diff --cached --name-only -- RESUME.md)
+    QUEUE_OLD_REF="HEAD:RESUME.md"
+    QUEUE_NEW_REF=":RESUME.md"
+fi
+
+if [ -n "$QUEUE_CHANGED" ]; then
+    QUEUE_NEW=$(git show "$QUEUE_NEW_REF" 2>/dev/null | wc -l | tr -d ' ')
+    QUEUE_OLD=$(git show "$QUEUE_OLD_REF" 2>/dev/null | wc -l | tr -d ' ')
+    [ -z "$QUEUE_NEW" ] && QUEUE_NEW=0
+    [ -z "$QUEUE_OLD" ] && QUEUE_OLD=0
+    if [ "$QUEUE_NEW" -gt "$QUEUE_CEILING" ] && [ "$QUEUE_NEW" -gt "$QUEUE_OLD" ]; then
+        cat >&2 <<MSG
+
+[hygiene] RESUME.md grew: $QUEUE_OLD -> $QUEUE_NEW lines, over the $QUEUE_CEILING-line budget.
+
+The queue keeps what can still change. A landed slice is struck and moved to
+docs/slices.md, a dated reading to docs/measurements.md, a settled call to
+docs/decisions.md - live rows cite them by name, so they are kept, not deleted.
+Move something out in this commit, or shrink what you are adding.
+MSG
+        exit 1
+    fi
+fi
+# ---------------------------------------------------------------------------
+
 # Built at runtime from octal escapes so this file holds no literal en- or
 # em-dash and cannot flag itself.
 ENDASH=$(printf '\342\200\223')
