@@ -161,7 +161,7 @@ which is the cheapest of the four. The last two are borrowed shapes, sourced in
 the off-repo ledger. Worth one paired arm if table talk ever needs to carry
 evidence.
 
-**Two things to record before they are measured**, so neither reads as a surprise
+**Three things to record before they are measured**, so none reads as a surprise
 later:
 - **`--notebook` should show no gain.** Three independent 2026 results on three
   different games report that reasoning and memory scaffolds do not deliver what
@@ -174,6 +174,16 @@ later:
   curve. **Do not run a head-to-head against someone else's harness**: the ones
   surveyed are variously unlicensed, dependency-rotted or pinned to retired
   models, and a head-to-head then measures their rot rather than either player.
+- **A neutral canonical key can mislead a model about STATE, and that is the cost
+  side of the branding-free invariant.** Read outside this repo, not measured
+  here, and no number attached to it: seats reading a state key by its everyday
+  sense inferred the wrong thing about the game from it, and renaming that state
+  fixed the reading; separately, an evocative role name drew threat assessment out
+  of proportion to what the role mechanically did. Both cut the same way for
+  parlor - branding-free keys buy the second effect and can lose the first. So a
+  key that names a STATE rather than a role is a prompt variable, and renaming one
+  is a MEASURED change on the same terms as a theme change, not a tidy-up. The
+  invariant stands; what is new is that it has a cost worth watching for.
 
 ## Session slices - what one `/new` should take
 
@@ -201,7 +211,7 @@ table says which pairs.
 | ~~**S5**~~ | ~~changeling: read the 200-game run.~~ **READ 2026-08-28 - GATE #3 HOLDS.** Blind villager accuracy **110/247 = 44.53%**, Wilson floor **38.47%** and the scorer's game-bootstrap floor **37.36%**, both clearing the pre-committed 35.95%. Gate #2 readable at **59.49%** [52.48%, 66.13%] and given **no verdict**, per the criterion. Two clauses did not apply cleanly and are recorded rather than smoothed: the criterion said Wilson where the scorer publishes a bootstrap, and S2 ran no random arm so the own-arm clause had nothing to fire on. Writeup `games/changeling/RULES.md` §S2 read; arithmetic `py -3 -m eval.s5_verdict`. Code-debt item 4 settled in the same session because the writeup had to quote a path. | - | - | done |
 | ~~**S6**~~ | ~~The gate #3b campaign - cabal's LAST GPU program.~~ **CALLED 2026-08-27 - gate #3b NOT SHOWN, cabal's GPU program stops.** 40/40 games, both arms `rc=0`, 1.35% campaign fallback. Pooled 9/20 = 45.00%, Wilson [25.82%, 65.79%] against the derived bar 33.33% - floor does not clear, so the pre-committed answer applies and there is no third campaign. All three draw-dependent items resolved off the same records: step-not-slope did NOT fire, the `five_rejects` shift is not established, run-length degradation did not reproduce. Verdict and arithmetic: `docs/gate3b-verdict.md`, `py -3 -m eval.s6_verdict`. | - | - | done |
 | ~~**S7**~~ | ~~Measured prompt variables.~~ **DROPPED as a cabal GPU program** - a paired cabal arm is 13.2h to move a number 3a no longer spends precision on. Re-homed; reasoning in `docs/gate3a-retired.md`. | - | - | done |
-| **S8** | **Next rung or publish.** 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. | varies | S5 done (S1 is called) | scoped in its own session, not here |
+| **S8** | **Next rung or publish.** 6/7p + information-degrading evils, publish hygiene, or the adjudicator spike - and **Spike #2's faction heartbeat is no longer a fourth option beside that one.** Scoped 2026-08-27 (`docs/faction-heartbeat.md`): both need the same typed-fact channel, and a faction is the small version of it, so the heartbeat is a way of building the adjudicator's hardest part against a testable surface. **The adjudicator spike has its own literature** - the off-repo ledger names what to read before scoping it, and the sweep that produced it is closed. What remains is READING debt and the unchecked TTRPG IP posture. **The DESIGN half of that literature is now in the tree** - `docs/action-channel.md` carries the call-vocabulary constraints (one blocking call, referee-side free-text seat tokens, a prompt split along its seams) and the two failures the kernel has to catch, all stated in parlor's terms, so the spike does not depend on the ledger surviving. What stays off-repo is the competitive half: which builds exist, what they are rated, and their licences - including that one of them was read in full from source under a licence that forbids reuse, so the call vocabulary above is written from the game's own public rules and stays that way. | varies | S5 done (S1 is called) | scoped in its own session, not here |
 
 ## While the card is busy - the standing menu
 
