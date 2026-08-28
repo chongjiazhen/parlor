@@ -11,13 +11,15 @@ flags are three different kinds of thing, and only one kind composes.
 
 ## The pattern, named
 
-Configurable-by-toggle is an established tabletop design pattern with three
-decades of published instances behind it, and its known failure mode is
-published too: past a certain count the toggles stop being a convenience and
-become a decision the table must make before anything is playable. Borrowing the
-pattern is fine. Borrowing it whole means inheriting that.
+Configurable-by-toggle is an established tabletop design pattern, and published
+toolkit systems that work this way describe themselves in exactly those terms - a
+box of parts to assemble a game from rather than a game. The cost is stated in
+their own reception: a toolkit hands the table a design job before it hands them
+a playable game, and doing that job well takes more skill than running a finished
+system does. Borrowing the pattern is fine. Borrowing it whole means inheriting
+that.
 
-Whose instances those are, and how well each is thought to work, is assessment of
+Which systems those are, and how well each is thought to work, is assessment of
 somebody else's design and stays in the working notes - the division
 `docs/action-channel.md` and `docs/content-packs.md` already draw.
 
@@ -77,21 +79,32 @@ not a comparison.
 
 The general-game-playing literature has already built the good version of
 "games are configurations of a shared vocabulary", and has a universality proof
-for it: **arXiv:2205.00451** (*abstract read at source 2026-08-28, body unread*)
-proves that language capable of representing any **finite** non-deterministic
-imperfect-information **extensive-form** game, extending an earlier result for
-the finite deterministic fully-observable case.
+for it: **arXiv:2205.00451** (*abstract and introduction read at source
+2026-08-28; the proof itself unread*) proves that language capable of
+representing any **finite** non-deterministic imperfect-information game,
+extending an earlier result that covered the finite deterministic
+perfect-information alternating-move case.
 
-That boundary is the citation's whole value here. parlor's deduction rungs sit
-inside it; the endgame rung does not, because an unbounded declaration channel is
-not a finite extensive-form game. So the proof marks where a description language
-stops covering this problem rather than covering it, and it is the reason the
-adjudicator is a seat rather than a grammar.
+**Read the boundary precisely, because the loose version of it is wrong.** The
+proof's class is finite games; the language is not confined to them, and that
+paper says so itself, naming a game with an infinitely-sized tree that it can
+still express. So the honest statement is about what has been *proven*, not about
+what a description language can reach.
 
-**It is also a reason not to build a DSL.** That work needed one because a search
-agent had to read the description. Here a person picks the preset, so a typed
-interface per axis is the whole implementation, and a language would be the
-second thing to encode game #1.
+The value here is the shape of the class, not a limit on anyone's language. Every
+rung on the deduction ladder is a finite game with a bounded action set and sits
+squarely inside it. The endgame rung is the one that leaves: an unbounded
+declaration channel has no enumerable action set to describe, which is the same
+property `docs/action-channel.md` identifies when it says the closed-phase shape
+generalises to the other deduction games and not to the RPG. **That is why the
+adjudicator is a seat and not a grammar** - not because a grammar could not be
+written, but because writing one means enumerating the thing whose refusal to be
+enumerated is the rung's entire content.
+
+**It is also a reason not to build a DSL.** That work needed one because an
+automated player had to read the description and a whole corpus had to be written
+in it. Here a person picks the preset, so a typed interface per axis is the whole
+implementation, and a language would be the second thing to encode game #1.
 
 ## What this does not decide
 
