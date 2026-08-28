@@ -183,6 +183,15 @@ symmetry of the two branches are in `docs/durf-rung.md` §The read. The fact's
 statement of the fact, not a sentinel, and editing it would move a byte the
 recorded runs saw.
 
+**The price of a term change is now answerable off records rather than off a
+campaign.** `py -3 -m eval.durf_rescore <record>.json --add "hidden,R2=loose
+flagstone" --check` replays a stored session against any term set: a declaration
+is recognisable in the transcript because publishing a fact writes its own `text`
+as a referee entry, so entitlement at every point is reconstructible. Under the
+run's own terms it must reproduce that run's own leaks, which is what `--check`
+requires. It is a counterfactual, never a read - `docs/durf-gate1-criterion.md`
+binds those.
+
 **What that costs, stated rather than buried:** the instrument is now blind to a
 referee that names the flagstone without naming the cavity or the coin. That is a
 second measurement - catching a PHRASING tell - and `docs/action-channel.md`

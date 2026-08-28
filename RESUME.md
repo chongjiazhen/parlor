@@ -1059,6 +1059,10 @@ queue, the dated measurements, and the route decisions.
 - `docs/gate3a-retired.md` / `docs/gate3b-verdict.md` - cabal's two gate #3
   verdicts, each recomputable (`eval.gate3_arithmetic`, `eval.s6_verdict`). Read
   before restarting any cabal run or quoting either half.
+- `eval/durf_rescore.py` - re-audits a stored DURF session against any term set,
+  no GPU and no re-run: entitlement is reconstructible from the transcript because
+  publishing a fact writes its own text as a referee entry. Prices a sentinel
+  change against records already on disk. A counterfactual, never a read.
 - `eval/durf_camp1_verdict.py` - the DURF gate #1 criterion as arithmetic,
   written before the campaign landed and pinned by `eval/test_durf_camp1_verdict.py`
   against synthetic records, so the promise cannot drift to fit the result.
