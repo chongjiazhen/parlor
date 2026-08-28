@@ -54,10 +54,9 @@ fresh clone with no install plays exactly the same games.
 
 **In a game, three words are not moves.** `?` reprints the view, `help` reprints the
 orientation, and `rules` prints that game's full `RULES.md`. They are answered by
-the console and never reach the referee - the per-turn ask tells you what you may
-play right now and deliberately says nothing about what wins, because THAT text
-would have to go into the payload every model receives and re-baseline every number
-in this repo. The console is allowed to help; the ask is not allowed to change.
+the console and never reach the referee: the console is allowed to help, and the ask
+is not allowed to change. Why the ask tells you what you may play now and not what
+wins is *Context is a budget* below.
 
 Before a live game, `parlor doctor` answers the part no `--help` can, because its
 answer is about the box and not the repo:
@@ -150,6 +149,32 @@ walks all five phases in **every** skin - it iterates `THEMES` rather than a lis
 so a skin added later is covered the day it lands - audits `prompt_for` (the ask,
 not just the view), and plants a leak in each phase's ask to prove the audit is
 still reading it.
+
+## Context is a budget, and the ask is incremental
+
+parlor is **local-first**: the runs behind its numbers are one model served
+serially on one box, not a frontier API with a context window nobody counts
+(`docs/measurements.md` §Route - local is the gate lane). That makes the payload a
+budget, and it is spent deliberately.
+
+**A rule reaches a seat at the phase where it is actionable, and not before.** The
+vote ask states the five-rejection rule; the mission ask states how many fails sink
+it and what the seat's own side wants; the propose ask states neither, because
+neither is actionable while you are picking a team. There is no standing rules
+block anywhere - a seat is never handed the whole game, only the part of it that is
+live.
+
+**This is a position, not an omission**, and two measured things hold it there.
+Every byte in the payload is audited by gate #1 and re-baselines every number
+recorded under it, so context is never free. And restating a fact a seat *already
+holds* is measured to cut both ways: one such line bought +7% -> +63% discrimination
+on a 12B and then inverted on a stronger model, +80% without it against +72% with
+it. More context is not monotonically better, so it is added as an arm and never on
+the argument that it ought to help.
+
+It is a real fork, and the queue carries the arm that would test it. A person is a
+separate question with a free answer - the console prints a briefing and the full
+rules beside the view, outside the payload, where neither cost lands.
 
 ## The gates - one property and two dated snapshots
 

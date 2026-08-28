@@ -42,6 +42,21 @@ Change them against a measurement, and change them HERE.
   wins ~65% with no deception at all.
 - **`core/` is what game #2 inherits; `games/<name>/` is what is about that game.**
   Promote on evidence that a second game needs it.
+- **The ask carries what THIS phase needs, and the payload is a budget.** parlor is
+  local-first - `docs/measurements.md` §Route: local is the gate lane, one model
+  served serially on one box - so context is scarce in a way a frontier API hides,
+  and a standing rules dump would be paid on every call of every seat of every
+  game. So a rule reaches a seat at the phase where it is actionable: VOTE gets the
+  reject rule, MISSION gets `need` and the seat's own stake, PROPOSE gets neither.
+  **This is a position, not an omission**, and two things hold it there. Every byte
+  in the payload is audited by gate #1 and re-baselines every number recorded under
+  it. And restating a fact a seat ALREADY holds is measured to cut both ways -
+  `_night_against_the_table` bought +7% -> +63% on a 12B and then INVERTED on q36
+  (+80% as-is vs +72% with the line), so more context is not monotonically better
+  and cannot be adopted on the argument that it ought to help. Adding standing
+  context is a measured arm (`RESUME.md`), never a convenience. What a PERSON needs
+  is a different question with a free answer: `core/console.py` prints a briefing
+  and `rules` beside the view, outside the payload, where neither cost lands.
 - **The tree describes parlor; the rest is a working note.** Canonical keys stay
   functional and branding-free - prose may name the game a rung is modelled on,
   while that game's role names, art and text stay out of the code. Published work
