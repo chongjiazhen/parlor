@@ -202,3 +202,140 @@ calls a game against cabal's 80-220), not for running it sooner.
 
 The wider neighbour list is kept off-repo with its raw notes; `CLAUDE.local.md`
 has the path.
+
+## The changeling skin set - what each arm is FOR
+
+Scoped 2026-08-27, all behind arm 3 above (the inverted-polarity skin) - two more
+rich arm-2 fictions and still no claim about morality is exactly the trap this doc
+exists to name. Built the same day as themes only; `DEFAULT_THEME` stayed `folk`
+and no number moved on any of them. All are held to 59 words AND 308-316 chars on
+both axes at once, for the same reason as the cabal arms above: a same-word-count
+blurb ran 13% short in bytes once already, and word count alone is not the control.
+
+**The set, and the slot each fills.** `folk` is the floor. `folk-inv` is the
+inverted-polarity arm: same village, same night, opposite valence, and six of its
+eight card names are `folk`'s own and unchanged - only the two carrying the valence
+move, `Werewolf` to `Hunted` and `Seer` to `Witchfinder`. 2-vs-3 differs in valence
+and very nearly nothing else, tighter than cabal's `1984-inv` manages; the village
+still wins by naming one of them, the blurb just stops calling that a rescue.
+`greek` is the vocabulary control (arm 2'), what `bnw-en` is to `1984-en`.
+`investiture` (Fengshen Yanyi) and `masquerade` are the two neutral arms, neutral
+by different mechanisms - `investiture` with total stakes that do not matter,
+`masquerade` with no stakes at all - so the pair separates an act with no moral
+weight from an act with no consequences, which one neutral arm alone would
+confound. The full set is floor / polarity / inverted polarity / vocabulary
+control / two neutrals, all at 59 words and 308-316 chars, all unrun.
+
+**Greek myth as the vocabulary control.** Register-distant from `folk` in the way
+a fae skin (rejected above) was not, and the fit is structural rather than
+decorative: metamorphosis and theoxeny are the corpus, gods walk unrecognised,
+Proteus is a different thing each time you grip him, Circe changes what you are
+while you are her guest. Polarity maps onto `folk`'s cleanly, which is exactly
+what a control needs.
+
+**Fengshen Yanyi's text check, done 2026-08-27, and what it moved.** The
+conceit - the dead of the war are enrolled in the celestial bureaucracy - was
+first read as "both hosts execute the same mandate" and that reading did not
+survive the source. Ch. 99, the edict at the investiture altar: the dead are
+enrolled `依劫運之輕重，循資品之高下` (by the weight of the calamity endured and by
+rank), then `有功之日，循序而遷`. Shang's dead take posts beside Zhou's - Huang
+Feihu served Shang and is enrolled - so the neutral FRAME stands. What did not
+survive is the "shared commission" gloss: the edict grounds enrollment in
+calamity and karma, not a shared mandate, so that clause was this repo's own
+gloss wearing the novel's authority. The blurb now says what the text says - the
+roll asks what it cost you, not which host you served - which is flatter
+neutrality, the indifference being the ROLL's rather than a symmetry between the
+sides. Still 59 words. `investiture` and `masquerade` are neutral by different
+mechanisms as above, which is the whole reason Fengshen earns a build rather than
+being folded into the masquerade arm: "one side must lose, and losing is not
+damnation" is rich where a masquerade is neutral by being thin.
+
+**Journey to the West holds the best statement of this rung's premise.** The
+Six-Eared Macaque: an impostor identical to Sun Wukong, indistinguishable to the
+gods and to the pilgrims who travelled with him. That is the belief/truth split
+this whole rung measures, in one episode.
+
+**The mashup question, asked and answered 2026-08-27: right as SOURCING, wrong as
+DESIGN.** Fengshen Yanyi and Journey to the West share a pantheon - Nezha, Li
+Jing, Erlang Shen, Laozi are in both - so drawing on both is how the folk
+cosmology actually works, not a mangling. But their value here is opposite:
+Fengshen's is neutral polarity, JTTW's is righteous-pilgrims-versus-impostors.
+Mash them and the skin's polarity goes indeterminate, which rebuilds the
+`1984-en`-vs-`plain` confound by hand. So the rule: one corpus owns the FRAME,
+the other supplies vocabulary and imagery across the shared pantheon - a mashup
+in practice, one variable on paper. Applied one name at a time with this entry
+test: a figure enters if its story reinforces the bureaucratic conceit or is
+silent about it, and stays out if it arrives arguing one side is righteous. Zhong
+Kui is in for his APPOINTMENT - failed the examination, died on the steps, woke
+into an office, which is the frame's own claim told as a biography - and his
+demon-hunt is out, being the same man. Lotus Body is Nezha. The first build of
+`investiture` was Fengshen top to bottom and did not honour the sourcing half; it
+was re-vocabularied across the pantheon the same day, against this test.
+
+**A second test found the same day, after a pure-JTTW skin was costed: corpus
+signatures are RESERVED even when they pass the polarity test.** Six-Eared
+Macaque sat in `investiture` for a few hours and came back out: as a card it
+takes no side, but it is the JTTW skin's headline, and two faces sharing their
+most distinctive name stop being two vocabularies - which is the whole variable a
+control arm moves. Shared-pantheon figures (Nezha, Zhong Kui, Yang Jian) stay
+free to both corpora; signatures do not. `Yellow Turban` went with it, colliding
+lexically rather than by ownership with `Yellow Wind`. `investiture`'s
+swapper/switcher/kindred are now Earth-Traveller / Duty Officer / Same List, the
+last two also pulling toward the bureaucratic frame.
+
+**`journey`, the pure-JTTW skin, built 2026-08-27.** Card mapping: pack = Six-Eared
+Macaque, spotter = Fiery Eyes, swapper = Hair Double, switcher = Yellow Wind,
+deceived = River-Drinker, bystander = Porter, kindred = Vow-Bound, waker =
+Cast-Off Body (the corpse at the Lingyun crossing - looking at what you actually
+are, after everything). Sides are The Pilgrims / The Impostors, pile `baggage`.
+It does not add an arm: its polarity matches `folk`, so it is a second candidate
+for the one vocabulary-control slot `greek` holds, and two 2' arms carry no more
+information than one. `greek` keeps the slot, because the two run on different
+moral axes even at matched polarity - `folk` and `greek` both run on predator and
+prey, where `journey` runs on legitimate versus counterfeit: nobody is eaten, and
+the wrong is that the wrong one is wearing the face. A control must not move that
+axis. So `journey` ships to be READ (the skin to put in front of someone asking
+what parlor is for, since its source states this rung's premise outright) and
+`greek` ships to be RUN. Reversing that would be a swap, not an addition.
+
+**`greek` lost its proper names the same day, and that is the control working.**
+It shipped 6-of-8 proper names - Empousa, Pythia, Hermes, Circe, Dioscuri,
+Narcissus - while `folk` is 8-of-8 common nouns and so is every other skin,
+`journey` included. So folk-vs-greek was moving vocabulary AND name type at once,
+the `bnw-en` word-count defect in a different currency. Name type is not
+cosmetic: a proper name is an opaque token that pays off only from the model's
+priors and pays nothing without them, while a common noun restates a power the
+preamble already prints - so the two hand a weak model different amounts, and
+that gap would have been read as vocabulary. Renamed to Hollow Guest / Oracle /
+Trickster / Enchantress / Lotus-Eater / Shepherd / Twins / Pool-Gazer, same
+register, no personal names. Check name type on any future skin - nothing tests
+it, because "is this a proper name" is not a property code can decide.
+
+**The proper names came back the same day as `greek-named`, which is the right
+LAYER for them, not a reversal.** Dropping them from the control was correct;
+treating them as a defect rather than a variable was not. `greek` and
+`greek-named` are the pair described in §Name form above: they differ in exactly
+eight strings, the card names, with blurb, pile, sides, polarity, corpus and
+length all identical.
+
+**A live prompt bug caught by reading the rendered preamble, not by any test.**
+Under `greek`, the `deceived` power hardcoded "a {centre}", so a skin naming the
+pile with a vowel put "a altar card" in front of every seat. Fixed via
+`roles.indefinite()`; a guard now renders every skin's power text so this class
+of bug surfaces before a run does. `folk` and `plain` render the bytes they
+always did, so the queued 200-game run was untouched. Standing lesson: read the
+prompt, not just the tests, when a skin lands.
+
+**Ship any myth skin in English first.** A `*-cn` skin moves fiction AND language
+at once and cannot be read. The clean language control for this already exists
+on cabal and has never been run - `1984-en` vs `1984-cn` holds the fiction
+byte-identical and moves only the language, on a game whose numbers are already
+in hand. CN name forms (`Liu'er Mihou` as transliteration, `六耳猕猴` as Han
+script) are the next rung on the §Name form axis, not a new one, and `journey` /
+`investiture` are where they would go - see §Name form for the ladder and why
+the Greek pair goes first.
+
+`games/changeling/demo.py` (built 2026-08-27, the twin of cabal's `demo.py`) is
+the entry point for reading any of these skins as a seat receives them rather
+than as source; it reuses the same CJK-safe stdout guard already in place for the
+CN work.

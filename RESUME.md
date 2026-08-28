@@ -48,12 +48,13 @@ never carry the marker - `hunt6[ab]`, not `hunt6*`, which also matches
 `hunt6b-chain.log` and so reads "in flight" forever. **Never judge a run by a
 process probe.**
 
-**The bare command now names 9 terminal runs, and that number only grows.** The
-`PARLOR DONE` marker landed in S4 (2026-08-27, `core/runlog.py`), so every log
-written before it lacks the marker permanently: the `hunt20*`, `huntcloud*` and
-unsuffixed `cl-powers-*` logs are all finished and all report as in flight. Read
-the answer against `RESUME.local.md`'s launch record, and treat a name it does not
-list as a pre-S4 fossil rather than a run.
+**Most of what it names is a fossil, and no count of them is worth writing down** -
+it only grows, and a number here is stale on the next run. The `PARLOR DONE` marker
+landed in S4 (2026-08-27, `core/runlog.py`), so every log written before it lacks
+the marker permanently: the `hunt20*`, `huntcloud*` and unsuffixed `cl-powers-*`
+logs are all finished and all report as in flight. Read the answer against
+`RESUME.local.md`'s launch record, and treat a name it does not list as a pre-S4
+fossil rather than a run.
 
 **No progress figure, ETA or log-tail path is recorded here** - a count written
 into a queue file about a running job is stale the hour it is written, and an ETA
@@ -176,8 +177,9 @@ later:
 
 ## Session slices - what one `/new` should take
 
-The queue is 24 open items and a cold session cannot rank them. These are the
-units: each is one session's worth, has a stated entry condition, and ends in a
+The queue is two dozen open items and a cold session cannot rank them - and it is
+deliberately not counted here, because a count in a queue file is wrong on the next
+edit and nothing objects. These are the units: each is one session's worth, has a stated entry condition, and ends in a
 thing that exists. **Take exactly one.** They are ordered by what unblocks what,
 not by appeal - so **the numbers are IDs, not positions**, and S9/S10 sit above S2
 because the code-debt batch re-baselines what S2 would record. Live rows cite
@@ -216,8 +218,6 @@ is waiting on.
 
 | option | verdict | why |
 |---|---|---|
-| ~~the mechanical solver + the heuristic rung~~ | **DONE 2026-08-27** | The whole CPU lane of a GPU wait, and it needed no model-facing byte: `games/cabal/solver.py`, `games/cabal/heuristic.py`, `python -m eval.derivable` / `eval.ladder`. Numbers in §Measured, reasoning in `docs/reference-policies.md`. What is left of either needs the card - a solver ARM and a mixed heuristic/LLM table, and cabal has no GPU program left to spend on them. **The reusable lesson is the shape, not the code: an instrument scored against records that already exist costs nothing and can outrank the run it is waiting on.** Both of this session's headline findings came from re-reading 60 games nobody re-ran |
-| ~~human players in cabal/changeling~~ | **DONE 2026-08-27** | `--human 0` on either demo hands a person `ref.prompt_for(seat)` and nothing else. **One game, one human, and the second of those is the invariant asserting itself** - a terminal is one channel, so two people at it would read each other's private view scroll past, and the referee's audit cannot see that: both renders are correct, and what is wrong is that one pair of eyes receives both. `human_seats` refuses it in `core/`, mutation-checked. A second human seat needs a second channel (socket, second terminal, process per seat) and that does not exist, so gate #1 is a thing you can sit inside and try to break rather than only a thing a test asserts. Cost one class (`core/console.py`) and no game edits: `LLMPolicy` already reaches its backend through exactly `complete_meta(context) -> (reply, served_by)`, so a console in that slot inherits the same prompt, parser and refuse-and-retell loop, and records `served_by="human"` per decision. Also landed changeling's demo entry point. The demos' pre-game peek at seat 0's view is now withheld when a person is seated - a leak the referee's audit **cannot** see, because it grades what the REFEREE renders and that print talks past it |
 | Secret Hitler | **no** | Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
 | Blood on the Clocktower | **right target, wrong size - and now scope it against what exists** | The only one of these that is a genuinely different rung: the Storyteller makes *discretionary* rulings, which is the judgment-GM `docs/action-channel.md` splits the kernel/adjudicator for. But it is 20+ characters and the discretion is the hard part - so the session-sized version is a SPIKE that scopes the adjudicator against 3-4 characters, never the game. **Confirmed from outside 2026-08-27** - a public LLM-vs-LLM arena at this game already exists and is rated, another build scripts the storyteller outright, and a third puts an LLM in that seat; the off-repo ledger names all three. **So an LLM arena at this game is NOT the contribution. The discretionary adjudicator plus the entitlement audit is.** Two free controls worth copying from the rated one: shuffled turn order against positional advantage, and role-flipped mirrored matches |
 | 5e / a rules-lite RPG | **the endgame, and not yet** | This is the rung the repo is aimed at. `docs/action-channel.md` says do not harden cabal's `Phase` enum, `action_prompt` chain or `ACTION_KEYS` before game #2 exists - and a rules-lite system is the honest cheap version of this, not 5e |
@@ -246,10 +246,15 @@ sit behind the freeze - the solver arm, the mixed heuristic/LLM table,
 move landed 2026-08-28; the other two need GPU cabal no longer has, so they queue
 behind changeling or land at the publish boundary.
 
-**Publish hygiene is DONE for this round, 2026-08-28.** The tree states what parlor
-does and what its numbers mean; the scope rule for everything else is the invariant
-in `CLAUDE.md`, and it is the thing to check a new doc against rather than a pass to
-re-run. The three route base URLs are environment variables with loopback defaults
+**Publish hygiene stopped being a round, 2026-08-28.** It is now a pre-commit gate
+over the lines a commit ADDS - `scripts/hygiene-check.sh`, installed by
+`scripts/install-hooks.sh`, invariant in `CLAUDE.md` - so the mechanical half rides
+every commit instead of waiting for a publish-day pass, and nothing accrues between
+passes. It found zero violations in the tracked tree the day it landed, which is the
+point: the value is forward, on the next commit. The judgement half a grep cannot
+see - a doc that assesses a third party, quotes unread work, or names an author
+where an identifier would do - is the scope rule in `CLAUDE.md`, and it is the thing
+to check a new doc against rather than a pass to re-run. The three route base URLs are environment variables with loopback defaults
 (`PARLOR_ENDPOINT_LOCAL` / `_CLEAN` / `_GRAY`), so a clone runs with nothing set and
 no box's topology is in the tree. Nothing is queued behind it.
 
@@ -394,11 +399,13 @@ arm is ~30 min against cabal's 13.2 h.
       (`cannot fail a mission`, `cannot be the informant`) are hard guardrails and
       stay, though each already pairs with a positive instruction.
       **This is a measured change, not a cleanup** - same seeds, one variable, and
-      it waits until the runs in flight land or it contaminates them.
+      a prompt edit landed mid-campaign confounds that campaign exactly the way
+      `c43274e` confounded `hunt20b`. **UNBLOCKED 2026-08-28**: S6 is down, nothing
+      is in flight, and the standing rule is the check rather than the wait - run
+      the liveness command above before landing it, not a remembered freeze.
       **Re-homed 2026-08-27 (S1):** measure it on changeling, where a paired
-      20-game arm is ~30 min against cabal's 13.2 h. It must not land before the S6
-      campaign finishes - a prompt edit mid-campaign confounds it exactly the way
-      `c43274e` confounded `hunt20b`. Cabal's referee refusals stay as written.
+      20-game arm is ~30 min against cabal's 13.2 h. Cabal's referee refusals stay
+      as written.
 - [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.** `--notebook`
       on `run_games.py` and `demo.py`; off by default. A seat's `note` is filed
       under its own seat and rendered back to that seat alone on every later call,
@@ -441,9 +448,12 @@ arm is ~30 min against cabal's 13.2 h.
         becomes a claim about deduction. The blind-evil variant makes evil deceive
         WITHOUT knowing its partner, which is the honest version of gate #2 - the
         current claim is really "two agents told about each other cooperated".
-      - **Not before gate #3 is called.** Changing what the seer knows mid-run means
-        neither the old nor the new number means anything. Sequence them as the
-        hardening pass you would actually publish from.
+      - **The gate that gated this is CALLED** - 3a retired and 3b not shown,
+        2026-08-27 - so the sequencing constraint is now only the general one:
+        changing what the seer knows mid-run means neither the old nor the new
+        number means anything. Land it between campaigns, as the hardening pass you
+        would actually publish from. What still blocks it is that cabal has no GPU
+        program left, not a gate.
       - At 5 seats there are only 2 evil, so the unseen variant leaves the seer
         seeing exactly one and the blind variant leaves two evils who know nothing
         of each other - swingy to the point of noise. These are 7+ roles.
@@ -494,182 +504,39 @@ arm is ~30 min against cabal's 13.2 h.
       the same reason: every recorded changeling number was played on the
       eight-card deck, so a deck change re-baselines all of them. **The DECK DESIGN
       landed 2026-08-27** in `games/changeling/RULES.md` §The decks that would seat
-      them - two decks, not one, each with its arithmetic measured over 4000 nights.
-      What is left is registering them and the measurement.
-      - **Deck A, `waker`: 6 seats / 3 centre / 9 cards.** Cutting a `bystander` to
-        make room was the obvious move and HALVES the gate's own denominator (1.02
-        blind villager seats per game to 0.51), so the deck grows instead. Growing
-        the TABLE beat growing the centre on every axis, against the armchair
-        prediction: blind/game 1.18 (+16%), unwinnable 2.8% -> 1.8%. `waker` is
-        seated in 62.0% of games, so **one run carries its own control** -
-        waker-present vs waker-absent, randomised within the run, no paired second
-        run and no freeze between arms.
-      - **Deck B, `kindred`: 7 seats / 3 centre / 10 cards, plus
-        `require_seated_kin` (both seated or both in the centre).** On a free deal
-        the pair FAILS to form more often than it forms - lone 47.1% vs pair 45.2%
-        - so half the run would measure nothing while adding blind villagers
-        mislabelled `identity`. The constraint costs 0.92 retries/game and lifts
-        the pair to 86.0%; `require_seated_pack` is the precedent and the same
-        argument at twice the rate. Three copies instead of a constraint is worse
-        and deletes the blind stratum outright.
-      - **UNBLOCKED 2026-08-28** - both decks waited on code-debt item 6 (key the
-        knowledge class on what the seat was told), because each changes how much
-        of the `identity` stratum is blind seats. That landed in S10, and
-        `py -3 -m eval.strata` prices a deck's strata before it is built: add a row
-        to its `DECKS` table and read the blind count off 4000 nights.
-      - Every deck change here costs at least TWO variables - `len(deck) == n +
+      them, and that section is the source of record - two decks, each with its
+      arithmetic measured over 4000 nights, plus the four expansions costed and not
+      built. **Do not restate its numbers here.** What is open is the part a design
+      doc cannot close:
+      - **Register the setups, then measure.** Both decks are UNBLOCKED as of
+        2026-08-28 - they waited on keying the knowledge class on what the seat was
+        told, which landed in S10. `py -3 -m eval.strata` prices a deck's strata
+        before it is built: add a row to its `DECKS` table and read the blind count
+        off 4000 nights.
+      - **Every deck change costs at least TWO variables.** `len(deck) == n +
         centre` means a card cannot be added without growing the table or the
-        centre. There is no one-variable arm in this game; choose the second
+        centre, so there is no one-variable arm in this game. Choose the second
         variable deliberately and report it.
-      - **Do it after S2/S5**, and expect `waker` to be the one worth a run:
-        every other seat has to infer that the night moved it, and this one is
-        told, so it is the cleanest handle on whether a model reasons about
-        divergence at all rather than about who is lying.
-      - Landing `kindred` found a real gate #1 leak, now fixed and guarded: two
-        meeting kinds sharing the sentence "one of your own" made a stale village
-        reveal byte-identical to the one that betrays a wolf moved into that seat.
-        `Card.kin_form` is per-kind data; `pack` keeps its sentence, because
-        rewording it would be a prompt edit under the queued 200-game run.
-      - Four notable expansions costed and NOT built, in `RULES.md`: a third win
-        condition (cheapest interesting one, and it lands on the scorer, not the
-        night), an evil that sees the pack unseen, a card that copies another and
-        acts as it (the game is named for it, and it makes the night recursive), a
-        mass positional shuffle (cheap, but variety).
+      - **Route call: `waker` is the one worth a run.** Every other seat has to
+        infer that the night moved it and this one is told, so it is the cleanest
+        handle on whether a model reasons about divergence at all rather than about
+        who is lying - and its deck seats it in 62% of games, so one run carries
+        its own control with no paired second run.
 
-- [ ] **Candidate changeling skins, and which arm each is FOR** (scoped
-      2026-08-27). All of them sit behind arm 3, the
-      inverted-polarity skin - two more rich arm-2 fictions and still no claim
-      about morality is the trap `docs/moral-framing.md` exists to name.
-      **BUILT 2026-08-27, as themes only:** `greek` (the vocabulary control below)
-      and `investiture` (the Fengshen arm 4 below). Unrun, `DEFAULT_THEME` still
-      `folk`, no number moved. Both are 59 words against `folk`'s 59, and 312/308
-      chars against its 316 - length is held on BOTH axes, because a same-word-count
-      blurb ran 13% short in bytes on cabal and word count alone is not the control.
-      **The inverted-polarity skin landed the same day and the blocker is cleared.**
-      `folk-inv` is the hunted framing: same village, same night, opposite valence.
-      Six of its eight names are `folk`'s own and unchanged - only the two carrying
-      the valence move, `Werewolf` to `Hunted` and `Seer` to `Witchfinder` - so 2-vs-3
-      differs in valence and very nearly nothing else, which is tighter than cabal's
-      `1984-inv` manages. The village still wins by naming one of them; the blurb
-      stops calling that a rescue. The set is now floor / polarity / inverted polarity
-      / vocabulary control / two neutrals, all at 59 words and 308-316 chars, all
-      unrun.
-      **Reading the rendered preamble under `greek` caught a live prompt bug that no
-      test held**: the `deceived` power hardcoded "a {centre}", so a skin naming the
-      pile with a vowel put "a altar card" in front of every seat. The article now
-      comes from `roles.indefinite()` and a guard renders every skin's power text;
-      `folk` and `plain` render the bytes they always did, so the queued 200-game run
-      is untouched. Read the prompt, not just the tests, when a skin lands.
-      - **Greek myth = the vocabulary control (arm 2').** What `bnw-en` is to
-        `1984-en`. Register-distant from `folk` in the way a fae skin was not, and
-        the fit is structural rather than decorative: metamorphosis and theoxeny
-        are the corpus, gods walk unrecognised, Proteus is a different thing each
-        time you grip him, Circe changes what you are while you are her guest.
-        Polarity maps onto `folk`'s cleanly, which is exactly what a control needs.
-      - **Fengshen Yanyi = a better arm 4 than the masquerade.** Its conceit is
-        that the dead of the war are enrolled in the celestial bureaucracy and both
-        sides execute a mandate: "one side must lose, and losing is not damnation"
-        is a morally NEUTRAL frame that is also rich, where a masquerade is neutral
-        by being thin. Check the reading against the text before building on it.
-        **Both built 2026-08-27, and the masquerade objection is what gives it a
-        job.** They are neutral by DIFFERENT mechanisms - `investiture` with total
-        stakes that do not matter, `masquerade` with no stakes at all - so the pair
-        separates an act with no moral weight from an act with no consequences,
-        which one neutral arm confounds. If 4 and 4' differ, what moved was stakes
-        rather than valence. `masquerade` is thin in the conceit only: 59 words,
-        like every other arm here.
-        **Fengshen TEXT CHECK DONE 2026-08-27, and it moved a clause.** Ch. 99, the
-        edict at the investiture altar: the dead are enrolled `依劫運之輕重，循資品之高下`
-        (by the weight of the calamity endured and by rank), then `有功之日，循序而遷`.
-        Shang's dead take posts beside Zhou's - Huang Feihu served Shang and is
-        enrolled. So the frame stands. What did NOT survive is "both hosts execute the
-        same mandate": the edict grounds enrollment in calamity and karma, not a shared
-        commission, so that was this repo's gloss wearing the novel's authority. The
-        blurb now says what the text says - the roll asks what it cost you, not which
-        host you served - which is flatter neutrality, the indifference being the
-        ROLL's rather than a symmetry between the sides. Still 59 words.
-      - **Journey to the West holds the best statement of this rung's premise.**
-        The Six-Eared Macaque: an impostor identical to Sun Wukong, indistinguish-
-        able to the gods and to the pilgrims who travelled with him. That is the
-        belief/truth split in one episode. If one myth skin ever ships, that is its
-        blurb.
-      - **The mashup, asked 2026-08-27: right as SOURCING, wrong as DESIGN.** The
-        two share a pantheon - Nezha, Li Jing, Erlang Shen, Laozi are in both - so
-        drawing on both is how the folk cosmology actually works, not a mangling.
-        But their value here is opposite: Fengshen's is neutral polarity, JTTW's is
-        righteous-pilgrims-versus-impostors. Mash them and the skin's polarity is
-        indeterminate, which is the `1984-en`-vs-`plain` confound rebuilt by hand.
-        So: one corpus owns the FRAME, the other supplies vocabulary and imagery
-        across the shared pantheon. A mashup in practice, one variable on paper.
-        **The first `investiture` was Fengshen top to bottom and did not honour the
-        sourcing half; re-vocabularied 2026-08-27** across the pantheon, with a test
-        the division can be applied by, one name at a time: a figure enters if its
-        story reinforces the bureaucratic conceit or is silent about it, and stays
-        out if it arrives arguing one side is righteous. Zhong Kui is in for his
-        APPOINTMENT - failed the examination, died on the steps, woke into an office,
-        which is the frame's own claim told as a biography - and his demon-hunt is
-        out, being the same man. Lotus Body is Nezha.
-      - **A second test: corpus signatures are RESERVED, even when they pass the
-        polarity one** (2026-08-27, after a pure-JTTW skin was costed). Six-Eared
-        Macaque was in `investiture` for a few hours and is out again: as a card it
-        takes no side, but it is the JTTW skin's headline, and two faces sharing
-        their most distinctive name stop being two vocabularies - which is the whole
-        variable a control arm moves. Shared-pantheon figures (Nezha, Zhong Kui,
-        Yang Jian) stay free to both; signatures do not. `Yellow Turban` went with
-        it, colliding lexically rather than by ownership with `Yellow Wind`.
-        `investiture`'s swapper/switcher/kindred are now Earth-Traveller / Duty
-        Officer / Same List, the last two also pulling toward the bureaucratic frame.
-      - **`journey`, the pure-JTTW skin, BUILT 2026-08-27.** pack = Six-Eared
-        Macaque, spotter = Fiery Eyes, swapper = Hair Double, switcher = Yellow Wind,
-        deceived = River-Drinker, bystander = Porter, kindred = Vow-Bound, waker =
-        Cast-Off Body (the corpse at the Lingyun crossing - looking at what you
-        actually are, after everything). Sides The Pilgrims / The Impostors, pile
-        `baggage`. **It does not add an arm.** Its polarity matches `folk`, so it is a
-        second candidate for the ONE vocabulary-control slot `greek` holds, and two
-        2' arms carry no more information than one. `greek` keeps the slot: `folk` and
-        `greek` both run on predator and prey, where `journey` runs on legitimate
-        versus counterfeit - nobody is eaten, and the wrong is that the wrong one is
-        wearing the face. A different moral axis, which a control must not move. So
-        `journey` ships to be READ (the skin to put in front of someone asking what
-        parlor is for, since its source states this rung's premise outright) and
-        `greek` ships to be RUN. Reversing that is a swap, not an addition.
-      - **`greek` lost its proper names the same day, and that is the control
-        working.** It was 6-of-8 proper names - Empousa, Pythia, Hermes, Circe,
-        Dioscuri, Narcissus - while `folk` is 8-of-8 common nouns and so is every
-        other skin, `journey` included. So folk-vs-greek moved vocabulary AND name
-        type, the `bnw-en` word-count defect in a different currency. Name type is not
-        cosmetic: a proper name is an opaque token that pays off only from the model's
-        priors and pays nothing without them, while a common noun restates a power the
-        preamble already prints - so the two hand a weak model different amounts, and
-        that gap would have been read as vocabulary. Now Hollow Guest / Oracle /
-        Trickster / Enchantress / Lotus-Eater / Shepherd / Twins / Pool-Gazer, same
-        register, no personal names. **Check name type on any future skin**; nothing
-        tests it, because "is this a proper name" is not a property code can decide.
-      - **The proper names came back the same day as `greek-named`, which is the
-        right LAYER for them** - not a reversal. Dropping them from the CONTROL was
-        correct; treating them as a defect rather than a variable was not. The pair
-        differs in exactly eight strings, the card names, with blurb, pile, sides,
-        polarity, corpus and length all identical - the cleanest single-variable
-        manipulation in the repo, since every other arm pair moves a whole fiction.
-        It is worth running because the preamble prints every power in full, so the
-        names carry no information: whatever separates the pair moved through priors
-        and salience, which is a confound underneath every polarity arm. Axis, ladder
-        and the CN follow-up: `docs/moral-framing.md` §Name form.
-      - **CN name forms are the next rung on that axis, not a new one** - a
-        transliteration (`Liu'er Mihou`) is opaque where a gloss (`Six-Eared Macaque`)
-        is not, and Han script is opaquer again. `journey` / `investiture` are where
-        it would go, and it also tests whether the effect travels or belongs to one
-        fiction. Not built: the Greek pair isolates the axis at no fiction cost and
-        comes first. The console prerequisite below is now cleared either way.
-      - **Ship any myth skin in English first.** A `*-cn` skin moves fiction AND
-        language at once and cannot be read. The clean language control already
-        exists and has never been run - `1984-en` vs `1984-cn` holds the fiction
-        byte-identical and moves only the language, on a game whose numbers are
-        already in hand.
-      - **Changeling's demo entry point LANDED 2026-08-27** - `games/changeling/demo.py`,
-        the twin of cabal's, so a skin can be read as a seat receives it rather than
-        as source. The CJK console prerequisite was already done and this carries the
-        same stdout guard.
+- [ ] **Candidate changeling skins - BUILT 2026-08-27, ALL UNRUN.** `greek`,
+      `greek-named`, `journey`, `investiture`, `masquerade` and `folk-inv` exist as
+      themes; `DEFAULT_THEME` is still `folk` and no number has moved. **The design
+      is `docs/moral-framing.md` §The changeling skin set - what each arm is FOR**,
+      which owns the arm ladder, the name-form axis, the corpus-sourcing rules and
+      the length control. Read it before running or editing any of them; do not
+      restate it here.
+      - **What is open is which arm gets GPU first**, and the ranking is a route
+        call this file owes: `greek` for the vocabulary control, `folk-inv` for
+        polarity, the `greek`/`greek-named` pair for name form - that pair being the
+        cleanest single-variable manipulation in the repo, since it moves eight
+        strings and nothing else.
+      - **A blurb is a prompt**, so every face is frozen at its measured length and
+        an edit orphans whatever has been recorded against it.
 
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** A public repo has a real problem that "team-
@@ -738,8 +605,9 @@ arm is ~30 min against cabal's 13.2 h.
         information asymmetry against the game's own rules, i.e. the seat is being
         asked to weigh redundant sabotage against a threshold it was never given.
         This is not a hint and not a nudge; it is restoring entitled information,
-        and it needs no measurement to justify. It does still need to be SEQUENCED
-        after gate #3, because it changes behaviour mid-run like anything else.
+        and it needs no measurement to justify. The gate it was sequenced behind is
+        called, so what is left is the ordinary rule: it changes behaviour, so it
+        lands between campaigns and not into one.
       - **(b) Naming the partner on this team - a HINT, and the evidence points
         AGAINST it.** The seat can derive "my partner is on this team" from the
         public proposal plus its night knowledge. Spelling that out is exactly what
@@ -757,8 +625,8 @@ arm is ~30 min against cabal's 13.2 h.
         evil is not a fairness gesture - it is required before the good-side number
         means what it claims. Expect discrimination to DROP when this lands; that
         drop is a truer number, not a regression.
-      - Sequence: measured change, same seeds, one variable, after gate #3 is
-        called. Distribution above is from a PARTIAL run (13 of 20) and is an
+      - Sequence: measured change, same seeds, one variable, between campaigns -
+        the gate this waited on is called. Distribution above is from a PARTIAL run (13 of 20) and is an
         incidental mechanical count, not the pre-committed hunt metric - recompute
         on the full run before quoting it anywhere load-bearing.
 - [ ] **Stratify cloud results by served upstream instead of pooling them.** The
@@ -779,7 +647,8 @@ arm is ~30 min against cabal's 13.2 h.
       sabotage reads as heroic, deceit as survival - and nothing measures whether
       that moves behaviour. No number in §Measured records which theme produced it,
       so a theme change is a MEASURED change on the same terms as the negation
-      pass: same seeds, one variable, after gate #3 is called.
+      pass: same seeds, one variable, landed between campaigns. The gate it used to
+      wait on is called.
       **Re-homed 2026-08-27 (S1)** to changeling, which ships a folk-game theme of
       its own and so poses the polarity question at 1/26th the GPU cost. `1984-en`
       remains cabal's shipping default and is the face of every committed
@@ -917,7 +786,7 @@ random policy wearing a model's name.
 | same seer decision, isolated bench, no discussion | 83% -> 37% (n=30/cell, p<0.001) | the line works when nothing buries it |
 | `--rounds 2` vs 1 round | 1 of 8 games deadlocked vs 2 of 2 | two rounds is the floor |
 | vote unanimity | 11% of 46 votes (spread 1/5..4/5) | votes are ALREADY independent, just uninformed |
-| record length vs the 60-line cap | 10 of 16 games over, speech:facts ~4:1 | the trim was deleting missions 1-2 (fixed, `3d0d07d`) |
+| record length vs the 60-line cap | 10 of 16 games over, speech:facts ~4:1 | the trim was deleting missions 1-2 (fixed, `e3249ec`) |
 | cap at 512 vs 1536 max_tokens, `nemotron-3-super` | 0/4 -> 2/4 parsed, failures truncated at BOTH caps | no cap fixes a model that thinks out loud; pin one that does not |
 | **cloud `auto` (mixed 120B-class), character register, 12 games** | **discrimination +66.0%** (clean 94.4%, tainted 28.4%, n=192; 2.5% fallback) | **gate #3a HOLDS - it was model capability, not the prompt** |
 | same run, hunter | 33.3% (3/9, CI floor 12.1%) | exactly chance - gate #3b is now the blocker |
@@ -1063,11 +932,13 @@ queue, the dated measurements, and the route decisions.
   The state moved to the labels, never the reverse, and every `slots_used` is now
   derivable from a `slot_costs` block. The scorer is unbuilt - there is no durf
   engine yet, only the fixture.
-- `docs/moral-framing.md` - the theme-polarity experiment, its confound, and the
-  verified deception/framing prior work. Arms 3 (`1984-inv`) and 4 (`drill-en`)
-  are BUILT as of 2026-08-27 and unrun; read it before running any of them, and
-  before editing any blurb - the four English faces are length-matched on purpose
-  and frozen.
+- `docs/moral-framing.md` - the theme-polarity experiment, its confound, the
+  verified deception/framing prior work, the name-form axis, and **§The changeling
+  skin set, which owns every skin's design and sourcing rules** (moved out of this
+  file 2026-08-28 - it was 134 lines of design in a queue). Arms 3 (`1984-inv`) and
+  4 (`drill-en`) on cabal and the whole changeling set are BUILT and unrun; read it
+  before running any of them, and before editing any blurb - the faces are
+  length-matched on purpose and frozen.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
