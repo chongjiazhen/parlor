@@ -58,9 +58,28 @@ wrong in a way that passes every cabal-era and changeling-era test.
 
 **The card the proposer discards is the sharp case.** It is a fact the proposer is
 entitled to and the enactor is NOT, created and destroyed inside a single event,
-never public, and never revealed by any rule. It is the cleanest gate #1 sentinel
-this repo has: an entitlement that EXPIRES one step down a chain, in a game where
-the next seat down is actively trying to infer it.
+never public, and never revealed by any rule - an entitlement that EXPIRES one step
+down a chain, in a game where the next seat down is actively trying to infer it.
+
+**And naive substring matching cannot see it, which is the finding this rung
+produced before it had any code.** The repo's gate #1 instrument scans a seat's
+rendered bytes for a sentinel STRING. That works for identities, here as in cabal:
+a role name is a token that may appear in one seat's payload and not another's.
+It does not work for a card, because the vocabulary is shared with the public
+record - *"a writ was enacted"* is legal and public on every event, and *"your
+discard was a writ"* is a leak, and they are the same substring. A cleverer matcher
+is not the answer; `find_leaks` stays naive by invariant, and a matcher that had to
+understand which sentence a term sat in would be a parser with opinions.
+
+**The mechanism is a poisoned re-render.** Replace every field this seat is not
+entitled to with a token that appears nowhere else, render again, and scan for the
+tokens. Anything that survives into the payload is a leak, and it is a leak the
+naive scanner can see - so the invariant is kept rather than weakened, and the
+check gets STRONGER than substring matching rather than weaker: it catches a
+render that depends on an unentitled field even when the rendered words look
+innocent. This is the `games/quorum/audit.py` contract, and it is the first thing
+in this repo that a second game would plausibly want in `core/`. It is not
+promoted there yet: the bar is evidence that another rung needs it.
 
 The second reason for this rung is measurement, and it is the one worth building
 for.
@@ -175,9 +194,33 @@ One event, repeated until a win condition fires.
 7. **Power, if the enactment triggers one.** Below.
 8. **Discussion.** `--rounds` of public speech, as in cabal.
 
+**The term limit lifts rather than deadlocking.** Removals can shrink the table
+until barring both the proposer and the previous enactor leaves no legal
+nomination. The bar is a term limit, not a rule the game may stall on, so it lifts
+at that point - decided in `eligible_nominees` so every caller sees one answer. A
+random-play sweep reached this at two living seats before any model did.
+
+**A power fires on the WRIT that reaches its threshold, never on the count merely
+standing there.** Firing on the count alone re-fires every power on each later
+charter; the same sweep produced two inspections and three removals in one 5-seat
+game, which is what the structural bound in the test caught.
+
 ## The deck, and why its composition is a rule and not a knob
 
-Eleven `minority` cards, six `majority` cards. Seventeen total.
+Eleven `writ` cards, six `charter` cards. Seventeen total. A `charter` advances the
+majority's track and a `writ` advances the minority's, which `ADVANCES` states once
+so that a variant adding a third card kind moves the tracks and the win conditions
+together.
+
+**The cards are NOT called `majority` and `minority`,** which would be the obvious
+functional name. The side display names appear in every seat's own "Your role" line,
+so a card term that is a substring of a side term would trip the leak audit on every
+legal call - the colliding-sentinel failure the durf rung has already paid for twice.
+`charter` and `writ` are neutral legal instruments of near-equal valence, short, and
+unlikely to appear in a seat's own speech. The valence symmetry is deliberate as
+well: a `clean`/`corrupt` pair would put moral framing in the canonical layer, and
+`docs/moral-framing.md` records framing as a measured variable rather than
+decoration.
 
 The imbalance is what makes a forced move possible: a majority proposer draws three
 minority cards often enough that "I had no choice" is a real defence and not a
