@@ -284,6 +284,13 @@ arm is ~30 min against cabal's 13.2 h.
 - `docs/gate3-modelling-review.md` - the 2026-08-26 review that started it, closed
   on all six items. **Read its header before its body**: its line citations are
   stale and the gate it was sharpening is the one S1 retired.
+- `docs/scripted-rungs-cabal.md` - 2026-08-28, unmeasured. Why the ladder keeps
+  climbing on hand rules rather than a learned policy, and the three rungs that
+  follow: the designated failer (the CPU half of the 6/7p item below, with a
+  prediction stated before the run), the watcher bluff as a typed `claim(role)`
+  channel rather than a rung, and a ceiling estimator trained on self-play and
+  tested on the pinned 29 hunts. §0 is game-free and moves to
+  `docs/control-ladder.md` when a second game builds a rung.
 
 - [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with
       it.** The open half of the read above. `outed_own_role_in_public` matches the
