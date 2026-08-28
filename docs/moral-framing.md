@@ -195,10 +195,13 @@ outside the arm set and `greek-named` is the arm that deliberately breaks the ru
 Nothing tests this - whether a string is a proper name is not a property code can
 decide - so it is a hand check when a skin lands.
 
-**Precondition: not before gate #3 is called.** Same reasoning as every other
-measured change - and gate #3's own N problem binds here twice as hard, because
-this needs four arms rather than one. It is an argument for doing ONUW first (~10-15
-calls a game against cabal's 80-220), not for running it sooner.
+**Precondition, and it has RESOLVED - updated 2026-08-28.** This read "not before
+gate #3 is called"; both games' gate #3 was called on 2026-08-27/28, so what binds
+now is the ordinary rule for a measured change: same seeds, one variable, landed
+between campaigns and never into one. The N problem still binds twice as hard here,
+because this needs four arms rather than one - which is the argument that settled
+where these arms run. They run on changeling, at ~10-15 calls a game against cabal's
+80-220, and cabal has no GPU program left to offer them anyway.
 
 The wider neighbour list is kept off-repo with its raw notes; `CLAUDE.local.md`
 has the path.
