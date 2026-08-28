@@ -21,8 +21,8 @@ about), then pick a front:
 - **DURF** - the adjacency question is DECIDED 2026-08-28 and the two prescribed
   edits are APPLIED, so what is left of this front is a 52-minute campaign to run
   them and one open question that is not code. Both are in the DURF block below.
-- **quorum** - has RULES.md, roles, referee and a second gate mechanism as of
-  2026-08-28; its own rows are further down.
+- **quorum** - engine DONE, playable and registered 2026-08-28. What is left is
+  the first live arm: a criterion to write, then the card. Rows head the queue.
 
 **Every called gate has left this file, and DURF now has one of its own.**
 
@@ -403,6 +403,14 @@ file so far came from carrying one game's intuition into the other's denominator
 
 ## The queue
 
+**quorum - the engine is complete and no model has played a seat.**
+`games/quorum/RULES.md` carries every number and the knowledge model; the queue
+adds only what is unsettled. The first live arm needs a pre-committed criterion
+before it runs (`docs/evidence-discipline.md`), then: `py -3 -m eval.run_quorum
+--games 20 --arm llm --backend local --model qwen36-35b-a3b-iq3 --temperature 0.0
+--rounds 1 --seed 5200 --out eval/records/quorum-live1.json`. It asks whether a
+seat claims at all and beats 25% / 33.33%, never who won.
+
 Open rows, unordered - the slice table above is what ranks them.
 **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
 either**; what survives of both is re-homed to changeling, where a paired 20-game
@@ -425,15 +433,6 @@ arm is ~30 min against cabal's 13.2 h.
   channel rather than a rung, and a ceiling estimator trained on self-play and
   tested on the pinned 29 hunts. §0 is game-free and moves to
   `docs/control-ladder.md` when a second game builds a rung.
-- `docs/information-model.md` - 2026-08-28. The standard vocabulary for what this
-  repo calls entitlement, cited by identifier: information set, percept, synchronous
-  perfect recall, the chance move that turns incomplete information into imperfect,
-  and public versus private observation. Gate #1 in one line - a seat's bytes must
-  be a function of its information set. Reads the three rungs as one percept
-  function of increasing generality, and names what `games/quorum/audit.py` tests
-  (measurability with respect to the seat's partition). Carries its own read-depth
-  note; two of its citations are deliberately not first-hand and nothing rests on
-  them.
 - `docs/content-packs.md` - 2026-08-28, unmeasured. The engine/content split for
   the endgame rung: what ships, what stays local, why the example pack is
   required rather than a courtesy, and why "local" is not the same as
