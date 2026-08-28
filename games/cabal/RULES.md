@@ -159,8 +159,13 @@ is what makes concealment real play rather than a lapse.
 ## Themes are display-only
 
 `Theme` renames factions and roles and carries a premise blurb. It changes no rule,
-no entitlement, and no byte of private knowledge. Default is a dystopia skin;
-`--theme plain` is the sterile face. Because a theme changes only what a seat
+no entitlement, and no byte of private knowledge. **Default is `lodge` since
+2026-08-28** - a fraternal-order vocabulary referencing nothing under a live mark
+or copyright, and carrying no blurb, so the premise skins stay a clean contrast set
+against a premise-free default. The dystopia skin it replaced is still shipped as
+`--theme 1984-en`, and **every cabal number recorded before 2026-08-28 was played
+on that face**; a run meant to compare against one must pass it explicitly.
+`--theme plain` is the sterile fallback, as in every rung. Because a theme changes only what a seat
 believes it is doing, swapping it is the cleanest available experimental
 manipulation - and, for the same reason, a MEASURED change rather than a cosmetic
 one.

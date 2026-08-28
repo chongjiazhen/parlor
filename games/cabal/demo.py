@@ -122,7 +122,7 @@ def main() -> None:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=None)
-    ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: plain)")
+    ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: lodge)")
     ap.add_argument("--rounds", type=int, default=1, help="discussion rounds per proposal")
     ap.add_argument("--backend", choices=["local", "clean", "gray"],
                     help="run live players (default: random policy, no model)")

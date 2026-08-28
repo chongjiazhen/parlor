@@ -364,6 +364,51 @@ THEME_DRILL_EN = Theme(
     ),
 )
 
+# The default face as of 2026-08-28, and the only cabal skin that is a fiction
+# carrying no live mark or copyright. Lodge vocabulary - a fraternal order with a
+# sealed register, a door, and a secret ballot. The institution is a generic one and
+# no published work, order or product is referenced; `blackball` is ordinary English
+# for voting against in a secret ballot and is a word rather than a name.
+#
+# **Why cabal gets a fiction default at all, when `plain` references nothing.** The
+# rule the other rungs obey is that a default skin may reference nothing carrying a
+# live mark or copyright - not that it must be sterile. changeling defaults to
+# `folk` because public-domain Mafia vocabulary buys legibility a sterile skin
+# cannot: "werewolf, seer, villager" is understood by anyone, where the functional
+# keys are understood inside this repo. cabal had no rights-free fiction to prefer,
+# so it fell back to `plain`. This is that skin, and it puts the three rungs on one
+# rule rather than on a coincidence.
+#
+# **It carries NO blurb, and that is the design, not an omission.** A blurb is a
+# premise, and the premise skins are a measured arm set - `1984-en`, `1984-inv` and
+# `drill-en` are length-matched at 53 words and read against each other in
+# docs/moral-framing.md. That contrast needs a baseline with no premise at all, and
+# if the DEFAULT carried one the baseline would be gone. So this skin is vocabulary
+# only: names for legibility, no fiction in the prompt beyond them.
+#
+# It is still a MEASURED change. Names carry connotation, and RESUME.md already
+# records that a role name can move a seat's threat assessment out of proportion to
+# what the role mechanically does - so this face is not `plain` with better labels.
+# Nothing has been run on it.
+#
+# The key is bare rather than `lodge-en`: the `-en`/`-cn` suffix marks a language
+# pair, and this skin has no sibling to disambiguate from.
+THEME_LODGE = Theme(
+    "lodge",
+    {Team.GOOD: "The Lodge", Team.EVIL: "The Inner Circle"},
+    {
+        "seer": "Archivist",           # has read the sealed register, so knows both
+        "watcher": "Doorkeeper",       # sees who arrived together, not who they are
+        "loyalist": "Novice",
+        "mimic": "Copyist",            # works the Archivist's desk; the Doorkeeper
+                                       # cannot tell the two apart, which IS the aura
+        "hunter": "Blackball",
+        "agent": "Confederate",
+        "lurker": "Sleeper",           # never entered in the register there is to read
+        "stray": "Stranger",           # introduced to no one, and to no one introduced
+    },
+)
+
 # `plain` is the default face as of 2026-08-28; the engine itself is skin-agnostic.
 # Adding a skin moves no number - nothing runs on a face until a run asks for it by
 # name, and when one does it is a measured change like any other.
@@ -378,10 +423,26 @@ THEME_DRILL_EN = Theme(
 # Why move at all, when README.md's reasoning is sound: mechanics are not
 # copyrightable, neither are single words or short phrases, and the novel's text is
 # not in this repo. None of that is in question. It is surface area carried for no
-# benefit on the face of a public tree. `plain` references nothing, costs nothing,
-# and puts cabal on the same footing as changeling, which already defaults to
-# `folk`.
-DEFAULT_THEME = THEME_PLAIN
+# benefit on the face of a public tree. `plain` references nothing and costs
+# nothing.
+#
+# **It does NOT put cabal on the same footing as changeling, and an earlier version
+# of this comment claimed it did.** changeling defaults to `folk`, a fiction, not to
+# its own `THEME_PLAIN`. The rule both defaults actually obey is narrower: a default
+# skin may reference nothing carrying a live mark or copyright. `folk` clears that
+# on its own terms - Mafia-family party-game vocabulary, public domain, no mark -
+# and is preferred there because it buys legibility a sterile skin cannot. `1984-en`
+# did not clear it (US copyright to 2045), and cabal ships no rights-free fiction to
+# fall back to, so `plain` is what is left rather than a house standard. Writing
+# cabal a rights-free skin and defaulting to that is the consistent move, and it is
+# cheap for the same reason this change was - there is no future cabal run for a new
+# default to be incomparable with.
+#
+# **That skin is `lodge`, written 2026-08-28, and it is now the default.** So the
+# three rungs obey one rule: default to a rights-free fiction, keep `plain` as the
+# sterile fallback everywhere. `plain` held the default for part of one day and no
+# run was made on it.
+DEFAULT_THEME = THEME_LODGE
 
 THEMES: dict[str, Theme] = {
     "1984-en": THEME_1984_EN,
@@ -390,5 +451,6 @@ THEMES: dict[str, Theme] = {
     "bnw-en": THEME_BNW_EN,
     "bnw-cn": THEME_BNW_CN,
     "drill-en": THEME_DRILL_EN,
+    "lodge": THEME_LODGE,
     "plain": THEME_PLAIN,
 }
