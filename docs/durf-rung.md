@@ -431,6 +431,40 @@ finding stands as the first run wrote it.
   has no particular reason to be sampled at a player's temperature. That is the
   next cheap arm and it is a measured change like any other.
 
+## Third arm, PRE-REGISTERED 2026-08-28 - temperature, and what each outcome would mean
+
+**Written and committed before the run, per house rule.** The arm: arm 1 exactly -
+seed 5000, `decline` in the vocabulary, same model, same fixture - with
+`--temperature 0.0`. One variable. Then a second run at `--seed 6000`, also at
+0.0, as the arm's own instrument control.
+
+**Why this arm rather than another.** Every run so far sits at the 0.8 default,
+which is `Backend`'s value for a PLAYER seat: it exists so a table's speech
+varies. A referee ruling on rules has no such reason, and the seed control above
+showed the cost - **23 of 48 rulings move on a reseed alone**, i.e. the model is
+close to indifferent between rulings on half the fixture, and 0.8 samples from
+that indifference. Greedy decoding is the direct test of whether the churn is the
+sampler or the model.
+
+**Prediction, stated before the number exists.** The slot-gate failure is a
+reasoning error rather than a sampling one, so **floor-tier accuracy stays under
+the 55.88% bar and the run stays VOID**, with over-refusal in the high twenties.
+What greedy should buy is stability, not correctness.
+
+- **If floor accuracy clears the bar**, the finding inverts and it is a finding
+  about this harness rather than about the model: the player-seat default was
+  destroying an adjudicator that could otherwise rule, and **every number in the
+  two sections above would have to be re-run at 0.0 before any of them is quoted**.
+- **If the two 0.0 runs differ from each other at all**, temperature is not the
+  whole story and the endpoint is nondeterministic for some other reason - which
+  would also put the byte-identical seed-5000 repeat above in a different light,
+  since that pair shared a seed as well as a prompt. That is the control, and it
+  is the reason the arm is two runs rather than one.
+- **If accuracy is flat and the two 0.0 runs agree**, the churn was the sampler,
+  the aggregate findings stand as written, and the standing consequence is that
+  **an adjudicator seat should not inherit a player seat's temperature** - a
+  default worth changing on evidence rather than on taste.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no
