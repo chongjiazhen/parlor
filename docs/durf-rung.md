@@ -575,7 +575,7 @@ further bytes leave, names the fact and the referee line that carried it, and ru
 the next one. The record rides on the exception, so the decisions a leaking
 session made before it leaked stay in the fallback denominator.
 
-### The read, 2026-08-28: gate #1 held in 3 of 6 sessions
+### The read, 2026-08-28: gate #1 held in 3 of 6 sessions - VOID, see below
 
 `qwen36-35b-a3b-iq3` local, greedy, `--no-thinking`, seed 4200, 6 sessions x 3
 rounds, 139s. Records `eval/records/durf-sess2.json` + `.jsonl`; recipe
@@ -612,18 +612,27 @@ exists to prevent. So the fact set is unchanged, the ambiguity is on the record,
 and **any edit to it voids this read** - as `games/durf/fixtures/README.md` says of
 its own labels.
 
-**DECIDED 2026-08-28, in a later session and on the invariant rather than on this
-read: RENAME.** `loose flagstone` collides with the ordinary vocabulary of
-searching a stone floor, and the repo's remedy for a colliding term is to rename
-the term and leave the matcher naive. That argument stands without reference to
-any model output, which is what makes it an instrument change this file's own rule
-permits. Note also that the two branches cost the same: choosing to KEEP the term
-once the tripping lines are known is equally a decision made on the output, so the
-read above is void either way and was never the thing being protected. **The rate
-in this section is therefore superseded on the next run**, and the run that
-supersedes it is a campaign with a criterion written first, sized to say something
-- a second six-session arm would only reproduce the same interval. The rename and
-the campaign are specified in `RESUME.md`.
+**DECIDED AND LANDED 2026-08-28, in a later session and on the invariant rather
+than on this read: RENAME.** `["hidden", "R2"]` now carries `shallow cavity` and
+`40 GP` only, `games/durf/fixtures/facts.json`; the fact's referee-side `text` is
+untouched, because it is a byte the recorded runs saw and not a sentinel. **This
+whole section's rate is therefore VOID, not superseded-on-the-next-run** - the
+instrument it was scored against no longer exists. Two of its three leaks were the
+dropped term, so a later read is mechanically higher for that reason alone and may
+not be reported as an improvement on 3/6. The campaign that replaces it is
+specified, with its bar and its power arithmetic written before it runs, in
+`docs/durf-gate1-criterion.md`.
+
+The argument, unchanged from when it was made: `loose flagstone` collides with
+the ordinary vocabulary of searching a stone floor, and the repo's remedy for a
+colliding term is to rename the term and leave the matcher naive. That argument
+stands without reference to any model output, which is what makes it an
+instrument change this file's own rule permits. Note also that the two branches
+cost the same: choosing to KEEP the term once the tripping lines are known is
+equally a decision made on the output, so the read above is void either way and
+was never the thing being protected. A second six-session arm would only
+reproduce the same interval, so what replaces this read is a campaign sized to
+say something, with its criterion written first: `docs/durf-gate1-criterion.md`.
 
 **One thing that does NOT follow from it.** The arguable line is still evidence
 that a referee naming the object of its own secret is a tell, and renaming the

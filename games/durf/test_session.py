@@ -59,12 +59,12 @@ def test_narrating_an_undeclared_fact_is_caught_and_named():
     """The control. Same engine, same party, one referee that talks out of turn."""
     sess = session_mod.new(seed=7)
     leaky = Referee(seats.Turn(
-        narrate="You notice a loose flagstone by the bier.", calls=()))
+        narrate="You notice a shallow cavity under the bier.", calls=()))
     with pytest.raises(session_mod.LeakDetected) as caught:
         session_mod.play_session(sess, party(sess), leaky, rounds=1)
     assert ("hidden", "R2") in {f for f, _ in caught.value.leaks}
-    assert "loose flagstone" in str(caught.value)
-    assert any("loose flagstone" in line for line in caught.value.evidence), (
+    assert "shallow cavity" in str(caught.value)
+    assert any("shallow cavity" in line for line in caught.value.evidence), (
         "a leak with no line behind it cannot be reviewed")
 
 
@@ -92,7 +92,7 @@ def test_declaring_the_fact_first_makes_the_same_narration_legal():
     sess = session_mod.new(seed=7)
     honest = Referee(seats.Turn(
         reveal=(("hidden", "R2"),),
-        narrate="You notice a loose flagstone by the bier."))
+        narrate="You notice a shallow cavity under the bier."))
     rec = session_mod.play_session(sess, party(sess), honest, rounds=1)
     assert rec.gate1_held is True
     assert ["hidden", "R2"] in rec.declared
@@ -108,7 +108,7 @@ def test_entitlement_is_the_snapshot_taken_with_the_render():
     from games.durf import facts
 
     sess = session_mod.new(seed=1)
-    sess.narrate("You notice a loose flagstone by the bier.")
+    sess.narrate("You notice a shallow cavity under the bier.")
     render = sess.render(0)
     assert sess.check(render), "the render was built while the fact was secret"
 
@@ -147,16 +147,16 @@ def test_a_seat_s_own_speech_is_not_audited_as_a_referee_byte():
     """What a seat SAYS is gameplay, true or false. The referee saying it is the
     leak. Same narrowing ``games/cabal/audit.py`` makes with ``include_speech``."""
     sess = session_mod.new(seed=1)
-    sess.say(0, "I bet there is a loose flagstone under here.")
+    sess.say(0, "I bet there is a shallow cavity under here.")
     render = sess.render(0)
-    assert "loose flagstone" in render.text, "the table heard it"
-    assert "loose flagstone" not in render.audited, "the referee did not say it"
+    assert "shallow cavity" in render.text, "the table heard it"
+    assert "shallow cavity" not in render.audited, "the referee did not say it"
     assert sess.check(render) == []
 
 
 def test_the_audit_can_be_turned_off_and_the_record_refuses_to_call_that_a_pass():
     sess = session_mod.new(seed=7)
-    leaky = Referee(seats.Turn(narrate="A loose flagstone by the bier."))
+    leaky = Referee(seats.Turn(narrate="A shallow cavity under the bier."))
     rec = session_mod.play_session(sess, party(sess), leaky, rounds=1, audit=False)
     assert rec.gate1_held is None, (
         "an unaudited session did not fail gate #1 - it did not test it, and the "
@@ -213,7 +213,7 @@ def test_the_blocking_ask_renders_to_the_named_seat_and_is_audited():
 
 def test_the_blocking_ask_carries_the_same_entitlement_as_a_turn_render():
     sess = session_mod.new(seed=1)
-    sess.narrate("A loose flagstone by the bier.")
+    sess.narrate("A shallow cavity under the bier.")
     asked = sess.question(1, "what do you hear?")
     assert sess.check(asked), (
         "the question render is bytes leaving for a model like any other")

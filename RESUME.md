@@ -47,35 +47,32 @@ The three things a later session has to know before it re-opens this:
   for a rung that is still void. Pass `--temperature 0.0` on any later durf run.
 
 **S11 landed and the engine half is DONE - the rung now has seats, and gate #1
-has its first read where a model is the referee.** Held in 3/6 sessions, 0/88
-fallback. Everything about it is in `docs/durf-rung.md` §The session engine and
-§The read - **do not restate it here.** Two things a later session needs before
-it touches this:
+has its first read where a model is the referee.** That read - 3/6 sessions, 0/88
+fallback - is now VOID: the rename below changed the instrument it was scored
+against. Everything about it is in `docs/durf-rung.md` §The session engine and
+§The read - **do not restate it here.** Three things a later session needs
+before it touches this:
 
-- **THE OPEN DECISION WAS TAKEN 2026-08-28: RENAME. The work is queued and it is
-  the head of the queue.** Two of the three leaks are the same line, where the
-  character SEARCHES for a loose flagstone rather than being told one exists.
-  `loose flagstone` collides with the ordinary vocabulary of searching a stone
-  floor, and the invariant's remedy for a colliding term is to rename it and leave
-  the matcher naive. **Drop that term from the fact, leave `shallow cavity` and
-  `40 GP`.**
-  - **Why this is a legitimate edit and the alternative is not.** The renaming
-    argument holds without having seen any model output, which is what
-    `docs/reference-policies.md` asks of an instrument change. The cost is
-    symmetric in any case: choosing to KEEP the term once you know which lines
-    tripped it is equally a decision made on the output, so both branches void the
-    3/6 and neither is the free one. Once the cost is equal the choice rests on
-    instrument quality alone.
-  - **Do NOT simply re-run the six.** A clean version of that interval is still
-    uninterpretable, so the re-run buys tidiness and no number. A session is ~23s,
-    so a campaign large enough to quote is ~15 minutes of GPU. **Size it, state the
-    criterion and what a result would MEAN before launching**, the way gate #3b was
-    run, then run once and mark `durf-sess2` superseded. Pass `--temperature 0.0`.
-  - **The tell question is a SEPARATE instrument and must not be folded back in.**
-    The ambiguous line is evidence that catching a referee's PHRASING is a
-    different measurement from catching a fact dump, and `docs/action-channel.md`
-    already says substring matching cannot reach it. It stays an open problem in
-    its own right.
+- **THE RENAME LANDED 2026-08-28 and the 3/6 read is VOID, not merely stale.**
+  `["hidden", "R2"]` carries `shallow cavity` and `40 GP`; `loose flagstone` is
+  gone, on the colliding-term invariant and on an argument that never looked at
+  model output. The fact's referee-side `text` is untouched. Two of that read's
+  three leaks were the dropped term, so **a later rate is mechanically higher for
+  that reason alone and may not be reported as beating 3/6**.
+- **THE CAMPAIGN IS THE HEAD OF THE QUEUE, and its criterion is already written
+  and may not be edited.** `docs/durf-gate1-criterion.md` - 100 sessions x 3
+  rounds, seed 5100, `qwen36-35b-a3b-iq3`, greedy, ~35-45 min of GPU. The bar is
+  the Wilson floor clearing 50%; the arithmetic says that needs an observed 60/100
+  and that the run **cannot settle a true rate near 60%**. Launch:
+  `eval\runs\durf-session.cmd durf-camp1 5100 qwen36-35b-a3b-iq3 100 3`, model
+  armed via `llm-serve` first. Mark `durf-sess2` superseded when it lands and
+  write the outcome clause by clause into `docs/durf-rung.md` §The campaign.
+- **The tell question is a SEPARATE instrument and must not be folded back in.**
+  The rename makes this instrument blind to a referee that names the flagstone
+  without naming the cavity or the coin. That is evidence that catching a
+  referee's PHRASING is a different measurement from catching a fact dump, and
+  `docs/action-channel.md` already says substring matching cannot reach it. It
+  stays an open problem in its own right.
 - **`durf-sess1` is SUPERSEDED by `durf-sess2`** and its 21.18% recovered rate
   was a schema ambiguity in the parser, not the model. Quote sess2.
 
@@ -841,11 +838,12 @@ arm is ~30 min against cabal's 13.2 h.
       the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
       constraint: `docs/action-channel.md`.
 
-## Pre-committed criteria - all applied, all moved out
+## Pre-committed criteria - all moved out, one not yet applied
 
 None is edited to agree with its outcome; that is the whole value of a
 pre-commitment, and clause-by-clause outcomes belong in the verdict rather than
-back in the promise.
+back in the promise. **One is written and not yet applied** - DURF gate #1's,
+`docs/durf-gate1-criterion.md`, and the run it binds is the head of the queue.
 
 - **changeling gate #3**, written 2026-08-28 before S2 -
   `docs/changeling-gate3-criterion.md`, applied in `games/changeling/RULES.md`
@@ -1054,6 +1052,9 @@ queue, the dated measurements, and the route decisions.
 - `docs/gate3a-retired.md` / `docs/gate3b-verdict.md` - cabal's two gate #3
   verdicts, each recomputable (`eval.gate3_arithmetic`, `eval.s6_verdict`). Read
   before restarting any cabal run or quoting either half.
+- `docs/durf-gate1-criterion.md` - DURF's pre-commitment for the campaign that
+  replaces the voided 3/6 read: 100 sessions, the Wilson-floor-clears-50% bar and
+  the power arithmetic behind it. Written before the run; not to be edited.
 - `docs/changeling-gate3-criterion.md` - changeling's pre-commitment, verbatim and
   not to be edited; the outcome is `games/changeling/RULES.md` §S2 read.
 - `docs/gate3-modelling-review.md` - the 2026-08-26 review that sharpened the old

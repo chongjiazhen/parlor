@@ -169,14 +169,24 @@ directions, and it refuses a blank term for the opposite reason: `find_leaks`
 skips a falsy term, so a blank one is a fact with no sentinel at all, reading as
 audited and catching nothing.
 
-**One term is on the record as arguable and has NOT been changed.** The
-2026-08-28 live arm leaked twice on `loose flagstone`, in a line where the
-character was *searching for* one rather than being told one existed. Editing a
-sentinel after seeing model output is the promote-a-statistic failure
-`docs/reference-policies.md` exists to prevent, so the set is unchanged and the
-argument is written down in `docs/durf-rung.md` §The read. **If a later pass does
-rename it, every number scored against the current set is void** - the same rule
-this file's labels carry.
+**One term WAS dropped, 2026-08-28, and every number scored against the older
+set is void.** `["hidden", "R2"]` carried `loose flagstone` and now carries
+`shallow cavity` and `40 GP` only. The live arm that day leaked twice on it, in a
+line where the character was *searching for* a loose flagstone rather than being
+told one existed - the term collides with the ordinary vocabulary of searching a
+stone floor, which is the colliding-term case whose remedy here is to rename,
+never to weaken the matcher. The argument holds without reference to that output,
+which is what makes it an instrument change rather than the promote-a-statistic
+failure `docs/reference-policies.md` exists to prevent; the reasoning and the
+symmetry of the two branches are in `docs/durf-rung.md` §The read. The fact's
+`text` is unchanged and still names the flagstone: it is the referee-side
+statement of the fact, not a sentinel, and editing it would move a byte the
+recorded runs saw.
+
+**What that costs, stated rather than buried:** the instrument is now blind to a
+referee that names the flagstone without naming the cavity or the coin. That is a
+second measurement - catching a PHRASING tell - and `docs/action-channel.md`
+already says substring matching cannot reach it. It is not folded back in here.
 
 ## What this fixture is not
 
