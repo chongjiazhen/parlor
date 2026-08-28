@@ -662,6 +662,67 @@ measurement decision rather than a saving: this rung's question is about the
 referee's declarations, and a party that varies makes the adjudicator's job vary
 with it. A live party is a second variable and it has its own flag.
 
+### The campaign, 2026-08-28: gate #1 HOLDS, 91 of 100 sessions
+
+`qwen36-35b-a3b-iq3` local, greedy, `--no-thinking`, seed 5100, 100 sessions x 3
+rounds, 3107s. Records `eval/records/durf-camp1.json` + `.jsonl` + `.log`; recipe
+`eval/runs/durf-session.cmd durf-camp1 5100 qwen36-35b-a3b-iq3 100 3`. The
+criterion was written before the run and is `docs/durf-gate1-criterion.md`; the
+arithmetic that applies it is `py -3 -m eval.durf_camp1_verdict`, written while
+the run was still in flight so its statistic could not be chosen with the numbers
+in view.
+
+Clause by clause, in the order the criterion states them:
+
+- **Instrument control.** The published summary reproduces from the per-session
+  rows. Independently, `py -3 -m eval.durf_rescore eval/records/durf-camp1.json
+  --check` replays every referee entry against entitlement reconstructed from the
+  transcript and reproduces the recorded leaks exactly.
+- **Void conditions.** Fallback **0.16%** of 1913 decisions, far under the 10%
+  ceiling, so the rate below is this model's rather than the fallback policy's.
+  100 audited sessions, as promised. Neither void fired.
+- **The bar.** Held **91/100 (91.00%)**, Wilson 95% **[83.77%, 95.19%]**. The
+  floor clears 50% with room, so gate #1 **HOLDS**. The threshold computed before
+  the run was 60/100; this run got 91, which is outside the range the power
+  arithmetic was worried about.
+- **What that means, in the criterion's words.** On this backend, at this fixture
+  and this prompt, the model referee carries the entitlement boundary more often
+  than not. It is a dated snapshot of one model and is not a claim about model
+  referees in general.
+
+**The nine leaks are close to one recurring behaviour rather than diffuse
+leakage**, which is the more useful finding and was not something the criterion
+asked for. Eight of nine are the same act: a seat listens at a closed door and the
+referee narrates *"presses an ear to the iron door"* while the party is still in
+R1 and R2 has not been declared. The door is R2's content, so naming it is the
+leak. Wording varies across sessions and seats; the behaviour does not.
+Transcript: `transcripts/durf-camp1-leak-irondoor.md`.
+
+**The ninth leak is the rename's argument again, on a different term, and it is
+NOT being fixed here.** Session 54's referee wrote *"feeling for loose stones or
+hidden catches"* while searching, and `hidden catch` is the sentinel for
+`["hidden", "R4"]`. That is the same double reading `loose flagstone` had: the
+term collides with the ordinary vocabulary of searching for one. The remedy the
+invariant names would be the same remedy. It stays on the record and unfixed,
+because deciding it now is deciding it with this run's output in view, which is
+what the rename decision was careful to avoid. Transcript:
+`transcripts/durf-camp1-leak-arguable.md`. Scoring it as a hold instead gives
+90/100, [82.56%, 94.48%], and the verdict does not move.
+
+**The verdict does not rest on the rename, and that is checkable.** Scoring this
+same record with `loose flagstone` added back reads **82/100, [73.33%, 88.30%]**
+- still clearing the bar. The term was carrying 15 sessions on this data, which is
+a far higher rate than the void read's two-of-six suggested, and is the strongest
+evidence yet that it collided with ordinary searching prose rather than catching
+reveals. That figure is a counterfactual: it is a rate under a term set the run
+did not use, so it is reported here and never quoted as a read.
+
+**What this read does NOT say.** Nothing about whether the sessions were good,
+coherent or well-refereed; there is still no fixture for that and no judge is
+built for one. Nothing about the discretion number, which belongs to the isolated
+instrument and is still void. And no comparison with the 3/6 smoke read, which
+was scored against a different fact set.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no

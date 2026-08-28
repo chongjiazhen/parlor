@@ -11,10 +11,12 @@ above.
 
 What's next:
 
-**Both gates are called, and both verdicts have left this file.**
+**Every called gate has left this file, and DURF now has one of its own.**
 
 | verdict | where it lives | recompute |
 |---|---|---|
+| DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%] | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
+| its pre-committed criterion, unedited | `docs/durf-gate1-criterion.md` | - |
 | changeling gate #3 **HOLDS** - 2026-08-28 (S5), 200 games | `games/changeling/RULES.md` §S2 read | `py -3 -m eval.s5_verdict` |
 | its pre-committed criterion, as promised | `docs/changeling-gate3-criterion.md` | - |
 | cabal gate #3b **NOT SHOWN** - 2026-08-27 (S6). cabal's GPU program stops | `docs/gate3b-verdict.md` | `py -3 -m eval.s6_verdict` |
@@ -47,39 +49,34 @@ The three things a later session has to know before it re-opens this:
   for a rung that is still void. Pass `--temperature 0.0` on any later durf run.
 
 **S11 landed and the engine half is DONE - the rung now has seats, and gate #1
-has its first read where a model is the referee.** That read - 3/6 sessions, 0/88
-fallback - is now VOID: the rename below changed the instrument it was scored
-against. Everything about it is in `docs/durf-rung.md` §The session engine and
-§The read - **do not restate it here.** Three things a later session needs
-before it touches this:
+has its first read where a model is the referee.** The 3/6 smoke read is VOID
+because the rename changed the instrument it was scored against, and the campaign
+that replaced it has LANDED. Everything is in `docs/durf-rung.md`
+§The session engine, §The read and §The campaign - **do not restate it here.**
+Four things a later session needs before it touches this:
 
-- **THE RENAME LANDED 2026-08-28 and the 3/6 read is VOID, not merely stale.**
-  `["hidden", "R2"]` carries `shallow cavity` and `40 GP`; `loose flagstone` is
-  gone, on the colliding-term invariant and on an argument that never looked at
-  model output. The fact's referee-side `text` is untouched. Two of that read's
-  three leaks were the dropped term, so **a later rate is mechanically higher for
-  that reason alone and may not be reported as beating 3/6**.
-- **THE CAMPAIGN IS THE HEAD OF THE QUEUE, and its criterion is already written
-  and may not be edited.** `docs/durf-gate1-criterion.md` - 100 sessions x 3
-  rounds, seed 5100, `qwen36-35b-a3b-iq3`, greedy, ~35-45 min of GPU. The bar is
-  the Wilson floor clearing 50%; the arithmetic says that needs an observed 60/100
-  and that the run **cannot settle a true rate near 60%**. Launch:
-  `eval\runs\durf-session.cmd durf-camp1 5100 qwen36-35b-a3b-iq3 100 3`, model
-  armed via `llm-serve` first. Mark `durf-sess2` superseded when it lands and
-  write the outcome clause by clause into `docs/durf-rung.md` §The campaign.
-  **The verdict is already arithmetic: `py -3 -m eval.durf_camp1_verdict`**,
-  written while the campaign was still running so its statistic could not be
-  chosen with the numbers in view. It reproduces the published summary from the
-  per-session rows before it will report anything, applies the void conditions
-  ahead of the bar, and refuses the comparison with the voided 3/6. Exit 0
-  applied, 1 control disagreed or no record, 2 void. The criterion file itself
-  was NOT touched to add that pointer - it stays as promised.
+- **THE CAMPAIGN LANDED 2026-08-28 and gate #1 HOLDS: 91/100 sessions, Wilson
+  [83.77%, 95.19%], fallback 0.16% of 1913 decisions.** Everything about it is
+  `docs/durf-rung.md` §The campaign - **do not restate it here.** Recompute with
+  `py -3 -m eval.durf_camp1_verdict`; the promise it was scored against is
+  `docs/durf-gate1-criterion.md` and was not edited. `durf-sess2` is superseded.
+- **The open instrument decision is now `hidden catch`, and it is the SAME
+  argument the rename settled.** One of the nine leaks was a referee *searching*
+  ("feeling for loose stones or hidden catches"), and that term collides with
+  ordinary searching prose exactly as `loose flagstone` did. It is deliberately
+  unfixed: deciding it now is deciding it with this run's output in view. Scoring
+  it as a hold gives 90/100 and moves no verdict, so there is no rush and no
+  number riding on it. A later session decides it on the invariant alone, and
+  **any change to the term set voids the 91/100** the same way.
+- **A term change now has a price, payable off records.** `py -3 -m
+  eval.durf_rescore <record>.json --add "hidden,R2=loose flagstone" --check`
+  replays a stored session against any term set and must reproduce that run's own
+  leaks first. On this campaign the dropped term would have been worth 15 sessions
+  (82/100, still holding), which is a counterfactual and never a read.
 - **The tell question is a SEPARATE instrument and must not be folded back in.**
-  The rename makes this instrument blind to a referee that names the flagstone
-  without naming the cavity or the coin. That is evidence that catching a
-  referee's PHRASING is a different measurement from catching a fact dump, and
-  `docs/action-channel.md` already says substring matching cannot reach it. It
-  stays an open problem in its own right.
+  Substring matching cannot see a referee that names the object of its own
+  undeclared secret without naming the secret (`docs/action-channel.md`). It stays
+  an open problem in its own right.
 - **`durf-sess1` is SUPERSEDED by `durf-sess2`** and its 21.18% recovered rate
   was a schema ambiguity in the parser, not the model. Quote sess2.
 
@@ -827,12 +824,14 @@ arm is ~30 min against cabal's 13.2 h.
       the `action_prompt` if-chain, and `ACTION_KEYS`. Reasoning and the exact
       constraint: `docs/action-channel.md`.
 
-## Pre-committed criteria - all moved out, one not yet applied
+## Pre-committed criteria - all applied, all moved out
 
 None is edited to agree with its outcome; that is the whole value of a
 pre-commitment, and clause-by-clause outcomes belong in the verdict rather than
-back in the promise. **One is written and not yet applied** - DURF gate #1's,
-`docs/durf-gate1-criterion.md`, and the run it binds is the head of the queue.
+back in the promise. **DURF gate #1's applied cleanly 2026-08-28** -
+`docs/durf-gate1-criterion.md`, outcome in `docs/durf-rung.md` §The campaign.
+Every clause held as written and none needed smoothing, helped by its verdict
+being arithmetic (`eval/durf_camp1_verdict.py`) written mid-run.
 
 - **changeling gate #3**, written 2026-08-28 before S2 -
   `docs/changeling-gate3-criterion.md`, applied in `games/changeling/RULES.md`
