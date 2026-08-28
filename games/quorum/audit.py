@@ -136,6 +136,12 @@ def _counterfactual(ref: QuorumReferee, viewer: int) -> QuorumReferee:
     alt.deck = [_OTHER_CARD[c] for c in ref.deck]
     alt.discards = [_OTHER_CARD[c] for c in ref.discards]
 
+    # A seat's recall of its own past hand is its own observation. Every OTHER
+    # seat's recall flips, which is what proves no render carries somebody else's
+    # memory - the claim channel would be a leak if it did.
+    alt.recall = {s: (cards if s == viewer else tuple(_OTHER_CARD[c] for c in cards))
+                  for s, cards in ref.recall.items()}
+
     # An inspection belongs to the seat that paid for it and to nobody else.
     for inspector, found in alt.inspections.items():
         if inspector != viewer:
@@ -168,7 +174,7 @@ def _blame(ref: QuorumReferee, viewer: int) -> str:
     """
     base = ref.render_context(viewer, include_speech=False)
     for field in ("proposer_hand", "enactor_hand", "deck", "discards",
-                  "inspections"):
+                  "inspections", "recall"):
         alt = copy.copy(ref)
         alt.inspections = {k: dict(v) for k, v in ref.inspections.items()}
         full = _counterfactual(ref, viewer)

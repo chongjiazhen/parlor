@@ -43,6 +43,31 @@ from games.quorum.roles import (ADVANCES, DEFAULT_THEME, SETUPS, Card, Role,
                                 Setup, Side, Theme, known_allies)
 
 
+@dataclass(frozen=True)
+class ClaimRecord:
+    """One seat's formal statement about a draw it saw.
+
+    **Typed on purpose, and this is the decision the whole measurement rests on.**
+    A claim made only in free speech cannot be scored without a parser that reads
+    intent, and a parser with opinions is exactly what this repo refuses - the
+    referee is a unit test, not a judge. So a seat that wants its statement counted
+    declares it as a multiset of card keys, the referee reads it back to the table
+    verbatim, and scoring is set comparison against what was dealt.
+
+    A seat may still lie about a draw in ``say`` and never claim; that is gameplay
+    and it is unscored, exactly as it is on the two rungs before this one. What the
+    typed channel buys is the population that CAN be scored, not a ban on the rest.
+
+    ``cards`` holds canonical keys rather than themed names, so a record survives a
+    reskin - and the seat is asserting it, so nothing here is referee knowledge.
+    """
+
+    turn: int
+    seat: int
+    office: str                  # "proposer" | "enactor"
+    cards: tuple[str, ...]
+
+
 class Phase(Enum):
     NOMINATE = "nominate"
     DISCUSS = "discuss"
@@ -96,6 +121,10 @@ class QuorumReferee:
     #: event is the bug the cascade was built to make visible.
     proposer_hand: list[Card] = field(default_factory=list)
     enactor_hand: list[Card] = field(default_factory=list)
+    #: what each office SAW this event, kept so recall can be filed when the hand
+    #: is cleared. Referee-side, and never rendered except through ``recall``.
+    proposer_saw: list[Card] = field(default_factory=list)
+    enactor_saw: list[Card] = field(default_factory=list)
 
     deck: list[Card] = field(default_factory=list)
     discards: list[Card] = field(default_factory=list)
@@ -103,6 +132,25 @@ class QuorumReferee:
     #: inspector seat -> {subject seat -> side}. A private fact created mid-game,
     #: held by exactly one seat, about a seat that is never told it was inspected.
     inspections: dict[int, dict[int, Side]] = field(default_factory=dict)
+
+    #: Formal statements about the last completed draw. Seat-authored data the
+    #: referee reads back verbatim; it is never derived from a hand, which is what
+    #: keeps a truthful claim legal under the dependence audit.
+    claims: list[ClaimRecord] = field(default_factory=list)
+    #: seat -> the cards IT saw in the last completed event. A seat's own past
+    #: observation, entitled to that seat alone.
+    #:
+    #: **This exists because the claim channel would otherwise measure memory.** A
+    #: hand renders only during its own discard step and ``think`` is discarded
+    #: every turn, so without this a seat had no way to retrieve what it saw and an
+    #: honest claim was impossible to make on purpose. Perfect recall - an agent
+    #: remembers its own moves and perceptions along the history - is the standard
+    #: assumption, and this is the channel that implements it.
+    recall: dict[int, tuple[Card, ...]] = field(default_factory=dict)
+    #: who held each office in the last COMPLETED event, so a claim can be checked
+    #: for standing without the caller restating the flow. Both are cleared when an
+    #: enactment happened with nobody holding cards.
+    last_proposer: int | None = None
 
     discussion_rounds: int = 1
     speech_ptr: int = 0
@@ -303,6 +351,16 @@ class QuorumReferee:
         if hand is not None:
             shown = ", ".join(f"{i}: {t.card_names[c]}" for i, c in enumerate(hand))
             lines.append(f"In your hand, and seen by nobody else: {shown}.")
+        remembered = self.recall.get(seat)
+        if remembered:
+            # The office is read off how many cards it saw, not off `claimable`:
+            # recall is filed the moment a seat discards, which is BEFORE the
+            # event completes and therefore before standing to claim exists.
+            office = "proposer" if len(remembered) == 3 else "enactor"
+            shown = ", ".join(t.card_names[c] for c in remembered)
+            lines.append(
+                f"You remember holding, as {t.office_names[office]} last round "
+                f"and seen by nobody else: {shown}.")
         record: list[str] = []
         for kind, text in self.public_events:
             if kind == "event":
@@ -377,14 +435,28 @@ class QuorumReferee:
                 f'Format: {{{scratch}, "nominate": <one seat from {eligible}>}}'
             )
         if p is Phase.DISCUSS:
+            office = self.claimable(seat)
+            extra = ""
+            if office is not None:
+                size = self.CLAIM_SIZE[office]
+                names = " or ".join(sorted(t.card_names.values()))
+                extra = (
+                    f' You held {t.office_names[office]} in the last round, so you '
+                    f'may also make a formal claim: "claim" naming the {size} cards '
+                    f'you held, each {names}. The table is told you claimed it and '
+                    f'told that nothing confirms it. Claim what serves you.'
+                )
             return (
-                f"{head}\nYou are seat {seat}; speak in the first person and "
+                f"{head}{extra}\nYou are seat {seat}; speak in the first person and "
                 "address the table - your own earlier lines are marked (you) in "
                 f"the record.\nSay one or two short sentences before the vote, at "
                 f"most {MAX_UTTERANCE_CHARS} characters. Everyone reads \"say\" "
                 "and nothing else of yours. Argue, accuse, defend, or mislead as "
                 "your role requires.\n"
-                f'Format: {{{scratch}, "say": "<your public words>"}}'
+                f'Format: {{{scratch}, "say": "<your public words>"'
+                + (f', "claim": [<{self.CLAIM_SIZE[office]} card names>]'
+                   if office is not None else "")
+                + "}"
             )
         if p is Phase.VOTE:
             return (
@@ -424,6 +496,57 @@ class QuorumReferee:
                 f'Format: {{{scratch}, "target": <one seat from {legal}>}}'
             )
         raise IllegalAction(f"nothing to ask in phase {p.value}")
+
+    # ---- the claim channel -------------------------------------------------
+
+    def claimable(self, seat: int) -> str | None:
+        """Which office this seat held in the last completed event, or None.
+
+        One rule, read by the referee, the policy precheck and the ask, so a seat
+        cannot be invited to make a claim the referee would refuse.
+        """
+        if self.last_proposer is not None and seat == self.last_proposer:
+            return "proposer"
+        if self.last_enactor is not None and seat == self.last_enactor:
+            return "enactor"
+        return None
+
+    #: how many cards each office saw, and therefore how long its claim must be
+    CLAIM_SIZE = {"proposer": 3, "enactor": 2}
+
+    def validate_claim(self, seat: int, cards) -> None:
+        office = self.claimable(seat)
+        if office is None:
+            raise IllegalAction(
+                f"seat {seat} held no office in the last event, so it has nothing "
+                "to claim about")
+        want = self.CLAIM_SIZE[office]
+        if len(cards) != want:
+            raise IllegalAction(
+                f"a {self.theme.office_names[office]} claim names {want} cards, "
+                f"got {len(cards)}")
+        for c in cards:
+            if not isinstance(c, Card):
+                raise IllegalAction(f"{c!r} is not a card")
+
+    def record_claim(self, seat: int, cards) -> ClaimRecord:
+        """File a claim and read it back to the table.
+
+        The public line is the seat's assertion, never the referee's knowledge:
+        it is rendered from ``cards`` as given. That is what the dependence audit
+        checks - flipping the hand this claim is about leaves every seat's render
+        byte-identical, because no render reads the hand to write this line.
+        """
+        self.validate_claim(seat, cards)
+        office = self.claimable(seat)
+        rec = ClaimRecord(turn=len(self.public_events), seat=seat, office=office,
+                          cards=tuple(c.value for c in cards))
+        self.claims.append(rec)
+        named = ", ".join(self.theme.card_names[c] for c in cards)
+        self._event(f"Seat {seat} claims that as "
+                    f"{self.theme.office_names[office]} it held: {named}. "
+                    f"Nothing confirms this.")
+        return rec
 
     def prompt_for(self, seat: int, include_speech: bool = True) -> str:
         """The complete outgoing payload for one seat: its view plus its ask. This
@@ -522,6 +645,8 @@ class QuorumReferee:
         if self._install_win():
             return
         self.proposer_hand = self._draw(3)
+        self.proposer_saw = list(self.proposer_hand)
+        self.recall = {}
         self.log.append(f"proposer hand: {[c.value for c in self.proposer_hand]}")
         self.phase = Phase.PROPOSER_DISCARD
 
@@ -567,6 +692,10 @@ class QuorumReferee:
         # the entitlement expires with the value rather than with a flag.
         self.proposer_hand = []
         self.enactor_hand = hand
+        # its own observation, kept for its own recall - the discard included,
+        # because the seat saw it and is entitled to remember what it dropped
+        self.recall = {seat: tuple(self.proposer_saw)}
+        self.enactor_saw = list(hand)
         self.log.append(f"proposer discarded {dropped.value}; passed "
                         f"{[c.value for c in hand]}")
         self._event(f"Seat {seat} passes two cards to seat {self.enactor}.")
@@ -583,6 +712,7 @@ class QuorumReferee:
         hand = list(self.enactor_hand)
         dropped = hand.pop(index)
         self.discards.append(dropped)
+        self.recall[seat] = tuple(self.enactor_saw)
         self.enactor_hand = []
         self.log.append(f"enactor discarded {dropped.value}")
         self._enact(hand[0])
@@ -593,7 +723,14 @@ class QuorumReferee:
             self.charters += 1
         else:
             self.writs += 1
+        # Standing to claim comes from having SEEN cards. The failure-track
+        # enactment deals to nobody, so it confers none - and clearing both here
+        # rather than only setting them on the other path is what stops last
+        # round's proposer claiming about a card no one drew.
+        self.last_proposer = None if seen_by_nobody else self.proposer
         self.last_enactor = self.enactor
+        if seen_by_nobody:
+            self.recall = {}
         self.enactor = None
         self.nominee = None
         if self.charters >= self.setup.charter_target:

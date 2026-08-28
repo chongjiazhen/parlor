@@ -10,9 +10,12 @@ import tempfile
 import unittest
 
 from core.runlog import record_paths
+from eval.quorum_claims import judge
+from eval.quorum_claims import score as claim_score
 from eval.run_quorum import (build_backend, build_policies, one_game, report,
                              score)
-from games.quorum.player import DrawRecord, GameRecord, LLMPolicy, RandomPolicy
+from games.quorum.player import (ClaimEntry, DrawRecord, GameRecord, LLMPolicy,
+                                 RandomPolicy)
 from games.quorum.referee import QuorumReferee
 from games.quorum.roles import Side
 
@@ -98,6 +101,7 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(s["writs_with_a_choice"], 1)
         self.assertEqual(s["forced_writ"], 1)
         self.assertEqual(s["forced_charter"], 1)
+        self.assertEqual(s["claims"]["claims"], 0)
 
     def test_an_errored_game_is_excluded_from_every_figure(self):
         bad = GameRecord(assignment={})
@@ -117,7 +121,8 @@ class TestReport(unittest.TestCase):
         base = dict(games=10, played=10, errors=0, decisions=100, fallbacks=0,
                     fallback_rate=0.0, recovered=0, majority_wins=2, events=60,
                     forced=16, forced_writ=14, forced_charter=2,
-                    writ_enactments=40, writs_with_a_choice=26)
+                    writ_enactments=40, writs_with_a_choice=26,
+                    claims=claim_score([]))
         base.update(over)
         return base
 
@@ -129,15 +134,29 @@ class TestReport(unittest.TestCase):
     def test_a_clean_run_is_not_voided(self):
         self.assertNotIn("VOID", report(self._s(), args(), 1.0))
 
-    def test_it_refuses_to_report_a_deception_figure(self):
-        """The rung is built to make deception scoreable and the scorer does not
-        exist. A driver that inferred one from win rates would be inventing it, so
-        the refusal is printed rather than left as an absence a reader fills in."""
+    def test_it_refuses_to_infer_deception_from_the_win_rate(self):
+        """The claim rows are per-utterance evidence. A figure derived from who won
+        would be a different claim wearing their number, so the refusal is printed
+        rather than left as an absence a reader fills in."""
         text = report(self._s(), args(), 1.0)
-        self.assertIn("no deception figure is reported", text)
-        for word in ("deception rate", "lie rate", "honesty"):
-            self.assertNotIn(word, text.replace(
-                "no deception figure is reported", ""))
+        self.assertIn("no deception figure is inferred from the win rate", text)
+
+    def test_the_claim_scoring_reaches_the_report(self):
+        vs = [judge(ClaimEntry(turn=1, seat=0, office="proposer",
+                               cards=["writ", "writ", "writ"], event=0,
+                               seat_side="majority"),
+                    DrawRecord(turn=1, proposer=0, enactor=1,
+                               drew=["writ", "writ", "writ"],
+                               passed=["writ", "writ"], proposer_dropped="writ",
+                               enactor_dropped="writ", enacted="writ",
+                               forced=True))]
+        text = report(self._s(claims=claim_score(vs)), args(), 1.0)
+        self.assertIn("claims scored: 1", text)
+        self.assertIn("chance baseline", text)
+
+    def test_an_arm_with_no_claims_reports_that_and_not_a_zero(self):
+        text = report(self._s(), args(), 1.0)
+        self.assertIn("nothing to score", text)
 
     def test_the_forced_count_is_printed_against_the_decks_own_arithmetic(self):
         text = report(self._s(), args(), 1.0)
