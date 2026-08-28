@@ -346,15 +346,135 @@ class QuorumReferee:
             return [self.proposer]
         return []
 
+    # ---- the ask ----------------------------------------------------------
+
+    def action_prompt(self, seat: int) -> str:
+        """The ask appended to ``render_context`` for whichever seat acts next.
+
+        Declares the JSON envelope. ``think`` is the sanctioned place for private
+        reasoning and the driver discards it - only ``say`` is ever handed to
+        ``speak()``.
+
+        Written in the positive per this repo's model-facing-text rule: every ask
+        states the move to make rather than the move to avoid. The one thing
+        phrased as a constraint is the envelope, which the parser enforces anyway.
+        """
+        t = self.theme
+        head = (
+            'Reply with ONE JSON object and nothing else. A "think" field is '
+            "private scratch space that is discarded and never shown to anyone - "
+            "keep it under 30 words, because a reply long enough to be truncated "
+            "is a reply the referee has to refuse."
+        )
+        scratch = '"think": "..."'
+        p = self.phase
+        if p is Phase.NOMINATE:
+            eligible = self.eligible_nominees()
+            return (
+                f"{head}\nYou hold {t.office_names['proposer']}. Name the seat to "
+                f"serve as {t.office_names['enactor']} this round. Eligible: "
+                f"{eligible}.\n"
+                f'Format: {{{scratch}, "nominate": <one seat from {eligible}>}}'
+            )
+        if p is Phase.DISCUSS:
+            return (
+                f"{head}\nYou are seat {seat}; speak in the first person and "
+                "address the table - your own earlier lines are marked (you) in "
+                f"the record.\nSay one or two short sentences before the vote, at "
+                f"most {MAX_UTTERANCE_CHARS} characters. Everyone reads \"say\" "
+                "and nothing else of yours. Argue, accuse, defend, or mislead as "
+                "your role requires.\n"
+                f'Format: {{{scratch}, "say": "<your public words>"}}'
+            )
+        if p is Phase.VOTE:
+            return (
+                f"{head}\nVote on seating seat {self.nominee} as "
+                f"{t.office_names['enactor']}. Every vote is public and permanent, "
+                "and the table will remember who backed this government.\n"
+                f'Format: {{{scratch}, "vote": true or false}}'
+            )
+        if p is Phase.PROPOSER_DISCARD:
+            hand = self.entitled_hand(seat) or []
+            return (
+                f"{head}\nYou drew {len(hand)} cards and nobody else has seen "
+                f"them. Discard one face down; the other two pass to seat "
+                f"{self.enactor}, which enacts one of them. The card you drop is "
+                "seen by nobody, now or later.\n"
+                f'Format: {{{scratch}, "discard": <index 0..{len(hand) - 1}>}}'
+            )
+        if p is Phase.ENACTOR_DISCARD:
+            hand = self.entitled_hand(seat) or []
+            return (
+                f"{head}\nSeat {self.proposer} drew three cards, kept one to "
+                f"itself, and passed you these {len(hand)}. Discard one face "
+                "down; the other is enacted in front of the table.\n"
+                f'Format: {{{scratch}, "discard": <index 0..{len(hand) - 1}>}}'
+            )
+        if p is Phase.POWER:
+            legal = self.legal_power_targets(seat)
+            if self.pending_power == "inspect":
+                what = ("Look at one seat's allegiance. You alone learn it, the "
+                        "seat you look at is not told, and the record says only "
+                        "that you looked.")
+            else:
+                what = ("Remove one seat from the session. Its role stays secret, "
+                        "and the table sees only that it is gone.")
+            return (
+                f"{head}\n{what} Legal targets: {legal}.\n"
+                f'Format: {{{scratch}, "target": <one seat from {legal}>}}'
+            )
+        raise IllegalAction(f"nothing to ask in phase {p.value}")
+
+    def prompt_for(self, seat: int, include_speech: bool = True) -> str:
+        """The complete outgoing payload for one seat: its view plus its ask. This
+        is the string a player policy sends, so this is the string gate #1 audits.
+        """
+        return (f"{self.render_context(seat, include_speech)}\n\n"
+                f"{self.action_prompt(seat)}")
+
+    # ---- validators, so one rule answers the policy and the referee ---------
+
+    def legal_power_targets(self, seat: int) -> list[int]:
+        """Every seat the current power may name.
+
+        Derived here so that the precheck a policy runs before spending a retry
+        and the refusal the referee raises cannot disagree. Two copies of one
+        legality rule is how an audit ends up certifying the move it was written
+        to catch.
+        """
+        return [s for s in self.living() if s != seat]
+
+    def validate_nomination(self, seat: int, target: int) -> None:
+        if seat != self.proposer:
+            raise IllegalAction(f"seat {seat} does not hold the office")
+        if target not in self.eligible_nominees():
+            raise IllegalAction(
+                f"seat {target} is not an eligible nominee; eligible are "
+                f"{self.eligible_nominees()}")
+
+    def validate_power_target(self, seat: int, target: int) -> None:
+        if seat != self.proposer:
+            raise IllegalAction(f"seat {seat} does not hold the office")
+        if target not in self.legal_power_targets(seat):
+            raise IllegalAction(
+                f"seat {target} is not a legal target; legal are "
+                f"{self.legal_power_targets(seat)}")
+
+    def validate_discard(self, seat: int, index: int) -> None:
+        """The hand's own accessor decides whether this seat may discard at all,
+        so entitlement is asked once and answered in one place."""
+        hand = self.entitled_hand(seat)
+        if hand is None:
+            raise IllegalAction(f"seat {seat} holds no cards at this step")
+        if not 0 <= index < len(hand):
+            raise IllegalAction(f"index {index} outside a hand of {len(hand)}")
+
     # ---- actions ----------------------------------------------------------
 
     def nominate(self, seat: int, target: int) -> None:
         if self.phase is not Phase.NOMINATE:
             raise IllegalAction(f"nominate out of phase ({self.phase.value})")
-        if seat != self.proposer:
-            raise IllegalAction(f"seat {seat} does not hold the office")
-        if target not in self.eligible_nominees():
-            raise IllegalAction(f"seat {target} is not an eligible nominee")
+        self.validate_nomination(seat, target)
         self.nominee = target
         self._event(f"Seat {seat} nominates seat {target} as "
                     f"{self.theme.office_names['enactor']}.")
@@ -502,10 +622,7 @@ class QuorumReferee:
     def use_power(self, seat: int, target: int) -> None:
         if self.phase is not Phase.POWER:
             raise IllegalAction(f"power out of phase ({self.phase.value})")
-        if seat != self.proposer:
-            raise IllegalAction(f"seat {seat} does not hold the office")
-        if target == seat or target not in self.living():
-            raise IllegalAction(f"seat {target} is not a legal target")
+        self.validate_power_target(seat, target)
         if self.pending_power == "inspect":
             side = self.assignment[target].side
             self.inspections.setdefault(seat, {})[target] = side

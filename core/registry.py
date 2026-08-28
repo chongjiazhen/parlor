@@ -74,6 +74,10 @@ _RUNGS = (
     Rung("changeling", "games.changeling.demo",
          "5-seat one-night swap. A seat's knowledge of its OWN role can be stale "
          "and can be false, because the night moves cards it may not look at."),
+    Rung("quorum", "games.quorum.demo",
+         "5-seat legislative cascade. A hand is dealt per event and narrows as it "
+         "passes down the offices, so what a seat may see is a fact about the "
+         "state and not about its role."),
 )
 
 RUNGS: dict[str, Rung] = {r.name: r for r in _RUNGS}
