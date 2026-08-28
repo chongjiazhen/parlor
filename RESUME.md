@@ -390,6 +390,15 @@ arm is ~30 min against cabal's 13.2 h.
   channel rather than a rung, and a ceiling estimator trained on self-play and
   tested on the pinned 29 hunts. §0 is game-free and moves to
   `docs/control-ladder.md` when a second game builds a rung.
+- `docs/information-model.md` - 2026-08-28. The standard vocabulary for what this
+  repo calls entitlement, cited by identifier: information set, percept, synchronous
+  perfect recall, the chance move that turns incomplete information into imperfect,
+  and public versus private observation. Gate #1 in one line - a seat's bytes must
+  be a function of its information set. Reads the three rungs as one percept
+  function of increasing generality, and names what `games/quorum/audit.py` tests
+  (measurability with respect to the seat's partition). Carries its own read-depth
+  note; two of its citations are deliberately not first-hand and nothing rests on
+  them.
 - `docs/content-packs.md` - 2026-08-28, unmeasured. The engine/content split for
   the endgame rung: what ships, what stays local, why the example pack is
   required rather than a courtesy, and why "local" is not the same as
