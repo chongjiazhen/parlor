@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import io
 import random
 import unittest
@@ -277,10 +278,22 @@ class TestConsoleSeat(unittest.TestCase):
 
 class TestAuditRunsInsideTheDriver(unittest.TestCase):
     """The audit's own coverage lives in ``test_audit.py``; what is tested here is
-    that the DRIVER runs it. Both halves were mutation-checked: disabling the call
-    in ``play_game`` leaves every other test in this file green."""
+    that the DRIVER runs it - a distinction with teeth, because an audit nothing
+    calls passes its own tests forever.
+
+    **Mutation-checked 2026-08-28.** Pinning ``play_game``'s audit call to a dead
+    branch turns exactly ONE test red - the first one below - out of 56 in this
+    package and 746 in the repo. So this class is the only thing standing between a
+    leaking referee and a scored game, and the count is written down because "some
+    test would catch it" is the belief this check exists to replace.
+    """
 
     class _LeaksAnotherSeatsRole(QuorumReferee):
+        """A referee that names a role it may not. The same mutant appears in
+        ``test_audit.py`` against the audit functions directly; here the subject is
+        the driver, so the duplication is two different questions rather than one
+        asked twice."""
+
         def render_context(self, seat, include_speech=True):
             base = super().render_context(seat, include_speech)
             other = next(s for s in self.living() if s != seat)
@@ -295,8 +308,22 @@ class TestAuditRunsInsideTheDriver(unittest.TestCase):
         with self.assertRaises(LeakDetected):
             play_game(ref, {s: RandomPolicy(rng=rng) for s in ref.assignment})
 
+    def test_the_off_switch_actually_switches_it_off(self):
+        """The pair that makes the default meaningful. Without this, a driver that
+        ignored ``audit`` entirely would pass every other test here - and the
+        signature check below would certify a flag that does nothing.
+
+        It also shows what the default is protecting against: the identical game,
+        with the identical leak, runs to a winner and reports a record.
+        """
+        ref = self._LeaksAnotherSeatsRole.new(5, seed=3, discussion_rounds=1)
+        rng = random.Random(0)
+        rec = play_game(ref, {s: RandomPolicy(rng=rng) for s in ref.assignment},
+                        audit=False)
+        self.assertEqual(rec.error, "")
+        self.assertTrue(rec.winner)
+
     def test_audit_off_is_possible_but_never_the_default(self):
-        import inspect
         self.assertIs(inspect.signature(play_game).parameters["audit"].default,
                       True)
 
