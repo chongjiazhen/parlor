@@ -24,14 +24,6 @@
 set -e
 cd "$(git rev-parse --show-toplevel)"
 
-if [ "$1" = "--range" ] && [ -n "$2" ]; then
-    DIFF=$(git diff --unified=0 "$2")
-else
-    DIFF=$(git diff --cached --unified=0)
-fi
-
-[ -z "$DIFF" ] && exit 0
-
 # ---------------------------------------------------------------------------
 # The queue does not grow once it is over budget.
 #
@@ -42,11 +34,36 @@ fi
 # appending was the only move available. They have one now (docs/slices.md,
 # docs/measurements.md, docs/decisions.md), so the rule can be a gate.
 #
-# It is a RATCHET, not a ceiling. Under CEILING lines the file is free. Over
-# it, a commit may shrink the file or leave it flat, never grow it. A flat
-# ceiling would have blocked the next commit outright at today's 916 lines,
+# It is a RATCHET, not a ceiling. Under CEILING the file is free. Over it, a
+# commit may shrink the file or leave it flat, never grow it. A flat ceiling
+# would have blocked the next commit outright at the 916 lines it started from,
 # which teaches the author to pass --no-verify rather than to prune.
-QUEUE_CEILING=400
+#
+# **The budget is BYTES, and it was lines until 2026-08-28.** A line count is a
+# proxy for what a cold session pays, and it is defeatable without paying
+# anything: rewrapping two lines into one satisfies a line ratchet and saves
+# zero tokens. Measured when this bit for the first time - a row was trimmed
+# from 17 lines to 12, and part of that trim was reflow rather than cuts. Bytes
+# are what the read actually costs, so bytes are what the gate counts. The
+# ceiling is the old 400-line budget at this file's own 75 bytes/line.
+#
+# Both sides are read through `git show` rather than off disk, so the count is
+# the BLOB's - line endings are whatever git stores, and the same number comes
+# back on a CRLF checkout and an LF one.
+QUEUE_CEILING=30000
+
+if [ "$1" = "--budget" ]; then
+    QUEUE_NOW=$(git show HEAD:RESUME.md 2>/dev/null | wc -c | tr -d ' ')
+    [ -z "$QUEUE_NOW" ] && QUEUE_NOW=0
+    echo "RESUME.md at HEAD: $QUEUE_NOW bytes, ceiling $QUEUE_CEILING."
+    if [ "$QUEUE_NOW" -gt "$QUEUE_CEILING" ]; then
+        echo "Over budget, so this commit may shrink it or hold it flat, never grow it."
+        echo "Write the row to fit, or move something out in the same commit."
+    else
+        echo "Under budget: free to grow by $((QUEUE_CEILING - QUEUE_NOW)) bytes."
+    fi
+    exit 0
+fi
 
 if [ "$1" = "--range" ] && [ -n "$2" ]; then
     QUEUE_BASE=${2%%..*}
@@ -62,23 +79,36 @@ else
 fi
 
 if [ -n "$QUEUE_CHANGED" ]; then
-    QUEUE_NEW=$(git show "$QUEUE_NEW_REF" 2>/dev/null | wc -l | tr -d ' ')
-    QUEUE_OLD=$(git show "$QUEUE_OLD_REF" 2>/dev/null | wc -l | tr -d ' ')
+    QUEUE_NEW=$(git show "$QUEUE_NEW_REF" 2>/dev/null | wc -c | tr -d ' ')
+    QUEUE_OLD=$(git show "$QUEUE_OLD_REF" 2>/dev/null | wc -c | tr -d ' ')
     [ -z "$QUEUE_NEW" ] && QUEUE_NEW=0
     [ -z "$QUEUE_OLD" ] && QUEUE_OLD=0
     if [ "$QUEUE_NEW" -gt "$QUEUE_CEILING" ] && [ "$QUEUE_NEW" -gt "$QUEUE_OLD" ]; then
         cat >&2 <<MSG
 
-[hygiene] RESUME.md grew: $QUEUE_OLD -> $QUEUE_NEW lines, over the $QUEUE_CEILING-line budget.
+[hygiene] RESUME.md grew: $QUEUE_OLD -> $QUEUE_NEW bytes, over the $QUEUE_CEILING-byte budget.
 
 The queue keeps what can still change. A landed slice is struck and moved to
 docs/slices.md, a dated reading to docs/measurements.md, a settled call to
 docs/decisions.md - live rows cite them by name, so they are kept, not deleted.
 Move something out in this commit, or shrink what you are adding.
+
+Read the budget BEFORE writing the row, not after - discovering it by failing
+this gate costs a round trip per attempt, which is how it was found:
+
+  sh scripts/hygiene-check.sh --budget
 MSG
         exit 1
     fi
 fi
+if [ "$1" = "--range" ] && [ -n "$2" ]; then
+    DIFF=$(git diff --unified=0 "$2")
+else
+    DIFF=$(git diff --cached --unified=0)
+fi
+
+[ -z "$DIFF" ] && exit 0
+
 # ---------------------------------------------------------------------------
 
 # Built at runtime from octal escapes so this file holds no literal en- or

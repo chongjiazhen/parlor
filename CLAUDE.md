@@ -61,10 +61,14 @@ Change them against a measurement, and change them HERE.
   as the file and was broken anyway, because it had no destination and appending
   was the only move available; the file reached 1200 lines, which every cold
   session then paid to read. It has destinations now, so
-  `scripts/hygiene-check.sh` enforces it as a RATCHET rather than prose: under 400
-  lines the file is free, over it a commit may shrink or hold but never grow. A
+  `scripts/hygiene-check.sh` enforces it as a RATCHET rather than prose: under the
+  budget the file is free, over it a commit may shrink or hold but never grow. A
   flat ceiling would have failed the very next commit and taught the author to
-  reach for `--no-verify`.
+  reach for `--no-verify`. **The budget is BYTES, 2026-08-28** - it was lines, and
+  a line count is a proxy a rewrap defeats for free: measured, 100 bytes of new
+  prose paid for by merging two wrapped lines PASSES a line ratchet and fails a
+  byte one. Read it before writing a row, not by failing the gate:
+  `sh scripts/hygiene-check.sh --budget`.
 - **Publish hygiene is a GATE, not a pass.** `scripts/hygiene-check.sh` runs from
   `.git/hooks/pre-commit` and reads the lines a commit ADDS, which is why it needs
   no list of what is excused - and a list of what is excused would be a map to the
