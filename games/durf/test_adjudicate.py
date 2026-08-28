@@ -136,6 +136,39 @@ class AskLoop(unittest.TestCase):
         self.assertEqual(arm.last_refusals, 0)
 
 
+class DeclineVocabulary(unittest.TestCase):
+    """The pre-registered second arm moves exactly the decline bytes and no others."""
+
+    def setUp(self):
+        from games.durf import fixture
+        fx = fixture.load()
+        self.scene = fixture.render_scenario(fx)
+        self.decl = fx.declarations[0]
+
+    def test_dropping_decline_removes_only_its_own_two_clauses(self):
+        with_it = adjudicate.declaration_prompt(self.scene, self.decl)
+        without = adjudicate.declaration_prompt(self.scene, self.decl,
+                                                allow_decline=False)
+        self.assertEqual(len(with_it) - len(without),
+                         len(adjudicate.DECLINE_OPTION) + len(adjudicate.DECLINE_CLAUSE))
+        self.assertEqual(with_it.replace(adjudicate.DECLINE_OPTION, "", 1)
+                         .replace(adjudicate.DECLINE_CLAUSE, "", 1), without)
+        self.assertNotIn("decline", without)
+
+    def test_the_parser_refuses_the_word_the_prompt_no_longer_offers(self):
+        with self.assertRaises(adjudicate.IllegalReply):
+            adjudicate.parse_ruling('{"ruling": "decline"}', allow_decline=False)
+        self.assertEqual(
+            adjudicate.parse_ruling('{"ruling": "decline"}').ruling, "decline")
+
+    def test_the_arm_carries_the_flag_into_its_ask(self):
+        arm = adjudicate.build_arm("llm", backend=FakeBackend(
+            ['{"ruling": "decline"}', '{"ruling": "no_roll"}']), allow_decline=False)
+        arm.backoff = 0.0
+        self.assertEqual(arm.rule("p", {"id": "d001"}).ruling, "no_roll")
+        self.assertEqual(arm.last_rule_refusals, 1)
+
+
 class Arms(unittest.TestCase):
     def test_the_random_arm_never_declines(self):
         # `decline` is a refusal to answer; a random arm that produced one would

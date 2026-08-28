@@ -96,7 +96,7 @@ The player declares, in room {room}:
 Rule on that declaration. Answer with one JSON object and nothing else:
 
   {{"think": "<your reasoning, one or two sentences>",
-    "ruling": "roll" | "no_roll" | "illegal" | "decline",
+    "ruling": "roll" | "no_roll" | "illegal"{decline_option},
     "attribute": "STR" | "DEX" | "WIL" | null,
     "opposed": true | false,
     "narrate": "<what the table sees happen, one sentence>"}}
@@ -106,8 +106,16 @@ governing attribute, and set "opposed" true when the roll is against an NPC's
 Skill rather than flat against 15. "no_roll" means the outcome follows from what
 is already established - leave "attribute" null. "illegal" means a rule or this
 character's own state forbids the attempt, so there is nothing to roll for and
-nothing to resolve - leave "attribute" null. "decline" means you will not rule on
-this declaration; say why in "think"."""
+nothing to resolve - leave "attribute" null.{decline_clause}"""
+
+#: The two halves of the ``decline`` affordance, so the arm that drops it changes
+#: exactly these bytes and no others. The first run's 27% refusal rate is not
+#: readable as "declined to rule" while the vocabulary invites the word as a way to
+#: reject a player's argument; ``docs/durf-rung.md`` §First run pre-registers what
+#: each outcome of dropping it would mean.
+DECLINE_OPTION = ' | "decline"'
+DECLINE_CLAUSE = (' "decline" means you will not rule on\n'
+                  'this declaration; say why in "think".')
 
 MORALE_ASK = """\
 {kernel}
@@ -129,10 +137,13 @@ one JSON object and nothing else:
 without one."""
 
 
-def declaration_prompt(scenario_text: str, decl: dict) -> str:
-    return DECLARATION_ASK.format(kernel=rules.KERNEL_DIGEST,
-                                  scenario=scenario_text,
-                                  room=decl["room"], text=decl["text"])
+def declaration_prompt(scenario_text: str, decl: dict,
+                       allow_decline: bool = True) -> str:
+    return DECLARATION_ASK.format(
+        kernel=rules.KERNEL_DIGEST, scenario=scenario_text,
+        room=decl["room"], text=decl["text"],
+        decline_option=DECLINE_OPTION if allow_decline else "",
+        decline_clause=DECLINE_CLAUSE if allow_decline else "")
 
 
 def morale_prompt(scenario_text: str, event: dict) -> str:
@@ -147,7 +158,7 @@ def _obj(reply: str, keys) -> dict:
         return salvage(reply, keys)
 
 
-def parse_ruling(reply: str) -> Ruling:
+def parse_ruling(reply: str, allow_decline: bool = True) -> Ruling:
     """Read a ruling out of a model reply, or raise.
 
     Strict about the one pair that decides a score and lenient about everything
@@ -158,13 +169,14 @@ def parse_ruling(reply: str) -> Ruling:
     attribute is unreachable, so it costs nothing and a retry spent on it is a
     retry not spent on a ruling.
     """
+    legal = RULINGS if allow_decline else tuple(r for r in RULINGS if r != "decline")
     obj = _obj(reply, ACTION_KEYS)
     ruling = obj.get("ruling")
     if isinstance(ruling, str):
         ruling = ruling.strip().lower().replace("-", "_").replace(" ", "_")
-    if ruling not in RULINGS:
+    if ruling not in legal:
         raise IllegalReply(
-            f"'ruling' must be one of {', '.join(RULINGS)}; got {obj.get('ruling')!r}")
+            f"'ruling' must be one of {', '.join(legal)}; got {obj.get('ruling')!r}")
     attribute = obj.get("attribute")
     if isinstance(attribute, str):
         attribute = attribute.strip().upper() or None
@@ -300,6 +312,9 @@ class LLMAdjudicator:
     fallback: object = field(default_factory=RandomAdjudicator)
     backoff: float = 1.0
     trace: list = field(default_factory=list)
+    #: Whether ``decline`` is in the vocabulary this run offers. Off is the
+    #: pre-registered second arm; see ``DECLINE_OPTION`` above.
+    allow_decline: bool = True
 
     def __post_init__(self) -> None:
         self.reset()
@@ -345,7 +360,9 @@ class LLMAdjudicator:
         return None
 
     def rule(self, prompt: str, item: dict) -> Ruling:
-        answer = self._ask(prompt, item["id"], parse_ruling)
+        answer = self._ask(
+            prompt, item["id"],
+            lambda reply: parse_ruling(reply, allow_decline=self.allow_decline))
         return answer if answer is not None else self.fallback.rule(prompt, item)
 
     def morale(self, prompt: str, item: dict) -> MoraleCall:
@@ -360,7 +377,7 @@ ARMS = ("always-roll", "never-roll", "random", "llm")
 
 
 def build_arm(name: str, backend=None, retries: int = 2,
-              rng: random.Random | None = None):
+              rng: random.Random | None = None, allow_decline: bool = True):
     if name == "always-roll":
         # Answers "roll" to everything and "morale" to every event, which is the
         # direction CoC-Seduce says a False-Pass-prone model is furthest from.
@@ -373,5 +390,6 @@ def build_arm(name: str, backend=None, retries: int = 2,
         if backend is None:
             raise ValueError("the llm arm needs a backend")
         return LLMAdjudicator(backend=backend, retries=retries,
-                              fallback=RandomAdjudicator(rng))
+                              fallback=RandomAdjudicator(rng),
+                              allow_decline=allow_decline)
     raise ValueError(f"unknown arm {name!r}")

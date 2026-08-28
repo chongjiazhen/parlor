@@ -183,7 +183,7 @@ def grade_morale(event: dict, call: adjudicate.MoraleCall) -> str:
 
 
 def run_items(fx: fixture.Fixture, arm, limit: int | None = None,
-              on_land=None) -> list[ItemRecord]:
+              on_land=None, allow_decline: bool = True) -> list[ItemRecord]:
     """Every item through the arm, landing each one as it finishes.
 
     ``on_land`` is called with each record the moment it is graded, so a run that
@@ -195,7 +195,7 @@ def run_items(fx: fixture.Fixture, arm, limit: int | None = None,
     decls = fx.declarations[:limit] if limit else fx.declarations
     events = fx.morale_events[:limit] if limit else fx.morale_events
     for decl in decls:
-        prompt = adjudicate.declaration_prompt(scenario_text, decl)
+        prompt = adjudicate.declaration_prompt(scenario_text, decl, allow_decline)
         ruling, rec = _ask_one(arm, prompt, decl, "declaration")
         rec.label = {"roll": decl["roll"], "attribute": decl["attribute"],
                      "opposed": decl["opposed"], "refuse": decl["refuse"]}
@@ -355,8 +355,11 @@ def _band(ci) -> str:
 
 def report(s: dict, args, elapsed: float) -> list[str]:
     f = s["fixture"]
+    vocab = "roll/no_roll/illegal" + ("" if getattr(args, "no_decline", False)
+                                      else "/decline")
     out = [f"=== {s['items']} fixture items ({args.arm} arm, "
-           f"backend={args.backend or 'none'}, model={args.model}) in {elapsed:.1f}s ===",
+           f"backend={args.backend or 'none'}, model={args.model}, "
+           f"vocabulary={vocab}) in {elapsed:.1f}s ===",
            f"fixture {f['scenario']} v{f['version']}, {f['ruleset']}, labelled "
            f"{f['labelled']}. {f['attribution']}", ""]
 
@@ -459,6 +462,10 @@ def main() -> None:
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--no-thinking", action="store_true",
                     help="ask the chat template to skip the model's reasoning pass")
+    ap.add_argument("--no-decline", action="store_true",
+                    help="drop `decline` from the ruling vocabulary. A MODEL-FACING "
+                         "change and the pre-registered second arm - see "
+                         "docs/durf-rung.md, First run")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--limit", type=int, default=None,
                     help="first N declarations and N morale events, for a smoke run. "
@@ -482,7 +489,8 @@ def main() -> None:
 
     rng = random.Random(args.seed)
     arm = adjudicate.build_arm(args.arm, backend=build_backend(args),
-                               retries=args.retries, rng=rng)
+                               retries=args.retries, rng=rng,
+                               allow_decline=not args.no_decline)
 
     on_land = None
     if args.out:
@@ -491,7 +499,8 @@ def main() -> None:
                 fh.write(as_line(index, rec) + "\n")
 
     started = time.time()
-    records = run_items(fx, arm, args.limit, on_land)
+    records = run_items(fx, arm, args.limit, on_land,
+                        allow_decline=not args.no_decline)
     scored = score(records, fx)
     print("\n".join(report(scored, args, time.time() - started)))
 
