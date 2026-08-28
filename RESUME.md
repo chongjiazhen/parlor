@@ -405,11 +405,11 @@ file so far came from carrying one game's intuition into the other's denominator
 
 **quorum - the engine is complete and no model has played a seat.**
 `games/quorum/RULES.md` carries every number and the knowledge model; the queue
-adds only what is unsettled. The first live arm needs a pre-committed criterion
-before it runs (`docs/evidence-discipline.md`), then: `py -3 -m eval.run_quorum
+adds only what is unsettled. **The criterion is WRITTEN and unedited since -
+`docs/quorum-live1-criterion.md`, arithmetic `eval/quorum_live1_verdict.py`, both
+2026-08-28, before any model played a seat.** What is left is GPU: `run_quorum
 --games 20 --arm llm --backend local --model qwen36-35b-a3b-iq3 --temperature 0.0
---rounds 1 --seed 5200 --out eval/records/quorum-live1.json`. It asks whether a
-seat claims at all and beats 25% / 33.33%, never who won.
+--rounds 1 --seed 5200 --out ...quorum-live1.json`, then `quorum_live1_verdict`.
 
 Open rows, unordered - the slice table above is what ranks them.
 **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
