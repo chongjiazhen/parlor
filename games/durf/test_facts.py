@@ -94,6 +94,41 @@ def test_colliding_terms_are_refused_because_the_remedy_is_a_rename():
         facts.check_facts(ledger(a=["barrow-rats"], b=["three barrow-rats"]))
 
 
+def texted(**entries) -> facts.FactLedger:
+    """A hand-built set where each fact's TEXT is stated, not derived from its id."""
+    return facts.FactLedger(
+        facts={(fid,): facts.WorldFact((fid,), f"fact {fid}", tuple(terms), text)
+               for fid, (terms, text) in entries.items()},
+        revealed=set())
+
+
+def test_a_term_inside_another_facts_text_is_refused():
+    """The collision the pairwise term check cannot see.
+
+    ``kernel.call_reveal`` publishes a fact's own text verbatim, so a text that
+    carries another fact's sentinel makes declaring the first one write the
+    second one's term into the transcript - and every later render is charged
+    with a leak the referee could not have avoided. It is worse than a term
+    collision because nothing in the term list shows it: it surfaces only at run
+    time, attributed to a model that obeyed the rules.
+    """
+    led = texted(
+        rats_room=(["barrow-rats"], "R3 Gallery: three barrow-rats on the far side."),
+        rats_stats=(["ML 6"], "Three barrow-rats: Skill 2, ML 6."))
+    with pytest.raises(facts.FactError, match="appears in"):
+        facts.check_facts(led)
+
+
+def test_the_text_check_does_not_fire_on_a_facts_own_text():
+    """A term is expected to appear in the text of the fact it belongs to - that
+    is what the kernel publishes when the fact is legally declared. A check that
+    fired there would refuse every well-formed fact set."""
+    led = texted(
+        a=(["shallow cavity"], "A loose flagstone covers a shallow cavity."),
+        b=(["rope bridge"], "R3 Gallery: an old rope bridge."))
+    facts.check_facts(led)
+
+
 def test_a_blank_term_is_refused_because_find_leaks_skips_it():
     with pytest.raises(facts.FactError, match="blank"):
         facts.check_facts(ledger(a=["   "]))

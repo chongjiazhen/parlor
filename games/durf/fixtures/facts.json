@@ -3,7 +3,7 @@
   "scenario_id": "hollow-barrow",
   "ruleset": "DURF 2.2 (2021), Emiel Boven, CC BY 4.0",
   "note": "The world facts the session engine audits gate #1 against. Derived from scenario.json's rooms, hidden entries and NPC stat blocks - the same fixed dungeon the declaration fixture is evaluated against - but a SEPARATE file, because scenario.json's rendering is a model-facing byte of the recorded instrument runs and must not move.",
-  "terms_note": "Naive sentinels. They are held pairwise disjoint by games/durf/facts.check_facts, because the repo's remedy for a colliding term is to rename it, never to weaken the matcher.",
+  "terms_note": "Naive sentinels. games/durf/facts.check_facts holds them pairwise disjoint AND holds no term to appear in another fact's text, because the kernel publishes a fact's text verbatim on a reveal - a term inside another fact's text leaks that fact by construction. The remedy for either collision is to rename the TERM, never to weaken the matcher and never to move a text, which is a model-facing byte.",
 
   "public_at_start": [["room", "R1"]],
 
@@ -23,13 +23,13 @@
     {
       "fact_id": ["room", "R3"],
       "label": "what is in the gallery",
-      "terms": ["twenty-foot chasm", "rope bridge", "rusted brazier", "barrow-rats"],
+      "terms": ["twenty-foot chasm", "rope bridge", "rusted brazier", "barrow-rats on the far side"],
       "text": "R3 Gallery: a twenty-foot chasm spanned by an old rope bridge, three barrow-rats on the far side, a rusted brazier hanging over the chasm on a chain."
     },
     {
       "fact_id": ["room", "R4"],
       "label": "what is in the tomb",
-      "terms": ["sealed stone sarcophagus", "grave goods", "barrow-wight"],
+      "terms": ["sealed stone sarcophagus", "grave goods", "barrow-wight standing over it"],
       "text": "R4 Tomb: a sealed stone sarcophagus with a barrow-wight standing over it, and grave goods worth 300 GP."
     },
     {

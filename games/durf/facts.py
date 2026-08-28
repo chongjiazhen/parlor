@@ -157,6 +157,16 @@ def check_facts(ledger: FactLedger) -> None:
       loose in a legal render, which reports a leak that is not one - and this
       repo's answer to a colliding term is to rename it, never to weaken the
       matcher.
+    - **No fact's term appears in another fact's TEXT.** The same failure by the
+      route the pairwise check cannot see. ``kernel.call_reveal`` publishes a
+      fact's own text verbatim, so a text carrying another fact's sentinel means
+      declaring the first one writes the second one's term into the transcript -
+      and every later render is then charged with a leak the referee could not
+      have avoided, because the kernel wrote it. Worse than a term collision:
+      a collision is visible in the term list, this is not, and it surfaces only
+      as a run-time leak attributed to a model that obeyed the rules. The remedy
+      is the same rename, and it belongs on the TERM - a fact's text is what the
+      party is told, and moving it moves a model-facing byte.
     """
     seen: dict[str, FactId] = {}
     for fid, fact in ledger.facts.items():
@@ -175,3 +185,16 @@ def check_facts(ledger: FactLedger) -> None:
                         f"term owned by {owner!r}. Rename one - a shared sentinel "
                         f"makes a legal render read as a leak.")
             seen[low] = fid
+    for fid, fact in ledger.facts.items():
+        for term in fact.terms:
+            low = term.strip().lower()
+            for other_id, other in ledger.facts.items():
+                if other_id == fid:
+                    continue
+                if low in other.text.lower():
+                    raise FactError(
+                        f"the term {term!r} ({fid!r}) appears in {other_id!r}'s "
+                        f"text. Declaring {other_id!r} publishes that text, so it "
+                        f"would leak {fid!r} by construction. Rename the term - "
+                        f"the text is what the party is told and moving it moves "
+                        f"a model-facing byte.")

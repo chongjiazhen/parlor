@@ -160,6 +160,21 @@ adjudicator declares, the referee-side `text` the kernel publishes on a declared
 reveal, and the naive `terms` that catch the fact in a render. `["room", "R1"]`
 is public at start, because the party is standing in it.
 
+**A term against another fact's TEXT is refused too, added 2026-08-28.**
+`kernel.call_reveal` publishes a fact's own text verbatim, so a text carrying
+another fact's sentinel means declaring the first fact writes the second one's
+term into the transcript, and every later render is charged with a leak the
+referee could not have avoided. The fixture had exactly two such pairs, both a
+creature's stat block naming the creature whose name was its room's sentinel:
+`["room", "R3"]` now carries `barrow-rats on the far side` and `["room", "R4"]`
+`barrow-wight standing over it`, both transcribed from the room text. **The
+remedy is on the TERM, never on the text** - a text is what the party is told
+when the fact is declared, and moving one moves a model-facing byte. Terms are
+audit-side only, so this edit changed no byte any recorded run sent; it changed
+the instrument, and a leak count is a reading under the term set its run used.
+`docs/durf-rung.md` §The paired arm carries the proof and what the narrower
+sentinels cost.
+
 **The terms are held pairwise disjoint by `games/durf/facts.check_facts`, at
 load.** A sentinel shared between two facts means declaring one leaves the other's
 term loose in a legal render - a leak reported that is not one - and this repo's

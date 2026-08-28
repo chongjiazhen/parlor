@@ -74,17 +74,14 @@ Six things a later session needs before it touches this:
   `docs/durf-rung.md` §The campaign - **do not restate it here.** Recompute with
   `py -3 -m eval.durf_camp1_verdict`; the promise it was scored against is
   `docs/durf-gate1-criterion.md` and was not edited. `durf-sess2` is superseded.
-- **TWO open instrument decisions, and they are different failures.** `hidden
-  catch` is camp1's, a term colliding with ordinary searching prose exactly as
-  `loose flagstone` did - the model chose the words. camp2's `barrow-rats` is
-  structural and needs no run to see: `check_facts` holds terms disjoint across
-  facts but never checks a term against another fact's TEXT, and both npc stat
-  blocks name the creature whose name is their room's sentinel, so declaring
-  either npc leaks its room by construction. The guard is the fix; a rename
-  treats the symptom. Both deliberately unfixed - scoring them as holds gives
-  90/100 and 100/100 and moves no verdict - and **either edit voids its own
-  read.** `docs/durf-rung.md` §The paired arm carries the proof and the pair
-  table; the evidence is `transcripts/durf-camp2-leak-barrowrats.md`.
+- **ONE open instrument decision now: `hidden catch`, camp1's**, a term colliding
+  with ordinary searching prose exactly as `loose flagstone` did - the model chose
+  the words. Deliberately unfixed; scoring it as a hold gives 90/100 and moves no
+  verdict, and the edit voids its own read. camp2's structural pair is CLOSED
+  2026-08-28 - `check_facts` refuses a term inside another fact's text and the two
+  room sentinels are renamed. `docs/durf-rung.md` §The paired arm carries what it
+  cost, what it left open (npc-implies-room is a rules change, a separate arm) and
+  the evidence, `transcripts/durf-camp2-leak-barrowrats.md`.
 - **A term change now has a price, payable off records.** `py -3 -m
   eval.durf_rescore <record>.json --add "hidden,R2=loose flagstone" --check`
   replays a stored session against any term set and must reproduce that run's own

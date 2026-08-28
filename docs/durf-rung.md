@@ -944,14 +944,42 @@ time, by construction. That is checkable by reading `facts.json` alone - which i
 what makes it an instrument argument this file's rule permits, exactly as the
 `loose flagstone` rename was.
 
-**Not applied here, and the fix is a guard rather than a rename.** Extending
-`check_facts` to term-against-text would have refused this fixture at load rather
-than scoring it, which is where a guarantee belongs; renaming the sentinel treats
-the symptom. Either edit moves the instrument and **voids this 99/100** the way the
-rename voided the 3/6. Scoring the leak as a hold gives 100/100 and moves no
-verdict, so nothing is riding on the timing. `hidden catch` remains separately
-open and is a genuinely different failure - a collision with ordinary prose, where
-the model chose the words.
+**APPLIED 2026-08-28, and it is both moves rather than a choice between them.**
+`check_facts` now refuses a fact set where any term appears in another fact's
+text, and the two pairs above are renamed to conform: `["room", "R3"]` carries
+`barrow-rats on the far side` and `["room", "R4"]` carries `barrow-wight standing
+over it`, both transcribed from the room text that already held them. The guard is
+where the guarantee belongs - a load that cannot be scored with now refuses rather
+than scoring - and the rename is what the guard demands of the fixture, so this is
+not the symptom treated in place of the cause but the cause made unshippable and
+the fixture brought into line with it. Decided on the invariant alone, in a session
+holding none of this arm's numbers: the failure the guard catches is a leak
+charged to a referee that obeyed the rules, which is the same false positive the
+pairwise term check already exists to refuse, arriving by the one route that check
+cannot see. Mutation-checked both ways - the raise removed, and the self-skip
+removed - each killing exactly the test that names it.
+
+**What it costs, and what it does not.** The rename narrows two sentinels: the
+instrument no longer catches a referee that names either creature outside the
+phrase its room text uses. That is a real widening of the false-negative side,
+paid to close a false positive that fires by construction, and both rooms keep
+their other sentinels (three for R3, two for R4). It moves **no model-facing
+byte** - terms are audit-side only, and no text, world view or prompt changed - so
+nothing here needs re-running and §First run, §Second arm, §The temperature arm,
+§The campaign and the reveal-ahead tables above are all untouched. What it moves is
+the instrument, so **the leak column is a read under the term set its run used**:
+99/100 stands as camp2's reading under that set, and this section already records
+that scoring the one leak as a hold gives 100/100 and moves no verdict.
+
+**The deeper question is left open on purpose.** Declaring the rats' stat block
+before the party reaches R3 genuinely does tell the party that barrow-rats exist,
+so the honest instrument would make `["npc", "barrow-rats"]` undeclarable until
+`["room", "R3"]` is - a containment relation between facts, not a sentinel. That
+constrains what is legal and therefore what the fallback rate counts, which makes
+it a rules change and a separate arm, exactly as movement respecting the exit
+graph is. The guard closes the mis-attribution; it does not claim the fact graph
+is right. `hidden catch` remains separately open and is a genuinely different
+failure - a collision with ordinary prose, where the model chose the words.
 
 **Reveal-ahead, the comparison this arm existed to make.** Re-run with `py -3 -m
 eval.durf_reveal_order eval/records/durf-camp2.json`; its control reproduced each

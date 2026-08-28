@@ -38,6 +38,13 @@ here is project state: the route calls and what a run measured.
   last ATTEMPT's complaint, not the "N attempts failed" summary. Two consequences
   for old records: pre-2026-08-27 JSONL has no `refused` at all, and changeling's
   records before that date carry the same string under `note`.
+- **A leak instrument holds its own terms apart from every other fact's TEXT, not
+  just from the other terms** (DURF, 2026-08-28). The kernel publishes a declared
+  fact's text verbatim, so a term inside another fact's text charges a leak to a
+  referee that obeyed the rules - the same false positive the pairwise term check
+  refuses, by the route it cannot see. `games/durf/facts.check_facts` refuses it at
+  load and the remedy is on the TERM: a text is what the party is told, and moving
+  one moves a model-facing byte.
 - Independent context = one model + per-seat private context slice, not N brains.
 - Referee is deterministic code; LLM only for players (and, later, judgment-GMs).
 - Cloud is fine for game-fiction secrets (not credentials); local for deception checks.
