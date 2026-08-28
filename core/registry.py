@@ -78,6 +78,10 @@ _RUNGS = (
          "5-seat legislative cascade. A hand is dealt per event and narrows as it "
          "passes down the offices, so what a seat may see is a fact about the "
          "state and not about its role."),
+    Rung("belfry", "games.belfry.demo",
+         "5-12 seat town square over many days and nights. The referee is allowed "
+         "to lie: a seat whose ability has been switched off is told something "
+         "false in the same words, and is not told that."),
 )
 
 RUNGS: dict[str, Rung] = {r.name: r for r in _RUNGS}

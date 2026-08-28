@@ -188,6 +188,26 @@ Reference already written down, unmeasured unless it says otherwise:
 - `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
   and the graded-taint fix that does.
 
+belfry - engine DONE, playable and registered 2026-08-28. No model has played a
+seat, and there is no eval lane yet, so nothing about it belongs in
+`docs/measurements.md`. `games/belfry/RULES.md` carries the knowledge model, the
+discretion table and the random-policy control (520 games: good 49.2 / evil 47.5 /
+none 3.3).
+
+- [ ] **`eval/run_belfry.py`, the scoring lane.** Twin of `run_quorum`, over the
+      same `core/integrity.py` block. Blocked on nothing. Until it exists belfry
+      can be PLAYED and cannot be MEASURED, which is the only reason it is not a
+      third live front.
+- [ ] **The first live game, and a criterion written before it.** Cost is the
+      binding constraint and it is measured: 5 seats ~49 decisions, 7 ~119, 9
+      ~183, one call each. Start at 5 seats on the compact script; the full
+      script re-baselines every number, so pick one and say which.
+- [ ] **A model in the referee's seat, for the discretionary choices only.** The
+      spike the ladder was pointed at, and belfry makes it small: the choices are
+      already isolated in one place and logged, so the arm replaces the seeded
+      draw and changes nothing about the audit. The measurement is whether a seat
+      can tell which referee it faced.
+
 Instrument and integrity:
 
 - [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with

@@ -38,6 +38,7 @@ python -m parlor play cabal                   # a whole game, random players, no
 python -m parlor play cabal --human 0         # you play seat 0
 python -m parlor play changeling --human 0    # your own card can change under you
 python -m parlor play quorum --human 0        # the secret is dealt in play, not at the deal
+python -m parlor play belfry --seats 7 --human 0   # days and nights, and the referee may lie to you
 ```
 
 Each game keeps its own flags - `play cabal --help` prints cabal's. One person per
@@ -91,7 +92,8 @@ each other's private view. A second human seat needs a second channel.
 | **changeling** (belief can diverge from truth) | deterministic, one night | spike #2 |
 | **quorum** (entitlement cascades over a secret created in play) | deterministic, per event | spike #3 |
 | Secret Hitler | deterministic + forced reveals | **not as a port** - a port buys recognition and no engine progress. `quorum` is that shape, built for the entitlement axis below rather than the recognition |
-| Blood on the Clocktower | a Storyteller with discretion | next, as an ADJUDICATOR spike against 3-4 characters, not the game |
+| **belfry** (the referee may state a falsehood to a seat, as a rule) | deterministic, discretion drawn from the seed | spike #4 |
+| the same rung with a MODEL in the referee's seat | LLM judgment over one isolated decision | next - belfry's discretionary choices are already isolated and logged, so this replaces one function and nothing about the audit |
 | Freeform TTRPG (5e SRD) | mostly LLM judgment | the actual product |
 
 Ordered by how much JUDGMENT the referee needs, which is the axis the engine risk
@@ -119,8 +121,29 @@ an object that did not exist at the deal** - so the audit question changes from
 chain*, and a referee that caches entitlement per seat rather than per event
 passes every earlier test while being wrong.
 
+**belfry** is the fourth, modelled on Blood on the Clocktower: a town square over
+many days and nights, 22 roles on a public script of which nobody knows which are
+in play, nominations and simultaneous votes, and a dead seat that keeps its voice
+and one vote. What it adds to the ladder is not the size. In the three rungs before
+it the referee always tells the truth; here it **lies on purpose, to a seat that is
+not told**, because a poisoned or deluded seat is a rule of the game. So gate #1
+stops meaning "tell the truth to the entitled" and starts meaning **never state a
+true association a seat has not earned** - and a lie is safe only when it is built
+to miss, which is why a false reveal is drawn from what a seat is NOT and a poisoned
+watcher sees a derangement rather than a shuffle. A shuffle leaves fixed points, and
+a fixed point is a true fact delivered to a seat with no claim on it: a real leak
+wearing a lie's provenance.
+
+The other thing it adds is that a referee of this family is normally a PERSON who is
+allowed to choose. A deterministic referee cannot have taste, so every such choice -
+which seat a reveal points at, whether an ambiguous seat reads as evil, who dies when
+a kill is deflected - is drawn from the run's seeded RNG and written to the
+referee-side log. That keeps `--seed` meaning what it means everywhere else in this
+repo, and it is what makes the next rung cheap: the discretion is already one
+isolated, logged set of calls, so putting a model in that seat changes one function.
+
 Full rules and the knowledge tables: `games/cabal/RULES.md`,
-`games/changeling/RULES.md`, `games/quorum/RULES.md`.
+`games/changeling/RULES.md`, `games/quorum/RULES.md`, `games/belfry/RULES.md`.
 
 ## Two public channels, and the line between them
 
@@ -232,6 +255,12 @@ games/changeling/referee.py, roles.py, audit.py, player.py, demo.py   as above, 
 games/quorum/RULES.md      rules, and what an OFFICE entitles a seat to see
 games/quorum/referee.py    the deck and the cascade - a hand narrows as it passes down
 games/quorum/roles.py, audit.py, player.py, demo.py   as above, 2 themes
+
+games/belfry/RULES.md      rules, the night order, and what a lie has to miss
+games/belfry/state.py      the board the referee keeps, and the seeded discretion
+games/belfry/night.py      what a seat is told, and how a false version of it is built
+games/belfry/referee.py    days and nights as a cursor: pending() says who is on the clock
+games/belfry/roles.py, audit.py, player.py, demo.py   as above, 2 scripts
 
 core/registry.py           name -> the driver that plays that rung
 core/doctor.py             `parlor doctor` - what this BOX can serve, and a real probe
