@@ -51,11 +51,32 @@ cd "$(git rev-parse --show-toplevel)"
 # the BLOB's - line endings are whatever git stores, and the same number comes
 # back on a CRLF checkout and an LF one.
 QUEUE_CEILING=30000
+QUEUE_PATH=RESUME.md
+
+# The old side of the ratchet has to follow a RENAME, or the rename reads as
+# growth from zero.
+#
+# git resolves HEAD:<new path> to nothing on the commit that moves the file,
+# `2>/dev/null` swallows the error, QUEUE_OLD falls back to 0, and the whole
+# file then counts as added - so the gate blocks a commit that changed nothing
+# but the name. It fails silent in both directions: no line of output says the
+# old side was never found, and the byte numbers it prints look like a real
+# reading. Rename detection hands back the pre-rename path, which is the blob
+# the count actually wants to compare against.
+queue_old_path() {
+    # $1 = the diff selector (--cached, or a range). $2 = the current path.
+    # Falls back to the current path, which is the right answer whenever the
+    # file was not renamed in this commit.
+    git diff "$1" -M --name-status 2>/dev/null | awk -v new="$2" '
+        $1 ~ /^R/ && $3 == new { print $2; found = 1; exit }
+        END { if (!found) print new }
+    '
+}
 
 if [ "$1" = "--budget" ]; then
-    QUEUE_NOW=$(git show HEAD:RESUME.md 2>/dev/null | wc -c | tr -d ' ')
+    QUEUE_NOW=$(git show "HEAD:$QUEUE_PATH" 2>/dev/null | wc -c | tr -d ' ')
     [ -z "$QUEUE_NOW" ] && QUEUE_NOW=0
-    echo "RESUME.md at HEAD: $QUEUE_NOW bytes, ceiling $QUEUE_CEILING."
+    echo "$QUEUE_PATH at HEAD: $QUEUE_NOW bytes, ceiling $QUEUE_CEILING."
     if [ "$QUEUE_NOW" -gt "$QUEUE_CEILING" ]; then
         echo "Over budget, so this commit may shrink it or hold it flat, never grow it."
         echo "Write the row to fit, or move something out in the same commit."
@@ -72,13 +93,15 @@ if [ "$1" = "--range" ] && [ -n "$2" ]; then
     QUEUE_BASE=${2%%..*}
     QUEUE_TIP=${2##*..}
     [ -z "$QUEUE_TIP" ] && QUEUE_TIP=HEAD
-    QUEUE_CHANGED=$(git diff --name-only "$2" -- RESUME.md)
-    QUEUE_OLD_REF="$QUEUE_BASE:RESUME.md"
-    QUEUE_NEW_REF="$QUEUE_TIP:RESUME.md"
+    QUEUE_CHANGED=$(git diff --name-only "$2" -- "$QUEUE_PATH")
+    QUEUE_OLD_PATH=$(queue_old_path "$2" "$QUEUE_PATH")
+    QUEUE_OLD_REF="$QUEUE_BASE:$QUEUE_OLD_PATH"
+    QUEUE_NEW_REF="$QUEUE_TIP:$QUEUE_PATH"
 else
-    QUEUE_CHANGED=$(git diff --cached --name-only -- RESUME.md)
-    QUEUE_OLD_REF="HEAD:RESUME.md"
-    QUEUE_NEW_REF=":RESUME.md"
+    QUEUE_CHANGED=$(git diff --cached --name-only -- "$QUEUE_PATH")
+    QUEUE_OLD_PATH=$(queue_old_path --cached "$QUEUE_PATH")
+    QUEUE_OLD_REF="HEAD:$QUEUE_OLD_PATH"
+    QUEUE_NEW_REF=":$QUEUE_PATH"
 fi
 
 if [ -n "$QUEUE_CHANGED" ]; then
@@ -89,7 +112,7 @@ if [ -n "$QUEUE_CHANGED" ]; then
     if [ "$QUEUE_NEW" -gt "$QUEUE_CEILING" ] && [ "$QUEUE_NEW" -gt "$QUEUE_OLD" ]; then
         cat >&2 <<MSG
 
-[hygiene] RESUME.md grew: $QUEUE_OLD -> $QUEUE_NEW bytes, over the $QUEUE_CEILING-byte budget.
+[hygiene] $QUEUE_PATH grew: $QUEUE_OLD -> $QUEUE_NEW bytes, over the $QUEUE_CEILING-byte budget.
 
 The queue keeps what can still change. A landed slice is struck and moved to
 docs/slices.md, a dated reading to docs/measurements.md, a settled call to
