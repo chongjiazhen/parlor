@@ -53,7 +53,7 @@ has its first read where a model is the referee.** The 3/6 smoke read is VOID
 because the rename changed the instrument it was scored against, and the campaign
 that replaced it has LANDED. Everything is in `docs/durf-rung.md`
 §The session engine, §The read and §The campaign - **do not restate it here.**
-Four things a later session needs before it touches this:
+Six things a later session needs before it touches this:
 
 - **THE CAMPAIGN LANDED 2026-08-28 and gate #1 HOLDS: 91/100 sessions, Wilson
   [83.77%, 95.19%], fallback 0.16% of 1913 decisions.** Everything about it is
@@ -73,6 +73,19 @@ Four things a later session needs before it touches this:
   replays a stored session against any term set and must reproduce that run's own
   leaks first. On this campaign the dropped term would have been worth 15 sessions
   (82/100, still holding), which is a counterfactual and never a read.
+- **THE NEXT DURF SLICE, and it is a design question the campaign produced rather
+  than an instrument one.** Eight of nine leaks were the same act: the referee
+  narrates the iron door of an undeclared R3 while the party stands in R1. A door
+  the party can SEE from the room it occupies is arguably R1's public content, in
+  which case the fixture is what is wrong and the referee is describing the room
+  it was given. The alternative is that the referee should say "a door" without
+  the room beyond it. **Decide which before changing either**, because a fixture
+  edit re-baselines the 91/100 exactly as the rename re-baselined the 3/6.
+- **Deciding `hidden catch` does NOT oblige a re-run.** The 91/100 is a dated read
+  under its own term set and stays quotable as that. A new term set needs a new
+  campaign only if a number under it is wanted, and 52 minutes of GPU buys nothing
+  when the verdict does not move. Change the term, mark the read as scored under
+  the old set, and run again only when something else is worth measuring with it.
 - **The tell question is a SEPARATE instrument and must not be folded back in.**
   Substring matching cannot see a referee that names the object of its own
   undeclared secret without naming the secret (`docs/action-channel.md`). It stays
