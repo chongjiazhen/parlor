@@ -723,6 +723,84 @@ built for one. Nothing about the discretion number, which belongs to the isolate
 instrument and is still void. And no comparison with the 3/6 smoke read, which
 was scored against a different fact set.
 
+### The iron-door question, decided 2026-08-28: the FIXTURE is at fault, and not for the reason the question supposed
+
+The campaign's eight iron-door leaks were left open as a design question rather
+than an instrument one: is the fixture withholding a door the party can plainly
+see, or is the referee naming a room beyond a door it should have left as "a
+door"? **Neither, as posed.** The question's premise is that there is a door the
+party can see from where it stands, and at this fixture there is not.
+
+What the record actually says, all of it read off the record rather than argued
+(`py -3 -m eval.durf_reveal_order eval/records/durf-camp1.json --leaks`):
+
+- **R1 has no door.** Its contents are `a steep scree slope down into the barrow,
+  loose stone underfoot, daylight behind and dark ahead`. The iron door named in
+  all eight leaks is R2's, standing in the antechamber's far wall and opening on
+  R3 - two room-contents away from a party on the entry slope. There is no
+  visible-door reading to make public, so the branch that would edit R1's
+  contents is answering a question the dungeon does not ask.
+- **The party was in R1 for all eight**, and had issued no move.
+- **All eight follow one scripted declaration**: `I listen at the door before
+  touching it.`, from `games/durf/seats.py` §`ScriptedPlayer.LINES`. The
+  campaign's party is scripted, so that line is fixture text, not model
+  behaviour. The ninth leak follows `I check the floor for anything loose.` and
+  is the `hidden catch` term question, which is separate and still open.
+
+So the fixture is what is wrong, in a way the question did not consider: **it
+hands the referee a declaration whose object does not exist in the room the party
+occupies**, and then scores the referee on how it copes. Asked to narrate a
+character listening at a door on a doorless scree slope, the model reached for the
+only door in its world view. That is the fixture's defect and not a referee's
+oversharing - which is why the remedy is one line of `ScriptedPlayer.LINES` and
+not a prompt change, and why "the referee should have said *a door*" is the wrong
+reading: there was no door for the definite article to point at.
+
+**The edit is prescribed and deliberately NOT applied here.** Replace the line
+with a declaration satisfiable in any room the party can occupy - the other four
+lines already are - and the eight leaks have no vehicle. The reason to hold it:
+unlike a term-set change, a fixture change **cannot be replayed off records**.
+`eval.durf_rescore` can price a sentinel against bytes already on disk because the
+model's input did not move; changing what a seat declares moves the model's input,
+so the 100 sessions say nothing about the edited fixture and the only way to learn
+anything is another campaign. That is 52 minutes of GPU, and the standing rule
+from the `hidden catch` decision applies unchanged: spend it when something else
+is worth measuring with it. Something now is - see below. **The 91/100 stays
+quotable as what it is, a dated read under fixture v1**, exactly as the 3/6 stayed
+a read under the old fact set.
+
+### What working that question turned up: 84 of 100 sessions revealed ahead of the party, and 78 of those are counted as holds
+
+`eval/durf_reveal_order.py` (tracked, no GPU, scored off records already on disk;
+definitions in its docstring, written before anything was counted; its control
+replays each session's declarations and must reproduce that session's own
+`declared` list, and it does, across all 100).
+
+**84/100 sessions declare a room or a hidden fact for a room the party is not in
+and does not enter that turn. 78 of them recorded a gate #1 HOLD.** By where the
+party was standing: R2 from R1 49 times, R3 from R2 31, **R3 from R1 28** - the
+full Gallery, chasm, rope bridge, three barrow-rats and brazier, published to a
+party on the entry slope - R2's hidden cavity from R1 21 times, R4 from R3 6.
+
+**This is not a gate #1 failure and gate #1 must not be changed to catch it.**
+Declaring is the adjudicator's authority; a declared fact is entitled by
+definition, and the audit is correctly silent. What it means is narrower and
+sharper: the nine leaks are not the whole of the referee's forward-reveal
+behaviour, they are the ~10% of it that routed through prose instead of a
+`reveal`. A referee that declares first holds the gate while telling the party
+about rooms it has never entered. Gate #1 measures byte discipline against the
+referee's own declarations; this counts declarations against the fiction. Two
+questions, two instruments, and the second one has no criterion and no verdict -
+it is a count, not a read.
+
+**Whether reveal-ahead is even wrong is undecided and belongs to the next slice.**
+A referee describing what the party can see from where it stands is doing its job;
+one narrating the far side of a closed iron door is not; the fixture states no
+adjacency and no sightlines, so nothing in the tree can currently tell those
+apart. That, and not the door wording, is what a second campaign should be run to
+settle - and it is the "something else worth measuring" the fixture edit should
+ride along with, so one run answers both.
+
 ## The cheapest version that tests anything
 
 One dungeon, hand-authored, fixed. Three to four player seats. One session, no

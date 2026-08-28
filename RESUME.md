@@ -73,14 +73,29 @@ Six things a later session needs before it touches this:
   replays a stored session against any term set and must reproduce that run's own
   leaks first. On this campaign the dropped term would have been worth 15 sessions
   (82/100, still holding), which is a counterfactual and never a read.
-- **THE NEXT DURF SLICE, and it is a design question the campaign produced rather
-  than an instrument one.** Eight of nine leaks were the same act: the referee
-  narrates the iron door of an undeclared R3 while the party stands in R1. A door
-  the party can SEE from the room it occupies is arguably R1's public content, in
-  which case the fixture is what is wrong and the referee is describing the room
-  it was given. The alternative is that the referee should say "a door" without
-  the room beyond it. **Decide which before changing either**, because a fixture
-  edit re-baselines the 91/100 exactly as the rename re-baselined the 3/6.
+- **The iron-door question is DECIDED 2026-08-28 - the fixture, and not for the
+  reason the question posed.** R1 has no door at all, so there was never a
+  visible-door reading to make public; the door named in all eight leaks is R2's,
+  and the party was in R1 for all eight. All eight follow one scripted line,
+  `I listen at the door before touching it.` in `games/durf/seats.py`
+  §`ScriptedPlayer.LINES` - fixture text that presupposes an object the room does
+  not have. The prescribed edit is that one line and it is deliberately UNAPPLIED:
+  a fixture change cannot be replayed off records the way `durf_rescore` prices a
+  term change, so it buys nothing until a campaign is run. Reasoning and the
+  evidence: `docs/durf-rung.md` §The iron-door question. **Do not re-derive this.**
+- **THE NEXT DURF SLICE, and the campaign produced it too: 84 of 100 sessions
+  declared a room or hidden fact for a room the party was not in, and 78 of those
+  are counted as gate #1 HOLDS.** R3's whole contents were published to a party on
+  the entry slope 28 times. This is NOT a gate #1 failure and gate #1 must not be
+  changed to catch it - declaring is the referee's authority, so the audit is
+  correctly silent. The instrument is `py -3 -m eval.durf_reveal_order
+  eval/records/durf-camp1.json` (tracked, no GPU, control passes on all 100).
+  **The open question is whether reveal-ahead is wrong at all** - the fixture
+  states no adjacency and no sightlines, so nothing in the tree separates "what
+  the party can see from where it stands" from "the far side of a closed door".
+  Settle that, and let the prescribed fixture edit ride the same campaign so one
+  run answers both. Numbers: `docs/durf-rung.md` §What working that question
+  turned up.
 - **Deciding `hidden catch` does NOT oblige a re-run.** The 91/100 is a dated read
   under its own term set and stays quotable as that. A new term set needs a new
   campaign only if a number under it is wanted, and 52 minutes of GPU buys nothing
