@@ -31,10 +31,12 @@ def vote(nominee_evil: bool, yes: bool, voter_evil: bool = False,
 
 
 def execution(day: int, evil: bool, was_alive: bool = True,
-              alive_before: int = 5, evil_before: int = 2) -> dict:
+              alive_before: int = 5, evil_before: int = 2,
+              by_vote: bool = True) -> dict:
     """One ``ExecutionRecord``, on a board that defaults to the day-1 board."""
     return {"day": day, "seat": 2, "evil": evil, "was_alive": was_alive,
-            "alive_before": alive_before, "evil_before": evil_before}
+            "alive_before": alive_before, "evil_before": evil_before,
+            "by_vote": by_vote}
 
 
 def game(votes: list, executions: list, decisions: int = 48,
@@ -95,11 +97,15 @@ def summary_for(rows: list[dict]) -> dict:
         "seat_games_misled": 0,
         "execution_day1": {
             "executions": live, "on_a_living_seat": live, "on_a_dead_seat": 0,
+            "voted_up": live, "by_trigger": 0, "trigger_hits": 0,
             "hits": hits, "rate": hits / live if live else None,
             "chance": (t(u, "day1_chance_num") / live) if live else None,
             "ci95": wilson(hits, live) if live else None},
         "execution": {
-            "executions": t(u, "executions"), "on_a_living_seat": all_live,
+            "executions": t(u, "executions"),
+            "on_a_living_seat": all_live + t(u, "by_trigger"),
+            "voted_up": all_live, "by_trigger": t(u, "by_trigger"),
+            "trigger_hits": 0,
             "on_a_dead_seat": t(u, "dead_seat"), "hits": all_hits,
             "rate": all_hits / all_live if all_live else None,
             "chance": (t(u, "chance_num") / all_live) if all_live else None,
@@ -187,6 +193,24 @@ class ClauseB(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("the interval spans chance", text)
         self.assertIn("not evidence of absence", text)
+
+    def test_an_execution_a_trigger_fired_is_not_read_as_a_bad_execution(self):
+        """A trigger executes the nominator and fires only on a townsfolk one, so
+        it is good with probability 1. Reading it as a day-1 pick would drag the
+        rate toward zero for a table that never chose it - the effect that broke
+        the random control's instrument check. The compact script live1 runs has
+        no such role; the field is honoured anyway, because the criterion is read
+        against controls measured on scripts that do."""
+        rows = arm(60, 0.7, 0.3, seed=24, day1_evil=0.9)
+        for r in rows:
+            r["executions"] += [execution(1, False, by_vote=False)] * 3
+        text, code = run(rows)
+        self.assertEqual(code, 0)
+        # Pooled, the three-per-game would put the rate at ~22% on a 40% board
+        # and read as a table executing WORSE than chance. The denominator is the
+        # assertion: 60 voted-up executions, not 240.
+        self.assertRegex(text, r"\n  \d+/60 = ")
+        self.assertIn("the floor clears chance", text)
 
     def test_a_board_that_is_not_five_alive_and_two_evil_is_unreadable(self):
         rows = arm(60, 0.7, 0.3, seed=23)

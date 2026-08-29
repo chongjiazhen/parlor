@@ -130,21 +130,37 @@ def _executions(records: list[GameRecord], day: int | None = None) -> dict:
     boards. A nomination can carry against a seat that is already dead - the day
     ends and nobody dies - and those are counted separately rather than folded in:
     a table that spent three days executing corpses is not a table that executed
-    badly, it is a table that did not execute at all."""
+    badly, it is a table that did not execute at all.
+
+    An execution a TRIGGER fired is counted apart for the same reason, and it is
+    the harder of the two to see. The trigger executes the nominator and only
+    fires on a townsfolk one, so it is good with probability 1 - while the chance
+    rate here prices it as a draw from the board. Pooled, they cost the day-1
+    control 5.2 points on a 10-seat full script (measured 2026-08-29: 216 of 1105
+    day-1 executions, 0 of them evil, z = -9.62 on their own baseline), which read
+    as the random policy failing to hit chance and is instead a metric summing two
+    different quantities. The vote-selected half lands on chance (§belfry, and
+    ``docs/measurements.md``). The compact script has no such role, so no number
+    measured on it moves."""
     every = [e for r in records for e in r.executions
              if day is None or e.day == day]
     live = [e for e in every if e.was_alive]
-    hits = sum(1 for e in live if e.evil)
-    chance = (sum(e.evil_before / e.alive_before for e in live) / len(live)
-              if live else None)
+    voted = [e for e in live if e.by_vote]
+    hits = sum(1 for e in voted if e.evil)
+    chance = (sum(e.evil_before / e.alive_before for e in voted) / len(voted)
+              if voted else None)
     return {
         "executions": len(every),
         "on_a_living_seat": len(live),
         "on_a_dead_seat": len(every) - len(live),
+        # The accuracy denominator, and it is the voted half of the living half.
+        "voted_up": len(voted),
+        "by_trigger": len(live) - len(voted),
+        "trigger_hits": sum(1 for e in live if not e.by_vote and e.evil),
         "hits": hits,
-        "rate": hits / len(live) if live else None,
+        "rate": hits / len(voted) if voted else None,
         "chance": chance,
-        "ci95": wilson(hits, len(live)) if live else None,
+        "ci95": wilson(hits, len(voted)) if voted else None,
     }
 
 
@@ -273,10 +289,10 @@ def report(s: dict, args, elapsed: float) -> str:
 
     e = s["execution"]
     d1 = s["execution_day1"]
-    out.append(f"executions on a living seat: {e['hits']}/{e['on_a_living_seat']} "
+    out.append(f"executions the table voted up: {e['hits']}/{e['voted_up']} "
                f"were evil, {_pct(e['rate'])}{_band(e['ci95'])} against a chance "
                f"rate of {_pct(e['chance'])} on the same boards")
-    out.append(f"  first day only: {d1['hits']}/{d1['on_a_living_seat']}, "
+    out.append(f"  first day only: {d1['hits']}/{d1['voted_up']}, "
                f"{_pct(d1['rate'])}{_band(d1['ci95'])} against "
                f"{_pct(d1['chance'])} - READ THIS ONE. The pooled figure above is "
                f"subject to a stopping rule: executing the demon ends the game, so "
@@ -285,6 +301,13 @@ def report(s: dict, args, elapsed: float) -> str:
     if e["on_a_dead_seat"]:
         out.append(f"  {e['on_a_dead_seat']} execution(s) carried against a seat "
                    f"that was already dead - the day ended and nobody died")
+    if e["by_trigger"]:
+        out.append(f"  {e['by_trigger']} execution(s) ({d1['by_trigger']} on day 1) "
+                   f"were fired by a trigger rather than voted up, and are counted "
+                   f"apart: the trigger names the nominator and fires only on a "
+                   f"townsfolk one, so it is good with probability 1 and is not a "
+                   f"draw from the board the chance rate above is computed off "
+                   f"({e['trigger_hits']} of them evil)")
 
     out.append("votes, scored against what the referee dealt:")
     out.append(_vote_line("good seats", s["vote_good"]))

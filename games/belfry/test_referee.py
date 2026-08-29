@@ -369,6 +369,24 @@ class TestTheTriggeredRoles(unittest.TestCase):
         self.assertFalse(ref.grim.seat(3).alive)
         self.assertTrue(ref.grim.seat(2).alive)
 
+    def test_a_trigger_execution_records_that_no_vote_carried_it(self):
+        """The day-1 instrument control reads this field. A trigger execution
+        names the nominator and fires only on a townsfolk one, so it is good with
+        probability 1 while the scorer prices every execution against the board
+        rate - pooled, that read as the random policy missing chance."""
+        ref = rigged(["fiend", "venom", "martyr", "gauge", "bulwark", "tally"])
+        advance_to(ref, "nominate", seat=3)
+        ref.submit(3, {"nominate": 2})
+        self.assertEqual([(e.seat, e.by_vote) for e in ref.executions],
+                         [(3, False)])
+
+    def test_an_execution_the_table_voted_up_says_so(self):
+        ref = rigged(["fiend", "venom", "martyr", "gauge", "bulwark", "tally"])
+        ref.block = 2
+        ref._dusk()
+        self.assertEqual([(e.seat, e.by_vote) for e in ref.executions],
+                         [(2, True)])
+
     def test_a_martyr_nomination_by_an_evil_seat_is_an_ordinary_nomination(self):
         ref = rigged(["fiend", "venom", "martyr", "gauge", "bulwark", "tally"])
         turn = advance_to(ref, "nominate", seat=0)

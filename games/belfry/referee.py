@@ -131,6 +131,14 @@ class Execution:
     was_alive: bool
     alive_before: int
     evil_before: int
+    #: Did the table VOTE this seat up, or did a trigger execute it on the spot?
+    #: The two are not the same measurement and pooling them broke the day-1
+    #: instrument control: a trigger execution names the nominator, and the role
+    #: that fires it only fires on a townsfolk nominator, so it is good with
+    #: probability 1 while the scorer prices it against the board rate. Recorded
+    #: for the same reason ``was_alive`` is - the board has moved by the time
+    #: anybody scores it, and nothing downstream can re-derive this.
+    by_vote: bool = True
 
 
 @dataclass
@@ -463,11 +471,13 @@ class BelfryReferee:
                       f"then nominations. Alive: "
                       + ", ".join(str(s) for s in self.grim.alive_seats()) + "."))
 
-    def _execute(self, seat: int) -> None:
+    def _execute(self, seat: int, by_vote: bool = True) -> None:
         """One execution, wherever it came from - the seat left standing at dusk,
         or the seat a trigger executed on the spot. One function, because the
         losing condition attached to executing a particular role has to fire on
-        both paths and a second copy is how it comes to fire on only one."""
+        both paths and a second copy is how it comes to fire on only one. Which
+        path it came from is recorded, because the two do not measure the same
+        thing (see ``Execution.by_vote``)."""
         self.executed_today = seat
         self.last_executed_role = self.grim.registers_as(seat).key
         alive = self.grim.alive_seats()
@@ -475,7 +485,8 @@ class BelfryReferee:
             day=self.day, seat=seat, was_alive=self.grim.seat(seat).alive,
             alive_before=len(alive),
             evil_before=sum(1 for s in alive
-                            if self.grim.seat(s).align is Align.EVIL)))
+                            if self.grim.seat(s).align is Align.EVIL),
+            by_vote=by_vote))
         self._execution_done = True
         role = self.grim.role_of(seat)
         self.public_events.append(("event", f"Seat {seat} is executed."))
@@ -896,7 +907,7 @@ class BelfryReferee:
             self.public_events.append(
                 ("event", "Nominating that seat ends the day at once."))
             self.block = None
-            self._execute(seat)
+            self._execute(seat, by_vote=False)
             if self.phase is not Phase.DONE:
                 for s in self.grim.seats:
                     s.nominated_today = True

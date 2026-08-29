@@ -45,7 +45,7 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
 | **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
-| **belfry** | done, with its scoring lane | **never** | settle the day-1 instrument control, then the first live game - both rows below. `games/belfry/RULES.md` carries the knowledge model and the discretion table; `docs/measurements.md` carries the random control at the settings that run should use, and the instrument check inside it |
+| **belfry** | done, with its scoring lane | **never** | the first live game - the row below, now unblocked: the day-1 instrument control passes (a trigger execution is not a pick, and is scored apart). `games/belfry/RULES.md` carries the knowledge model and the discretion table; `docs/measurements.md` carries the random control at the settings that run should use, and the instrument check inside it |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
 | **adjudicator** | not built | n/a | the spike itself (S8) - a model in the referee's seat for the discretionary choices only, which belfry has already isolated and logged |
 
@@ -193,20 +193,14 @@ Reference already written down, unmeasured unless it says otherwise:
 
 belfry - state and pointers are §What each rung owes; these are its rows.
 
-- [ ] **The day-1 instrument control FAILS, and clause B rests on it.** Measured
-      2026-08-29: a random table nominates evil at the board rate and then executes
-      it below - 514 evil day-1 executions against 586.4 expected over 1963, z =
-      -3.60, in 7 of 8 samples. The old "it lands on chance" claim was one seed.
-      The bar (40.00%) is right as arithmetic and conservative, so no false
-      positive is possible, but "beats random" is not what clause B currently
-      measures. Find the mechanism - a day carries several nominations and only one
-      ends it - before the live arm, or state the limit in the criterion.
-      `docs/measurements.md` carries the pooled numbers and the nomination split.
-- [ ] **The first live game, once the line above is settled.** The lane is
+- [ ] **The first live game.** The lane is
       `eval.run_belfry`, 5 seats compact seed 6100, `--no-thinking`; the re-run
-      control is day-1 40.00% (44/110) on a 40.00% board. Cost is measured: 5 seats
+      control is day-1 40.00% (44/110) on a 40.00% board, and that control now
+      carries its own instrument check. Cost is measured: 5 seats
       ~49 decisions, 7 ~119, 9 ~183, one call each. The full script re-baselines
-      every number, so pick one and say which.
+      every number, so pick one and say which - and on the full script the day-1
+      denominator is the VOTED executions, which is a fifth smaller than the count
+      of executions.
 - [ ] **A model in the referee's seat, for the discretionary choices only.** The
       spike the ladder was pointed at, and belfry makes it small: the choices are
       already isolated in one place and logged, so the arm replaces the seeded

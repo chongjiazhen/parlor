@@ -109,7 +109,7 @@ something sharper than either: whatever the blind seats respond to, it is not th
 mechanically derivable part.
 
 
-## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it FAILS
+## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it now PASSES
 
 **No model has played this rung.** Every row is the RANDOM policy: what the rules
 alone do, and what a live arm has to be read against.
@@ -127,50 +127,55 @@ are not comparable; nothing should be read against them.
 | was, pre-fix | 48.24% | 60.55% | 59.00% |
 | how they ended | attrition 112, demon-dead 88 | demon-dead 160, attrition 85, bad-execution 52, speaker 3 | demon-dead 115, attrition 59, bad-execution 17, speaker 9 |
 | days per game | 2.8 | 4.5 | 5.5 |
-| **day-1 execution accuracy** | 40.00% [31.33%, 49.34%], 44/110 | 19.81% [14.95%, 25.76%], 41/207 | 20.78% [15.12%, 27.86%], 32/154 |
+| **day-1 execution accuracy** | 40.00% [31.33%, 49.34%], 44/110 | 22.40% [16.97%, 28.98%], 41/183 | 25.81% [18.91%, 34.15%], 32/124 |
 | chance on those day-1 boards | **40.00%** | **22.22%** | **30.00%** |
+| day-1 executions a TRIGGER fired, scored apart | 0 | 24 | 30 |
 | good-seat vote accuracy | 50.44% [48.52%, 52.36%], n=2601 | 49.79% [49.14%, 50.45%], n=22206 | 49.84% [49.13%, 50.56%], n=18642 |
 | fallback rate | 0.00% (0/9330) | 0.00% (0/49762) | 0.00% (0/45401) |
 
-### The day-1 instrument control does NOT land on chance, and the old claim that it did rested on one seed
+### The day-1 deficit was a METRIC summing two different quantities, and the metric is fixed
 
-The scorer computes a chance rate per execution off that execution's own board
-(`evil_before / alive_before`), and the point of running a random policy is that it
-has to land there. **It does not.** Pooled over eight non-overlapping random samples
-measured 2026-08-29 at `5a71004` - 5 and 10 seats compact, 9 and 10 seats full,
-1963 day-1 executions on a living seat:
+**Found 2026-08-29.** The reported failure was real - 514 evil day-1 executions
+against 586.4 expected over 1963, Poisson-binomial z = -3.60, seven of eight
+samples low. It was not the random policy missing chance. **A day-1 execution is
+not always a pick.** The `martyr` executes the seat that NOMINATED it, and the
+referee fires that only when the nominator is a townsfolk
+(`referee.py`, the guard is `role.team is Team.TOWNSFOLK`) - so a trigger
+execution is good with probability **1**, while the scorer priced it against the
+board rate like any other. The role is on the full script and not on compact,
+which is why the deficit tracked the script rather than the table size.
 
-**514 evil executions observed against 586.4 expected on those same boards -
-26.18% vs 29.87%, Poisson-binomial z = -3.60, a deficit of 72 evil executions.**
-Seven of the eight samples come in low; the eighth is seed 6100, which lands on
-40.00% exactly and is the seed the 2026-08-28 table published. The previous
-version of this section asserted the instrument "does" land on chance "at both
-table sizes and on both scripts". That was one seed per configuration, and the
-published one was the draw that agreed.
+Measured at 3-8x the sample that raised the alarm, splitting day-1 executions on a
+living seat by how they happened:
 
-**The deficit enters at the VOTE, not at the nomination.** Measured on three
-400-game runs, day-1 nominees are evil at the board rate and day-1 executions are
-not:
+| run, `--arm random` | executions the table VOTED up | executions a TRIGGER fired |
+|---|---|---|
+| 5 seats compact, 12000 games | 2811/7007 = 40.12% vs 40.00%, z = **+0.20** | none on this script |
+| 10 seats compact, 8000 games | 1623/5561 = 29.19% vs 30.00%, z = **-1.33** | none on this script |
+| 9 seats full, 1500 games | 212/893 = 23.74% vs 22.22%, z = **+1.09** | 138, **0 evil**, z = -6.28 |
+| 10 seats full, 1500 games | 274/889 = 30.82% vs 30.00%, z = **+0.53** | 216, **0 evil**, z = -9.62 |
 
-| run | nominated evil | executed evil | board |
-|---|---|---|---|
-| 5 seats compact, seed 15000 | 38.95% (386/991) | 33.61% (81/241) | 40.00% |
-| 9 seats full, seed 16000 | 22.61% (373/1650) | 20.94% (58/277) | 22.22% |
-| 10 seats full, seed 12000 | 31.37% (566/1804) | 27.34% (76/278) | 30.00% |
+**Pooled trigger executions: 354, none of them evil, 95.5 expected, z = -11.48.**
+The voted half lands on chance in every configuration, on both scripts, at both
+table sizes. The instrument is sound; the pooling was not. Two earlier readings
+were noise and should not be carried forward: the 5-seat compact 33.61% (81/241,
+one 400-game seed) and the nomination-stage 38.95%, which is a 0.67-sigma miss and
+was read as a signal.
 
-So a random table nominates evil seats at chance and then executes them below it.
-The mechanism is not yet identified and is not a rules question this file can
-settle - a day carries several nominations and only one can end it, so position
-within the day and which vote passes are both live candidates.
+**What changed in the code.** `Execution.by_vote` rides in the record beside
+`was_alive`, `_executions` scores the two apart, and `eval/belfry_live1_verdict.py`
+skips trigger executions in clause B - the same treatment, for the same reason, as
+the executions that carried against a seat already dead. Old records carry no field
+and default to `by_vote=True`, which is honest: they predate every script with such
+a role. The 9- and 10-seat full columns above MOVED when this landed (they were
+19.81% and 20.78% pooled); the compact column did not move by a byte, and cannot.
 
-**What it costs the criterion.** `docs/belfry-live1-criterion.md` reads clause B
-against `DAY1_CHANCE = 0.40`, the exact arithmetic for a 5-seat board. That bar is
-unchanged and remains correct AS ARITHMETIC, but it is **not** the empirical random
-floor, which sits below it. The error is conservative - a model has to beat a
-harder bar than random play achieves, so the arm cannot produce a false positive -
-but the criterion's claim that the control validates the bar does not hold, and
-clause B should not be read as "beats random" until this is understood. The 5-seat
-compact arm is otherwise unaffected: 0% fallback, 200/200 games.
+**What it costs the criterion: nothing, and it settles the open question.**
+`docs/belfry-live1-criterion.md` reads clause B against `DAY1_CHANCE = 0.40` on 5
+seats compact, a script with no such role, and the control lands on 40.00% exactly
+(44/110 at seed 6100, 40.12% over 7007 executions pooled). The bar is exact
+arithmetic AND the empirical random floor, so clause B may be read as "beats
+random" as written. The arm is otherwise unaffected: 0% fallback, 200/200 games.
 
 **The ~14% figure in the previous slice-6 note was wrong.** The `venom` and `mimic`
 are both dealt in **17.23%** of 10-seat full deals, measured over 4,000 deals,

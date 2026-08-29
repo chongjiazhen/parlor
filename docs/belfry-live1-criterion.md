@@ -216,9 +216,15 @@ Three outcomes, all three of which get reported:
 
 ## Clause B - the pre-registered secondary, and it is a secondary
 
-**The statistic: day-1 execution accuracy on a living seat**
-(`execution_day1.hits` over `execution_day1.on_a_living_seat`), against
+**The statistic: day-1 execution accuracy on a living seat the table voted up**
+(`execution_day1.hits` over `execution_day1.voted_up`), against
 `execution_day1.chance` computed off the same boards, with `execution_day1.ci95`.
+
+The denominator key was `on_a_living_seat` when this file was written, and the two
+are the same number on this arm's script: the split exists because an execution a
+trigger fired is good with probability 1 and is not a draw from the board, and the
+role that fires one is not on the compact script (`docs/measurements.md` §belfry).
+Nothing pre-registered here moves - the quantity, the bar and the N are unchanged.
 
 **The bar: the Wilson 95% floor clears the run's own chance figure.** The run's
 own, not the control's - the scorer computes it per execution off that execution's

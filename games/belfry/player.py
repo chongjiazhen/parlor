@@ -295,6 +295,11 @@ class ExecutionRecord:
     was_alive: bool
     alive_before: int
     evil_before: int
+    #: Voted up, or executed on the spot by a trigger. A trigger execution names
+    #: the nominator and only fires on a townsfolk one, so it is good with
+    #: probability 1 and is not a draw from the board the chance rate is computed
+    #: off. Scored apart, for the same reason ``was_alive`` is.
+    by_vote: bool = True
 
 
 @dataclass
@@ -439,7 +444,7 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
         ExecutionRecord(day=e.day, seat=e.seat,
                         evil=ref.grim.seat(e.seat).align is Align.EVIL,
                         was_alive=e.was_alive, alive_before=e.alive_before,
-                        evil_before=e.evil_before)
+                        evil_before=e.evil_before, by_vote=e.by_vote)
         for e in ref.executions]
     rec.alive = tuple(ref.grim.alive_seats())
     rec.public_events = list(ref.public_events)

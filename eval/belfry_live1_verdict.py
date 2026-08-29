@@ -105,7 +105,7 @@ def tally(row: dict) -> dict:
         "misled_votes", "misled_correct",
         "alive_votes", "alive_correct", "dead_votes", "dead_correct",
         "day1_live", "day1_hits", "day1_chance_num",
-        "live", "hits", "chance_num", "dead_seat", "executions",
+        "live", "hits", "chance_num", "dead_seat", "executions", "by_trigger",
         "vote_decisions", "vote_fallbacks", "provenance_missing")}
     for v in row.get("votes", []):
         # A vote the random fallback cast is not a model vote. Old records carry
@@ -159,6 +159,13 @@ def tally(row: dict) -> dict:
         t["executions"] += 1
         if not e["was_alive"]:
             t["dead_seat"] += 1
+            continue
+        # A trigger execution names the nominator and fires only on a townsfolk
+        # one, so it is good with probability 1 and is not a draw from the board
+        # the chance rate is computed off. Old records carry no field and predate
+        # any script that has such a role, so the default is the honest one.
+        if not e.get("by_vote", True):
+            t["by_trigger"] += 1
             continue
         share = e["evil_before"] / e["alive_before"] if e["alive_before"] else 0.0
         t["live"] += 1
@@ -251,13 +258,15 @@ def control(summary: dict, derived: dict,
          total(units, "evil_n_evil") + total(units, "evil_n_good")),
         ("misled good-seat votes", score.get("vote_good_misled", {}).get("votes"),
          total(units, "misled_votes")),
-        ("day-1 executions on a living seat", day1.get("on_a_living_seat"),
+        ("day-1 executions voted up on a living seat", day1.get("voted_up"),
          total(units, "day1_live")),
         ("day-1 hits", day1.get("hits"), total(units, "day1_hits")),
-        ("executions on a living seat", pooled.get("on_a_living_seat"),
+        ("executions voted up on a living seat", pooled.get("voted_up"),
          total(units, "live")),
         ("executions on a dead seat", pooled.get("on_a_dead_seat"),
          total(units, "dead_seat")),
+        ("executions fired by a trigger", pooled.get("by_trigger"),
+         total(units, "by_trigger")),
         ("hits", pooled.get("hits"), total(units, "hits")),
     ]
     bad = []

@@ -30,9 +30,10 @@ def args(**over) -> argparse.Namespace:
 
 
 def execution(evil: bool, alive: int = 5, evil_alive: int = 2, day: int = 1,
-              was_alive: bool = True) -> ExecutionRecord:
+              was_alive: bool = True, by_vote: bool = True) -> ExecutionRecord:
     return ExecutionRecord(day=day, seat=0, evil=evil, was_alive=was_alive,
-                           alive_before=alive, evil_before=evil_alive)
+                           alive_before=alive, evil_before=evil_alive,
+                           by_vote=by_vote)
 
 
 def vote(yes: bool, nominee_evil: bool, voter_evil: bool = False,
@@ -140,6 +141,26 @@ class TestExecutionScoring(unittest.TestCase):
         self.assertEqual(s["execution"]["on_a_living_seat"], 1)
         self.assertEqual(s["execution"]["on_a_dead_seat"], 1)
         self.assertEqual(s["execution"]["rate"], 1.0)
+
+    def test_a_trigger_execution_is_counted_apart_from_the_accuracy(self):
+        """It is not a draw from the board. The trigger executes the nominator
+        and fires only on a townsfolk one, so it is good with probability 1 -
+        pooled into the rate it reads as a table (or a random control) executing
+        below chance, which is how the day-1 instrument check failed."""
+        s = score([self.rec([execution(True), execution(False, by_vote=False)])])
+        d = s["execution"]
+        self.assertEqual((d["executions"], d["on_a_living_seat"]), (2, 2))
+        self.assertEqual((d["voted_up"], d["by_trigger"]), (1, 1))
+        self.assertEqual((d["hits"], d["rate"]), (1, 1.0))
+        self.assertEqual(d["trigger_hits"], 0)
+
+    def test_a_trigger_execution_does_not_move_the_chance_rate_either(self):
+        """Excluding it from the numerator and leaving it in the denominator of
+        ``chance`` would swap one bias for another."""
+        s = score([self.rec([execution(True, alive=4, evil_alive=2),
+                             execution(False, alive=9, evil_alive=2,
+                                       by_vote=False)])])
+        self.assertAlmostEqual(s["execution"]["chance"], 0.5)
 
     def test_the_first_day_figure_is_its_own_denominator(self):
         s = score([self.rec([execution(True, day=1), execution(False, day=2),

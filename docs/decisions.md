@@ -47,6 +47,17 @@ opened the Claude one. The decision is unchanged; only the file holding it is.
   refuses, by the route it cannot see. `games/durf/facts.check_facts` refuses it at
   load and the remedy is on the TERM: a text is what the party is told, and moving
   one moves a model-facing byte.
+- **An execution a TRIGGER fired is not a pick, and is scored apart from the ones
+  the table voted up** (belfry, 2026-08-29). It executes the NOMINATOR and fires
+  only on a townsfolk one, so it is good with probability 1 while the chance rate
+  prices it as a draw from the board. Pooled, that read as the random control
+  missing chance by z = -3.60 and was recorded as an instrument failure; split, the
+  voted half lands on chance everywhere and the trigger half is 0 of 354.
+  `Execution.by_vote` carries it, for the same reason `was_alive` does - the board
+  has moved by the time anybody scores it. **The general rule, which is the part
+  that outlives belfry: a metric that pools an outcome the rules FORCED with an
+  outcome a seat CHOSE is measuring two things, and the control is where that
+  shows up.** `docs/measurements.md` §belfry has the numbers.
 - Independent context = one model + per-seat private context slice, not N brains.
 - Referee is deterministic code; LLM only for players (and, later, judgment-GMs).
 - Cloud is fine for game-fiction secrets (not credentials); local for deception checks.
