@@ -88,9 +88,12 @@ partly true is worse than none.
   prior art (`arXiv:2205.00451`).
 - `docs/scripted-rungs-cabal.md` - why the control ladder keeps climbing on hand
   rules rather than a learned policy, and the three rungs that follow. Unmeasured.
-- `docs/quorum-live1-criterion.md` - quorum's pre-commitment for its first live
-  arm, written before any model played a seat; arithmetic
-  `eval/quorum_live1_verdict.py`. Not to be edited.
+- `docs/quorum-live4-criterion.md` - **the operative quorum pre-commitment**;
+  arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
+  stand beside it, superseded IN WRITING and unrun: each was retired before launch
+  because the instrument changed under it, never edited after a number landed. Read
+  live4 for the arm; read the others only for what the instrument used to be. None
+  is to be edited.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

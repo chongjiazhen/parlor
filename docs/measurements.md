@@ -211,7 +211,10 @@ a cloud model turns out to REFUSE to deceive, or you want games beside image gen
 
 **2026-08-27 (S6), the gate-#3b campaign** - `docs/gate3b-verdict.md`,
 `py -3 -m eval.s6_verdict`. 40 games, seeds 2000/3000, frozen at `2c0e2a3`, 1.35%
-fallback. **9/20 = 45.00%**, Wilson [25.82%, 65.79%] vs the derived bar 33.33% - NOT
+fallback. **9/20 = 45.00%**, Wilson [25.82%, 65.79%] vs the derived bar 33.33% -
+NOT SHOWN, at exactly the 0.50 hunts/game the power table assumed. All three
+draw-dependent items came back negative there; **carry no run-length caveat
+forward.**
 
 ## Quorum slice-7 control - the once-per-event rebaseline, measured 2026-08-29
 
@@ -229,7 +232,13 @@ fallback over 44441 decisions, no leak. **2562 claims over 400 games = 6.41
 claims/game (was 7.55 pre-fix)** - the drop IS the removed duplicates, not a
 policy change. The fixed instrument still lands on chance: proposer 325/1310
 honest (24.81%) Wilson [22.55%, 27.22%] vs the exact 25.00%; enactor 381/1252
-(30.43%) [27.95%, 33.04%] vs 33.33%. Both intervals contain their baseline; a
+(30.43%) [27.95%, 33.04%] vs 33.33%. The proposer interval contains its
+baseline; **the enactor interval does NOT** - 33.04% is below 33.33%, and an
+earlier revision of this block asserted that both did. The miss was read as a
+one-in-twenty draw and was mostly not: the referee and the policies shared one
+random stream, and decoupling them (`5a71004`) moved the enactor to 398/1246
+(31.94%) with both intervals containing their baselines - see the slice-9 block
+below. A
 control that cleared the bar would mean the bar is wrong.
 
 These numbers price `docs/quorum-live2-criterion.md` (written the same day,
@@ -237,10 +246,6 @@ before any live game): a 20-game live2 arm offers ~66 proposer and ~63 enactor
 claim opportunities, and its Clause B keeps live1's per-claim Wilson form with
 the known correlated-claims caveat declared in the file - the per-game bootstrap
 replacement is slice 8 and is not pre-committed here.
-
-SHOWN, at exactly the 0.50 hunts/game the power table assumed. All three
-draw-dependent items came back negative there; **carry no run-length caveat
-forward.**
 
 
 ## Quorum slice-8 control re-read - the game bootstrap, measured 2026-08-29
@@ -300,3 +305,35 @@ differently:
   already on disk is named, so settling it renamed one run's files rather than
   every run's. One test pins the two drivers TOGETHER: the defect was that they
   disagreed, and a test beside either one cannot see that.
+
+## Quorum slice-9 control - the decoupled policy stream, measured 2026-08-29
+
+`eval/records/quorum-control-slice9.json`, 400 random games, seeds 7000..7399,
+`--rounds 1`, at `5a71004`. The SAME deals as the slice-7 control above: only the
+policy stream moved, so the two are directly comparable.
+
+`5a71004` stopped the referee and the policies sharing one seed. Seeding both with
+the same integer makes them one MT19937 sequence read at two offsets, so the deal
+and the policy's claim draw were dependent - and the exact chance baseline the
+control is read against assumes they are not. Measured coupled, across nine blocks:
+enactor honesty 32.550% over 20,540 claims, z = -2.38 against the exact 33.333%,
+every block negative; decoupled, 33.449% over 48,971 claims, z = +0.54, blocks
+straddling zero.
+
+| figure | slice-7 (coupled) | slice-9 (decoupled) | exact |
+|---|---|---|---|
+| claims scored | 2562 (6.41/game) | 2554 (6.39/game) | - |
+| proposer | 325/1310 = 24.81% | 313/1308 = **23.93%** | 25.00% |
+| proposer bootstrap | [22.63%, 27.02%] | **[21.75%, 26.11%]** | contains |
+| enactor | 381/1252 = 30.43% | 398/1246 = **31.94%** | 33.33% |
+| enactor bootstrap | [27.87%, 32.90%] - **EXCLUDES** | **[29.45%, 34.48%]** | contains |
+
+Both intervals now contain their baseline and **neither floor clears it**, which is
+the property a floor control has to have: the instrument does not clear the bar on
+random play. Zero repeat (seat, event) claims, so the void condition added at
+`5a71004` does not fire on legal play; zero safe enactor lies, the standing
+self-check. Per-game offer 3.27 proposer / 3.12 enactor, so a 20-game arm offers
+~65 and ~62 opportunities.
+
+This is the control `docs/quorum-live4-criterion.md` is priced from. live3 was
+priced from the coupled one and is superseded in writing, unrun.

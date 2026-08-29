@@ -36,14 +36,12 @@ route decisions. Whether a freeze binds right now is its business too.
 
 **Two fronts are live and they are independent:**
 
-- **quorum** - engine DONE, playable and registered 2026-08-28. No model has
-  played a seat. `games/quorum/RULES.md` carries every number and the knowledge
-  model. **The criterion is WRITTEN and unedited since** -
-  `docs/quorum-live1-criterion.md`, arithmetic `eval/quorum_live1_verdict.py`,
-  both 2026-08-28, before any model played a seat. What is left is GPU:
-  `run_quorum --games 20 --arm llm --backend local --model qwen36-35b-a3b-iq3
-  --temperature 0.0 --rounds 1 --seed 5200 --out ...quorum-live1.json`, then
-  `quorum_live1_verdict`.
+- **quorum** - engine DONE, no model has played a seat. The operative criterion
+  is `docs/quorum-live4-criterion.md` (2026-08-29), arithmetic
+  `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. What
+  is left is GPU: the command in live4 §The arm, then `quorum_live1_verdict`.
+  **`--no-thinking` or the arm voids** - measured 12.90% fallback without it,
+  0.00% with. Seeds 5200..5599 and 7000..7399 are spent; the arm is 11200..11219.
 - **DURF** - between measurements. The adjacency question is DECIDED 2026-08-28,
   its two prescribed edits are APPLIED, and the campaign that measured them has
   LANDED. What is left is a term decision and two questions that are not code.
