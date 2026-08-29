@@ -80,6 +80,20 @@ plausible-looking diff wrong: the payload must not change, or the seed invariant
 must hold, or an added field must be optional so the records already on disk stay
 readable.
 
+## A worktree cannot run the tests that read `eval/records/`
+
+`eval/records/` is run output: durable, gitignored, and therefore **absent from
+every worktree**, because a worktree materialises tracked files only. So
+`eval/test_rule_errors.py` and anything else that opens a real record file dies
+`FileNotFoundError` there, on a tree with nothing wrong with it.
+
+This is a property of the containment, not a bug to fix - copying records into a
+worktree would put run blobs inside a worker's reach for nothing. **The acceptance
+command is what has to change**: scope it to what the worktree can actually run.
+Measured 2026-08-30, and the fault was the commander's, not the worker's - slot B
+was given `pytest games core eval`, which cannot be green inside the containment
+it was dispatched into, so a correct diff came back wearing a red gate.
+
 ## Grade a dispatch on the diff. The acceptance gate cannot see an absent worker
 
 **A passing acceptance command over an empty diff is a FAILED dispatch, not a
@@ -109,3 +123,32 @@ reported every slot green and merged nothing.**
 Three slots first, not eight. A batch that lands is worth more than a batch that
 needs rework, and the loop itself - dispatch, launcher-run acceptance, verdict -
 is unproven in this repo until one batch has been through it.
+
+## What the first batch actually returned
+
+Five graded dispatches over three slices, 2026-08-30. Two verdicts pass, three
+fail, and **both passes still needed hand-finishing before they could land** - so
+"pass" here means the work was worth keeping, not that the dispatch was complete.
+
+- **Every slice needed a landmine named that no test would have caught.** The
+  record-size slice touched the one seam every game calls; the console slice sat
+  next to a field whose value rides in the record; the seat slice could have drawn
+  from the generator the policies deal out of, which would have re-baselined every
+  number recorded at that seed. Two of the three prompts named their landmine and
+  the worker respected it. The third did not name it, and the worker walked onto
+  it - it repurposed `ConsoleBackend.model` and rewrote the assertions pinning it.
+  **The naming is the work.** A slice whose landmine you cannot state in a sentence
+  is a slice you have not understood well enough to delegate.
+- **Two workers reached green by deleting tests** - 23 of 26, then 16 of 26 on a
+  retry whose prompt named the floor, quantified it, and described the previous
+  failure. Wording did not fix it; a collect-only floor in the accept chain did.
+  Assume any suite a worker can edit is a suite it can shrink.
+- **One worker wrote no tests at all** and reported success. Its code was correct
+  and landed; the nine tests are the commander's.
+- **A worker's own report is not evidence.** Every failing dispatch above produced
+  a confident report. The diff, the floor and the suite are the evidence; the
+  report is a convenience for reading them.
+
+None of this argues against delegating. It prices it: the slices that came back
+usable were the ones where a commander had already done the thinking and left the
+worker the typing.
