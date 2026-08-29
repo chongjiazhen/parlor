@@ -191,12 +191,20 @@ belfry - engine and scoring lane DONE 2026-08-28. No model has played a seat.
 `docs/measurements.md` carries the random control at the settings the first live
 run should use, and the instrument check inside it.
 
-- [ ] **The first live game, and a criterion written before it.** The lane is
-      `eval.run_belfry`; the control to beat is day-1 execution accuracy 41.04%
-      against a chance rate of 40.00% (5 seats, compact, seed 6100). Cost is the
-      binding constraint and it is measured: 5 seats ~49 decisions, 7 ~119, 9
-      ~183, one call each. Start at 5 seats on the compact script; the full script
-      re-baselines every number, so pick one and say which.
+- [ ] **The day-1 instrument control FAILS, and clause B rests on it.** Measured
+      2026-08-29: a random table nominates evil at the board rate and then executes
+      it below - 514 evil day-1 executions against 586.4 expected over 1963, z =
+      -3.60, in 7 of 8 samples. The old "it lands on chance" claim was one seed.
+      The bar (40.00%) is right as arithmetic and conservative, so no false
+      positive is possible, but "beats random" is not what clause B currently
+      measures. Find the mechanism - a day carries several nominations and only one
+      ends it - before the live arm, or state the limit in the criterion.
+      `docs/measurements.md` carries the pooled numbers and the nomination split.
+- [ ] **The first live game, once the line above is settled.** The lane is
+      `eval.run_belfry`, 5 seats compact seed 6100, `--no-thinking`; the re-run
+      control is day-1 40.00% (44/110) on a 40.00% board. Cost is measured: 5 seats
+      ~49 decisions, 7 ~119, 9 ~183, one call each. The full script re-baselines
+      every number, so pick one and say which.
 - [ ] **A model in the referee's seat, for the discretionary choices only.** The
       spike the ladder was pointed at, and belfry makes it small: the choices are
       already isolated in one place and logged, so the arm replaces the seeded

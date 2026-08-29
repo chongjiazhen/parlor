@@ -109,50 +109,87 @@ something sharper than either: whatever the blind seats respond to, it is not th
 mechanically derivable part.
 
 
-## belfry's control arm, and the instrument check inside it - 2026-08-28
+## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it FAILS
 
-**No model has played this rung.** Both rows are the RANDOM policy, which is why
-they are here rather than in a verdict doc: they are what the rules alone do, and
-the live arm has to be read against them.
+**No model has played this rung.** Every row is the RANDOM policy: what the rules
+alone do, and what a live arm has to be read against.
 
-| run | 5 seats, compact, `--rounds 1`, seed 6100, 200 games | 9 seats, full, `--rounds 1`, seed 7000, 300 games | 10 seats, full, `--rounds 1`, seed 9400, 200 games |
+**These replace the 2026-08-28 columns, which were measured on a different game.**
+Two commits moved random play underneath them: `1b926f9` (a role search prefers the
+seat that can still act - before it, 74 of 400 five-seat compact games ran with an
+inherited demon that could never kill again) and `5a71004` (the referee and the
+policies stopped sharing one random stream). The old numbers are in git history and
+are not comparable; nothing should be read against them.
+
+| run, `--arm random --rounds 1` | 5 seats, compact, seed 6100, 200 games | 9 seats, full, seed 7000, 300 games | 10 seats, full, seed 9400, 200 games |
 |---|---|---|---|
-| good win rate, decided games | 48.24% [41.40%, 55.15%] | 60.55% [54.82%, 66.01%] | 59.00% [52.08%, 65.58%] |
-| how they ended | attrition 103, demon-dead 96, day-bound 1 | demon-dead 168, attrition 64, bad-execution 50, day-bound 11, speaker 7 | demon-dead 112, attrition 66, bad-execution 16, speaker 6 |
-| **day-1 execution accuracy** | 41.04% [33.08%, 49.51%] | 20.57% [15.65%, 26.56%] | 25.16% [18.99%, 32.54%] |
-| chance on the same boards | **40.00%** | **22.22%** | **30.00%** |
-| good-seat vote accuracy | 51.54% [49.67%, 53.40%], n=2763 | - | 50.29% [49.56%, 51.02%], n=18148 |
-| fallback rate | 0.00% (0/9719) | 0.00% | 0.00% (0/43891) |
+| good win rate, decided games | 44.00% [37.30%, 50.93%] | 54.33% [48.68%, 59.88%] | 62.00% [55.11%, 68.44%] |
+| was, pre-fix | 48.24% | 60.55% | 59.00% |
+| how they ended | attrition 112, demon-dead 88 | demon-dead 160, attrition 85, bad-execution 52, speaker 3 | demon-dead 115, attrition 59, bad-execution 17, speaker 9 |
+| days per game | 2.8 | 4.5 | 5.5 |
+| **day-1 execution accuracy** | 40.00% [31.33%, 49.34%], 44/110 | 19.81% [14.95%, 25.76%], 41/207 | 20.78% [15.12%, 27.86%], 32/154 |
+| chance on those day-1 boards | **40.00%** | **22.22%** | **30.00%** |
+| good-seat vote accuracy | 50.44% [48.52%, 52.36%], n=2601 | 49.79% [49.14%, 50.45%], n=22206 | 49.84% [49.13%, 50.56%], n=18642 |
+| fallback rate | 0.00% (0/9330) | 0.00% (0/49762) | 0.00% (0/45401) |
 
-**The third and fourth rows are an instrument control, and that is the point of
-running this at all.** The scorer computes the chance rate per execution off that
-execution's own board (`evil_before / alive_before`), and a policy that picks at
-random has to land on it. It does, at both table sizes and on both scripts, which
-is what earns the figure the right to be read as evidence when a model moves it.
-The first draw at 9 seats looked 5.5 points low; it was 209 executions and the
-gap was inside the interval, so nothing was wrong with the instrument and the
-answer was more games, not a theory about which role caused it.
+### The day-1 instrument control does NOT land on chance, and the old claim that it did rested on one seed
 
-**The 10-seat full column was added 2026-08-29 as the slice-6 fix test** (`b5312fb`,
-poisoned board-watch is a real derangement). It exists because it is the first
-control that can actually poison the watcher: the watcher is the `mimic` and it is
-poisoned by the `venom`, and at 5-9 seats only one minion is dealt so the two never
-share a table (both dealt in ~14% of 10-seat deals). Neither the 5-seat compact nor
-the 9-seat full control could reach the changed code at all, so this fix changes no
-previously recorded number - this column is a fresh post-fix baseline, not a
-re-baseline of an old one. 200/200 games completed, 0 errors, 0 falls back.
+The scorer computes a chance rate per execution off that execution's own board
+(`evil_before / alive_before`), and the point of running a random policy is that it
+has to land there. **It does not.** Pooled over eight non-overlapping random samples
+measured 2026-08-29 at `5a71004` - 5 and 10 seats compact, 9 and 10 seats full,
+1963 day-1 executions on a living seat:
+
+**514 evil executions observed against 586.4 expected on those same boards -
+26.18% vs 29.87%, Poisson-binomial z = -3.60, a deficit of 72 evil executions.**
+Seven of the eight samples come in low; the eighth is seed 6100, which lands on
+40.00% exactly and is the seed the 2026-08-28 table published. The previous
+version of this section asserted the instrument "does" land on chance "at both
+table sizes and on both scripts". That was one seed per configuration, and the
+published one was the draw that agreed.
+
+**The deficit enters at the VOTE, not at the nomination.** Measured on three
+400-game runs, day-1 nominees are evil at the board rate and day-1 executions are
+not:
+
+| run | nominated evil | executed evil | board |
+|---|---|---|---|
+| 5 seats compact, seed 15000 | 38.95% (386/991) | 33.61% (81/241) | 40.00% |
+| 9 seats full, seed 16000 | 22.61% (373/1650) | 20.94% (58/277) | 22.22% |
+| 10 seats full, seed 12000 | 31.37% (566/1804) | 27.34% (76/278) | 30.00% |
+
+So a random table nominates evil seats at chance and then executes them below it.
+The mechanism is not yet identified and is not a rules question this file can
+settle - a day carries several nominations and only one can end it, so position
+within the day and which vote passes are both live candidates.
+
+**What it costs the criterion.** `docs/belfry-live1-criterion.md` reads clause B
+against `DAY1_CHANCE = 0.40`, the exact arithmetic for a 5-seat board. That bar is
+unchanged and remains correct AS ARITHMETIC, but it is **not** the empirical random
+floor, which sits below it. The error is conservative - a model has to beat a
+harder bar than random play achieves, so the arm cannot produce a false positive -
+but the criterion's claim that the control validates the bar does not hold, and
+clause B should not be read as "beats random" until this is understood. The 5-seat
+compact arm is otherwise unaffected: 0% fallback, 200/200 games.
+
+**The ~14% figure in the previous slice-6 note was wrong.** The `venom` and `mimic`
+are both dealt in **17.23%** of 10-seat full deals, measured over 4,000 deals,
+against the theoretical `C(2,2)/C(4,2)` = 16.67%.
 
 Two properties of the RULES worth carrying into any live read, both visible above:
-the good side wins more often on a bigger table under identical play, and 58 of
-the 5-seat run's 257 executions carried against a seat that was **already dead**
+the good side wins more often on a bigger table under identical play, and 49 of
+the 5-seat run's 274 executions carried against a seat that was **already dead**
 (the day ends, nobody dies). Those are counted apart, because a table that spent
 its days on corpses is not a table that executed badly.
 
-Recipe, and it needs no GPU: `py -3 -m eval.run_belfry --games 200 --seats 5
---script compact --rounds 1 --seed 6100 --out eval/records/belfry-control-5seat.json`.
-The 10-seat full third column, same shape: `py -3 -m eval.run_belfry --games 200
---seats 10 --script full --rounds 1 --seed 9400 --out
-eval/records/belfry-control-10seat-full.json`.
+Recipe, and none of it needs a GPU - all three columns re-run in under 20 seconds
+total, which is why there is no excuse for reading a stale control:
+
+```
+py -3 -m eval.run_belfry --games 200 --arm random --seats 5  --script compact   --rounds 1 --seed 6100 --out eval/records/belfry-control-5compact.json
+py -3 -m eval.run_belfry --games 300 --arm random --seats 9  --script full   --rounds 1 --seed 7000 --out eval/records/belfry-control-9full.json
+py -3 -m eval.run_belfry --games 200 --arm random --seats 10 --script full   --rounds 1 --seed 9400 --out eval/records/belfry-control-10full.json
+```
 
 ## Route: local IS the gate lane - corrected 2026-08-28
 
