@@ -65,6 +65,33 @@ seeing that is the same error wearing a third hat.
   a group-sequential boundary computed BEFORE a campaign, which must never be
   retrofitted to records already in hand.
 
+## Write the verdict as ARITHMETIC while the run is still in flight
+
+The section above pre-commits a statistic in PROSE, and prose is edited by the same
+hands that read the number. This is the harder half, learned on `durf-camp1`
+2026-08-28 and paid for by `durf-camp2` the same day.
+
+**A watched run leaks its result long before it lands, and no discipline prevents
+that.** camp1 showed partial hold counts three separate ways, every one of them
+legitimate: the monitor's own progress lines, which HAVE to carry failure
+signatures or a crashloop reads as silence; a landing-path dry run at 24 sessions,
+worth doing because it proved the replay worked against the live record shape; and
+the log tail, read to remeasure pace. "Do not look" is not a policy anyone can keep.
+
+The workable rule is **make the decision unchangeable before you look.** Once the
+bar, the void conditions and the exit codes are a module with tests pinning the
+threshold (`eval/durf_camp1_verdict.py`: 60/100 clears, 59/100 does not), seeing 91
+at session 91 cannot move anything, because moving it would mean editing a
+committed file and failing its own test. It was written out of an otherwise idle
+wait, at ~20 sessions, in twenty minutes.
+
+- **It is the only anti-peeking device that survives contact with a monitor** - and
+  camp2 is the proof, scored by a module written before its bytes existed. Its
+  monitor leaked a `[28/100] GATE #1 LEAKED` line too, and seeing it moved nothing.
+- **Do not touch the criterion file after launch**, not even to add a pointer to
+  its own verdict script. camp1's pointer went in the queue instead. A bright line
+  is worth more than the convenience.
+
 ## Projecting a rate from one draw
 
 **A rate whose denominator is another gate's outcome is not projectable from one
@@ -78,7 +105,12 @@ that reason. Numbers: `docs/gate3b-verdict.md`.
 
 The same shape governs pace estimates for a run in flight, which is why
 `queue.local.md` carries a band rather than a number and `queue.md` carries
-neither.
+neither. The rule that came out of the DURF campaigns is narrower than "always
+remeasure": **never inherit a pace from a SMALLER run.** camp1's ETA was built on a
+six-session smoke at 23-25s a session and ran at 31.1s, ~10 minutes short; camp2
+inherited camp1's 31.1s at the same size and came in at 32.3s, right within 4%.
+Remeasure off the run's own rate at ~10 sessions and restate, with a wall-clock
+start and a computed ETA rather than a bare duration.
 
 ## Freezing code across a campaign, and proving the freeze held
 
