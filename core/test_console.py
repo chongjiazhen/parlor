@@ -308,3 +308,46 @@ def test_the_briefing_never_enters_the_seats_view():
     assert view in printed
     assert "OBJECTIVE" not in view
     assert printed.index("OBJECTIVE") < printed.index(view)
+
+
+def test_random_seats_exactly_one_person_and_inside_the_table():
+    for seed in range(40):
+        seats = human_seats("random", 5, seed)
+        assert len(seats) == 1
+        assert 0 <= next(iter(seats)) < 5
+
+
+def test_the_same_seed_seats_the_same_person_every_time():
+    # The claim `--seed` makes. Both demos resolve `--human` twice - once in
+    # `main`, once in `build_policies` - so a draw that moved between calls would
+    # seat the person in one place and point the console at another.
+    for seed in (0, 7, 1000):
+        assert human_seats("random", 5, seed) == human_seats("random", 5, seed)
+
+
+def test_the_draw_does_not_consume_the_callers_random_stream():
+    """The sharp one. Drawing from the rng the policies deal out of would change
+    what every random seat played at that seed - a silent re-baseline of every
+    number recorded under it, bought for a convenience."""
+    import random as _r
+    before = _r.Random(4).random()
+    human_seats("random", 5, 4)
+    assert _r.Random(4).random() == before
+
+
+def test_different_seeds_can_seat_different_people():
+    assert len({next(iter(human_seats("random", 5, s))) for s in range(40)}) > 1
+
+
+def test_random_without_a_seed_refuses_rather_than_guessing():
+    try:
+        human_seats("random", 5)
+    except SystemExit as exc:
+        assert "--seed" in str(exc)
+    else:
+        raise AssertionError("an unseeded random draw was allowed")
+
+
+def test_an_explicit_seat_ignores_the_seed_entirely():
+    assert human_seats("3", 5, 99) == {3}
+    assert human_seats("3", 5) == {3}

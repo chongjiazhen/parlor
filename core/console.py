@@ -34,6 +34,7 @@ the demos rather than left to a comment:
 from __future__ import annotations
 
 import json
+import random
 import re
 import sys
 from dataclasses import dataclass, field
@@ -85,8 +86,12 @@ class TooManyHumans(SystemExit):
     """More than one person was seated at a single terminal."""
 
 
-def human_seats(spec: str | None, n: int) -> set[int]:
+def human_seats(spec: str | None, n: int, seed: int | None = None) -> set[int]:
     """``--human 0`` -> ``{0}``. At most ONE seat, and that is not a shortcut.
+
+    ``--human random`` -> one seat drawn from ``seed``. A person who always plays
+    seat 0 only ever sees one position in the deal, which is the narrowest
+    possible sample of the thing the console exists to check.
 
     A console is one channel. Two people playing from it read each other's
     private view as it scrolls past - which is precisely the property this arena
@@ -105,6 +110,21 @@ def human_seats(spec: str | None, n: int) -> set[int]:
     """
     if not spec:
         return set()
+    if spec.strip().lower() == "random":
+        if seed is None:
+            raise SystemExit(
+                "--human random needs --seed. A wall-clock draw would make two "
+                "runs at one seed seat the person differently, and every number "
+                "recorded under that seed is a claim that they would not.")
+        # Its OWN generator, keyed on the seed and on this decision's name, for
+        # two reasons that both bite. A draw taken from the caller's `rng` would
+        # consume from the stream the policies deal out of, so choosing a seat
+        # would change what every random seat then played at that same seed. And
+        # both callers here resolve the flag independently - `main` and
+        # `build_policies` - so a draw that depended on stream position would give
+        # them different seats and seat the person in one place while the console
+        # went to another.
+        return {random.Random(f"human-seat:{seed}").randrange(n)}
     seats = set()
     for piece in spec.replace(",", " ").split():
         seat = int(piece)

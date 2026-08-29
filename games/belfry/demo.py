@@ -96,7 +96,7 @@ def build_policies(ref: BelfryReferee, args, rng: random.Random) -> dict:
     fallback at the end of that loop plays a RANDOM move, and a person who
     mistypes twice has not decided to hand their seat to the control policy.
     """
-    humans = human_seats(args.human, ref.n)
+    humans = human_seats(args.human, ref.n, args.seed)
     backend = None
     if args.backend:
         backend = Backend.named(
@@ -149,8 +149,9 @@ def main() -> None:
                     help="ask the chat template to skip the reasoning pass")
     ap.add_argument("--register", choices=list(REGISTERS), default="character")
     ap.add_argument("--human", metavar="SEAT",
-                    help="play ONE seat yourself, e.g. 0 (a terminal is one "
-                         "channel, so it seats one person)")
+                    help="play ONE seat yourself: a seat number, or `random` "
+                         "to draw one from --seed (a terminal is one channel, "
+                         "so it seats one person)")
     ap.add_argument("--human-retries", type=int, default=99,
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
@@ -168,7 +169,7 @@ def main() -> None:
                             discussion_rounds=args.rounds,
                             max_days=args.max_days)
     policies = build_policies(ref, args, rng)
-    humans = human_seats(args.human, ref.n)
+    humans = human_seats(args.human, ref.n, args.seed)
 
     print(f"=== {args.seats}-seat belfry, script='{script.name}' ===\n")
     print(opening_view(ref, humans))

@@ -101,7 +101,7 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
                                                  briefing=BRIEFING,
                                                  rules_path=RULES_PATH),
                            retries=args.human_retries, fallback=fallback)
-              for s in human_seats(args.human, ref.n)}
+              for s in human_seats(args.human, ref.n, args.seed)}
     if not args.backend:
         return {s: humans.get(s, fallback) for s in ref.assignment}
     backend = Backend.named(
@@ -168,8 +168,9 @@ def main() -> None:
                     help="'character' roleplays the skin, 'plain' argues from the "
                          "record out of character")
     ap.add_argument("--human", metavar="SEAT",
-                    help="play ONE seat yourself, e.g. 0 (a terminal is one "
-                         "channel, so it seats one person)")
+                    help="play ONE seat yourself: a seat number, or `random` "
+                         "to draw one from --seed (a terminal is one channel, "
+                         "so it seats one person)")
     ap.add_argument("--human-retries", type=int, default=99,
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
@@ -188,7 +189,7 @@ def main() -> None:
                            simultaneous=args.simultaneous, notebook=args.notebook)
     policies = build_policies(ref, args, rng)
 
-    humans = human_seats(args.human, ref.n)
+    humans = human_seats(args.human, ref.n, args.seed)
 
     print(f"=== 5-seat hidden-role game, theme='{theme.name}' ===\n")
     print(opening_view(ref, humans))
