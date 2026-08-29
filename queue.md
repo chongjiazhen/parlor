@@ -303,12 +303,10 @@ Rules and setup changes, each of which re-baselines what runs under it:
       plus elimination.
 
 Human-seat play - triaged from one operator's hand-played session, 2026-08-29.
-Nothing here is measured; the code claims are read from the files cited. Rows
-are tagged with the feedback item they answer, so the report and the queue can be
-read against each other. Which may be handed to a worker is S12 and
-`docs/worklane.md`.
+Nothing here is measured; the code claims are read from the files cited. Which
+of them may be handed to a worker is S12 and `docs/worklane.md`.
 
-- [ ] **Item 5. "You went to sleep as the X" is rendered over the seat's POST-night
+- [ ] **"You went to sleep as the X" is rendered over the seat's POST-night
       belief, and for a thief or a waker that sentence is false.**
       `games/changeling/referee.py:239` prints `believes(seat)`, which
       `night.py` REPLACES on TAKE (:248) and WAKE (:270). Observed: a seat told it
@@ -318,30 +316,30 @@ read against each other. Which may be handed to a worker is S12 and
       and only the English is wrong. It is still model-facing text on the rung
       whose gate #3 read is 200 games, so **it re-baselines S5** and lands alone,
       saying so. The fix separates deal from dawn rather than adding a fact.
-- [ ] **Item 1a/1b. `--human` has no random default and cannot pick a role.**
+- [ ] **`--human` has no random default and cannot pick a role.**
       `core/console.py:88` takes an explicit index, so a person plays seat 0 every
       time and sees one deal position forever. Wants `--human random` drawn from
       `--seed` - a wall-clock draw voids the seed invariant exactly as a
       heartbeat's would - and a UAT-only role pick that constrains the deal and
       REFUSES when the deck cannot seat it. **A forced deal is not a sample**:
       mark it in the record so it cannot enter a scored denominator by habit.
-- [ ] **Item 1c. An omniscient live view is a SECOND channel, not a wider first one.** It
+- [ ] **An omniscient live view is a SECOND channel, not a wider first one.** It
       reads the referee (`holds`, the night log) and must never reach
       `prompt_for`, or gate #1's guarantee becomes a flag somebody can forget. The
       shape that cannot leak by construction: write the referee-side transcript
       incrementally and tail it from another terminal.
-- [ ] **Item 2. An interactive game never says which model is answering.**
+- [ ] **An interactive game never says which model is answering.**
       `complete_meta` returns the served upstream and `Decision.served_by` keeps
       it; the runners print the census at the end and `doctor` answers before a
       game, but the console does not. Print route/model/served-by at greet and on
       a `model` command. Outside the payload, so no re-baseline.
-- [ ] **Item 3. No decision records prompt size or token usage** - `Decision`
+- [ ] **No decision records prompt size or token usage** - `Decision`
       (`games/changeling/player.py:186`) carries refusals and `served_by` and
       nothing about bytes. Additive to the record and invisible to the model, so
       it costs no re-baseline, and it is the only way to price a payload edit in
       anything but win rate. It is what makes `--briefing` and `--notebook`
       measurable on COST as well as on outcome.
-- [ ] **Item 4/4c. "q36 is terse and robotic" is a claim about a model, and there is no
+- [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
       bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
       Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
       qwen3.8-27B and its MTP build. **Read the direction note first** - gates #2
@@ -349,10 +347,10 @@ read against each other. Which may be handed to a worker is S12 and
       one parlor-shaped question only: whether fallback rate and deduction move
       together or apart across tunes, which is what an RP tune is supposed to buy.
       Serial local lane; `--no-thinking` is a property of the rung, not the bench.
-- [ ] **Item 4b. Let a seat choose to speak rather than be scheduled to.** The same ask as
+- [ ] **Let a seat choose to speak rather than be scheduled to.** The same ask as
       the turn-taking row above - bidding, or random active-seat with an idle
       action - and it should be taken as ONE arm with it, not twice.
-- [ ] **Item 6. "changeling feels random" - instrument it before fixing it.** Its gate #3
+- [ ] **"changeling feels random" - instrument it before fixing it.** Its gate #3
       HOLDS over 200 games, so the felt randomness is either single-game variance
       or a real gap between winning and deducing, and no current number separates
       them. The folk reading the operator brought is that honest play collapses
