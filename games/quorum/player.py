@@ -237,6 +237,9 @@ class LLMPolicy:
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
+        self.last_prompt_size = 0
+        self.last_reply_size = 0
+        self.last_usage = None
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -248,6 +251,9 @@ class LLMPolicy:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
+                self.last_prompt_size = len(prompt)
+                self.last_reply_size = len(reply)
+                self.last_usage = getattr(self.backend, "last_usage", None)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self._refused(seat, attempt, "transport", complaint)
@@ -326,6 +332,9 @@ class Decision:
     #: without inferring a policy class from a side or an arm name later.
     model_controlled: bool = False
     served_by: str = ""
+    prompt_size: int = 0
+    reply_size: int = 0
+    usage: dict | None = None
 
 
 @dataclass
@@ -473,6 +482,9 @@ def play_game(
             rec.recovered += 1
         rec.refused_attempts += refusals
         rec.rule_refused_attempts += rule_refusals
+        prompt_size = getattr(policy, "last_prompt_size", 0)
+        reply_size = getattr(policy, "last_reply_size", 0)
+        usage = getattr(policy, "last_usage", None)
         rec.decision_log.append(Decision(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
@@ -483,6 +495,9 @@ def play_game(
             model_controlled=isinstance(policy, LLMPolicy),
             served_by=("" if fell_back
                        else str(getattr(policy, "last_upstream", "") or "")),
+            prompt_size=prompt_size,
+            reply_size=reply_size,
+            usage=usage,
         ))
         return action
 

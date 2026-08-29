@@ -583,3 +583,14 @@ class TestNotebookThroughTheDriver(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheCallSizeIsRecorded(unittest.TestCase):
+    def test_a_clean_decision_records_the_prompt_and_reply_it_sent(self):
+        ref = fixed_ref(discussion_rounds=0)
+        backend = FakeBackend(['{"team": [0, 1]}'])
+        policy = LLMPolicy(backend=backend, retries=2)
+        policy.act(ref, 0)
+        self.assertEqual(policy.last_reply_size, len('{"team": [0, 1]}'))
+        self.assertEqual(policy.last_prompt_size, len(backend.prompts[-1]))
+        self.assertIsNone(policy.last_usage)

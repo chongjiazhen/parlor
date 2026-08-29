@@ -243,3 +243,29 @@ class TestAnOffBoxRunRefusesToStartWithoutAKey(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheUsageOfTheMostRecentCall(unittest.TestCase):
+    """``last_usage`` is the seam's only mutable state, and it is per-call. A
+    stale value would be read by the NEXT decision as its own cost."""
+
+    def _backend(self, body):
+        b = Backend.named("local", "m")
+        b._post = lambda req: body                      # the HTTP boundary, stubbed
+        return b
+
+    def test_a_body_carrying_usage_leaves_it_on_the_backend(self):
+        b = self._backend({"choices": [{"message": {"content": "hi"}}],
+                           "model": "m", "usage": {"prompt_tokens": 7}})
+        b.complete_meta("ctx")
+        self.assertEqual(b.last_usage, {"prompt_tokens": 7})
+
+    def test_a_body_without_usage_leaves_it_None_rather_than_the_last_call_s(self):
+        b = self._backend({"choices": [{"message": {"content": "hi"}}],
+                           "model": "m", "usage": {"prompt_tokens": 7}})
+        b.complete_meta("ctx")
+        b._post = lambda req: {"choices": [{"message": {"content": "hi"}}],
+                               "model": "m"}
+        b.complete_meta("ctx")
+        self.assertIsNone(b.last_usage, "a call reporting no usage inherited the "
+                                        "previous call's token count")

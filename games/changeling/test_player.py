@@ -364,3 +364,41 @@ class TestReviewFixes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheCallSizeIsRecorded(unittest.TestCase):
+    """The bytes a decision cost. Additive fields, so the danger they carry is not
+    a wrong number but a silently absent one: every reader defaults them, so a
+    policy that stopped populating them would read as a run of free calls."""
+
+    def test_a_clean_decision_records_the_prompt_and_reply_it_actually_sent(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        backend = FakeBackend(['{"say": "here"}'])
+        policy = LLMPolicy(backend=backend, backoff=0)
+        policy.act(ref, 0)
+        self.assertEqual(policy.last_reply_size, len('{"say": "here"}'))
+        self.assertGreater(policy.last_prompt_size, 0)
+        # Not merely non-zero: the size is of the prompt the seat was HANDED, so a
+        # policy that measured its own template instead would pass a >0 assertion.
+        self.assertGreaterEqual(policy.last_prompt_size, len(ref.prompt_for(0)))
+
+    def test_a_backend_reporting_no_usage_leaves_the_field_None(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policy = LLMPolicy(backend=FakeBackend(['{"say": "here"}']), backoff=0)
+        policy.act(ref, 0)
+        self.assertIsNone(policy.last_usage)
+
+    def test_usage_is_carried_off_the_backend_when_the_upstream_reports_it(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        backend = FakeBackend(['{"say": "here"}'])
+        backend.last_usage = {"prompt_tokens": 11, "completion_tokens": 2}
+        policy = LLMPolicy(backend=backend, backoff=0)
+        policy.act(ref, 0)
+        self.assertEqual(policy.last_usage["prompt_tokens"], 11)
+
+    def test_a_fallback_that_called_no_model_records_no_size(self):
+        ref = ChangelingReferee.new(5, seed=3, discussion_rounds=1)
+        policy = LLMPolicy(backend=FakeBackend(['{}'] * 3), retries=2, backoff=0)
+        policy.act(ref, 0)
+        self.assertTrue(policy.last_fell_back)
+        self.assertIsNone(policy.last_usage)

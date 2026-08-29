@@ -395,3 +395,16 @@ class TestAuditRunsInsideTheDriver(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheCallSizeIsRecorded(unittest.TestCase):
+    def test_a_clean_decision_records_the_prompt_and_reply_it_sent(self):
+        ref = at(Phase.NOMINATE)
+        seat = ref.proposer
+        legal = ref.eligible_nominees()[0]
+        backend = _Backend([f'{{"nominate": {legal}}}'])
+        pol = LLMPolicy(backend=backend, retries=2, backoff=0)
+        pol.act(ref, seat)
+        self.assertEqual(pol.last_reply_size, len(f'{{"nominate": {legal}}}'))
+        self.assertEqual(pol.last_prompt_size, len(backend.seen[-1]))
+        self.assertIsNone(pol.last_usage)

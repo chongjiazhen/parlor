@@ -228,6 +228,9 @@ class Backend:
     #: per run, and turning it on is a MEASURED change like any other.
     enable_thinking: bool | None = None
 
+    #: Usage information from the most recent call, or None if the response had no usage field
+    last_usage: dict | None = None
+
     @classmethod
     def named(cls, name: str, model: str, **kw) -> "Backend":
         return cls(endpoint=ENDPOINTS[name], model=model, **kw)
@@ -273,6 +276,8 @@ class Backend:
             method="POST",
         )
         body = self._post(req)
+        # Capture usage information from the most recent call
+        self.last_usage = body.get("usage")
         return (body["choices"][0]["message"]["content"],
                 str(body.get("model") or self.model))
 

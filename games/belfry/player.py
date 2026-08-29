@@ -186,6 +186,9 @@ class LLMPolicy:
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
+        self.last_prompt_size = 0
+        self.last_reply_size = 0
+        self.last_usage = None
         turn = ref.pending()
         base = ref.prompt_for(seat)
         complaint = ""
@@ -197,6 +200,9 @@ class LLMPolicy:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
+                self.last_prompt_size = len(prompt)
+                self.last_reply_size = len(reply)
+                self.last_usage = getattr(self.backend, "last_usage", None)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self._refused(seat, attempt, "transport", complaint)
@@ -247,6 +253,9 @@ class Decision:
     rule_refusals: int = 0
     fell_back: bool = False
     served_by: str = ""
+    prompt_size: int = 0
+    reply_size: int = 0
+    usage: dict | None = None
 
 
 @dataclass
@@ -360,6 +369,9 @@ def _record_decision(rec: GameRecord, policy, turn_no: int, day: int, turn: Turn
     fell_back = getattr(policy, "last_fell_back", False)
     refusals = int(getattr(policy, "last_refusals", 0) or 0)
     rule_refusals = int(getattr(policy, "last_rule_refusals", 0) or 0)
+    prompt_size = getattr(policy, "last_prompt_size", 0)
+    reply_size = getattr(policy, "last_reply_size", 0)
+    usage = getattr(policy, "last_usage", None)
     rec.decisions += 1
     rec.fallbacks += int(fell_back)
     if not fell_back and rule_refusals:
@@ -373,6 +385,9 @@ def _record_decision(rec: GameRecord, policy, turn_no: int, day: int, turn: Turn
                  else ""),
         refusals=refusals, rule_refusals=rule_refusals, fell_back=fell_back,
         served_by=getattr(policy, "last_upstream", ""),
+        prompt_size=prompt_size,
+        reply_size=reply_size,
+        usage=usage,
     ))
 
 

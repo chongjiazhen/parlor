@@ -191,6 +191,9 @@ class LLMPolicy:
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
+        self.last_prompt_size = 0
+        self.last_reply_size = 0
+        self.last_usage = None
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -202,6 +205,9 @@ class LLMPolicy:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
+                self.last_prompt_size = len(prompt)
+                self.last_reply_size = len(reply)
+                self.last_usage = getattr(self.backend, "last_usage", None)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self._refused(seat, attempt, "transport", complaint)
@@ -351,6 +357,9 @@ class Decision:
     #: gateway picks per request, so a per-run mix cannot tell you whether the model
     #: that misread the hunt is the one that voted well.
     served_by: str = ""
+    prompt_size: int = 0
+    reply_size: int = 0
+    usage: dict | None = None
 
 
 def played_summary(phase: Phase, action: dict) -> str:
@@ -449,6 +458,9 @@ def play_game(
         # filed before the move is applied, so a note written about THIS board is
         # dated to this board. It is a no-op when the notebook is off.
         stored = ref.note(seat, action.get("note", ""))
+        prompt_size = getattr(policies[seat], "last_prompt_size", 0)
+        reply_size = getattr(policies[seat], "last_reply_size", 0)
+        usage = getattr(policies[seat], "last_usage", None)
         rec.decision_log.append(Decision(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
@@ -459,6 +471,9 @@ def play_game(
             fell_back=fell_back,
             served_by=("" if fell_back
                        else str(getattr(policies[seat], "last_upstream", "") or "")),
+            prompt_size=prompt_size,
+            reply_size=reply_size,
+            usage=usage,
         ))
         return action
 

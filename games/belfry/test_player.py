@@ -361,3 +361,14 @@ class TestTheDeadMaySpeakButNotSlay(unittest.TestCase):
         allowed = ref.legal_targets(turn.seat, "slay")
         self.assertEqual(
             illegal_reason(ref, turn, {"say": "hi", "slay": allowed[0]}), "")
+
+
+class TestTheCallSizeIsRecorded(unittest.TestCase):
+    def test_a_clean_decision_records_the_prompt_and_reply_it_sent(self):
+        ref = rigged(FIVE)
+        backend = Canned(['{"target": 2}'])
+        policy = LLMPolicy(backend=backend, backoff=0)
+        policy.act(ref, ref.pending().seat)
+        self.assertEqual(policy.last_reply_size, len('{"target": 2}'))
+        self.assertEqual(policy.last_prompt_size, len(backend.seen[-1]))
+        self.assertIsNone(policy.last_usage)
