@@ -34,17 +34,22 @@ in this block was wrong twice on 2026-08-27. That class lives in
 `queue.local.md` (gitignored, box-local); this file keeps terminal states and
 route decisions. Whether a freeze binds right now is its business too.
 
-**Two fronts are live and they are independent:**
+## What each rung owes
 
-- **quorum** - engine DONE, no model has played a seat. The operative criterion
-  is `docs/quorum-live4-criterion.md` (2026-08-29), arithmetic
-  `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. What
-  is left is GPU: the command in live4 §The arm, then `quorum_live1_verdict`.
-  **`--no-thinking` or the arm voids** - measured 12.90% fallback without it,
-  0.00% with. Seeds 5200..5599 and 7000..7399 are spent; the arm is 11200..11219.
-- **DURF** - between measurements. The adjacency question is DECIDED 2026-08-28,
-  its two prescribed edits are APPLIED, and the campaign that measured them has
-  LANDED. What is left is a term decision and two questions that are not code.
+One debt per rung, and **this table is the only place that state lives** - a
+second copy is the one that goes stale. The verdict table below is what has been
+CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
+
+| rung | engine | model in a seat | what it owes |
+|---|---|---|---|
+| **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
+| **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
+| **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
+| **belfry** | done, with its scoring lane | **never** | settle the day-1 instrument control, then the first live game - both rows below. `games/belfry/RULES.md` carries the knowledge model and the discretion table; `docs/measurements.md` carries the random control at the settings that run should use, and the instrument check inside it |
+| **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
+| **adjudicator** | not built | n/a | the spike itself (S8) - a model in the referee's seat for the discretionary choices only, which belfry has already isolated and logged |
+
+## Gates already called
 
 **Every called gate has left this file, and DURF now has one of its own.**
 
@@ -186,10 +191,7 @@ Reference already written down, unmeasured unless it says otherwise:
 - `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
   and the graded-taint fix that does.
 
-belfry - engine and scoring lane DONE 2026-08-28. No model has played a seat.
-`games/belfry/RULES.md` carries the knowledge model and the discretion table;
-`docs/measurements.md` carries the random control at the settings the first live
-run should use, and the instrument check inside it.
+belfry - state and pointers are §What each rung owes; these are its rows.
 
 - [ ] **The day-1 instrument control FAILS, and clause B rests on it.** Measured
       2026-08-29: a random table nominates evil at the board rate and then executes
