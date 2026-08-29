@@ -77,12 +77,3 @@ Historical numbering. The letters are separate verdicts, not revisions of one.
 - **grimoire (`grim`)** - belfry's referee-side book of who holds what, including
   what each seat **registers as**, which may differ from what it is. Referee-side
   only; it is never rendered to a seat.
-
-## The record
-
-- **record** - raw run output in `eval/records/`. Gitignored, durable in-repo, and
-  never a thing git stores.
-- **transcript** - a rendered game committed to `transcripts/` because it evidences
-  a claim. This is the tracked half.
-- **recipe** - the launcher in `eval/runs/`. Tracked, because a run recipe that is
-  not versioned cannot be reviewed after it misfires.
