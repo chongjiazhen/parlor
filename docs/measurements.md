@@ -115,14 +115,14 @@ mechanically derivable part.
 they are here rather than in a verdict doc: they are what the rules alone do, and
 the live arm has to be read against them.
 
-| run | 5 seats, compact, `--rounds 1`, seed 6100, 200 games | 9 seats, full, `--rounds 1`, seed 7000, 300 games |
-|---|---|---|
-| good win rate, decided games | 48.24% [41.40%, 55.15%] | 60.55% [54.82%, 66.01%] |
-| how they ended | attrition 103, demon-dead 96, day-bound 1 | demon-dead 168, attrition 64, bad-execution 50, day-bound 11, speaker 7 |
-| **day-1 execution accuracy** | 41.04% [33.08%, 49.51%] | 20.57% [15.65%, 26.56%] |
-| chance on the same boards | **40.00%** | **22.22%** |
-| good-seat vote accuracy | 51.54% [49.67%, 53.40%], n=2763 | - |
-| fallback rate | 0.00% (0/9719) | 0.00% |
+| run | 5 seats, compact, `--rounds 1`, seed 6100, 200 games | 9 seats, full, `--rounds 1`, seed 7000, 300 games | 10 seats, full, `--rounds 1`, seed 9400, 200 games |
+|---|---|---|---|
+| good win rate, decided games | 48.24% [41.40%, 55.15%] | 60.55% [54.82%, 66.01%] | 59.00% [52.08%, 65.58%] |
+| how they ended | attrition 103, demon-dead 96, day-bound 1 | demon-dead 168, attrition 64, bad-execution 50, day-bound 11, speaker 7 | demon-dead 112, attrition 66, bad-execution 16, speaker 6 |
+| **day-1 execution accuracy** | 41.04% [33.08%, 49.51%] | 20.57% [15.65%, 26.56%] | 25.16% [18.99%, 32.54%] |
+| chance on the same boards | **40.00%** | **22.22%** | **30.00%** |
+| good-seat vote accuracy | 51.54% [49.67%, 53.40%], n=2763 | - | 50.29% [49.56%, 51.02%], n=18148 |
+| fallback rate | 0.00% (0/9719) | 0.00% | 0.00% (0/43891) |
 
 **The third and fourth rows are an instrument control, and that is the point of
 running this at all.** The scorer computes the chance rate per execution off that
@@ -133,6 +133,15 @@ The first draw at 9 seats looked 5.5 points low; it was 209 executions and the
 gap was inside the interval, so nothing was wrong with the instrument and the
 answer was more games, not a theory about which role caused it.
 
+**The 10-seat full column was added 2026-08-29 as the slice-6 fix test** (`b5312fb`,
+poisoned board-watch is a real derangement). It exists because it is the first
+control that can actually poison the watcher: the watcher is the `mimic` and it is
+poisoned by the `venom`, and at 5-9 seats only one minion is dealt so the two never
+share a table (both dealt in ~14% of 10-seat deals). Neither the 5-seat compact nor
+the 9-seat full control could reach the changed code at all, so this fix changes no
+previously recorded number - this column is a fresh post-fix baseline, not a
+re-baseline of an old one. 200/200 games completed, 0 errors, 0 falls back.
+
 Two properties of the RULES worth carrying into any live read, both visible above:
 the good side wins more often on a bigger table under identical play, and 58 of
 the 5-seat run's 257 executions carried against a seat that was **already dead**
@@ -141,6 +150,9 @@ its days on corpses is not a table that executed badly.
 
 Recipe, and it needs no GPU: `py -3 -m eval.run_belfry --games 200 --seats 5
 --script compact --rounds 1 --seed 6100 --out eval/records/belfry-control-5seat.json`.
+The 10-seat full third column, same shape: `py -3 -m eval.run_belfry --games 200
+--seats 10 --script full --rounds 1 --seed 9400 --out
+eval/records/belfry-control-10seat-full.json`.
 
 ## Route: local IS the gate lane - corrected 2026-08-28
 
