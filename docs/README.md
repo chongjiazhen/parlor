@@ -34,6 +34,9 @@ partly true is worse than none.
 - `docs/open-arms.md` - 2026-08-28. The argument behind each open row in
   `queue.md`, which carries only the ask and the entry condition. **Read the
   entry for a row before taking that row**, not before picking one.
+- `docs/worklane.md` - 2026-08-29. Which open rows may be handed to a delegated
+  worker, the worktree that contains one, and the three classes that may not be
+  delegated at all. **Read it before dispatching anything**, not after.
 
 - `docs/information-model.md` - 2026-08-28. The settled vocabulary for what this
   repo calls entitlement, cited by identifier: information set, percept,

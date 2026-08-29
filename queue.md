@@ -146,6 +146,7 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | entry condition | done when |
 |---|---|---|---|
+| **S12** | **The delegation lane for the 2026-08-29 block.** Its mechanical rows dispatched as parallel workers, one `git worktree` each. `docs/worklane.md` is the contract: what may be handed over, why the worktree is the containment rather than the route, and why the route follows data residency and GPU contention rather than job size. | plans written, worktrees exist - **met** | one batch has been through dispatch, launcher-run acceptance and a verdict, and its diffs are reviewed |
 | **S8** | **Next rung or publish. TAKEN 2026-08-28 on the adjudicator branch and NOT closed** - the DURF fixture got its scorer and four runs, and its engine half (S11) is done. What is still open under this slice is the **6/7p package** and the **publish** option, both untouched, plus the adjudicator spike proper. Three things already decided for it: the faction heartbeat is not a fourth option but the small version of the adjudicator's hardest part (`docs/faction-heartbeat.md`); the TTRPG IP posture was answered 2026-08-28 and the answer ships (`docs/content-packs.md` - engine/content split, one example pack per rung whose terms permit it); and the design half of the adjudicator literature is in the tree (`docs/action-channel.md` - call vocabulary, the prompt seams, the two failures the kernel must catch). What stays off-repo is the competitive half. | S5 done, S1 called - **met** | the discretion number exists, VOID and dated; the engine does not |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
@@ -302,7 +303,8 @@ Rules and setup changes, each of which re-baselines what runs under it:
       plus elimination.
 
 Human-seat play - triaged from one operator's hand-played session, 2026-08-29.
-Nothing here is measured; the code claims are read from the files cited.
+Nothing here is measured; the code claims are read from the files cited. Which
+of them may be handed to a worker is S12 and `docs/worklane.md`.
 
 - [ ] **"You went to sleep as the X" is rendered over the seat's POST-night
       belief, and for a thief or a waker that sentence is false.**
