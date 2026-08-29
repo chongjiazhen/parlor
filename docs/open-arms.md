@@ -303,6 +303,67 @@ since been reworded in the queue is the live statement; this is the reasoning.
         it settles; a cabal gate left uncalled stays uncalled.
 
 
+## "changeling feels random" - four levers, and which of them this rung already has
+
+- [ ] **"changeling feels random" - instrument it before fixing it.** Raised
+      2026-08-29 from hand play, against the folk account of why the family of
+      one-night games this rung is modelled on feels arbitrary to new tables.
+      Nothing here is a citation: the levers are restated in this repo's terms
+      because the arguments stand or fall on their own, and none of them has been
+      measured here.
+      - **The starting position is that this rung's gate #3 HOLDS over 200 games.**
+        So a table that wins is already discriminating. "Feels random" is a claim
+        about a DIFFERENT quantity that no number here reports: whether the vote
+        that lands was reasoned or lucky. **The first move is therefore an
+        instrument, not a rule change** - a per-game deduction score off records
+        that already exist, separating won-by-deduction from won-by-draw. Until
+        that exists, every lever below is a fix to an unmeasured complaint, and
+        adopting one blind would re-baseline the numbers that DO exist.
+      - **Hidden role change is the thesis, not the defect.** A seat whose own card
+        moved under it is what this rung was built to demonstrate and what
+        separates it from cabal. It stays. What is worth asking is whether the
+        seats are told plainly enough that it can happen - which is where the
+        model-facing wording bug found the same day lands, since a seat told it
+        "went to sleep as" its post-night card is being actively misinformed about
+        exactly this.
+      - **Tracking who moved what is a working-memory task, and this rung already
+        has the affordance built.** `--notebook` (§A per-seat private notebook)
+        is a per-seat scratchpad that survives the turn, built 2026-08-26 and
+        never measured. This gives it a sharper hypothesis than "more context
+        helps": a seat that cannot carry the night's swaps across rounds must vote
+        on impressions, so the notebook should move the DEDUCTION score more than
+        the win rate. That is a prediction the arm can falsify, which is better
+        than the one it has now.
+      - **Discussion length is already a flag and has never been an arm.**
+        `discussion_rounds` defaults to 2. If a table is voting on impressions
+        because it has not had room to argue, more rounds is the one-variable test,
+        and it costs GPU linearly in decisions. Cheap, honest, and it may well
+        return nothing - the measured pattern on this box is that extra context is
+        not monotonically good.
+      - **Village seats have no reason to bluff, and that is the strongest of these
+        readings.** The folk account says an all-honest table collapses the game:
+        with every villager stating what it did, contradictions come only from
+        mechanical swaps, and nobody can tell a switch from a lie. This rung's ask
+        never invites a village seat to say anything false, and the same argument
+        is cabal's gate #3 wearing different clothes. **Measurable off existing
+        records before any change**: how often does a village seat say something
+        untrue? If the answer is ~never, the table is playing the collapsed game
+        and the finding stands on its own, independent of any fix.
+      - **A losing-is-winning role is the one genuinely new card here.** A seat
+        that wins by being executed forces every other seat to weigh whether an
+        accusation is being courted rather than earned, which is a reason to
+        analyse behaviour rather than accuse the first contradiction. It is a
+        RULES change and a new win condition, so it re-baselines everything and
+        belongs behind the deck decision, not in front of it.
+      - **One tension worth stating rather than resolving here.** The same account
+        argues for FEWER chaotic moving parts until a table has the baseline
+        deduction, which cuts against the standing route call that the expansion
+        deck is the run worth having (§Seat the changeling expansion cards). Both
+        cannot be tested first. The deduction instrument above is what would settle
+        it, because it is the only thing that can say whether the current deck is
+        already past what the seats can track.
+
+
 ## Spike #2: off-map faction heartbeat
 
 - [ ] **Spike #2: off-map faction heartbeat - SCOPED 2026-08-27,
