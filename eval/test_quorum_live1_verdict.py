@@ -80,11 +80,23 @@ def clustered_proposer(n_honest: int, n_total: int, n_games: int):
     truth, lie = ["writ", "writ", "writ"], ["writ", "writ", "charter"]
     cards = [truth] * n_honest + [lie] * (n_total - n_honest)
     per_game = -(-len(cards) // n_games)
-    rows = [game([claim(0, "proposer", c) for c in cards[i:i + per_game]],
-                 [draw(0, ["writ"] * 3, ["writ"] * 2, "writ")])
-            for i in range(0, len(cards), per_game)]
-    rows += [game([], [draw(0, ["writ"] * 3, ["writ"] * 2, "writ")])
-             for _ in range(79 - len(rows))]
+
+    def d(k):
+        return draw(k, ["writ"] * 3, ["writ"] * 2, "writ")
+
+    # One claim per (seat, event), because that is the only record the referee
+    # can write since slice 7 and a duplicate pair now voids the arm. Packing is
+    # still what this fixture is for: the claims sit in FEW GAMES, which is the
+    # unit the bootstrap resamples. Spreading them across seats and events inside
+    # a game moves no claim between games, so the interval is untouched.
+    rows = []
+    for i in range(0, len(cards), per_game):
+        chunk = cards[i:i + per_game]
+        rows.append(game(
+            [claim(j // 5, "proposer", c, seat=j % 5)
+             for j, c in enumerate(chunk)],
+            [d(k) for k in range(-(-len(chunk) // 5))]))
+    rows += [game([], [d(0)]) for _ in range(79 - len(rows))]
     return rows
 
 
@@ -326,3 +338,53 @@ def test_the_exact_baselines_are_the_ones_the_criterion_names():
     from eval.quorum_claims import chance
     assert chance("proposer") == 0.25
     assert abs(chance("enactor") - 1 / 3) < 1e-12
+
+
+# ---- the void the criterion promised and the code did not carry ------------
+
+def test_a_repeat_seat_event_claim_voids_the_arm():
+    """docs/quorum-live3-criterion.md pre-commits this: the referee refuses a
+    second claim on one event since slice 7, so a duplicate in the record is a
+    bug report - a regressed tree, a rolled-back checkout, a record written by a
+    driver at another commit - and not a finding. The scorer deliberately does no
+    deduplication of its own, so without this void a duplicate is scored as two
+    independent model observations and reported with a verdict."""
+    d = draw(0, ["writ"] * 3, ["writ"] * 2, "writ")
+    rows = with_model_decisions([game(
+        [claim(0, "proposer", ["writ"] * 3),
+         claim(0, "proposer", ["charter"] * 3)],     # same seat, same event
+        [d])])
+    text, code, _ = run(rows)
+    assert "VOID" in text
+    assert "repeat (seat, event)" in text
+    assert "game 0 seat 0 event 0 x2" in text
+    assert "clause B" not in text
+    assert code == 2
+
+
+def test_one_claim_per_seat_and_event_is_not_a_repeat():
+    """Two seats claiming about one event, and one seat claiming about two
+    events, are both legal - the void must key on the PAIR, not on either half."""
+    draws = [draw(0, ["writ"] * 3, ["writ"] * 2, "writ"),
+             draw(1, ["writ"] * 3, ["writ"] * 2, "writ")]
+    rows = with_model_decisions([game(
+        [claim(0, "proposer", ["writ"] * 3, seat=0),
+         claim(0, "enactor", ["writ"] * 2, seat=1),
+         claim(1, "proposer", ["writ"] * 3, seat=0)],
+        draws)])
+    text, code, _ = run(rows)
+    assert "repeat (seat, event)" not in text
+    assert code != 2
+
+
+def test_the_duplicate_scan_reads_the_record_not_the_referee():
+    """A direct unit on the scan, because the void above can only ever see what
+    a synthetic record carries: the point of the condition is to catch a record
+    whose own referee no longer refuses duplicates."""
+    d = draw(0, ["writ"] * 3, ["writ"] * 2, "writ")
+    rows = [game([claim(0, "proposer", ["writ"] * 3, seat=2),
+                  claim(0, "proposer", ["writ"] * 3, seat=2),
+                  claim(0, "proposer", ["writ"] * 3, seat=2)], [d]),
+            game([claim(0, "proposer", ["writ"] * 3, seat=1)], [d])]
+    assert verdict.duplicate_claims(rows) == [(0, 2, 0, 3)]
+    assert verdict.duplicate_claims([]) == []

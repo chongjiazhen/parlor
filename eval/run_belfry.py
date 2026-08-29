@@ -108,7 +108,7 @@ def build_policies(ref: BelfryReferee, args, rng: random.Random,
 
 def one_game(index: int, args) -> GameRecord:
     seed = None if args.seed is None else args.seed + index
-    rng = random.Random(seed)
+    rng = integrity.policy_rng(seed)
     script = SCRIPTS[args.script] if args.script else DEFAULT_SCRIPT
     ref = BelfryReferee.new(args.seats, seed=seed, script=script,
                             discussion_rounds=args.rounds,

@@ -6,6 +6,7 @@ than played games - what is under test is the arithmetic over decision counts, a
 a real game would only make the numbers harder to read.
 """
 
+import random
 import unittest
 from dataclasses import dataclass, field
 
@@ -231,3 +232,35 @@ class TestTheRecoveredBar(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PolicyRng(unittest.TestCase):
+    """The policy stream is derived from the run seed, never equal to it.
+
+    Seeding the referee and the policies with the same integer makes them one
+    MT19937 sequence read at two offsets, so the deal and the policy's draws are
+    dependent - and the exact chance baseline a random control is read against
+    assumes they are not. Measured on quorum 2026-08-29: coupled enactor honesty
+    32.550% (z = -2.38 against the exact 33.333%), decoupled 33.449% (z = +0.54).
+    """
+
+    def test_the_policy_stream_is_not_the_referee_stream(self):
+        for seed in (0, 1, 5, 400, 6100, 7000, 9600):
+            a = [integrity.policy_rng(seed).random() for _ in range(3)]
+            b = [random.Random(seed).random() for _ in range(3)]
+            self.assertNotEqual(a, b, f"policy stream tracks the deal at {seed}")
+
+    def test_one_seed_still_names_one_stream(self):
+        first = [integrity.policy_rng(11).random() for _ in range(5)]
+        second = [integrity.policy_rng(11).random() for _ in range(5)]
+        self.assertEqual(first, second)
+
+    def test_adjacent_seeds_do_not_share_a_stream(self):
+        # one_game derives seed+index, so neighbouring games must not overlap.
+        streams = [tuple(integrity.policy_rng(7000 + i).random() for _ in range(2))
+                   for i in range(20)]
+        self.assertEqual(len(set(streams)), len(streams))
+
+    def test_an_unpinned_run_stays_unpinned(self):
+        self.assertNotEqual(integrity.policy_rng(None).random(),
+                            integrity.policy_rng(None).random())

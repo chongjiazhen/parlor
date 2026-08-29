@@ -46,12 +46,42 @@ how a re-read of an old run comes back with a different answer.
 
 from __future__ import annotations
 
+import random
 from collections import Counter
 
 #: Above this share of random decisions the scorer voids a verdict. One constant,
 #: because cabal warns and changeling VOIDs off the same threshold and a drifting
 #: pair of literals is the bug this module exists to make impossible.
 VOID_BAR = 0.10
+
+
+def policy_rng(seed: int | None) -> random.Random:
+    """The random policy's stream, derived from a run seed but NOT equal to it.
+
+    Both games seeded the referee and the policies with the same integer, which
+    makes them the same MT19937 sequence read at two offsets - so the deal and
+    the policy's draws are dependent, and the exact chance baselines a control is
+    read against assume they are not. Measured on quorum, 2026-08-29: the random
+    control's enactor honesty came in at 32.550% over 20,540 claims (z = -2.38
+    against the exact 33.333%) coupled, and 33.449% over 48,971 claims (z = +0.54)
+    with the policy stream offset; every one of nine coupled blocks was negative
+    while the decoupled blocks straddled zero. The control is the floor a criterion
+    cites as evidence its bar is right, so a control that misses its own baseline
+    by construction costs the bar its credibility even when the bar is exact
+    arithmetic and unaffected.
+
+    Reproducibility is preserved: the derivation is pure, so one run seed still
+    names one policy stream. An unpinned run stays unpinned - ``None`` seeds from
+    the OS, exactly as before, because a default here would make every run look
+    reproducible while the record says nothing about it.
+    """
+    if seed is None:
+        return random.Random()
+    # A cheap avalanche, not a hash: enough to put the two streams in unrelated
+    # regions of the state space, and stable across versions the way a library
+    # hash is not.
+    return random.Random((seed ^ 0x9E3779B9) & 0xFFFFFFFF)
+
 
 #: Above this share of RECOVERED decisions the report says so, loudly, and does NOT
 #: void. **Set 2026-08-28, before any run had produced the number** - S9 introduced

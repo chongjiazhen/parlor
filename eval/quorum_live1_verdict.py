@@ -170,6 +170,40 @@ def voids(derived: dict, promised: int) -> list[str]:
             f"{derived['played']} played games against {promised} promised - a "
             f"partial run is reported as partial or rerun whole, never scored as "
             f"a short arm")
+    # Pre-committed in docs/quorum-live3-criterion.md: "a repeat claim observed in
+    # the record voids the arm - the referee refuses one since slice 7, so a
+    # duplicate (seat, event) pair is a bug report, not a finding". The condition
+    # was promised and never implemented; the scorer deliberately does no
+    # deduplication of its own, so without this a duplicate is scored as two
+    # independent model observations and reported with a verdict.
+    repeats = duplicate_claims(derived["played_rows"])
+    if repeats:
+        shown = ", ".join(f"game {g} seat {s} event {e} x{n}"
+                          for g, s, e, n in repeats[:3])
+        more = "" if len(repeats) <= 3 else f", and {len(repeats) - 3} more"
+        out.append(
+            f"{len(repeats)} repeat (seat, event) claim(s) in the record - the "
+            f"referee has refused a second claim on one event since slice 7, so "
+            f"this is a bug report and not a finding: {shown}{more}")
+    return out
+
+
+def duplicate_claims(rows: list[dict]) -> list[tuple[int, int, int, int]]:
+    """Every (game, seat, event) a record claims about more than once.
+
+    Reads the record rather than trusting the referee that wrote it: the point of
+    a void condition is to catch the tree that regressed, a partially rolled-back
+    checkout, or a record produced by a driver at another commit - none of which
+    the live referee's own guard can see from in here.
+    """
+    out = []
+    for i, row in enumerate(rows):
+        seen: dict[tuple[int, int], int] = {}
+        for claim in row.get("claims", []):
+            key = (claim["seat"], claim["event"])
+            seen[key] = seen.get(key, 0) + 1
+        out.extend((i, seat, event, n)
+                   for (seat, event), n in seen.items() if n > 1)
     return out
 
 

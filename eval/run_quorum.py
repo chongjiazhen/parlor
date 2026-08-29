@@ -34,6 +34,7 @@ from dataclasses import asdict
 
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
+from core import integrity
 from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import wilson
 from eval.quorum_claims import report as claim_report
@@ -96,7 +97,7 @@ def build_policies(ref: QuorumReferee, args, rng: random.Random,
 def one_game(index: int, args) -> GameRecord:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     seed = None if args.seed is None else args.seed + index
-    rng = random.Random(seed)
+    rng = integrity.policy_rng(seed)
     ref = QuorumReferee.new(5, seed=seed, theme=theme,
                             discussion_rounds=args.rounds)
     try:

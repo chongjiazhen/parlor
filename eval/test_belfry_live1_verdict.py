@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import random
 import unittest
+import unittest.mock
+from pathlib import Path
 
 from core.stats import wilson
 from eval import belfry_live1_verdict as verdict
@@ -448,3 +450,64 @@ class Pinned(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheCliRunsTheControllerItShips(unittest.TestCase):
+    """The join is only worth having if the path an operator runs reaches it.
+
+    ``report`` took ``rows`` as an OPTIONAL argument and ``main`` did not pass
+    them, so the whole vote-provenance join sat behind ``if rows is not None``
+    and never ran outside the tests. The two regression tests above passed
+    because the helper supplies rows by hand. This one goes through ``main``.
+    """
+
+    def _write(self, rows) -> str:
+        import json
+        import tempfile
+        from pathlib import Path
+        d = Path(tempfile.mkdtemp())
+        p = d / "probe.json"
+        p.write_text(json.dumps(summary_for(rows)), encoding="utf-8")
+        (d / "probe.json.jsonl").write_text(
+            "\n".join(json.dumps(r) for r in rows), encoding="utf-8")
+        return str(p)
+
+    def _main(self, path: str) -> tuple[str, int]:
+        import contextlib
+        import io
+        buf = io.StringIO()
+        code = 0
+        with contextlib.redirect_stdout(buf):
+            with unittest.mock.patch("sys.argv", ["x", path, "--games", "60"]):
+                try:
+                    verdict.main()
+                except SystemExit as exc:
+                    code = int(exc.code or 0)
+        return buf.getvalue(), code
+
+    @staticmethod
+    def _joinable(rows: list[dict]) -> list[dict]:
+        """Give game 0 the turn keys and decision log the join needs."""
+        for i, v in enumerate(rows[0]["votes"]):
+            v["turn"] = 100 + i
+        rows[0]["decision_log"] = [
+            {"turn": 100 + i, "day": 1, "seat": 0, "kind": "vote",
+             "fell_back": False} for i in range(len(rows[0]["votes"]))]
+        return rows
+
+    def test_a_desynchronised_vote_is_caught_through_main_not_only_the_helper(self):
+        rows = self._joinable(arm(60, 0.70, 0.30, seed=11))
+        rows[0]["votes"][0]["fell_back"] = True      # the log says False
+        text, code = self._main(self._write(rows))
+        self.assertEqual(code, 1, "main must run the provenance join")
+        self.assertIn("decision log", text)
+
+    def test_a_clean_record_still_passes_through_main(self):
+        text, code = self._main(self._write(
+            self._joinable(arm(60, 0.70, 0.30, seed=11))))
+        self.assertEqual(code, 0)
+        self.assertIn("VERDICT", text)
+
+    def test_report_refuses_to_be_called_without_rows(self):
+        with self.assertRaises(TypeError):
+            verdict.report({}, {}, Path("x"), 60)

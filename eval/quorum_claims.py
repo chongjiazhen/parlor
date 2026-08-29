@@ -42,6 +42,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 from core.stats import bootstrap_ci, wilson
+from core import integrity
 from games.quorum.player import GameRecord, RandomPolicy, play_game
 from games.quorum.referee import QuorumReferee
 
@@ -271,7 +272,7 @@ def control(games: int = 400, seed: int = 0, rounds: int = 1) -> list[GameRecord
     for i in range(games):
         game_seed = seed + i
         ref = QuorumReferee.new(5, seed=game_seed, discussion_rounds=rounds)
-        rng = random.Random(game_seed)
+        rng = integrity.policy_rng(game_seed)
         out.append(play_game(ref, {s: RandomPolicy(rng=rng) for s in ref.assignment}))
     return out
 

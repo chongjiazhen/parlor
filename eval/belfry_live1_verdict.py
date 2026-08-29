@@ -379,7 +379,13 @@ def _band(ci) -> str:
 
 
 def report(summary: dict, derived: dict, path: Path,
-           promised: int, rows: list[dict] | None = None) -> tuple[list[str], int]:
+           promised: int, rows: list[dict]) -> tuple[list[str], int]:
+    # ``rows`` is REQUIRED, not optional. It WAS optional, every caller that
+    # mattered had the rows in hand, and ``main`` did not pass them - so the
+    # vote-provenance join in ``control`` sat behind ``if rows is not None`` and
+    # never ran on the one path an operator executes. The suite stayed green
+    # because the test helper passed them. A default here is a controller that
+    # silently degrades to no controller, so the signature refuses one.
     units = derived["units"]
     score = summary.get("score", {})
     out = [f"belfry live arm #1 - {path.as_posix()}",
@@ -554,7 +560,7 @@ def main() -> None:
         print(f"no record at {exc.filename} - the arm has not been run")
         sys.exit(1)
 
-    lines, code = report(summary, recompute(rows), path, args.games)
+    lines, code = report(summary, recompute(rows), path, args.games, rows)
     print("\n".join(lines))
     sys.exit(code)
 
