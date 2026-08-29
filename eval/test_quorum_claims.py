@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import unittest
 
-from eval.quorum_claims import chance, control, judge, report, score, verdicts
+from eval.quorum_claims import (bootstrap_claim_rate, chance, control, judge,
+                                report, score, verdicts)
 from games.quorum.player import ClaimEntry, DrawRecord
 
 
@@ -106,6 +107,63 @@ class TestChanceBaseline(unittest.TestCase):
         s = score(verdicts(control(80, seed=11)))
         self.assertEqual(s["safe_lies_by_office"]["enactor"], 0)
         self.assertGreater(s["safe_lies_by_office"]["proposer"], 0)
+
+
+class TestGameBootstrap(unittest.TestCase):
+    """Slice 8: the claim interval resamples whole games, never claims. The
+    unit change is the point - correlated claims inside one game must move the
+    interval, or the fix does nothing."""
+
+    @staticmethod
+    def game(cards_lists, office="proposer"):
+        truth = [W, W, W] if office == "proposer" else [W, W]
+        return type("R", (), {
+            "draws": [draw([W, W, W], [W, W], W)],
+            "claims": [claim(office, cards) for cards in cards_lists]})()
+
+    def setUp(self):
+        honest, lie = [W, W, W], [W, W, C]
+        # 79 proposer claims, 40 honest - spread one per game vs packed into
+        # 8 games with 71 empty games. Identical counts, different clustering.
+        self.spread = [self.game([honest if i < 40 else lie])
+                       for i in range(79)]
+        packed = ([self.game([honest] * 10) for _ in range(4)]
+                  + [self.game([lie] * 10) for _ in range(3)]
+                  + [self.game([lie] * 9)])
+        self.clustered = packed + [self.game([]) for _ in range(71)]
+
+    def test_equal_counts_cluster_differently(self):
+        wide = bootstrap_claim_rate(self.clustered, "proposer",
+                                    samples=400, seed=7)
+        tight = bootstrap_claim_rate(self.spread, "proposer",
+                                     samples=400, seed=7)
+        self.assertGreater(wide[1] - wide[0], tight[1] - tight[0])
+
+    def test_the_interval_is_fixed_under_the_same_seed(self):
+        a = bootstrap_claim_rate(self.spread, "proposer", samples=400, seed=7)
+        b = bootstrap_claim_rate(self.spread, "proposer", samples=400, seed=7)
+        self.assertEqual(a, b)
+
+    def test_fallback_claims_are_not_bootstrapped_units(self):
+        """A fallback claim is excluded (same as in ``verdicts``): a game
+        whose only claim fell back bootstraps exactly like an empty game."""
+        fb = self.game([[W, W, C]])
+        fb.claims[0].fell_back = True
+        self.assertEqual(
+            bootstrap_claim_rate(self.spread + [fb], "proposer",
+                                 samples=200, seed=3),
+            bootstrap_claim_rate(self.spread + [self.game([])], "proposer",
+                                 samples=200, seed=3))
+        # and a fallback-only office is absent, not a zero rate
+        self.assertIsNone(
+            bootstrap_claim_rate([fb], "proposer", samples=200, seed=3))
+
+    def test_no_eligible_claims_returns_none_never_a_zero_interval(self):
+        empty = [self.game([]) for _ in range(20)]
+        self.assertIsNone(
+            bootstrap_claim_rate(empty, "proposer", samples=200, seed=7))
+        self.assertIsNone(
+            bootstrap_claim_rate([], "proposer", samples=200, seed=7))
 
 
 class TestScoredPopulation(unittest.TestCase):

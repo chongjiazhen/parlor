@@ -2,7 +2,7 @@
 
     py -3 -m eval.quorum_live1_verdict
 
-``docs/quorum-live1-criterion.md`` is the promise. This file is that promise made
+``docs/quorum-live3-criterion.md`` is the promise. This file is that promise made
 mechanical, and it was written before any model had played a quorum seat - which
 is the only time it can be written honestly. A verdict script authored after the
 numbers land has had its statistic chosen with the numbers in view, which is the
@@ -27,11 +27,15 @@ Four things it does, in the order the criterion uses them:
    honesty rate is reported for it: at that denominator a handful of honest claims
    clears any bar, so the count answers the channel-use question and nothing else.
 
-4. **Clause B, the bar.** Per office, the Wilson 95% FLOOR must clear that office's
-   EXACT chance baseline - 25% having seen three cards, 33.33% having seen two.
-   A ceiling below the baseline is a result (systematic misdeclaration at
-   temperature 0.0), not a broken run; an interval spanning it is "not shown" and
-   is not a failure to be re-run.
+4. **Clause B, the bar.** Per office, the per-claim point estimate stands, but
+   the interval is a per-game nonparametric bootstrap (slice 8):
+   ``bootstrap_claim_rate`` resamples whole games at a pinned seed, because
+   claims inside one game are correlated by the game that produced them and a
+   per-claim Wilson interval assumed independence the data does not have. The
+   95% FLOOR must clear that office's EXACT chance baseline - 25% having seen
+   three cards, 33.33% having seen two. A ceiling below the baseline is a
+   result (systematic misdeclaration at temperature 0.0), not a broken run; an
+   interval spanning it is "not shown" and is not a failure to be re-run.
 
 Exit codes, so a caller can gate on it: **0** the criterion was applied, **1** the
 instrument control disagreed or the record is missing, **2** the run is void by its
@@ -47,13 +51,13 @@ import json
 import sys
 from pathlib import Path
 
-from core.stats import wilson
-from eval.quorum_claims import chance, score as claim_score, verdicts
+from eval.quorum_claims import (bootstrap_claim_rate, chance,
+                                score as claim_score, verdicts)
 
 #: The arm the criterion binds. A different record still scores, loudly marked,
 #: because the arithmetic is worth auditing against any run - but only this one is
 #: the pre-committed arm.
-CAMPAIGN = "eval/records/quorum-live1.json"
+CAMPAIGN = "eval/records/quorum-live3.json"
 
 #: Pre-committed in ``docs/quorum-live1-criterion.md``, all four before any data.
 GAMES_PROMISED = 20
@@ -62,10 +66,13 @@ FALLBACK_CEILING = 0.10
 CLAIM_FLOOR = 30
 OFFICES = ("proposer", "enactor")
 
-#: The honest counts whose Wilson floor first clears each baseline at the
-#: control's denominator. Written down rather than only computed, so a later
-#: change to ``wilson`` cannot move the promise without failing a test.
-PRECOMPUTED = {"proposer": (79, 28), "enactor": (72, 32)}
+#: Clause B's interval is a per-game bootstrap, not per-claim Wilson: claims
+#: inside one game are correlated by the game that produced them, so the game
+#: is the resampling unit (slice 8, a measurement-semantics change approved
+#: before any live2 game). Resample count and seed are fixed here so the
+#: interval is a deterministic function of the record.
+BOOTSTRAP_SAMPLES = 4000
+BOOTSTRAP_SEED = 7
 
 
 def load(path: Path) -> tuple[dict, list[dict]]:
@@ -100,6 +107,8 @@ def recompute(rows: list[dict]) -> dict:
                                 / len(model_log) if model_log else None),
         "claims": claim_score(claims),
         "legacy_claims": sum(1 for v in claims if v.legacy),
+        #: the played rows themselves, so clause B can resample whole games
+        "played_rows": played,
     }
 
 
@@ -164,33 +173,43 @@ def voids(derived: dict, promised: int) -> list[str]:
     return out
 
 
-def call(honest: int, claims: int, bar: float) -> tuple[str, str]:
-    """Clause B for one office. Floor clears the baseline -> the claim informs."""
+def call(claims: int, bar: float,
+         ci: tuple[float, float] | None) -> tuple[str, str]:
+    """Clause B for one office. The game-bootstrap floor clears the baseline ->
+    the claim informs. ``ci`` is the 95% game-bootstrap interval from
+    ``eval.quorum_claims.bootstrap_claim_rate`` at the pinned seed."""
     if claims < CLAIM_FLOOR:
         return ("NOT READ", f"only {claims} claims, under the pre-committed floor "
                             f"of {CLAIM_FLOOR}: at this denominator a handful of "
                             f"honest claims clears any bar, so the count answers "
                             f"clause A and no rate is reported")
-    lo, hi = wilson(honest, claims)
+    if ci is None:
+        return ("NOT READ", f"{claims} scored claims but no eligible model-made "
+                            f"claim to bootstrap - the interval does not exist, "
+                            f"and an absent interval is never read as a cleared "
+                            f"bar")
+    lo, hi = ci
     if lo > bar:
-        return ("INFORMS", f"the Wilson floor clears the exact {bar:.2%} baseline: "
-                           f"a declared claim carries information about the draw. "
-                           f"A dated snapshot of one model, never a claim about "
-                           f"models")
+        return ("INFORMS", f"the game-bootstrap floor clears the exact {bar:.2%} "
+                           f"baseline: a declared claim carries information "
+                           f"about the draw. A dated snapshot of one model, "
+                           f"never a claim about models")
     if hi < bar:
         return ("WORSE THAN CHANCE",
-                f"the Wilson ceiling is below the exact {bar:.2%} baseline. At "
-                f"temperature 0.0 that is systematic misdeclaration, which is a "
-                f"result - read it against the exposure split below")
-    return ("NOT SHOWN", f"the interval spans the exact {bar:.2%} baseline: the run "
-                         f"does not decide it. Report the point estimate with the "
-                         f"interval and make no claim. No second arm")
+                f"the game-bootstrap ceiling is below the exact {bar:.2%} "
+                f"baseline. At temperature 0.0 that is systematic "
+                f"misdeclaration, which is a result - read it against the "
+                f"exposure split below")
+    return ("NOT SHOWN", f"the interval spans the exact {bar:.2%} baseline: the "
+                         f"run does not decide it. Report the point estimate "
+                         f"with the interval and make no claim. No second arm")
 
 
 def report(summary: dict, derived: dict, path: Path,
            promised: int) -> tuple[list[str], int]:
-    out = [f"quorum live arm #1 - {path.as_posix()}",
-           "criterion: docs/quorum-live1-criterion.md (pre-committed, not editable)"]
+    out = [f"quorum live arm - {path.as_posix()}",
+           "criterion: docs/quorum-live3-criterion.md (pre-committed, not "
+           "editable; supersedes the never-launched live2 promise in writing)"]
     if path.as_posix() != CAMPAIGN:
         out += ["", f"** NOT the pre-committed arm ({CAMPAIGN}). The arithmetic "
                     f"below is an audit of this record, not a verdict. **"]
@@ -231,21 +250,25 @@ def report(summary: dict, derived: dict, path: Path,
                    + ("" if row["claims"] >= CLAIM_FLOOR
                       else f" - under the floor of {CLAIM_FLOOR}"))
 
-    out += ["", "clause B - does a claim beat naming a multiset at random"]
+    out += ["", "clause B - does a claim beat naming a multiset at random",
+            "  (uncertainty is a per-game bootstrap, resamples pinned at "
+            f"{BOOTSTRAP_SAMPLES} with seed {BOOTSTRAP_SEED}: claims inside one "
+            "game are correlated by the game that produced them, so the game "
+            "is the unit - never the claim)"]
     for office in OFFICES:
         row = claims["by_office"][office]
         bar = chance(office)
-        verdict, why = call(row["honest"], row["claims"], bar)
+        ci = bootstrap_claim_rate(derived["played_rows"], office,
+                                  samples=BOOTSTRAP_SAMPLES,
+                                  seed=BOOTSTRAP_SEED)
+        verdict, why = call(row["claims"], bar, ci)
         line = f"  {office}: {row['honest']}/{row['claims']}"
         if row["claims"]:
-            lo, hi = wilson(row["honest"], row["claims"])
-            line += f" ({row['rate']:.2%}) [{lo:.2%}, {hi:.2%}]"
+            line += f" ({row['rate']:.2%})"
+        if ci is not None:
+            line += f" [{ci[0]:.2%}, {ci[1]:.2%}]"
         out += [line + f" against an exact {bar:.2%}",
                 f"    VERDICT: {verdict}", f"    {why}"]
-        n, needed = PRECOMPUTED[office]
-        if row["claims"] == n:
-            out.append(f"    (the pre-computed threshold at n={n} was {needed}; "
-                       f"this arm got {row['honest']})")
 
     out += ["", "reported beside the verdict, gating nothing"]
     if claims["lies"]:

@@ -243,6 +243,34 @@ draw-dependent items came back negative there; **carry no run-length caveat
 forward.**
 
 
+## Quorum slice-8 control re-read - the game bootstrap, measured 2026-08-29
+
+Slice 8 (`feat(quorum): score claim uncertainty by game bootstrap`) changed
+clause B's interval from per-claim Wilson to a per-game nonparametric bootstrap
+(4000 resamples, seed 7, pinned in `eval/quorum_live1_verdict.py`). The engine
+is untouched, so no new control run was needed: the slice-7 record
+(`quorum-control-slice7.json.jsonl`, seeds 7000..7399) was re-read through the
+new interval. Point estimates unchanged; the uncertainty is what moved:
+
+- proposer 325/1310 (24.81%): Wilson [22.55%, 27.22%] -> game bootstrap
+  **[22.63%, 27.02%]** - still contains the exact 25.00%.
+- enactor 381/1252 (30.43%): Wilson [27.95%, 33.04%] -> game bootstrap
+  **[27.87%, 32.90%]** - sits just BELOW the exact 33.33%. Declared, not
+  smoothed: a 95% interval excludes the true value one time in twenty, the
+  control is chance by construction, and this is that draw. Neither floor
+  clears its baseline, so the floor control still passes.
+
+The pinned boundary behaviour the criterion leans on: at the spread extreme
+(one claim per game) 28/79 proposer clears 25% and 27/79 does not; 33/72
+enactor clears 33.33% and 32/72 does not (Wilson cleared at 32 - the bootstrap
+is wider). The same 40/79 packed into 8 games does NOT clear, where spread
+does - the clustering sensitivity per-claim Wilson could not see.
+
+`docs/quorum-live3-criterion.md` (written the same day, before any live game)
+supersedes the never-launched live2 promise in writing: **live3 arm seeds
+9600..9619, record path `eval/records/quorum-live3.json`**. Neither live1 nor
+live2 criterion files were edited.
+
 ## Three changes that re-read an old record differently - moved from the queue 2026-08-28
 
 Verbatim from `queue.md`. Each one changes what a number recorded before it
