@@ -297,7 +297,8 @@ models, not of hidden roles - only the phase-to-key mapping is the game's.
 ## Run
 
 ```bash
-python -m unittest discover -s . -p "test_*.py"   # all tests, no dependencies
+python -m unittest discover -s . -p "test_*.py"   # unittest-style subset, no dependencies
+python -m pytest                                  # everything (requires pytest)
 
 python -m games.cabal.demo --theme plain           # sterile functional names
 python -m games.cabal.demo --rounds 2              # two discussion rounds per proposal
