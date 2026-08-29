@@ -1,14 +1,13 @@
 # parlor - the floor every agent reads
 
-Harness-neutral. Claude Code reaches this through `CLAUDE.md`; Codex, qwen, pi and
-anything else read it directly. Nothing here is specific to one harness, and
-nothing here should be, because the invariants below are what a cheap worker
-dispatched into this tree gets wrong by default. `GLOSSARY.md` is the companion:
-what the words mean. This file is what must stay true.
-
 Only non-default decisions live here. The module tree, the naming conventions and
 the dependency list are derivable by reading the code, and a context file that
 restates them is paid on every turn for nothing.
+
+`GLOSSARY.md` - what a word means in this repo, where the ordinary reading would
+produce something wrong: arm, control, void, rung, slice, fossil, the ask, the two
+channels. **Read it before writing a queue row, a commit message, or any prose
+that states a measurement.**
 
 ## The map
 

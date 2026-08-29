@@ -7,8 +7,7 @@ file, and adding it makes the file cost more than it saves.
 
 The formal vocabulary for what a seat may know - information set, percept,
 synchronous perfect recall, the chance move - is settled separately and cited by
-identifier in `docs/information-model.md`. This file is the working vocabulary:
-the words in commit messages, queue rows and measurement prose.
+identifier in `docs/information-model.md`.
 
 ## Measuring
 
