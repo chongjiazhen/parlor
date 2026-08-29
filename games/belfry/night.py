@@ -30,6 +30,18 @@ from games.belfry.roles import Role, Team
 from games.belfry.state import Grimoire
 
 
+class NoDerangement(Exception):
+    """The poisoned board-watch could not be drawn as a derangement.
+
+    A valid full-board derangement exists for every legal deal, so reaching this
+    is a code or rules bug and not information a player may reason from. It carries
+    the board keys and the allowed-edge counts per seat so the failure names what
+    made a perfect matching impossible - and it is raised rather than silently
+    falling back to a shuffle that could leave a fixed point (a fixed point is a
+    true association delivered to a seat with no entitlement to it).
+    """
+
+
 @dataclass(frozen=True)
 class Reveal:
     """One thing a seat was told, on the night it was told it.
@@ -212,6 +224,57 @@ def name_role(grim: Grimoire, rng: random.Random, viewer: int, night: int,
                   seats=(target,), role=role.key, truthful=truthful)
 
 
+def _derange_roles(grim: Grimoire, rng: random.Random) -> dict[int, Role]:
+    """A deranged board: every true role exactly once, each moved off its holder.
+
+    Builds the bipartite allowed-edge graph - seat ``i`` may receive source role
+    ``r`` iff ``r.key`` is neither what ``i`` holds nor what it registers as - and
+    finds a perfect matching by deterministic backtracking. Seats with the fewest
+    options are assigned first (they constrain the search), each candidate list is
+    shuffled only with ``rng`` so the same seed draws the same board, and a dead
+    end unwinds and retries. The table is small, so this is bounded and never
+    depends on luck.
+
+    A derangement exists for every legal deal; if the search somehow exhausts,
+    ``NoDerangement`` is raised with the board and the edge counts so the failure
+    names the bug rather than paraphrasing it as a player fact.
+    """
+    order = [s.index for s in grim.seats]
+    source = {s: grim.role_of(s).key for s in order}
+    allowed: dict[int, list[int]] = {
+        s: [t for t in order if source[t] not in _names(grim, s)]
+        for s in order
+    }
+    assignment: dict[int, int] = {}
+    used_roles: set[str] = set()
+
+    def search(seats: list[int]) -> bool:
+        if not seats:
+            return True
+        # The seat with the fewest candidates constrains the search most; pick it.
+        seat = min(seats, key=lambda s: len([t for t in allowed[s]
+                                             if t not in used_roles]))
+        rest = [s for s in seats if s != seat]
+        candidates = [t for t in allowed[seat]
+                      if source[t] not in used_roles]
+        rng.shuffle(candidates)
+        for target in candidates:
+            assignment[seat] = target
+            used_roles.add(source[target])
+            if search(rest):
+                return True
+            used_roles.remove(source[target])
+            del assignment[seat]
+        return False
+
+    if not search(order):
+        raise NoDerangement(
+            f"no derangement for board keys "
+            f"{tuple(grim.role_of(s).key for s in order)}; allowed edges per seat "
+            f"{[len(allowed[s]) for s in order]}")
+    return {s: grim.role_of(assignment[s]) for s in order}
+
+
 def watch_the_board(grim: Grimoire, rng: random.Random, viewer: int,
                     night: int) -> list[Reveal]:
     """Every seat's role at once, for the seat that sees the whole board.
@@ -224,19 +287,17 @@ def watch_the_board(grim: Grimoire, rng: random.Random, viewer: int,
     while that is true.
 
     Poisoned, it sees a DERANGEMENT - every seat paired with a role that is not
-    its own. A shuffle would leave fixed points, and a fixed point here is a true
-    association delivered to a seat with no entitlement to it, which is a gate #1
-    failure however it was produced.
+    its own, with the board's true roles each appearing exactly once. A shuffle
+    (or the per-seat ``_other_role`` draw) can leave fixed points or duplicate a
+    role, and a fixed point is a true association delivered to a seat with no
+    entitlement to it, which is a gate #1 failure however it was produced.
     """
     order = [s.index for s in grim.seats]
     if not grim.droisoned(viewer):
         return [Reveal(night, f"Seat {s} is the {grim.role_of(s).display}.",
                        seats=(s,), role=grim.role_of(s).key, truthful=True)
                 for s in order]
-    for _ in range(60):
-        shown = [_other_role(grim, rng, s) for s in order]
-        if all(shown[i].key not in _names(grim, s) for i, s in enumerate(order)):
-            return [Reveal(night, f"Seat {s} is the {shown[i].display}.",
-                           seats=(s,), role=shown[i].key, truthful=False)
-                    for i, s in enumerate(order)]
-    return [Reveal(night, "Tonight the board tells you nothing.", truthful=False)]
+    shown = _derange_roles(grim, rng)
+    return [Reveal(night, f"Seat {s} is the {shown[s].display}.",
+                   seats=(s,), role=shown[s].key, truthful=False)
+            for s in order]

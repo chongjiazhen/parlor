@@ -171,10 +171,59 @@ class TestTheBoardWatcher(unittest.TestCase):
         for seed in range(20):
             reveals = nightinfo.watch_the_board(grim, random.Random(seed), 2, 1)
             self.assertEqual(len(reveals), grim.n)
+            self.assertEqual(
+                sorted(r.role for r in reveals),
+                sorted(grim.role_of(s).key for s in range(grim.n)),
+                "a derangement must use each true role exactly once")
             for r in reveals:
                 seat = r.seats[0]
                 self.assertNotEqual(r.role, grim.role_of(seat).key)
+                self.assertNotEqual(r.role, grim.registers_as(seat).key)
                 self.assertIsNone(r.entitles(grim))
+
+    def test_poisoned_full_board_is_a_derangement_on_a_duplicate_susceptible_board(self):
+        """The full script deals more than one role the watcher could collide
+        with, and every true role must still land exactly once. Walk each seat as
+        the poisoned watcher in turn, across several deterministic seeds, and
+        require length, role multiset, and no ``_names`` collision every time."""
+        keys = [r.key for r in ROLES.values()]
+        for seed in range(6):
+            for viewer in range(len(keys)):
+                grim = board(keys, poisoned=(viewer,))
+                reveals = nightinfo.watch_the_board(grim, random.Random(seed),
+                                                    viewer, 1)
+                self.assertEqual(len(reveals), grim.n,
+                                 f"seed {seed} viewer {viewer}")
+                self.assertEqual(
+                    sorted(r.role for r in reveals),
+                    sorted(grim.role_of(s).key for s in range(grim.n)),
+                    f"seed {seed} viewer {viewer}: multiset drifted")
+                for r in reveals:
+                    seat = r.seats[0]
+                    self.assertNotIn(r.role, nightinfo._names(grim, seat),
+                                     f"seed {seed} viewer {viewer}: "
+                                     f"{r.role} on seat {seat}")
+
+    def test_the_derangement_is_deterministic_for_the_same_seed(self):
+        """A poisoned board-watch is a seeded decision like every other discretion
+        (see state.py's module docstring), so the same RNG seed must draw the same
+        bytes. Sourcing it from the per-seat ``_other_role`` stream is still seeded,
+        but the matching must not pull from any global or unseeded stream."""
+        a = nightinfo.watch_the_board(board(KEYS, poisoned=(2,)),
+                                      random.Random(11), 2, 1)
+        b = nightinfo.watch_the_board(board(KEYS, poisoned=(2,)),
+                                      random.Random(11), 2, 1)
+        self.assertEqual([r.text for r in a], [r.text for r in b])
+        self.assertEqual([r.role for r in a], [r.role for r in b])
+
+    def test_a_board_that_cannot_derange_raises_rather_than_lying(self):
+        """If no derangement exists (a code/rules bug, never a legal deal), the
+        watcher must be told an invariant error - "the board tells you nothing"
+        would be information a player could reason from, and a fixed point would
+        be a leak. A one-seat board has no legal derangement."""
+        grim = board(["fiend"], poisoned=(0,))
+        with self.assertRaises(nightinfo.NoDerangement):
+            nightinfo.watch_the_board(grim, random.Random(0), 0, 1)
 
 
 if __name__ == "__main__":
