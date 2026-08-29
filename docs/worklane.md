@@ -80,6 +80,32 @@ plausible-looking diff wrong: the payload must not change, or the seed invariant
 must hold, or an added field must be optional so the records already on disk stay
 readable.
 
+## Grade a dispatch on the diff. The acceptance gate cannot see an absent worker
+
+**A passing acceptance command over an empty diff is a FAILED dispatch, not a
+passing one.** The gate runs the suite against the worktree after the worker
+exits; a worker that never started leaves a pristine tree, and a pristine tree
+passes. So the success-shaped output of a dispatch that did nothing is
+indistinguishable, line for line, from one that did everything right - unless you
+read the `git status --porcelain` block the launcher prints underneath, which is
+the only part of the report that answers "did anything happen".
+
+Measured 2026-08-29, twice in a row, on the first two dispatches this repo ever
+made. Both printed `689 passed, 5 skipped ... accept exit: 0` and an empty
+porcelain block. Neither had touched a file:
+
+- the hosted tiers answered `401 Invalid API key` to an authenticated caller, on
+  three retries, all correctly tagged provider-error flake by the launcher;
+- the local route answered `400 request (38042 tokens) exceeds the available
+  context size (32768 tokens)` - the worker CLI's own scaffold does not fit the
+  armed model's context, so the size of the task prompt is irrelevant. A local
+  worker needs a model armed with room for the agent, not just for the job.
+
+The launcher was honest in both cases: it named the error and tagged the run. The
+trap is in the summary line, where an exit code and a green suite sit next to
+each other and read as a result. **A batch reviewed by exit code would have
+reported every slot green and merged nothing.**
+
 Three slots first, not eight. A batch that lands is worth more than a batch that
 needs rework, and the loop itself - dispatch, launcher-run acceptance, verdict -
 is unproven in this repo until one batch has been through it.
