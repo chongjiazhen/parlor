@@ -36,8 +36,9 @@ from core.console import ConsoleBackend, human_seats
 from games.changeling.audit import leak_audit
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                      play_game)
+from games.changeling.night import deal
 from games.changeling.referee import ChangelingReferee
-from games.changeling.roles import DEFAULT_THEME, THEMES
+from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES, Side
 
 #: See ``games.cabal.demo.BRIEFING`` - console furniture, never the payload.
 BRIEFING = """changeling in one screen. Five seats, eight cards: five dealt out, three left
@@ -123,6 +124,44 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
     return {s: policy(s) for s in range(ref.n)}
 
 
+def constrained_deal(setup, rng: random.Random, seat: int, key: str):
+    """Deal normally, then SWAP the wanted card into ``seat``.
+
+    **Why a swap and not a re-deal.** The obvious implementation reshuffles until
+    the wanted card lands - and every discarded shuffle is draws taken from the
+    seeded generator, so the same seed would produce a different night, different
+    policy choices, and a game that cannot be compared to its unconstrained twin.
+    Swapping after one deal keeps the stream at exactly the position an
+    unconstrained run leaves it, and preserves the deck multiset: no card is
+    created or destroyed, one pair changes hands.
+
+    It is still not a sample - the seat's card was chosen, not dealt - which is why
+    the record it produces is marked. What it costs is only that the OTHER seats'
+    holdings are a permutation of the seed's, not the seed's own.
+    """
+    dealt, centre = deal(setup, rng)
+    if dealt[seat].key != key:
+        donor = next((s for s, c in dealt.items() if c.key == key), None)
+        if donor is not None:
+            dealt[donor], dealt[seat] = dealt[seat], dealt[donor]
+        else:
+            slot = next((i for i, c in enumerate(centre) if c.key == key), None)
+            if slot is None:
+                raise SystemExit(
+                    f"no {key!r} was dealt or left in the centre this game, and "
+                    f"this deck holds "
+                    f"{sorted({c.key for c in setup.deck})}")
+            centre[slot], dealt[seat] = dealt[seat], centre[slot]
+    # The setup promises at least one pack card is SEATED, and seats reason from
+    # that promise. Swapping the last one into the centre would quietly retract it.
+    if setup.require_seated_pack and not any(c.side is Side.PACK
+                                             for c in dealt.values()):
+        raise SystemExit(
+            f"seating {key!r} at seat {seat} would move the only pack card out of "
+            "the seats, and the rules text every seat reads promises one is there")
+    return dealt, centre
+
+
 def main() -> None:
     # A CJK skin cannot be printed to the Windows console, whose default codec is
     # cp1252: the game runs, the render is correct, and the process dies at the
@@ -145,6 +184,10 @@ def main() -> None:
                     help="play ONE seat yourself: a seat number, or `random` "
                          "to draw one from --seed (a terminal is one channel, "
                          "so it seats one person)")
+    ap.add_argument("--human-role", metavar="KEY",
+                    help="UAT: deal this card key to the human seat, by swapping "
+                         "it in after the deal. Not a sample - the record is "
+                         "marked. Needs --human")
     ap.add_argument("--human-retries", type=int, default=99,
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
@@ -158,16 +201,30 @@ def main() -> None:
 
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     rng = random.Random(args.seed)
+    setup = SETUPS[5]
+    humans = human_seats(args.human, setup.n, args.seed)
+    dealt = centre = None
+    if args.human_role:
+        if not humans:
+            raise SystemExit("--human-role picks what the PERSON plays, so it "
+                             "needs --human to say which seat that is")
+        keys = sorted({c.key for c in setup.deck})
+        if args.human_role not in keys:
+            raise SystemExit(f"{args.human_role!r} is not in this deck. It holds "
+                             f"{keys}")
+        dealt, centre = constrained_deal(setup, random.Random(args.seed),
+                                         next(iter(humans)), args.human_role)
     ref = ChangelingReferee.new(5, seed=args.seed, theme=theme,
-                                discussion_rounds=args.rounds)
+                                discussion_rounds=args.rounds,
+                                dealt=dealt, centre=centre)
     policies = build_policies(ref, args, rng)
-    humans = human_seats(args.human, ref.n, args.seed)
 
     print(f"=== 5-seat changeling, theme='{theme.name}' ===\n")
     print(opening_view(ref, humans))
     print("\n--- play ---")
     try:
-        rec = play_game(ref, policies)      # gate #1 audited every turn, raises on a leak
+        rec = play_game(ref, policies, uat=bool(args.human_role) or None)
+        # gate #1 audited every turn, raises on a leak
     except KeyboardInterrupt:
         # A human seat ends its game this way (Ctrl-C, or a closed pipe). It is
         # an abandoned game, not a crash, and it has no record - so say that and

@@ -78,10 +78,14 @@ class ChangelingReferee:
     @classmethod
     def new(cls, n: int = 5, seed: int | None = None,
             theme: Theme = DEFAULT_THEME, discussion_rounds: int = 2,
-            choose=None) -> "ChangelingReferee":
+            choose=None, dealt=None, centre=None) -> "ChangelingReferee":
+        """``dealt``/``centre`` pin the deal, forwarded to ``resolve_night``. They
+        exist so a caller that needs a NAMED deal still comes through this one
+        constructor: the alternative is building a referee by hand, which silently
+        skips the public events and the referee log seeded below."""
         setup = SETUPS[n]
         rng = random.Random(seed)
-        night = resolve_night(setup, rng, choose)
+        night = resolve_night(setup, rng, choose, dealt=dealt, centre=centre)
         ref = cls(setup=setup, night=night, theme=theme,
                   discussion_rounds=discussion_rounds)
         ref.referee_log.extend(night.log)

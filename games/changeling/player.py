@@ -249,6 +249,10 @@ class GameRecord:
     trace_sample: list[str] = field(default_factory=list)
     error: str | None = None
     theme: str = ""
+    #: True when the deal was CONSTRAINED (``--human-role``), None otherwise. A
+    #: constrained deal is not a sample: the record says so in a field, because a
+    #: habit of remembering which runs were UAT is not a property of the record.
+    uat: bool | None = None
 
 
 def _record_decision(rec: GameRecord, policy, turn: int, seat: int, phase: str,
@@ -284,14 +288,14 @@ def _record_decision(rec: GameRecord, policy, turn: int, seat: int, phase: str,
 
 
 def play_game(ref: ChangelingReferee, policies: dict[int, object],
-              audit: bool = True) -> GameRecord:
+              audit: bool = True, uat: bool | None = None) -> GameRecord:
     """Run one night-and-day to a winner.
 
     Gate #1 is audited before every decision point and RAISES on a leak. It is on
     by default and stays that way: the property this arena exists to prove must not
     be something a caller can forget to switch on.
     """
-    rec = GameRecord(theme=ref.theme.name)
+    rec = GameRecord(theme=ref.theme.name, uat=uat)
     turn = 0
     try:
         if audit:
