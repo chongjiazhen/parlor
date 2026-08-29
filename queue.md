@@ -146,7 +146,7 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | entry condition | done when |
 |---|---|---|---|
-| **S12** | **The delegation lane for the 2026-08-29 block.** Its mechanical rows dispatched as parallel workers, one `git worktree` each. `docs/worklane.md` is the contract: what may be handed over, why the worktree is the containment rather than the route, and why the route follows data residency and GPU contention rather than job size. | plans written, worktrees exist - **met** | one batch has been through dispatch, launcher-run acceptance and a verdict, and its diffs are reviewed |
+| ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
 | **S8** | **Next rung or publish. TAKEN 2026-08-28 on the adjudicator branch and NOT closed** - the DURF fixture got its scorer and four runs, and its engine half (S11) is done. What is still open under this slice is the **6/7p package** and the **publish** option, both untouched, plus the adjudicator spike proper. Three things already decided for it: the faction heartbeat is not a fourth option but the small version of the adjudicator's hardest part (`docs/faction-heartbeat.md`); the TTRPG IP posture was answered 2026-08-28 and the answer ships (`docs/content-packs.md` - engine/content split, one example pack per rung whose terms permit it); and the design half of the adjudicator literature is in the tree (`docs/action-channel.md` - call vocabulary, the prompt seams, the two failures the kernel must catch). What stays off-repo is the competitive half. | S5 done, S1 called - **met** | the discretion number exists, VOID and dated; the engine does not |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
@@ -213,12 +213,6 @@ Instrument and integrity:
       match sees nothing; neither is a measurement. First person and present
       tense is the fix. **RE-BASELINES the 26/1580 count**, so it lands with the
       re-score, not on its own.
-- [ ] **`python -m unittest discover` claims "all tests" and collects 572 of
-      850.** `README.md:189` offers it as the no-dependency runner; every
-      pytest-fixture file imports cleanly and contributes ZERO tests, silently,
-      and still prints `OK`. **Done when** the number the README implies and the
-      number the command collects are the same number, by either of the two
-      routes - and they are not equivalent.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
@@ -316,29 +310,11 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
       and only the English is wrong. It is still model-facing text on the rung
       whose gate #3 read is 200 games, so **it re-baselines S5** and lands alone,
       saying so. The fix separates deal from dawn rather than adding a fact.
-- [ ] **`--human` has no random default and cannot pick a role.**
-      `core/console.py:88` takes an explicit index, so a person plays seat 0 every
-      time and sees one deal position forever. Wants `--human random` drawn from
-      `--seed` - a wall-clock draw voids the seed invariant exactly as a
-      heartbeat's would - and a UAT-only role pick that constrains the deal and
-      REFUSES when the deck cannot seat it. **A forced deal is not a sample**:
-      mark it in the record so it cannot enter a scored denominator by habit.
 - [ ] **An omniscient live view is a SECOND channel, not a wider first one.** It
       reads the referee (`holds`, the night log) and must never reach
       `prompt_for`, or gate #1's guarantee becomes a flag somebody can forget. The
       shape that cannot leak by construction: write the referee-side transcript
       incrementally and tail it from another terminal.
-- [ ] **An interactive game never says which model is answering.**
-      `complete_meta` returns the served upstream and `Decision.served_by` keeps
-      it; the runners print the census at the end and `doctor` answers before a
-      game, but the console does not. Print route/model/served-by at greet and on
-      a `model` command. Outside the payload, so no re-baseline.
-- [ ] **No decision records prompt size or token usage** - `Decision`
-      (`games/changeling/player.py:186`) carries refusals and `served_by` and
-      nothing about bytes. Additive to the record and invisible to the model, so
-      it costs no re-baseline, and it is the only way to price a payload edit in
-      anything but win rate. It is what makes `--briefing` and `--notebook`
-      measurable on COST as well as on outcome.
 - [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
       bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
       Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
@@ -350,15 +326,14 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
 - [ ] **Let a seat choose to speak rather than be scheduled to.** The same ask as
       the turn-taking row above - bidding, or random active-seat with an idle
       action - and it should be taken as ONE arm with it, not twice.
-- [ ] **"changeling feels random" - instrument it before fixing it.** Its gate #3
-      HOLDS over 200 games, so the felt randomness is either single-game variance
-      or a real gap between winning and deducing, and no current number separates
-      them. The folk reading the operator brought is that honest play collapses
-      the deduction and bluffing is what makes it a game, which is cabal's gate #3
-      claim on a different rung. Two cheap moves before any ML: a per-game
-      deduction score off records that already exist, and a changeling heuristic
-      rung on the control ladder (`docs/scripted-rungs-cabal.md` §0) to say what
-      un-random even looks like here.
+- [ ] **"changeling feels random" is now MEASURED, and the levers are the open
+      half.** `py -3 -m eval.deduction` (2026-08-30, S5 records): mean per-game
+      lift +0.169 [+0.085, +0.255], 39.5% of games vote BELOW their own chance
+      baseline, and 44.3% of village wins (35/79) turn on one vote. Gate #3 and
+      the complaint were never in conflict. Four levers and the order to try them:
+      `docs/open-arms.md` §"changeling feels random". A changeling heuristic rung
+      (`docs/scripted-rungs-cabal.md` §0) is still unbuilt and would say what
+      un-random looks like here.
 
 Spikes and unbuilt arms:
 

@@ -80,6 +80,16 @@ plausible-looking diff wrong: the payload must not change, or the seed invariant
 must hold, or an added field must be optional so the records already on disk stay
 readable.
 
+## A slice that touches a `demo.py` needs a smoke run in its accept chain
+
+A suite green over a program that cannot start is not a contradiction here:
+nothing in `core`, `games` or `eval` calls a demo's `main()`. Measured 2026-08-30
+- a dispatch moved one line above the assignment it depended on, so
+`py -3 -m games.changeling.demo` died `UnboundLocalError` on every invocation,
+and the accept gate reported exit 0 over 1132 passing tests and a real diff. Put
+`py -3 -m games.<rung>.demo --rounds 1` in the chain for any slice touching a
+driver; it costs a second and it is the only thing that runs the entry point.
+
 ## A worktree cannot run the tests that read `eval/records/`
 
 `eval/records/` is run output: durable, gitignored, and therefore **absent from
