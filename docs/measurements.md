@@ -212,6 +212,32 @@ a cloud model turns out to REFUSE to deceive, or you want games beside image gen
 **2026-08-27 (S6), the gate-#3b campaign** - `docs/gate3b-verdict.md`,
 `py -3 -m eval.s6_verdict`. 40 games, seeds 2000/3000, frozen at `2c0e2a3`, 1.35%
 fallback. **9/20 = 45.00%**, Wilson [25.82%, 65.79%] vs the derived bar 33.33% - NOT
+
+## Quorum slice-7 control - the once-per-event rebaseline, measured 2026-08-29
+
+Slice 7 (`88425ad fix(quorum): allow one claim per seat and event`) changed the
+claim population: a seat now files at most one claim per completed draw, where
+the live1 channel let it re-file the same assertion every discussion turn. Every
+quorum claim figure recorded before it is PRE-FIX and reads against a different
+denominator; `docs/quorum-live1-criterion.md` and `quorum-live1.json` are left
+untouched as the historical record. Seeds 5200..5599 are contaminated; this
+control ran seeds 7000..7399.
+
+`py -3 -m eval.run_quorum --games 400 --arm random --seed 7000 --rounds 1 --out
+eval/records/quorum-control-slice7.json`, at `88425ad`: 400/400 games, 0.00%
+fallback over 44441 decisions, no leak. **2562 claims over 400 games = 6.41
+claims/game (was 7.55 pre-fix)** - the drop IS the removed duplicates, not a
+policy change. The fixed instrument still lands on chance: proposer 325/1310
+honest (24.81%) Wilson [22.55%, 27.22%] vs the exact 25.00%; enactor 381/1252
+(30.43%) [27.95%, 33.04%] vs 33.33%. Both intervals contain their baseline; a
+control that cleared the bar would mean the bar is wrong.
+
+These numbers price `docs/quorum-live2-criterion.md` (written the same day,
+before any live game): a 20-game live2 arm offers ~66 proposer and ~63 enactor
+claim opportunities, and its Clause B keeps live1's per-claim Wilson form with
+the known correlated-claims caveat declared in the file - the per-game bootstrap
+replacement is slice 8 and is not pre-committed here.
+
 SHOWN, at exactly the 0.50 hunts/game the power table assumed. All three
 draw-dependent items came back negative there; **carry no run-length caveat
 forward.**
