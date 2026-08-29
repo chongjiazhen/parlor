@@ -18,7 +18,7 @@ Four triggers, any one of which flips the answer - the first is checked by
 2. A doc has **two plausible homes** and the answer matters - i.e. it is cited
    from two different reader contexts.
 3. A **second contributor**, or external readers after publishing. Folders are a
-   coordination tool; a single author with `CLAUDE.md` as the map does not need
+   coordination tool; a single author with `AGENTS.md` as the map does not need
    them, and someone who cannot ask does.
 4. **~40 files**, as a crude backstop on scanning a flat directory.
 

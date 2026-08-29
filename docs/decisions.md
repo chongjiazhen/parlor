@@ -3,13 +3,13 @@
 Moved out of `queue.md` 2026-08-28: settled, not queue, and verbatim except where
 an entry says otherwise. Nothing here is "below" or "above" anything in the queue -
 a pointer that survived the move as a deictic is a pointer at nothing.
-Code invariants are NOT here - they are in `CLAUDE.md`, which is always loaded,
+Code invariants are NOT here - they are in `AGENTS.md`, which every harness loads,
 and two copies of one rule is how the stale copy wins an argument.
 
 ## Decisions already locked
 
 **Publish hygiene stopped being a round, 2026-08-28**, and the pass is not owed
-again. What it decided is the project state; HOW the gate works is `CLAUDE.md` and
+again. What it decided is the project state; HOW the gate works is `AGENTS.md` and
 the script's own header, and is deliberately not restated here.
 - The mechanical half rides every commit, so nothing accrues between passes and
   the value is forward. It found zero violations in the tracked tree the day it
@@ -20,7 +20,10 @@ the script's own header, and is deliberately not restated here.
 
 **Code invariants moved to `CLAUDE.md`** - it is always loaded, these are not,
 and two copies of one rule is how the stale copy wins an argument. What stays
-here is project state: the route calls and what a run measured.
+here is project state: the route calls and what a run measured. **Amended
+2026-08-29: they moved again, to `AGENTS.md`, which `CLAUDE.md` imports** - a
+`codex`/`qwen`/`pi` worker dispatched into this tree reads that file and never
+opened the Claude one. The decision is unchanged; only the file holding it is.
 
 - **A run writes its own terminal marker; a wrapper cannot be trusted to outlive
   it.** `core/runlog.py`, used by both eval drivers: `PARLOR DONE rc=N

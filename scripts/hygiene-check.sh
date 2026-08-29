@@ -14,7 +14,7 @@
 #
 # What it CANNOT check is the judgement half - whether a new doc assesses a
 # third party, quotes unread work, or names an author where an identifier
-# would do. That is the scope invariant in CLAUDE.md and it is checked when a
+# would do. That is the scope invariant in AGENTS.md and it is checked when a
 # doc lands, by a reader.
 #
 # Usage:  sh scripts/hygiene-check.sh          # staged changes (what the hook runs)

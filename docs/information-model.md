@@ -8,7 +8,7 @@ claim without first learning parlor's dialect.
 
 **This file fixes the translation.** It says what each parlor artefact IS in the
 standard terms, and nothing about what anyone else's system is worth - that
-judgement is a working note and lives off-tree per `CLAUDE.md`. Sources are cited
+judgement is a working note and lives off-tree per `AGENTS.md`. Sources are cited
 by identifier, never by author, and the read depth behind each is at the foot.
 
 ## The five terms worth taking

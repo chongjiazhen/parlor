@@ -65,7 +65,7 @@ ARMS = ("random", "llm", "llm-village", "llm-pack")
 def build_backend(args, seed: int | None) -> Backend:
     """``seed`` is the GAME's seed, never the run's base.
 
-    `2cfe9d5` landed this invariant for cabal and CLAUDE.md records it: "Backend.seed
+    `2cfe9d5` landed this invariant for cabal and AGENTS.md records it: "Backend.seed
     rides in the payload and one_game hands each game the number it deals with."
     This lane shipped `seed=args.seed`, which pinned the sampler to one value for
     every game in a run while the deal advanced - so cross-game variation came only

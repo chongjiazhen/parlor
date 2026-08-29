@@ -5,7 +5,7 @@ record. They lived in `queue.md` until 2026-08-28, wrapped in the terminal
 narrative of the slices that produced them; the queue keeps a pointer and the
 reasoning lives here. Each one is here because it has already cost something.
 
-The code-level invariants these serve are in `CLAUDE.md` and are not repeated here.
+The code-level invariants these serve are in `AGENTS.md` and are not repeated here.
 
 ## Citing work nobody here has read
 
@@ -39,7 +39,7 @@ Read, four of them moved something live. A ledger that ranks by lane inherits
 whatever the lane was worth when it was written; re-check the ranking against the
 notes' own flags before trusting it.
 
-**Where this material lives is a separate decision** and it is in `CLAUDE.md`: the
+**Where this material lives is a separate decision** and it is in `AGENTS.md`: the
 tree describes parlor, and who else built something goes to the untracked working
 notes. `CLAUDE.local.md` has the path.
 
@@ -133,7 +133,7 @@ gate on any change that claims not to be a measured one.
 
 ## Reading a run
 
-**Judge a detached run by its own log or JSONL.** The invariant is in `CLAUDE.md`;
+**Judge a detached run by its own log or JSONL.** The invariant is in `AGENTS.md`;
 the two ways it has actually failed here are worth keeping:
 
 - **A proxy reads healthy while a run sleeps.** CPU seconds, Win32 IO counters and
@@ -158,7 +158,7 @@ stopped - at which point the re-baselining cost was zero, because there was no f
 cabal run to be incomparable with. Nothing in the queue recomputes itself.
 
 **A rule stated in two places loses to whichever copy the reader opens.** Code
-invariants live in `CLAUDE.md` and nowhere else, for that reason; this file states
+invariants live in `AGENTS.md` and nowhere else, for that reason; this file states
 none of them.
 
 
