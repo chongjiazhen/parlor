@@ -108,6 +108,19 @@ class TestChanceBaseline(unittest.TestCase):
         self.assertGreater(s["safe_lies_by_office"]["proposer"], 0)
 
 
+class TestScoredPopulation(unittest.TestCase):
+    def test_uniqueness_is_the_referees_job_and_the_scorer_trusts_it(self):
+        # Since slice 7 the referee refuses a second claim from one seat about
+        # one event, so the scorer's population carries at most one claim per
+        # (seat, event). The scorer itself does no deduplication: a duplicate
+        # reaching it is a referee bug, and is scored, not silently dropped.
+        class Rec:
+            draws = [draw([W, W, C], [W, C], C)]
+            claims = [claim("proposer", [C, W, W]),
+                      claim("proposer", [C, W, W])]
+        self.assertEqual(len(verdicts([Rec()])), 2)
+
+
 class TestScoreAndReport(unittest.TestCase):
     def test_an_arm_that_never_claims_says_so_rather_than_reporting_zero(self):
         lines = "\n".join(report(score([])))

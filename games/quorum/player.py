@@ -510,7 +510,7 @@ def play_game(
                 filed = ref.record_claim(seat, action["claim"])
                 rec.claims.append(ClaimEntry(
                     turn=rec.turns, seat=seat, office=filed.office,
-                    cards=list(filed.cards), event=len(rec.draws) - 1,
+                    cards=list(filed.cards), event=filed.event,
                     seat_side=ref.assignment[seat].side.value,
                     fell_back=provenance["fell_back"]))
         elif p is Phase.VOTE:

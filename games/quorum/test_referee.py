@@ -114,6 +114,79 @@ class TestCascade(unittest.TestCase):
             self.assertEqual((ref.charters, ref.writs), (0, 1))
 
 
+def complete_event(ref: QuorumReferee) -> None:
+    """Finish the draw in flight; the referee ends at the next NOMINATE."""
+    ref.proposer_discard(ref.proposer, 0)
+    ref.enactor_discard(ref.enactor, 0)
+    if ref.phase is Phase.POWER:
+        ref.use_power(ref.proposer, ref.legal_power_targets(ref.proposer)[0])
+    assert ref.phase is Phase.NOMINATE
+
+
+def vote_through(ref: QuorumReferee, votes: dict[int, bool]) -> None:
+    """Speak out the discussion, then cast the roll."""
+    while ref.phase is Phase.DISCUSS:
+        ref.speak(ref.next_speaker(), "holding.")
+    ref.vote(votes)
+
+
+def parked_after_first_event(seed: int = 3) -> QuorumReferee:
+    """One completed draw behind it, parked at the next round's DISCUSS."""
+    ref = QuorumReferee.new(5, seed=seed, discussion_rounds=1)
+    ref.nominate(ref.proposer, ref.eligible_nominees()[0])
+    vote_through(ref, carried(ref))
+    complete_event(ref)
+    ref.nominate(ref.proposer, ref.eligible_nominees()[0])
+    assert ref.phase is Phase.DISCUSS
+    return ref
+
+
+class TestOneClaimPerEvent(unittest.TestCase):
+    """A seat files at most one claim about one completed draw: no duplicate
+    public assertion, and no draw scored twice for the same seat."""
+
+    def test_a_second_claim_about_the_same_event_is_refused(self):
+        ref = parked_after_first_event()
+        seat = ref.last_proposer
+        cards = list(ref.recall[seat])
+        filed = ref.record_claim(seat, cards)
+        self.assertEqual(filed.event, 0)
+        with self.assertRaises(IllegalAction) as caught:
+            ref.record_claim(seat, cards)
+        self.assertIn("already claimed", str(caught.exception))
+
+    def test_standing_and_the_offer_disappear_once_claimed(self):
+        ref = parked_after_first_event()
+        seat = ref.last_proposer
+        self.assertEqual(ref.claimable_event(seat), ("proposer", 0))
+        self.assertIn('"claim"', ref.action_prompt(seat))
+        ref.record_claim(seat, list(ref.recall[seat]))
+        self.assertIsNone(ref.claimable_event(seat))
+        self.assertIsNone(ref.claimable(seat))
+        self.assertNotIn('"claim"', ref.action_prompt(seat))
+
+    def test_the_other_office_claims_the_same_event_independently(self):
+        ref = parked_after_first_event()
+        proposer, enactor = ref.last_proposer, ref.last_enactor
+        ref.record_claim(proposer, list(ref.recall[proposer]))
+        filed = ref.record_claim(enactor, list(ref.recall[enactor]))
+        self.assertEqual((filed.office, filed.event), ("enactor", 0))
+
+    def test_the_next_completed_event_reopens_the_former_seat(self):
+        ref = parked_after_first_event()
+        seat = ref.last_proposer
+        ref.record_claim(seat, list(ref.recall[seat]))
+        # finish this round: the vote fails, then the next government seats the
+        # SAME seat as enactor and completes another draw
+        vote_through(ref, rejected(ref))
+        ref.nominate(ref.proposer, seat)
+        vote_through(ref, carried(ref))
+        complete_event(ref)
+        self.assertEqual(ref.claimable_event(seat), ("enactor", 1))
+        filed = ref.record_claim(seat, list(ref.recall[seat]))
+        self.assertEqual(filed.event, 1)
+
+
 class TestVoting(unittest.TestCase):
     def test_a_partial_roll_is_refused(self):
         ref = QuorumReferee.new(5, seed=2, discussion_rounds=0)

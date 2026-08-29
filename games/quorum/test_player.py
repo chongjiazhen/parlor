@@ -262,6 +262,31 @@ class TestProvenance(unittest.TestCase):
             self.assertEqual(d.model_controlled, d.seat == model_seat)
 
 
+class TestClaimEventIndex(unittest.TestCase):
+    """The driver records the event the REFEREE returned, never a recomputed
+    ``len(rec.draws) - 1``, and one event is claimed at most once per seat."""
+
+    def test_the_entry_event_is_the_referees_and_never_repeats_a_seat(self):
+        filed = []
+
+        class Spying(QuorumReferee):
+            def record_claim(self, seat, cards):
+                rec = super().record_claim(seat, cards)
+                filed.append(rec)
+                return rec
+
+        ref = Spying.new(5, seed=7, discussion_rounds=1)
+        policies = {s: RandomPolicy(rng=random.Random(s), claim_rate=1.0)
+                    for s in ref.assignment}
+        rec = play_game(ref, policies)
+        self.assertEqual(rec.error, "")
+        self.assertTrue(rec.claims)
+        self.assertEqual([(c.seat, c.event) for c in rec.claims],
+                         [(r.seat, r.event) for r in filed])
+        keys = [(c.seat, c.event) for c in rec.claims]
+        self.assertEqual(len(keys), len(set(keys)))
+
+
 class TestConsoleSeat(unittest.TestCase):
     def _console(self, typed: str) -> ConsoleBackend:
         return ConsoleBackend(keys=ACTION_KEYS, stdin=io.StringIO(typed),

@@ -66,6 +66,9 @@ class ClaimRecord:
     seat: int
     office: str                  # "proposer" | "enactor"
     cards: tuple[str, ...]
+    #: which completed draw this claim is about. The referee hands it back at
+    #: filing time, so no caller ever recomputes it from a draw count.
+    event: int
 
 
 class Phase(Enum):
@@ -151,6 +154,16 @@ class QuorumReferee:
     #: for standing without the caller restating the flow. Both are cleared when an
     #: enactment happened with nobody holding cards.
     last_proposer: int | None = None
+
+    #: how many office-held draws have completed; the index of the last one is
+    #: ``events_completed - 1``. The unseen failure-track enactment dealt to
+    #: nobody, confers no standing, and does not count - keeping this index equal
+    #: to the driver's ``len(rec.draws) - 1``.
+    events_completed: int = 0
+    #: ``(seat, event_index)`` pairs that already filed a claim: one claim per
+    #: seat and event, so no draw is publicly asserted twice and none enters the
+    #: scored population twice for the same seat.
+    claimed_events: set[tuple[int, int]] = field(default_factory=set)
 
     discussion_rounds: int = 1
     speech_ptr: int = 0
@@ -499,17 +512,32 @@ class QuorumReferee:
 
     # ---- the claim channel -------------------------------------------------
 
-    def claimable(self, seat: int) -> str | None:
-        """Which office this seat held in the last completed event, or None.
+    def claimable_event(self, seat: int) -> tuple[str, int] | None:
+        """``(office, event_index)`` this seat may still claim about, or None.
 
         One rule, read by the referee, the policy precheck and the ask, so a seat
-        cannot be invited to make a claim the referee would refuse.
+        cannot be invited to make a claim the referee would refuse. Office and
+        event index come from this one source: standing derives from
+        ``last_proposer`` / ``last_enactor`` and the index is
+        ``events_completed - 1``, never a caller's recomputation. A seat that
+        already filed on this event has no standing left - one claim per seat
+        and event.
         """
         if self.last_proposer is not None and seat == self.last_proposer:
-            return "proposer"
-        if self.last_enactor is not None and seat == self.last_enactor:
-            return "enactor"
-        return None
+            office = "proposer"
+        elif self.last_enactor is not None and seat == self.last_enactor:
+            office = "enactor"
+        else:
+            return None
+        event = self.events_completed - 1
+        if (seat, event) in self.claimed_events:
+            return None
+        return office, event
+
+    def claimable(self, seat: int) -> str | None:
+        """Which office this seat may still claim about, or None."""
+        held = self.claimable_event(seat)
+        return held[0] if held is not None else None
 
     #: how many cards each office saw, and therefore how long its claim must be
     CLAIM_SIZE = {"proposer": 3, "enactor": 2}
@@ -517,6 +545,13 @@ class QuorumReferee:
     def validate_claim(self, seat: int, cards) -> None:
         office = self.claimable(seat)
         if office is None:
+            held_office = (
+                (self.last_proposer is not None and seat == self.last_proposer)
+                or (self.last_enactor is not None and seat == self.last_enactor))
+            if held_office:
+                raise IllegalAction(
+                    f"seat {seat} already claimed about event "
+                    f"{self.events_completed - 1}; one claim per seat and event")
             raise IllegalAction(
                 f"seat {seat} held no office in the last event, so it has nothing "
                 "to claim about")
@@ -538,9 +573,13 @@ class QuorumReferee:
         byte-identical, because no render reads the hand to write this line.
         """
         self.validate_claim(seat, cards)
-        office = self.claimable(seat)
+        office, event = self.claimable_event(seat)
+        # The standing is spent BEFORE the public line is written: the claim is
+        # accepted the moment it validates, and no path may leave the same event
+        # claimable by this seat twice.
+        self.claimed_events.add((seat, event))
         rec = ClaimRecord(turn=len(self.public_events), seat=seat, office=office,
-                          cards=tuple(c.value for c in cards))
+                          cards=tuple(c.value for c in cards), event=event)
         self.claims.append(rec)
         named = ", ".join(self.theme.card_names[c] for c in cards)
         self._event(f"Seat {seat} claims that as "
@@ -729,6 +768,10 @@ class QuorumReferee:
         # round's proposer claiming about a card no one drew.
         self.last_proposer = None if seen_by_nobody else self.proposer
         self.last_enactor = self.enactor
+        if not seen_by_nobody:
+            # only an office-held draw is a claimable event; the unseen top card
+            # dealt to nobody, so it neither confers standing nor moves the index
+            self.events_completed += 1
         if seen_by_nobody:
             self.recall = {}
         self.enactor = None
