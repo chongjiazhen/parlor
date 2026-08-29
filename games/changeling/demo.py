@@ -111,7 +111,8 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
         if seat in humans:
             return LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
                                                    briefing=BRIEFING,
-                                                   rules_path=RULES_PATH),
+                                                   rules_path=RULES_PATH,
+                                                   other_model=args.model if args.backend else None),
                              retries=args.human_retries,
                              fallback=RandomPolicy(rng))
         if backend is None:

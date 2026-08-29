@@ -78,7 +78,7 @@ Ctrl-C ends the game.
 #:
 #: A game whose ``ACTION_KEYS`` held one of these words would have it shadowed, so
 #: the disjointness is asserted in ``core/test_console.py`` rather than noticed.
-COMMANDS = ("?", "help", "rules")
+COMMANDS = ("?", "help", "rules", "model")
 
 
 class TooManyHumans(SystemExit):
@@ -159,6 +159,9 @@ class ConsoleBackend:
     #: Wears the attribute an eval driver reads off a Backend, so a report that
     #: prints the model name does not crash on a human seat.
     model: str = HUMAN
+    #: The model ID used for the non-human seats, for display to the human player.
+    #: Does not affect the human seat's served-by value (which remains ``model``).
+    other_model: str | None = None
     seed: int | None = None
     _greeted: bool = field(default=False, repr=False)
 
@@ -227,6 +230,7 @@ class ConsoleBackend:
         if self.briefing:
             self._say(self.briefing.rstrip())
             self._say()
+        self._say(self._table_model())
 
     def _command(self, word: str, context: str) -> None:
         """Answer a command and return to the same ask. Nothing here is recorded,
@@ -237,6 +241,15 @@ class ConsoleBackend:
             self._greet()
         elif word == "rules":
             self._say(self._rules())
+        elif word == "model":
+            self._say(self._table_model())
+
+    def _table_model(self) -> str:
+        """Who is answering in the OTHER seats. Console furniture, never payload -
+        and deliberately not ``self.model``, which is this seat's own served-by
+        identity (``HUMAN``) and rides in the record."""
+        return ("The other seats are served by: "
+                f"{self.other_model if self.other_model is not None else 'unknown'}")
 
     def _rules(self) -> str:
         """This game's rules, or a straight account of why they are not here.

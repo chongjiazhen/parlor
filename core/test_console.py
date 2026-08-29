@@ -249,6 +249,53 @@ def test_a_move_wins_the_word_if_a_game_ever_takes_it():
     assert json.loads(reply) == {"rules": ""}
 
 
+def test_other_model_display_known():
+    # Test that when other_model is set, the greet line shows it.
+    backend = ConsoleBackend(keys=("vote",), other_model="test-model")
+    backend.stdin = io.StringIO("vote y\n")
+    backend.stdout = io.StringIO()
+    backend.complete_meta("view")
+    out = backend.stdout.getvalue()
+    assert "The other seats are served by: test-model" in out
+
+
+def test_other_model_display_unknown():
+    # Test that when other_model is None, the greet line shows unknown.
+    backend = ConsoleBackend(keys=("vote",))
+    backend.stdin = io.StringIO("vote y\n")
+    backend.stdout = io.StringIO()
+    backend.complete_meta("view")
+    out = backend.stdout.getvalue()
+    assert "The other seats are served by: unknown" in out
+
+
+def test_model_command_does_not_consume_retry():
+    # The model command should not count as a move and not end the turn.
+    backend = ConsoleBackend(keys=("vote",), other_model="test-model")
+    # ONE stream. The command is answered and the SAME ask is put again, so the
+    # move has to be waiting on the next line. Two separate streams exhaust stdin
+    # mid-ask, which surfaces as "input closed" rather than as a result - and
+    # that crash is what hid the dead `model` command from this very test.
+    backend.stdin = io.StringIO("vote a\nmodel\nvote y\n")
+    backend.stdout = io.StringIO()
+    backend.complete_meta("view")            # spends the greeting
+    backend.stdout = io.StringIO()           # so the next line can only be the command
+    reply, served = backend.complete_meta("view")
+    # An unregistered word is not a command: it is an unparsed move, refused, and
+    # the seat is asked again - which reaches the same `vote y` and passes every
+    # assertion below. Only the printed line separates a live command from a dead
+    # one, and this is the assertion that fails when `model` leaves COMMANDS.
+    assert "test-model" in backend.stdout.getvalue()
+    assert json.loads(reply) == {"vote": "y"}
+    assert served == HUMAN
+
+
+def test_model_field_still_human():
+    # Ensure that the model field (for served-by) is still HUMAN by default.
+    backend = ConsoleBackend(keys=("vote",))
+    assert backend.model == HUMAN
+
+
 def test_the_briefing_never_enters_the_seats_view():
     """Gate #1's neighbour. The briefing is console furniture: it is printed
     around the view, never into it, so the bytes the referee rendered are what a
