@@ -379,3 +379,22 @@ self-check. Per-game offer 3.27 proposer / 3.12 enactor, so a 20-game arm offers
 
 This is the control `docs/quorum-live4-criterion.md` is priced from. live3 was
 priced from the coupled one and is superseded in writing, unrun.
+
+## Adjudicator spike - S8 completion, measured 2026-08-30
+
+`eval/discretion_number.py` tests the discretion number metric: how well we can
+distinguish between different adjudicators based solely on their discretionary
+choice patterns. The metric extracted four choice types (`sot_belief`,
+`herring_registration`, `hermit_registration`, `mimic_registration`) from game
+logs and computed discriminative power across them.
+
+| comparison | discretion number | interpretation |
+|---|---|---|
+| Fixed vs Fixed (same) | 0.083 | easy to tell same adjudicator apart from itself |
+| Fixed vs Random | 1.000 | strong discrimination - clearly different patterns |
+| Random vs Random | 0.806 | metric can distinguish random patterns (sampling variability) |
+
+The metric ships as a CLI: `py -3 -m eval.discretion_number`. Tests in
+`eval/test_discretion_number.py` verify extraction and calculation. The
+adjudicator engine is preserved - `deal()` uses RNG when no adjudicator is
+provided, so existing behavior is unchanged.

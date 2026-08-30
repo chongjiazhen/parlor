@@ -50,7 +50,7 @@ from games.belfry.night import Reveal
 from games.belfry.roles import (DISTRIBUTION, FIRST_NIGHT, OTHER_NIGHT,
                                 ROLES, Align, Script, Team)
 from games.belfry.roles import DEFAULT_SCRIPT
-from games.belfry.state import Grimoire, deal
+from games.belfry.state import Adjudicator, Grimoire, deal
 
 
 class Phase(Enum):
@@ -201,9 +201,9 @@ class BelfryReferee:
     @classmethod
     def new(cls, n: int = 7, seed: int | None = None,
             script: Script = DEFAULT_SCRIPT, discussion_rounds: int = 1,
-            max_days: int = 12) -> "BelfryReferee":
+            max_days: int = 12, adjudicator: state.Adjudicator | None = None) -> "BelfryReferee":
         rng = random.Random(seed)
-        grim = deal(n, script, rng)
+        grim = deal(n, script, rng, adjudicator)
         ref = cls(grim=grim, rng=rng, discussion_rounds=discussion_rounds,
                   max_days=max_days)
         ref.knowledge = {s: [] for s in range(n)}
