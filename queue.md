@@ -229,9 +229,11 @@ Instrument and integrity:
       campaign**, never retrofitted to S6's records - that would be the peeking
       it exists to prevent.
 - [ ] **Stratify cloud results by served upstream instead of pooling them.**
-      Pooling computes a Wilson interval over an ill-defined denominator. Cells
-      accumulate ACROSS runs, which retires the "unlike the cloud's 30-upstream
-      mix" asymmetry.
+       Pooling computes a Wilson interval over an ill-defined denominator. Cells
+       accumulate ACROSS runs, which retires the "unlike the cloud's 30-upstream
+       mix" asymmetry.
+- [review-merge owed] **the \`unittest discover\` shortfall: a shipped doc currently claims a runner collects 850 tests when it collects 572; every later "all tests pass" claim inherits that**
+- [review-merge owed] **Slot C: `--human random` allows varying human seat position** - adds `--human random` to draw seat from `--seed`, preventing always playing seat 0 and enabling full position sampling while preserving reproducibility
 
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
