@@ -13,6 +13,7 @@ eval/records/
 *.local.md
 
 /.scratch/
+/.worktrees/
 
 .claude/settings.local.json
 
