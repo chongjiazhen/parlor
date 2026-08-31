@@ -7,6 +7,8 @@ import random
 import unittest
 
 from games.belfry.adjudicator import ModelAdjudicator
+from games.belfry.player import RandomPolicy, play_game
+from games.belfry.referee import BelfryReferee
 from games.belfry.roles import FULL, ROLES
 from games.belfry.state import deal
 
@@ -31,6 +33,28 @@ class FirstOptionBackend:
     def complete_meta(self, context: str) -> tuple[str, str]:
         self.contexts.append(context)
         return json.dumps({"choice": json.loads(context)["options"][0]}), "fake-upstream"
+
+
+class PromptCapturingRandomPolicy(RandomPolicy):
+    """Legal noise that records the exact player payload before answering it."""
+
+    def __init__(self, rng: random.Random):
+        super().__init__(rng)
+        self.payloads: list[str] = []
+
+    def act(self, ref: BelfryReferee, seat: int) -> dict:
+        self.payloads.append(ref.prompt_for(seat))
+        return super().act(ref, seat)
+
+
+def referee_with_fixed_model_adjudicator() -> BelfryReferee:
+    """A deal whose legal setup choices come from a deterministic fake model."""
+    return BelfryReferee.new(
+        11,
+        seed=42,
+        script=FULL,
+        adjudicator=ModelAdjudicator(FirstOptionBackend(), random.Random(9)),
+    )
 
 
 class TestModelAdjudicator(unittest.TestCase):
@@ -93,6 +117,20 @@ class TestModelAdjudicator(unittest.TestCase):
         self.assertEqual([event.upstream for event in grim.adjudicator_events],
                          ["fake-upstream", "fake-upstream"])
         self.assertNotIn("fake-upstream", "\n".join(grim.log))
+
+    def test_model_choice_provenance_never_reaches_player_prompt(self):
+        ref = referee_with_fixed_model_adjudicator()
+        policy = PromptCapturingRandomPolicy(random.Random(11))
+
+        rec = play_game(ref, {seat: policy for seat in range(ref.n)})
+
+        self.assertIsNone(rec.error)
+        self.assertTrue(policy.payloads)
+        self.assertTrue(ref.grim.adjudicator_events)
+        self.assertTrue(all("adjudicator" not in payload.lower()
+                            for payload in policy.payloads))
+        self.assertTrue(all("fake-upstream" not in payload
+                            for payload in policy.payloads))
 
 
 if __name__ == "__main__":
