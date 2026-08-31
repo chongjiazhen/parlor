@@ -49,19 +49,40 @@ from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
 from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import wilson
+from games.belfry.adjudicator import ModelAdjudicator
 from games.belfry.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
 
 ARMS = ("random", "llm", "llm-good", "llm-evil")
 
-ADJUDICATOR_ARMS = ("random",)
+ADJUDICATOR_ARMS = ("random", "model")
+
+ADJUDICATOR_SYSTEM_PROMPT = (
+    "You are the referee for a hidden-role game. Choose exactly one option from "
+    "the offered list. Reply as one JSON object with only the key `choice`.")
 
 
-def build_adjudicator(args, seed: int | None) -> None:
-    """Keep random discretion on the referee's seeded deal RNG."""
-    del args, seed
-    return None
+def build_adjudicator_backend(args, seed: int | None) -> Backend:
+    """Build the setup referee independently of the players at the table."""
+    return Backend(
+        endpoint=ENDPOINTS[args.adjudicator_backend],
+        model=args.adjudicator_model,
+        api_key=api_key_from_env(),
+        system_prompt=ADJUDICATOR_SYSTEM_PROMPT,
+        temperature=0.0,
+        timeout=args.timeout,
+        max_tokens=args.max_tokens,
+        seed=seed,
+        enable_thinking=False,
+    )
+
+
+def build_adjudicator(args, seed: int | None) -> ModelAdjudicator | None:
+    """Keep random discretion on the referee's deal RNG, or model it separately."""
+    if args.adjudicator == "random":
+        return None
+    return ModelAdjudicator(build_adjudicator_backend(args, seed), random.Random(seed))
 
 STATE = RunState()
 
@@ -238,6 +259,28 @@ def score(records: list[GameRecord]) -> dict:
                                / len(all_votes) if all_votes else None),
         "model_votes": len(votes),
         "integrity": integrity.summarise(played),
+        "adjudicator_integrity": _adjudicator_integrity(played),
+    }
+
+
+def _adjudicator_integrity(records: list[GameRecord]) -> dict | None:
+    """Aggregate referee provenance without treating it as player behavior."""
+    rows = [row for r in records
+            if (row := getattr(r, "adjudicator", None)) is not None]
+    if not rows:
+        return None
+    calls = sum(row["calls"] for row in rows)
+    fallbacks = sum(row["fallbacks"] for row in rows)
+    recovered = sum(row["recovered"] for row in rows)
+    upstreams: Counter = Counter()
+    for row in rows:
+        upstreams.update(row["upstreams"])
+    return {
+        "calls": calls,
+        "fallbacks": fallbacks,
+        "fallback_rate": fallbacks / calls if calls else 0.0,
+        "recovered": recovered,
+        "upstreams": dict(upstreams.most_common()),
     }
 
 
@@ -273,6 +316,13 @@ def report(s: dict, args, elapsed: float) -> str:
         out.append(f"  VOID: above {integrity.VOID_BAR:.0%}, so every figure below "
                    f"is the random policy wearing a model's name. Report the rate, "
                    f"not the results.")
+    adjudicator_integrity = s["adjudicator_integrity"]
+    if adjudicator_integrity is not None:
+        out.append(
+            "adjudicator integrity  "
+            f"{adjudicator_integrity['fallbacks']}/{adjudicator_integrity['calls']} "
+            "setup choices fell back to random "
+            f"({adjudicator_integrity['fallback_rate']:.2%} caused)")
     vote_rate = s["vote_fallback_rate"]
     if vote_rate is not None:
         out.append(f"  vote fallback {s['vote_fallbacks']}/{s['vote_decisions']} "
@@ -374,16 +424,25 @@ def main() -> None:
                          "not pinned does not look reproducible in the records")
     ap.add_argument("--adjudicator", choices=ADJUDICATOR_ARMS, default="random",
                     help="discretion source (random uses referee deal RNG)")
+    ap.add_argument("--adjudicator-backend", choices=list(ENDPOINTS))
+    ap.add_argument("--adjudicator-model")
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
 
     if args.arm != "random" and not args.backend:
         raise SystemExit(f"--arm {args.arm} needs --backend")
+    if args.adjudicator == "model":
+        if not args.adjudicator_backend:
+            raise SystemExit("--adjudicator model needs --adjudicator-backend")
+        if not args.adjudicator_model:
+            raise SystemExit("--adjudicator model needs --adjudicator-model")
     # Refuse at the DOOR, never at game 200. An off-box route with no key does not
     # crash - it 401s every attempt, falls back on every decision, and reports a
     # number the scorer then voids after the GPU is spent.
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+    if args.adjudicator == "model":
+        require_key(ENDPOINTS[args.adjudicator_backend], api_key_from_env())
 
     STATE.requested = args.games
     started = time.time()

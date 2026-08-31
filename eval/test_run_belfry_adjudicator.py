@@ -4,8 +4,19 @@ from __future__ import annotations
 
 import argparse
 import unittest
+from unittest import mock
 
-from eval.run_belfry import build_adjudicator, main  # Import to trigger argument parsing
+from eval.run_belfry import build_adjudicator, main
+from games.belfry.adjudicator import ModelAdjudicator
+
+
+def make_args(**over) -> argparse.Namespace:
+    base = dict(adjudicator="model", adjudicator_backend="local",
+                adjudicator_model="judge-model", model="player-model",
+                temperature=0.85, register="character", timeout=120.0,
+                max_tokens=1536, no_thinking=False)
+    base.update(over)
+    return argparse.Namespace(**base)
 
 
 class TestRunBelfryAdjudicator(unittest.TestCase):
@@ -13,59 +24,40 @@ class TestRunBelfryAdjudicator(unittest.TestCase):
 
     def test_adjudicator_argument_exists(self):
         """Test that --adjudicator argument is available."""
-        # This will fail initially since we haven't implemented it yet
-        try:
-            # Try to parse --adjudicator argument
-            import sys
-            original_argv = sys.argv
-            sys.argv = ['run_belfry.py', '--adjudicator', 'random']
-            try:
-                main()
-            except SystemExit as e:
-                # main() calls sys.exit() when done, which is expected
-                if e.code != 0:
-                    raise  # Re-raise if it's an error exit
-            finally:
-                sys.argv = original_argv
-            self.assertTrue(True)  # If we get here without error, the argument exists
-        except SystemExit as e:
-            if e.code != 0:
-                self.fail("--adjudicator argument not recognized or caused error")
-            # If exit code is 0, it's okay - means parsing succeeded and main exited normally
-        except Exception as e:
-            # Other exceptions might occur (like missing backend for llm), but that's okay
-            # for the random adjudicator test
-            if "needs --backend" not in str(e):
-                raise  # Re-raise if it's not the expected backend error
+        with mock.patch("sys.argv", ["run_belfry.py", "--games", "0",
+                                      "--adjudicator", "random"]), \
+             mock.patch("builtins.print"):
+            main()
 
     def test_adjudicator_choices(self):
         """Test that valid adjudicator choices are accepted."""
-        # Test the choices we expect to implement
-        valid_choices = ['random']  # Start with random since llm needs backend
-        for choice in valid_choices:
+        for choice, extra in (("random", []),
+                              ("model", ["--adjudicator-backend", "local",
+                                         "--adjudicator-model", "judge-model"])):
             with self.subTest(choice=choice):
-                try:
-                    import sys
-                    original_argv = sys.argv
-                    sys.argv = ['run_belfry.py', '--adjudicator', choice, '--games', '1']
-                    try:
-                        main()
-                    except SystemExit as e:
-                        # main() calls sys.exit() when done
-                        if e.code != 0 and "needs --backend" not in str(e):
-                            raise  # Re-raise if it's an unexpected error
-                    finally:
-                        sys.argv = original_argv
-                except SystemExit as e:
-                    if e.code != 0 and "needs --backend" not in str(e):
-                        self.fail(f"--adjudicator {choice} not recognized or caused unexpected error")
-                except Exception as e:
-                    if "needs --backend" not in str(e):
-                        raise  # Re-raise if it's not the expected backend error
+                with mock.patch("sys.argv", ["run_belfry.py", "--games", "0",
+                                              "--adjudicator", choice, *extra]), \
+                     mock.patch("builtins.print"):
+                    main()
 
     def test_random_default_uses_deal_rng(self):
         args = argparse.Namespace(adjudicator="random")
         self.assertIsNone(build_adjudicator(args, 1000))
+
+    def test_model_adjudicator_uses_game_seed_not_run_seed(self):
+        """Changing the game index must change the adjudicator sampler too."""
+        args = make_args()
+        first = build_adjudicator(args, 6100)
+        second = build_adjudicator(args, 6101)
+        self.assertIsInstance(first, ModelAdjudicator)
+        self.assertEqual(first.backend.seed, 6100)
+        self.assertEqual(second.backend.seed, 6101)
+
+    def test_model_adjudicator_has_its_own_hard_temperature(self):
+        """Player exploration must not make setup discretion nondeterministic."""
+        adjudicator = build_adjudicator(make_args(temperature=0.85), 6100)
+        self.assertEqual(adjudicator.backend.temperature, 0.0)
+        self.assertEqual(adjudicator.backend.model, "judge-model")
 
 
 if __name__ == '__main__':
