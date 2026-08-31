@@ -210,6 +210,24 @@ class TestSeatSeesBeliefNotTruth(unittest.TestCase):
             self.assertEqual(view.own_role, believed)
             self.assertNotEqual(view.own_role, held)
 
+    def test_self_line_names_the_dealt_card_not_post_night_belief(self):
+        """A night reveal may replace belief, but cannot rewrite what was dealt."""
+        for seed in range(200):
+            ref = ChangelingReferee.new(5, seed=seed)
+            for seat in range(ref.n):
+                dealt = ref.night.dealt[seat]
+                believed = ref.believes(seat)
+                if dealt.key == believed.key:
+                    continue
+                line = ref.self_line(seat)
+                self.assertEqual(
+                    line,
+                    f"You are seat {seat}. You were dealt the "
+                    f"{ref.theme.card_names[dealt.key]} "
+                    f"({ref.theme.side_names[dealt.side]}).")
+                return
+        self.fail("no seat learned a post-night self-belief in 200 deals")
+
     def test_a_diverged_seat_is_told_a_side_it_may_not_win_with(self):
         for seat in self.diverged:
             if self.ref.believes(seat).side is not self.ref.holds(seat).side:

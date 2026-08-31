@@ -263,9 +263,10 @@ class ChangelingReferee:
         """What the referee asserts about this seat TO this seat. One line, so the
         self-leak has exactly one place it can live and the audit has exactly one
         place to look."""
-        v = self.seat_view(seat)
-        return (f"You are seat {v.seat}. You went to sleep as the {v.own_role} "
-                f"({v.own_team}).")
+        dealt = self.night.dealt[seat]
+        return (f"You are seat {seat}. You were dealt the "
+                f"{self.theme.card_names[dealt.key]} "
+                f"({self.theme.side_names[dealt.side]}).")
 
     def seat_lines(self, seat: int, include_speech: bool = True) -> str:
         """Everything the referee put in front of THIS seat and not the others: its

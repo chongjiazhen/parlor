@@ -148,7 +148,6 @@ should launch first and spend the wait on a CPU slice.
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
 | **S13** | **Claim-shaped self-outing re-score. READY 2026-08-31** - replace the over-broad theme-name match, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
-| **S14** | **Changeling deal-versus-dawn wording. READY 2026-08-31** - make the sleep claim name dealt state, not post-night belief. | no changeling arm in flight | isolated model-facing edit, audit test, and S5 marked pre-change |
 | **S15** | **Cabal solver-seat arm. READY 2026-08-31** - make the existing mechanical reader a player policy without widening what it can inspect. | S14 closed and no cabal arm in flight | policy, phase tests, and demo smoke run; no measurement claimed |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
@@ -283,16 +282,6 @@ Human-seat play - triaged from one operator's hand-played session, 2026-08-29.
 Nothing here is measured; the code claims are read from the files cited. Which
 of them may be handed to a worker is S12 and `docs/worklane.md`.
 
-- [ ] **"You went to sleep as the X" is rendered over the seat's POST-night
-      belief, and for a thief or a waker that sentence is false.**
-      `games/changeling/referee.py:239` prints `believes(seat)`, which
-      `night.py` REPLACES on TAKE (:248) and WAKE (:270). Observed: a seat told it
-      slept as the Werewolf and then handed "Seat 4 held the Thief" - it was the
-      Thief, it robbed seat 4, and the two lines cannot be reconciled by any
-      reader. **Not a leak** - every reveal was entitled, so the audit is right
-      and only the English is wrong. It is still model-facing text on the rung
-      whose gate #3 read is 200 games, so **it re-baselines S5** and lands alone,
-      saying so. The fix separates deal from dawn rather than adding a fact.
 - [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
       bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
       Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,

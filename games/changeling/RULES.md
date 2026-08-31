@@ -475,7 +475,11 @@ games; on this rung the N is the cheap part.
 is a pre-S10 estimate and understates it for the same reason the 14 does. The read
 is the section immediately below.
 
-## S2 read - 200 games, gate #3 HOLDS (2026-08-28)
+## S2 read - 200 games, gate #3 HOLDS (2026-08-28, pre-S14 wording)
+
+**This is pre-S14 evidence.** S14 changed the model-facing self-line from a
+post-night belief phrased as a sleep-state claim to the card actually dealt. The
+recorded result remains historical evidence, not a verdict on post-S14 wording.
 
 **The run.** `s2`, `--arm llm`, 200 games, `--seed 4000`, `--no-thinking`,
 `qwen36-35b-a3b-iq3` local and 100% of the attribution, `PARLOR DONE rc=0

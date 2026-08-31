@@ -197,11 +197,12 @@ py -3 -m eval.run_belfry --games 300 --arm random --seats 9  --script full   --r
 py -3 -m eval.run_belfry --games 200 --arm random --seats 10 --script full   --rounds 1 --seed 9400 --out eval/records/belfry-control-10full.json
 ```
 
-## Changeling per-game deduction - S5 record re-read, 2026-08-30
+## Changeling per-game deduction - S5 record re-read, 2026-08-30 (pre-S14 wording)
 
 Rendered evidence: [`transcripts/changeling-s5-per-game-deduction.md`](../transcripts/changeling-s5-per-game-deduction.md).
 `py -3 -m eval.deduction` re-read S5's 200 completed games with no GPU or new
-play. The S5 record's fallback rate was **0.40%**, below the 10% void bar. The
+play. This is historical evidence, not a post-S14 verdict: S14 changed a
+model-facing self-line. The S5 record's fallback rate was **0.40%**, below the 10% void bar. The
 instrument first replays each recorded winner from its votes, including the
 tie-accuses-all rule; `py -3 -m unittest eval.test_deduction -v` is its control.
 
