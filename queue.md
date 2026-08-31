@@ -47,7 +47,7 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
 | **belfry** | done, scoring lane, control instrument, and first sampled-player arm read | **never** | setup-only referee-seat arm is frozen, unrun, and separately routed; `docs/belfry-adjudicator-criterion.md` binds its control/model recipe |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
-| **adjudicator** | not built | n/a | the spike itself (S8) - a model in the referee's seat for the discretionary choices only, which belfry has already isolated and logged |
+| **adjudicator** | built, unmeasured | referee only | S8's belfry setup-only model arm: discretionary choices only, private provenance, fail-closed launcher, and a committed criterion; control/model arms remain unrun |
 
 ## Gates already called
 
@@ -147,7 +147,7 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | entry condition | done when |
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has a setup-only model adjudicator, private provenance, a committed criterion, and a frozen dual-arm recipe. Both arms are unrun; the 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
+| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has a setup-only model adjudicator, private provenance, a committed criterion, and a fail-closed frozen dual-arm recipe. Both arms are unrun; the 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
@@ -300,11 +300,6 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
       and only the English is wrong. It is still model-facing text on the rung
       whose gate #3 read is 200 games, so **it re-baselines S5** and lands alone,
       saying so. The fix separates deal from dawn rather than adding a fact.
-- [ ] **An omniscient live view is a SECOND channel, not a wider first one.** It
-      reads the referee (`holds`, the night log) and must never reach
-      `prompt_for`, or gate #1's guarantee becomes a flag somebody can forget. The
-      shape that cannot leak by construction: write the referee-side transcript
-      incrementally and tail it from another terminal.
 - [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
       bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
       Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
