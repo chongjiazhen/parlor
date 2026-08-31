@@ -355,9 +355,9 @@ class TestPerDecisionAttribution(unittest.TestCase):
         del rec
         self.assertEqual(served, ["up-a", "up-b", "up-a", "up-b", "up-a"])
 
-    def test_a_fallback_names_nobody(self):
-        """The random policy answered it, not a model. Attributing it to whichever
-        upstream last succeeded would put a random move on a model's record."""
+    def test_a_fallback_keeps_the_upstream_that_refused_it(self):
+        """A random fallback must stay marked as one, but the served upstream is
+        still needed to price that model's fallback rate."""
         backend = TestUpstreamAttribution.Rotating("{}", ["up-a"])   # never legal
         policy = LLMPolicy(backend=backend, retries=0,
                            fallback=RandomPolicy(rng=random.Random(1)))
@@ -365,7 +365,7 @@ class TestPerDecisionAttribution(unittest.TestCase):
         rec = play_game(ref, {s: policy for s in ref.assignment})
         self.assertTrue(rec.decision_log)
         self.assertTrue(all(d.fell_back for d in rec.decision_log))
-        self.assertTrue(all(d.served_by == "" for d in rec.decision_log))
+        self.assertTrue(all(d.served_by == "up-a" for d in rec.decision_log))
 
     def test_the_log_carries_it_through_a_real_game(self):
         backend = TestUpstreamAttribution.Rotating('{"say": "hello"}', ["up-a"])
@@ -376,6 +376,16 @@ class TestPerDecisionAttribution(unittest.TestCase):
         spoke = [d for d in rec.decision_log if d.phase == "discuss" and not d.fell_back]
         self.assertTrue(spoke)
         self.assertTrue(all(d.served_by == "up-a" for d in spoke))
+
+    def test_vote_record_turn_joins_the_decision_that_made_it(self):
+        """Upstream scoring joins votes on this key; seat alone repeats each turn."""
+        ref = fixed_ref(discussion_rounds=0)
+        rec = play_game(ref, {s: RandomPolicy(random.Random(s))
+                              for s in ref.assignment})
+        vote_keys = {(v.turn, v.seat) for v in rec.votes}
+        decision_keys = {(d.turn, d.seat) for d in rec.decision_log
+                         if d.phase == "vote"}
+        self.assertEqual(vote_keys, decision_keys)
 
 
 class TestTheFallbackReasonRidesOnTheDecision(unittest.TestCase):

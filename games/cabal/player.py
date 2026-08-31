@@ -188,6 +188,7 @@ class LLMPolicy:
 
     def act(self, ref: CabalReferee, seat: int) -> dict:
         self.last_fell_back = False
+        self.last_upstream = ""
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
@@ -229,7 +230,6 @@ class LLMPolicy:
             return action
         self.trace.append(f"seat {seat}: {self.retries + 1} attempts failed, playing random")
         self.last_fell_back = True
-        self.last_upstream = ""          # nothing served it; the random policy did
         return self.fallback.act(ref, seat)
 
     def _refused(self, seat: int, attempt: int, kind: str, detail: str) -> None:
@@ -303,6 +303,9 @@ class VoteRecord:
     #: by its thinnest cell while a well-populated comparison sits unused. Graded
     #: taint uses every vote against every level.
     team_evil_count: int = 0
+    #: Driver turn for joining this vote to its per-decision upstream provenance.
+    #: A seat votes repeatedly, so seat alone cannot identify which model answered.
+    turn: int = 0
 
 
 @dataclass
@@ -469,8 +472,10 @@ def play_game(
                      if refusals else ""),
             refusals=refusals, rule_refusals=rule_refusals,
             fell_back=fell_back,
-            served_by=("" if fell_back
-                       else str(getattr(policies[seat], "last_upstream", "") or "")),
+            # A fallback remains random play (`fell_back` says that), but an
+            # upstream that returned an illegal answer still owns the refusal.
+            # Dropping it makes that upstream's fallback rate unmeasurable.
+            served_by=str(getattr(policies[seat], "last_upstream", "") or ""),
             prompt_size=prompt_size,
             reply_size=reply_size,
             usage=usage,
@@ -520,6 +525,7 @@ def play_game(
                     knew_evil_on_team=bool(known_evil & set(team)),
                     knowledge_class=knowledge_class,
                     team_evil_count=team_evil_count,
+                    turn=rec.turns,
                 ))
             ref.vote(votes)
         elif ref.phase is Phase.MISSION:

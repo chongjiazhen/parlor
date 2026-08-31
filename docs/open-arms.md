@@ -431,21 +431,6 @@ since been reworded in the queue is the live statement; this is the reasoning.
         on the full run before quoting it anywhere load-bearing.
 
 
-## Stratify cloud results by served upstream
-
-- [ ] **Stratify cloud results by served upstream instead of pooling them.** The
-      problem with an `auto` run was never that it is undocumented - `complete_meta`
-      already returns the served model and the report prints the mix. It is that
-      POOLING hunts across a time-varying model population computes a Wilson
-      interval over an ill-defined denominator. Record the served upstream on each
-      decision, report per model class, and an `auto` run stops being "several
-      models averaged": cells accumulate ACROSS runs, so tonight's nano hunts and a
-      future 120B-class run land in different cells instead of contaminating one.
-      Retires the "reproducible, unlike the cloud's 30-upstream mix" asymmetry -
-      stratified, a cloud run is reproducible at the cell level. Does not rescue a
-      thin run: ~10 hunts over 3+ upstreams is nothing per cell.
-
-
 ## Theme as an experimental variable
 
 - [ ] **Theme as an experimental variable, not a default to fix** (design:

@@ -219,10 +219,6 @@ Instrument and integrity:
       spending, not "don't look". **It must be designed BEFORE the next
       campaign**, never retrofitted to S6's records - that would be the peeking
       it exists to prevent.
-- [ ] **Stratify cloud results by served upstream instead of pooling them.**
-       Pooling computes a Wilson interval over an ill-defined denominator. Cells
-       accumulate ACROSS runs, which retires the "unlike the cloud's 30-upstream
-       mix" asymmetry.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 

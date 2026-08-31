@@ -25,6 +25,7 @@ random policy wearing a model's name.
 | same run, hunter | 33.3% (3/9, CI floor 12.1%) | exactly chance - gate #3b is now the blocker |
 | local 12B, `--register plain`, same seeds as the salient run | discrimination +16.7% (blind seats +11.4%, n=76) | first positive on the 12B, but 7 of 8 games died at five_rejects |
 | **local `qwen36-35b-a3b-iq3` (MoE 35B-A3B APEX), 12 games, 0.69% fallback** | **discrimination +30.7%** (blind seats +13.7%, n=222); evil 66.7% with 6 wins by SINKING missions and 32 fail cards | gate #3a holds on ONE pinned local model - reproducible, unlike the cloud's 30-upstream `auto` mix |
+| cloud upstream cells, `huntcloud-auto-lottery.jsonl` | 24 served-upstream cells, all 0.00% fallback; one un-attributed source-unknown cell, 2/2 fallbacks; only `nvidia/nemotron-3-nano-30b-a3b` has a hunt, 0/1 (Wilson 0.00%-79.35%) | **2026-08-31T11:53:18.4082507Z**: `py -3 -m eval.cloud_strata <records...>` never pools cells; old vote rows lack turns, so its vote metric REFUSES |
 | same model, seer bench | +80% as-is vs +72% with the salience line | the salience line is now HARMFUL - it competes with reasoning a capable model already does |
 | hunts across ALL live runs | 8/26 = 31%, and **5 of 26 named the hunter's own ally** | fixed in `hunt()`: a seat the night named as yours cannot be the seer, so the referee refuses it |
 | cost, `q36` local | ~14.6 min/game (reasoning distill, long generations) | a 50-game hunter run is ~12h overnight; cloud is ~3 min/game when quota allows |
@@ -231,6 +232,13 @@ Local is serial, exact-match and 100%-attributed, which beats a time-varying `au
 mix as evidence. Cloud is capacity, not gates - its composition is anti-correlated
 with what you are measuring (§Backend notes). Reach for a bigger local model only if
 a cloud model turns out to REFUSE to deceive, or you want games beside image gen.
+
+**2026-08-31T11:53:18.4082507Z correction:** `eval.cloud_strata` now reads the
+served upstream on each stored decision, so cloud results accumulate by upstream
+instead of pooling an `auto` mix. This makes a cell reproducible; it does not make a
+thin cell a gate. The stored cloud hunt is one nano decision, 0/1 with 0.00%
+fallback; two source-unknown fallbacks are visible separately as 2/2 un-attributed.
+Its 0.00%-79.35% Wilson band is no verdict.
 
 
 ## Backend notes (measured 2026-08-25)
