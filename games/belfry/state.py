@@ -28,9 +28,38 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
+from typing import Protocol
 
 from games.belfry.roles import (ALIGNMENT, DISTRIBUTION, Align, Role, Script,
                                 Team)
+
+
+class Adjudicator(Protocol):
+    """Interface for providing discretionary choices in Belfry games."""
+
+    def sot_belief(self, spare_roles: list[Role], rng: random.Random) -> Role:
+        """Choose what the sot believes it is from spare townsfolk roles."""
+        ...
+
+    def herring_registration(self, good_seats: list[int], rng: random.Random) -> int:
+        """Choose which good seat the herring reads as the demon to."""
+        ...
+
+    def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
+        """Determine if hermit registers as evil and what it appears as.
+        
+        Returns:
+            Tuple of (is_evil, apparent_role)
+        """
+        ...
+
+    def mimic_registration(self, good_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
+        """Determine if mimic registers as good and what it appears as.
+        
+        Returns:
+            Tuple of (is_good, apparent_role)
+        """
+        ...
 
 
 class BadSetup(ValueError):
@@ -237,7 +266,8 @@ class Grimoire:
             seat.was_nominated_today = False
 
 
-def deal(n: int, script: Script, rng: random.Random) -> Grimoire:
+def deal(n: int, script: Script, rng: random.Random, 
+         adjudicator: Adjudicator | None = None) -> Grimoire:
     """Deal one table. The referee owns the deal and the seating, always.
 
     That line is drawn here rather than argued each time: a model that dealt would
@@ -293,7 +323,8 @@ def deal(n: int, script: Script, rng: random.Random) -> Grimoire:
             raise BadSetup(
                 f"the {script.name} script has no spare townsfolk role for the "
                 "seat that must believe it holds one")
-        believed = rng.choice(spare)
+        believed = (adjudicator.sot_belief(spare, rng) if adjudicator is not None
+                    else rng.choice(spare))
         seats[sot].believes = believed
         grim.log.append(f"discretion: seat {sot} is the sot and believes it is "
                         f"the {believed.key}")
@@ -309,23 +340,38 @@ def deal(n: int, script: Script, rng: random.Random) -> Grimoire:
     if grim.find_believer("diviner") is not None:
         good = [s.index for s in seats if s.align is Align.GOOD]
         if good:
-            grim.herring = rng.choice(good)
+            herring = (adjudicator.herring_registration(good, rng)
+                      if adjudicator is not None
+                      else rng.choice(good))
+            grim.herring = herring
             grim.log.append(f"discretion: seat {grim.herring} reads as the demon "
                             f"to the diviner all game")
 
     if grim.find("hermit") is not None:
-        grim.hermit_evil = rng.random() < 0.5
         evil_roles = [r.key for r in script.roles if r.align is Align.EVIL
                       and r.key != "hermit"]
-        grim.hermit_as = rng.choice(evil_roles) if evil_roles else "fiend"
+        if adjudicator is not None:
+            hermit_evil, hermit_as_role = adjudicator.hermit_registration(evil_roles, rng)
+            hermit_as = hermit_as_role.key if hasattr(hermit_as_role, 'key') else str(hermit_as_role)
+        else:
+            hermit_evil = rng.random() < 0.5
+            hermit_as = rng.choice(evil_roles) if evil_roles else "fiend"
+        grim.hermit_evil = hermit_evil
+        grim.hermit_as = hermit_as
         grim.log.append(
             f"discretion: the hermit registers "
             + (f"as evil, and as the {grim.hermit_as}" if grim.hermit_evil
                else "as good, as itself"))
     if grim.find("mimic") is not None:
-        grim.mimic_good = rng.random() < 0.5
-        good_roles = [r.key for r in script.by_team(Team.TOWNSFOLK)]
-        grim.mimic_as = rng.choice(good_roles) if good_roles else "witness"
+        if adjudicator is not None:
+            mimic_good, mimic_as = adjudicator.mimic_registration(
+                [r.key for r in script.by_team(Team.TOWNSFOLK)], rng)
+            grim.mimic_good = mimic_good
+            grim.mimic_as = mimic_as.key if hasattr(mimic_as, 'key') else str(mimic_as)
+        else:
+            grim.mimic_good = rng.random() < 0.5
+            good_roles = [r.key for r in script.by_team(Team.TOWNSFOLK)]
+            grim.mimic_as = rng.choice(good_roles) if good_roles else "witness"
         grim.log.append(
             f"discretion: the mimic registers "
             + (f"as good, and as the {grim.mimic_as}" if grim.mimic_good

@@ -55,6 +55,14 @@ from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
 
 ARMS = ("random", "llm", "llm-good", "llm-evil")
 
+ADJUDICATOR_ARMS = ("random",)
+
+
+def build_adjudicator(args, seed: int | None) -> None:
+    """Keep random discretion on the referee's seeded deal RNG."""
+    del args, seed
+    return None
+
 STATE = RunState()
 
 
@@ -110,9 +118,10 @@ def one_game(index: int, args) -> GameRecord:
     seed = None if args.seed is None else args.seed + index
     rng = integrity.policy_rng(seed)
     script = SCRIPTS[args.script] if args.script else DEFAULT_SCRIPT
+    adjudicator = build_adjudicator(args, seed)
     ref = BelfryReferee.new(args.seats, seed=seed, script=script,
                             discussion_rounds=args.rounds,
-                            max_days=args.max_days)
+                            max_days=args.max_days, adjudicator=adjudicator)
     try:
         return play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
@@ -363,6 +372,8 @@ def main() -> None:
                     help="base seed; game i uses seed+i for the deal AND the "
                          "sampler. Unset sends no seed at all, so a run that is "
                          "not pinned does not look reproducible in the records")
+    ap.add_argument("--adjudicator", choices=ADJUDICATOR_ARMS, default="random",
+                    help="discretion source (random uses referee deal RNG)")
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
 
