@@ -52,41 +52,16 @@ from core.stats import wilson
 from games.belfry.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
-from games.belfry.state import Adjudicator
 
 ARMS = ("random", "llm", "llm-good", "llm-evil")
 
-ADJUDICATOR_ARMS = ("random", "llm")
+ADJUDICATOR_ARMS = ("random",)
 
 
-class RandomAdjudicatorStub:
-    """A random adjudicator that draws from the same distribution as the original RNG."""
-
-    def __init__(self, rng: random.Random):
-        self.rng = rng
-
-    def sot_belief(self, spare_roles, rng):
-        return self.rng.choice(spare_roles)
-
-    def herring_registration(self, good_seats, rng):
-        return self.rng.choice(good_seats)
-
-    def hermit_registration(self, evil_roles, rng):
-        return (self.rng.random() < 0.5,
-                self.rng.choice(evil_roles) if evil_roles else "fiend")
-
-    def mimic_registration(self, good_roles, rng):
-        return (self.rng.random() < 0.5,
-                self.rng.choice(good_roles) if good_roles else "witness")
-
-
-def build_adjudicator(args, seed: int | None) -> Adjudicator | None:
-    """Build an adjudicator for discretionary choices based on args."""
-    if args.adjudicator in ("random", "llm"):
-        # "llm" falls back to random until a real LLM adjudicator is implemented
-        return RandomAdjudicatorStub(rng=random.Random(seed))
-    else:
-        return None
+def build_adjudicator(args, seed: int | None) -> None:
+    """Keep random discretion on the referee's seeded deal RNG."""
+    del args, seed
+    return None
 
 STATE = RunState()
 
@@ -398,14 +373,12 @@ def main() -> None:
                          "sampler. Unset sends no seed at all, so a run that is "
                          "not pinned does not look reproducible in the records")
     ap.add_argument("--adjudicator", choices=ADJUDICATOR_ARMS, default="random",
-                    help="adjudicator for discretionary choices (default: random)")
+                    help="discretion source (random uses referee deal RNG)")
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
 
     if args.arm != "random" and not args.backend:
         raise SystemExit(f"--arm {args.arm} needs --backend")
-    if args.adjudicator != "random" and not args.backend:
-        raise SystemExit(f"--adjudicator {args.adjudicator} needs --backend")
     # Refuse at the DOOR, never at game 200. An off-box route with no key does not
     # crash - it 401s every attempt, falls back on every decision, and reports a
     # number the scorer then voids after the GPU is spent.

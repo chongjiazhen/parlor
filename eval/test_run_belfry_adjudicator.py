@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import unittest
 
-from eval.run_belfry import main  # Import to trigger argument parsing
+from eval.run_belfry import build_adjudicator, main  # Import to trigger argument parsing
 
 
 class TestRunBelfryAdjudicator(unittest.TestCase):
@@ -62,6 +62,10 @@ class TestRunBelfryAdjudicator(unittest.TestCase):
                 except Exception as e:
                     if "needs --backend" not in str(e):
                         raise  # Re-raise if it's not the expected backend error
+
+    def test_random_default_uses_deal_rng(self):
+        args = argparse.Namespace(adjudicator="random")
+        self.assertIsNone(build_adjudicator(args, 1000))
 
 
 if __name__ == '__main__':

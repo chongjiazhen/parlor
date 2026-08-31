@@ -147,7 +147,7 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | entry condition | done when |
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| ~~**S8**~~ | ~~**Next rung or publish.**~~ **CLOSED 2026-08-30** - the adjudicator spike implemented: `Adjudicator` Protocol in `games/belfry/state.py`, four discretionary choice methods (`sot_belief`, `herring_registration`, `hermit_registration`, `mimic_registration`), `--adjudicator` argument in `eval/run_belfry.py`, and `eval/discretion_number.py` for the metric. All four tracer-bullet tickets complete; discretion number exists and measures distinguishability between adjudicator choice patterns (Fixed vs Random: 1.000, Fixed vs Fixed: 0.083). Engine preserved - random adjudicator used when none provided. | - | **met** |
+| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has the `Adjudicator` Protocol and four setup-choice seams; random control keeps its old seeded deal stream. The repaired discretion instrument uses held-out source classification and preserves every registration outcome, but no model adjudicator exists yet. The 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | a model adjudicator and measured, non-VOID discretion arm |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with

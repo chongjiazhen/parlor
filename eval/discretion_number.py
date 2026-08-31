@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import random
 from collections import Counter
-from typing import List, Dict, Any, Tuple
+from typing import Any
 
 from games.belfry.state import Adjudicator, deal
 from games.belfry.roles import FULL
 
 
-def extract_discretionary_choices(log_entries: List[str]) -> Dict[str, Any]:
+def extract_discretionary_choices(log_entries: list[str]) -> dict[str, Any]:
     """Extract discretionary choices from game log entries.
     
     Returns a dictionary mapping choice type to its value.
@@ -35,22 +35,52 @@ def extract_discretionary_choices(log_entries: List[str]) -> Dict[str, Any]:
                     herring_seat = seat_part.split(" ")[0].rstrip(".")
                     choices["herring_registration"] = int(herring_seat)
             elif "the hermit registers" in entry:
-                # Format: "discretion: the hermit registers as {evil/good}, and as the {role}"
                 if "as evil, and as the" in entry:
-                    choices["hermit_registration"] = ("evil", 
+                    choices["hermit_registration"] = ("evil",
                         entry.split("as evil, and as the")[1].split()[0].rstrip(",."))
+                elif "as good, as itself" in entry:
+                    choices["hermit_registration"] = ("good", "itself")
                 elif "as good, and as the" in entry:
-                    choices["hermit_registration"] = ("good", 
+                    choices["hermit_registration"] = ("good",
                         entry.split("as good, and as the")[1].split()[0].rstrip(",."))
             elif "the mimic registers" in entry:
-                # Format: "discretion: the mimic registers as {good/evil}, and as the {role}"
                 if "as good, and as the" in entry:
-                    choices["mimic_registration"] = ("good", 
+                    choices["mimic_registration"] = ("good",
                         entry.split("as good, and as the")[1].split()[0].rstrip(",."))
+                elif "as good, as itself" in entry:
+                    choices["mimic_registration"] = ("good", "itself")
                 elif "as evil, and as the" in entry:
-                    choices["mimic_registration"] = ("evil", 
+                    choices["mimic_registration"] = ("evil",
                         entry.split("as evil, and as the")[1].split()[0].rstrip(",."))
+                elif "as evil, as itself" in entry:
+                    choices["mimic_registration"] = ("evil", "itself")
     return choices
+
+
+def _held_out_source_accuracy(values_a: list[Any], values_b: list[Any]) -> float:
+    """Classify held-out choices from empirical arm distributions.
+
+    The score is balanced accuracy: a tie earns half a point, so indistinguishable
+    adjudicators score chance (0.5) rather than a value driven by choice entropy.
+    """
+    train_a, test_a = values_a[::2], values_a[1::2]
+    train_b, test_b = values_b[::2], values_b[1::2]
+    if not train_a or not test_a or not train_b or not test_b:
+        return 0.5
+
+    counts_a, counts_b = Counter(train_a), Counter(train_b)
+
+    def correct(value: Any, source_a: bool) -> float:
+        probability_a = counts_a[value] / len(train_a)
+        probability_b = counts_b[value] / len(train_b)
+        if probability_a == probability_b:
+            return 0.5
+        predicted_a = probability_a > probability_b
+        return float(predicted_a is source_a)
+
+    points = sum(correct(value, True) for value in test_a)
+    points += sum(correct(value, False) for value in test_b)
+    return points / (len(test_a) + len(test_b))
 
 
 def calculate_discretion_number(
@@ -79,7 +109,7 @@ def calculate_discretion_number(
         (0.5 = chance, 1.0 = perfect discrimination, 0.0 = anti-correlated)
     """
     # Generate games with adjudicator A
-    choices_a: List[Dict[str, Any]] = []
+    choices_a: list[dict[str, Any]] = []
     for i in range(num_games_per_adjudicator):
         seed = base_seed + i * 2  # Even seeds for adjudicator A
         grim = deal(9, script, random.Random(seed), adjudicator_a)
@@ -87,7 +117,7 @@ def calculate_discretion_number(
         choices_a.append(choices)
     
     # Generate games with adjudicator B
-    choices_b: List[Dict[str, Any]] = []
+    choices_b: list[dict[str, Any]] = []
     for i in range(num_games_per_adjudicator):
         seed = base_seed + i * 2 + 1  # Odd seeds for adjudicator B
         grim = deal(9, script, random.Random(seed), adjudicator_b)
@@ -107,16 +137,7 @@ def calculate_discretion_number(
             # Skip if we don't have data for this choice type
             continue
             
-        # Simple discrimination metric: 
-        # What proportion of values from A are NOT in the most common value from B?
-        # This measures how much A's choices differ from B's typical choice
-        
-        if values_b:
-            most_common_b = Counter(values_b).most_common(1)[0][0]
-            # Count how many values from A are different from B's most common
-            different_from_b = sum(1 for v in values_a if v != most_common_b)
-            proportion_different = different_from_b / len(values_a) if values_a else 0.0
-            discriminative_scores.append(proportion_different)
+        discriminative_scores.append(_held_out_source_accuracy(values_a, values_b))
     
     # The discretion number is the average discriminative power across choice types
     # If adjudicators are identical, we expect ~0.5 (chance level)
@@ -133,7 +154,7 @@ def discretion_number_report(
     adjudicator_a_name: str,
     adjudicator_b_name: str,
     discretion_number: float
-) -> List[str]:
+) -> list[str]:
     """Generate a report lines for the discretion number calculation."""
     lines = [
         "",

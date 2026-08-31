@@ -6,6 +6,8 @@ import random
 import unittest
 
 from eval.run_belfry import build_adjudicator, one_game, score
+from eval.discretion_number import (calculate_discretion_number,
+                                    extract_discretionary_choices)
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import FULL
 from games.belfry.state import Adjudicator, deal
@@ -38,46 +40,6 @@ class FixedAdjudicator:
         return (True, "witness")
 
 
-def extract_discretionary_choices(log_entries):
-    """Extract discretionary choices from game log entries."""
-    choices = {}
-    for entry in log_entries:
-        if entry.startswith("discretion: "):
-            if "sot and believes it is the" in entry:
-                # Extract what the sot believes it is
-                # Format: "discretion: seat {sot} is the sot and believes it is the {role}"
-                believes_part = entry.split("believes it is the ")[1]
-                sot_belief = believes_part.rstrip(".")
-                choices["sot_belief"] = sot_belief
-            elif "reads as the demon to the diviner all game" in entry:
-                # Extract which seat reads as the demon
-                # Format: "discretion: seat {seat} reads as the demon to the diviner all game"
-                parts = entry.split("discretion: seat ")
-                if len(parts) > 1:
-                    seat_part = parts[1]
-                    herring_seat = seat_part.split(" ")[0].rstrip(".")
-                    choices["herring_registration"] = int(herring_seat)
-            elif "the hermit registers" in entry:
-                # Extract hermit registration
-                # Format: "discretion: the hermit registers as {evil/good}, and as the {role}"
-                if "as evil, and as the" in entry:
-                    choices["hermit_registration"] = ("evil", 
-                        entry.split("as evil, and as the")[1].split()[0].rstrip(",."))
-                elif "as good, and as the" in entry:
-                    choices["hermit_registration"] = ("good", 
-                        entry.split("as good, and as the")[1].split()[0].rstrip(",."))
-            elif "the mimic registers" in entry:
-                # Extract mimic registration
-                # Format: "discretion: the mimic registers as {good/evil}, and as the {role}"
-                if "as good, and as the" in entry:
-                    choices["mimic_registration"] = ("good", 
-                        entry.split("as good, and as the")[1].split()[0].rstrip(",."))
-                elif "as evil, and as the" in entry:
-                    choices["mimic_registration"] = ("evil", 
-                        entry.split("as evil, and as the")[1].split()[0].rstrip(",."))
-    return choices
-
-
 class TestDiscretionaryChoiceExtraction(unittest.TestCase):
     """Test extraction of discretionary choices from game logs."""
 
@@ -99,14 +61,21 @@ class TestDiscretionaryChoiceExtraction(unittest.TestCase):
         self.assertEqual(choices.get("hermit_registration"), ("evil", "mimic"))
         self.assertEqual(choices.get("mimic_registration"), ("good", "witness"))
 
+    def test_extract_choices_keeps_as_itself_registrations(self):
+        choices = extract_discretionary_choices([
+            "discretion: the hermit registers as good, as itself",
+            "discretion: the mimic registers as evil, as itself",
+        ])
+
+        self.assertEqual(choices["hermit_registration"], ("good", "itself"))
+        self.assertEqual(choices["mimic_registration"], ("evil", "itself"))
+
 
 class TestDiscretionNumberCalculation(unittest.TestCase):
     """Test calculation of the discretion number."""
 
     def test_discretion_number_random_vs_fixed(self):
         """Test that we can distinguish random from fixed adjudicators."""
-        from eval.discretion_number import calculate_discretion_number
-        
         class FixedAdjudicator:
             """An adjudicator that always makes the same discretionary choices."""
             def sot_belief(self, spare_roles, rng):
@@ -152,6 +121,12 @@ class TestDiscretionNumberCalculation(unittest.TestCase):
         
         # Fixed vs fixed should have lower discretion number than fixed vs random
         self.assertGreater(discretion_number, disc_fixed_fixed)
+
+    def test_same_adjudicator_scores_at_chance(self):
+        """Held-out source classification must not distinguish identical arms."""
+        score = calculate_discretion_number(
+            None, None, num_games_per_adjudicator=200, base_seed=4000)
+        self.assertAlmostEqual(score, 0.5, delta=0.1)
 
 
 if __name__ == '__main__':
