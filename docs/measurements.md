@@ -197,6 +197,24 @@ py -3 -m eval.run_belfry --games 300 --arm random --seats 9  --script full   --r
 py -3 -m eval.run_belfry --games 200 --arm random --seats 10 --script full   --rounds 1 --seed 9400 --out eval/records/belfry-control-10full.json
 ```
 
+## Changeling per-game deduction - S5 record re-read, 2026-08-30
+
+`py -3 -m eval.deduction` re-read S5's 200 completed games with no GPU or new
+play. The S5 record's fallback rate was **0.40%**, below the 10% void bar. The
+instrument first replays each recorded winner from its votes, including the
+tie-accuses-all rule; `py -3 -m unittest eval.test_deduction -v` is its control.
+
+Of 195 winnable games, mean per-game lift over each game's own chance baseline
+was **+0.169 [+0.085, +0.255]**. 89/195 (45.6%) voted above that baseline,
+29/195 (14.9%) met it, and 77/195 (39.5%) fell below it. Decisiveness was thin:
+88/195 (45.1%) outcomes could reverse with one redirected legal vote, and
+35/79 village wins (44.3%, Wilson [33.9%, 55.3%]) did so.
+
+Gate #3 and the hand-played "feels random" complaint do not conflict. The gate
+is aggregate discrimination; this reading shows many individual outcomes remain
+available to chance. `docs/open-arms.md` §"changeling feels random" owns the four
+open levers. Changing rules or model-facing text re-baselines this reading.
+
 ## belfry live1 - sampled-player measurement, 2026-08-31
 
 Rendered record: [`transcripts/belfry-live1.md`](../transcripts/belfry-live1.md).

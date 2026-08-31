@@ -307,12 +307,9 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
 - [ ] **Let a seat choose to speak rather than be scheduled to.** The same ask as
       the turn-taking row above - bidding, or random active-seat with an idle
       action - and it should be taken as ONE arm with it, not twice.
-- [ ] **"changeling feels random" is now MEASURED, and the levers are the open
-      half.** `py -3 -m eval.deduction` (2026-08-30, S5 records): mean per-game
-      lift +0.169 [+0.085, +0.255], 39.5% of games vote BELOW their own chance
-      baseline, and 44.3% of village wins (35/79) turn on one vote. Gate #3 and
-      the complaint were never in conflict. Four levers and the order to try them:
-      `docs/open-arms.md` §"changeling feels random". A changeling heuristic rung
+- [ ] **Changeling: respond to measured randomness.** Four levers and their order:
+      `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
+      re-baselines this reading. A changeling heuristic rung
       (`docs/scripted-rungs-cabal.md` §0) is still unbuilt and would say what
       un-random looks like here.
 
