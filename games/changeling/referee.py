@@ -189,10 +189,11 @@ class ChangelingReferee:
         return forms
 
     def self_reveal_forms(self, key: str) -> list[str]:
-        """The phrasings that would tell a seat what it HOLDS. Separate from
-        ``reveal_forms`` because the referee addresses a seat in the second person,
-        and a self-leak therefore looks nothing like a third-party one."""
-        return [f"went to sleep as the {self.theme.card_names[key]}"]
+        """The self-line form that would leak ``key`` if a dawn card replaced the
+        dealt card. Separate from ``reveal_forms`` because the referee addresses a
+        seat in the second person, and a self-leak therefore looks unlike a
+        third-party one."""
+        return [f"You were dealt the {self.theme.card_names[key]}"]
 
     def _knowledge_line(self, k: Knowledge) -> str:
         """One entitled reveal, in the theme's vocabulary."""
@@ -499,10 +500,13 @@ class ChangelingReferee:
             self.entitled_seats(viewer),
             viewer,
         )
-        if viewer not in self.entitled_seats(viewer):
+        dealt = self.night.dealt[viewer]
+        held = self.holds(viewer)
+        if (viewer not in self.entitled_seats(viewer)
+                and dealt.key != held.key):
             leaks += find_leaks(
                 self.self_line(viewer),
-                {viewer: self.self_reveal_forms(self.holds(viewer).key)},
+                {viewer: self.self_reveal_forms(held.key)},
                 set(),
                 viewer,
                 self_is_secret=True,

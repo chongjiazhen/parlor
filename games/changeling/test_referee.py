@@ -40,7 +40,7 @@ class LeaksOwnTruth(ChangelingReferee):
 
     def self_line(self, seat: int) -> str:
         card = self.holds(seat)
-        return (f"You are seat {seat}. You went to sleep as the "
+        return (f"You are seat {seat}. You were dealt the "
                 f"{self.theme.card_names[card.key]} "
                 f"({self.theme.side_names[card.side]}).")
 
