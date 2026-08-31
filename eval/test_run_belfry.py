@@ -24,7 +24,7 @@ def args(**over) -> argparse.Namespace:
     base = dict(games=2, arm="random", seats=5, script="compact", backend=None,
                 model="auto", rounds=1, max_days=12, register="character",
                 retries=2, temperature=0.8, max_tokens=1536, timeout=120.0,
-                no_thinking=False, seed=None, out=None)
+                no_thinking=False, seed=None, out=None, adjudicator="random")
     base.update(over)
     return argparse.Namespace(**base)
 
