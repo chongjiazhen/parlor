@@ -75,23 +75,6 @@ since been reworded in the queue is the live statement; this is the reasoning.
         information the ask withholds) but stop expecting it to zero this number.
 
 
-## `unittest discover` claims all tests and collects 572 of 850
-
-- [ ] **`python -m unittest discover` claims "all tests" and collects 572 of 850.**
-      `README.md:189` offers it as the no-dependency way to run the suite. Every
-      pytest-fixture file imports cleanly and contributes ZERO tests - silently,
-      and it still prints `OK`. `core/test_console.py` and `core/test_registry.py`
-      are two; the gap is 278 tests, including every mutation-checked guard in
-      them. A green that proves less than it claims, in the public README, which
-      is the shape `docs/evidence-discipline.md` exists to refuse.
-      - The fix is one of two and they are not equivalent: reword the README to
-        name pytest as the suite runner and unittest as a partial smoke, or move
-        the fixture files to plain `TestCase` so the claim becomes true. The
-        second keeps the no-dependency property the line is selling.
-      - **Done when** the number the README implies and the number the command
-        collects are the same number, by either route.
-
-
 ## What writes a stale `.git/index.lock`
 
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
