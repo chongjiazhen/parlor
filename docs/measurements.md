@@ -199,6 +199,7 @@ py -3 -m eval.run_belfry --games 200 --arm random --seats 10 --script full   --r
 
 ## Changeling per-game deduction - S5 record re-read, 2026-08-30
 
+Rendered evidence: [`transcripts/changeling-s5-per-game-deduction.md`](../transcripts/changeling-s5-per-game-deduction.md).
 `py -3 -m eval.deduction` re-read S5's 200 completed games with no GPU or new
 play. The S5 record's fallback rate was **0.40%**, below the 10% void bar. The
 instrument first replays each recorded winner from its votes, including the
