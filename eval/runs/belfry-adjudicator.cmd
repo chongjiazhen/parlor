@@ -10,11 +10,11 @@ rem qwen36-35b-a3b-iq3 and verified the probe's logged result.
 
 cd /d "%~dp0..\.."
 
-set "OUTDIR=eval\records"
+set "OUTDIR=eval/records"
 set "MODEL=qwen36-35b-a3b-iq3"
-set "CONTROL=%OUTDIR%\belfry-adjudicator-control.json"
-set "MODEL_OUT=%OUTDIR%\belfry-adjudicator-model.json"
-set "LOG=%OUTDIR%\belfry-adjudicator-launch.log"
+set "CONTROL=%OUTDIR%/belfry-adjudicator-control.json"
+set "MODEL_OUT=%OUTDIR%/belfry-adjudicator-model.json"
+set "LOG=%OUTDIR%/belfry-adjudicator-launch.log"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 
 rem A ping can pass on a cooled or wrong route. Three completion requests prove
@@ -39,7 +39,7 @@ rem fixes its temperature at 0.0; do not add a player backend/model to this arm.
 py -3 -m eval.run_belfry --games 60 --arm random --seats 5 --script compact ^
   --rounds 1 --no-thinking --seed 6100 --adjudicator model ^
   --adjudicator-backend local --adjudicator-model "%MODEL%" ^
-  --timeout 240 --out "%MODEL_OUT%" >>"%LOG%" 2>&1
+  --timeout 120 --out "%MODEL_OUT%" >>"%LOG%" 2>&1
 set "RC=%ERRORLEVEL%"
 echo DONE rc=%RC% ^(wrapper^)>>"%LOG%"
 exit /b %RC%

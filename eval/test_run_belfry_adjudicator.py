@@ -42,6 +42,17 @@ class TestRunBelfryAdjudicator(unittest.TestCase):
                      mock.patch("builtins.print"):
                     main()
 
+    def test_model_adjudicator_requires_its_dedicated_route(self):
+        """A model referee cannot silently inherit absent backend or model settings."""
+        base = ["run_belfry.py", "--games", "0", "--adjudicator", "model"]
+        for extra, missing in (([], "--adjudicator-backend"),
+                               (["--adjudicator-backend", "local"],
+                                "--adjudicator-model")):
+            with self.subTest(missing=missing), \
+                 mock.patch("sys.argv", [*base, *extra]), \
+                 self.assertRaisesRegex(SystemExit, missing):
+                main()
+
     def test_random_default_uses_deal_rng(self):
         args = argparse.Namespace(adjudicator="random")
         self.assertIsNone(build_adjudicator(args, 1000))

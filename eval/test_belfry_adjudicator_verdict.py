@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import copy
 import random
+import shlex
 import unittest
+from pathlib import Path
 
 from eval.belfry_adjudicator_verdict import (
     Trace,
@@ -18,6 +20,50 @@ from games.belfry.state import deal
 
 
 SEEDS = range(6100, 6160)
+
+
+def _launcher_recipes() -> dict[str, dict]:
+    """Derive each run_belfry argv from the frozen Windows launcher."""
+    lines = (Path(__file__).parent / "runs" / "belfry-adjudicator.cmd").read_text(
+        encoding="utf-8").splitlines()
+    values: dict[str, str] = {}
+    for line in lines:
+        if line.lower().startswith('set "') and line.endswith('"'):
+            name, value = line[5:-1].split("=", 1)
+            values[name] = value
+
+    def expand(value: str) -> str:
+        for _ in values:
+            for name, replacement in values.items():
+                value = value.replace(f"%{name}%", replacement)
+        return value
+
+    recipes = {}
+    for index, line in enumerate(lines):
+        if not line.startswith("py -3 -m eval.run_belfry "):
+            continue
+        command = line
+        next_index = index
+        while command.rstrip().endswith("^"):
+            next_index += 1
+            command = command.rstrip()[:-1] + " " + lines[next_index].strip()
+        tokens = shlex.split(command.split(">>", 1)[0])
+        args: dict[str, object] = {}
+        cursor = tokens.index("eval.run_belfry") + 1
+        while cursor < len(tokens):
+            option = tokens[cursor]
+            cursor += 1
+            key = option.removeprefix("--").replace("-", "_")
+            if option == "--no-thinking":
+                args[key] = True
+                continue
+            args[key] = expand(tokens[cursor])
+            cursor += 1
+        for key in ("games", "seats", "rounds", "seed"):
+            args[key] = int(args[key])
+        args["timeout"] = float(args.get("timeout", 120.0))
+        recipes[args["adjudicator"]] = args
+    return recipes
 
 
 def _args(adjudicator: str) -> dict:
@@ -237,6 +283,16 @@ class TestEvidenceBoundary(unittest.TestCase):
 
 
 class TestRecipeBinding(unittest.TestCase):
+    def test_launcher_emits_a_recipe_bound_by_controller(self):
+        """A launcher timeout or output spelling that differs from the criterion fails."""
+        recipes = _launcher_recipes()
+        self.assertEqual(set(recipes), {"random", "model"})
+        control, model = _arm("random"), _arm("model")
+        control[0]["args"].update(recipes["random"])
+        model[0]["args"].update(recipes["model"])
+        lines, code = report(control, model)
+        self.assertEqual(code, 0, "\n".join(lines))
+
     def test_recipe_mismatch_has_its_own_exit(self):
         control, model = _arm("random"), _arm("model")
         model[0]["args"]["script"] = "full"
