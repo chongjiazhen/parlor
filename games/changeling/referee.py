@@ -26,6 +26,8 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import TextIO
 
 from core.observability import Knowledge, SeatView, find_leaks
 from games.changeling.night import (NightResult, is_centre, centre_slot,
@@ -70,6 +72,25 @@ class ChangelingReferee:
     #: Referee-side only. Carries the night's narrative, which names seats and cards
     #: in the same breath and reaches no model ever.
     referee_log: list[str] = field(default_factory=list)
+    #: Optional observer-only sidecar. Never read by any render or policy path.
+    transcript_path: str | Path | None = field(default=None, repr=False)
+    _transcript_fh: TextIO | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if self.transcript_path is not None:
+            self._transcript_fh = open(self.transcript_path, "a", encoding="utf-8")
+
+    def _log(self, line: str) -> None:
+        """Append one referee-only fact, then make it tail-visible immediately."""
+        self.referee_log.append(line)
+        if self._transcript_fh is not None:
+            self._transcript_fh.write(line + "\n")
+            self._transcript_fh.flush()
+
+    def close(self) -> None:
+        if self._transcript_fh is not None:
+            self._transcript_fh.close()
+            self._transcript_fh = None
 
     @property
     def n(self) -> int:
@@ -78,7 +99,8 @@ class ChangelingReferee:
     @classmethod
     def new(cls, n: int = 5, seed: int | None = None,
             theme: Theme = DEFAULT_THEME, discussion_rounds: int = 2,
-            choose=None, dealt=None, centre=None) -> "ChangelingReferee":
+            choose=None, dealt=None, centre=None,
+            transcript_path: str | Path | None = None) -> "ChangelingReferee":
         """``dealt``/``centre`` pin the deal, forwarded to ``resolve_night``. They
         exist so a caller that needs a NAMED deal still comes through this one
         constructor: the alternative is building a referee by hand, which silently
@@ -87,8 +109,10 @@ class ChangelingReferee:
         rng = random.Random(seed)
         night = resolve_night(setup, rng, choose, dealt=dealt, centre=centre)
         ref = cls(setup=setup, night=night, theme=theme,
-                  discussion_rounds=discussion_rounds)
-        ref.referee_log.extend(night.log)
+                  discussion_rounds=discussion_rounds,
+                  transcript_path=transcript_path)
+        for line in night.log:
+            ref._log(line)
         # The ONLY thing the night puts in the public record. It says that a night
         # happened and nothing about who moved in it.
         ref.public_events.append(
@@ -396,11 +420,11 @@ class ChangelingReferee:
         self.phase = Phase.DONE
         # The reveal is referee-side. It lands in the transcript, never in a render:
         # by the time it is written the game is over, but a render is still a render.
-        self.referee_log.append(self.reason)
-        self.referee_log.append(
+        self._log(self.reason)
+        self._log(
             "dawn truth: " + ", ".join(
                 f"seat {s}={self.holds(s).key}" for s in range(self.n)))
-        self.referee_log.append(
+        self._log(
             "diverged seats: " + (", ".join(map(str, sorted(self.night.diverged())))
                                   or "none"))
 

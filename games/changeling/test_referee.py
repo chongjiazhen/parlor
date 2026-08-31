@@ -10,6 +10,8 @@ from __future__ import annotations
 import random
 import unittest
 from dataclasses import replace
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from core.observability import Knowledge
 from games.changeling.audit import leak_audit
@@ -369,6 +371,26 @@ class TestOutcomeReadsTruth(unittest.TestCase):
         self.assertTrue(any("dawn truth" in line for line in ref.referee_log))
         joined = " ".join(t for _, t in ref.public_events)
         self.assertNotIn("dawn truth", joined)
+
+    def test_transcript_sidecar_matches_referee_log_and_stays_out_of_prompts(self):
+        """Break caught: omitting a log write, buffering it, or reading it into a
+        seat render makes observer output disagree with referee state or leaks it."""
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "referee.log"
+            path.write_text("prior game\n", encoding="utf-8")
+            ref = ChangelingReferee.new(5, seed=4, discussion_rounds=1,
+                                        transcript_path=path)
+            self.assertEqual(path.read_text(encoding="utf-8").splitlines(),
+                             ["prior game", *ref.referee_log])
+            for seat in range(ref.n):
+                prompt = ref.prompt_for(seat)
+                for line in ref.referee_log:
+                    self.assertNotIn(line, prompt)
+            wolf = next(s for s in range(5) if ref.holds(s).side is Side.PACK)
+            self.all_point_at(ref, wolf)
+            lines = path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(lines, ["prior game", *ref.referee_log])
+            ref.close()
 
 
 class TestThemesChangeNoRule(unittest.TestCase):

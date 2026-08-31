@@ -188,6 +188,8 @@ def main() -> None:
                     help="UAT: deal this card key to the human seat, by swapping "
                          "it in after the deal. Not a sample - the record is "
                          "marked. Needs --human")
+    ap.add_argument("--referee-transcript", metavar="PATH",
+                    help="append referee-only log lines here as the game runs")
     ap.add_argument("--human-retries", type=int, default=99,
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
@@ -216,7 +218,8 @@ def main() -> None:
                                          next(iter(humans)), args.human_role)
     ref = ChangelingReferee.new(5, seed=args.seed, theme=theme,
                                 discussion_rounds=args.rounds,
-                                dealt=dealt, centre=centre)
+                                dealt=dealt, centre=centre,
+                                transcript_path=args.referee_transcript)
     policies = build_policies(ref, args, rng)
 
     print(f"=== 5-seat changeling, theme='{theme.name}' ===\n")
@@ -232,6 +235,8 @@ def main() -> None:
         # something.
         print("\n(game abandoned - no record written)")
         return
+    finally:
+        ref.close()
     for line in ref.referee_log:
         print(" ", line)
 

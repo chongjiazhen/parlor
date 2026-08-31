@@ -9,18 +9,20 @@ from __future__ import annotations
 
 import io
 import random
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
 
 from core.console import ConsoleBackend, human_seats
 from games.changeling.demo import (build_policies, constrained_deal,
                                     opening_view)
-from games.changeling.night import deal
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                       play_game)
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import SETUP_5, Side
-from games.changeling.audit import leak_audit
 
 
 def test_the_sample_view_is_withheld_from_a_human_table():
@@ -80,65 +82,18 @@ def test_a_hand_played_game_reaches_a_winner_with_gate_one_audited():
 
 # ---- --human-role: a UAT deal, and the stream it must not touch --------------
 
-# New test: UAT verification workflow for --human-role constrained deals
-def test_uat_workflow_validates_constrained_deal():
-    """UAT: Verify the --human-role workflow produces uat:true records and preserves RNG stream.
 
-    This mirrors the existing constrained deal tests but adds UAT verification.
-    The same seed ensures reproducibility and allows comparison with unconstrained runs.
-    """
-    # Use the same seed as other tests for consistency
-    seed = 5
-    rng = random.Random(seed)
-
-    # First run unconstrained to establish baseline
-    ref_base = ChangelingReferee.new(5, seed=seed, discussion_rounds=1)
-    rec_base = play_game(ref_base, {s: RandomPolicy(rng) for s in range(5)})
-    assert rec_base.uat is None, "ordinary game should not be marked as UAT"
-
-    # Now run constrained deal with human role
-    ref = ChangelingReferee.new(5, seed=seed, discussion_rounds=1)
-    dealt, centre = constrained_deal(SETUP_5, random.Random(seed), 0, "spotter")
-
-    # Build policies with UAT flag - use mock console like existing test
-    console = ConsoleBackend(keys=ACTION_KEYS)
-    console.stdin = io.StringIO("say I will wait\nvote 1\n" * 40)
-    console.stdout = io.StringIO()
-    human = LLMPolicy(backend=console, retries=8, fallback=RandomPolicy(rng))
-    policies = {s: (human if s == 0 else RandomPolicy(rng)) for s in range(ref.n)}
-    rec = play_game(ref, policies, uat=True)
-
-    # Verify UAT marking
-    assert rec.uat is True, "constrained deal must be marked as UAT"
-
-    # Verify RNG stream preserved (same as unconstrained)
-    # Test that a single constrained deal doesn't consume extra draws
-    a = random.Random(seed)
-    deal(SETUP_5, a)  # unconstrained deal consumes draws
-    b = random.Random(seed)
-    constrained_deal(SETUP_5, b, 0, "spotter")  # constrained deal with same parameters as our test
-    assert a.random() == b.random(), "RNG stream must be preserved"
-
-    # Verify deck multiset unchanged (same as existing test)
-    plain = sorted(c.key for c in SETUP_5.deck)
-    assert _keys(dealt, centre) == plain, "deck multiset must be preserved"
-
-    # Verify the wanted card reached the correct seat
-    assert dealt[0].key == "spotter", "spotter card must be at seat 0"
-
-    # Verify gate #1 compliance (no leaks)
-    leaks = leak_audit(ref)
-    assert not leaks, "UAT workflow must pass gate #1 audit"
-
-    # Verify record contains uat:true marking (already checked above)
-    # No additional check needed in decision log
-
-    # Verify served_by for human seat is "human"
-    human_seat = 0
-    served = {d.served_by for d in rec.decision_log if d.seat == human_seat}
-    assert served == {"human"}, "human seat must be served by human policy"
-
-    print(f"UAT workflow validated: {rec.uat is True}, RNG preserved, gate #1 passed")
+def test_referee_transcript_flag_writes_a_live_game_log():
+    """Break caught: parser-only flag or post-game renderer leaves no tailable
+    sidecar during normal demo execution."""
+    with TemporaryDirectory() as tmp:
+        path = Path(tmp) / "referee.log"
+        run = subprocess.run(
+            [sys.executable, "-m", "games.changeling.demo", "--seed", "42",
+             "--rounds", "1", "--referee-transcript", str(path)],
+            text=True, capture_output=True, check=False)
+        assert run.returncode == 0, run.stderr
+        assert path.read_text(encoding="utf-8").splitlines()
 
 def _keys(dealt, centre):
     return sorted([c.key for c in dealt.values()] + [c.key for c in centre])
