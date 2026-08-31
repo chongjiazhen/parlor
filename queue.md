@@ -45,7 +45,7 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
 | **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
-| **belfry** | done, its scoring lane, and its control's instrument check PASSES (2026-08-29) | **never** | the first live game, and nothing blocks it - the row below is the lane. `games/belfry/RULES.md` carries the knowledge model and the discretion table; `docs/measurements.md` §belfry carries the random control at the settings that run should use, and the check inside it |
+| **belfry** | done, scoring lane, control instrument, and first sampled-player arm read | **never** | referee-seat spike remains. `docs/measurements.md` §belfry and `transcripts/belfry-live1.md` carry live1; it is not the 60-game/0.0 criterion arm |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
 | **adjudicator** | not built | n/a | the spike itself (S8) - a model in the referee's seat for the discretionary choices only, which belfry has already isolated and logged |
 
@@ -193,13 +193,6 @@ Reference already written down, unmeasured unless it says otherwise:
   and the graded-taint fix that does.
 
 belfry - state and pointers are §What each rung owes; these are its rows.
-
-- [ ] **The first live game.** The lane is `eval.run_belfry`, 5 seats compact seed
-      6100, `--no-thinking`; the control is day-1 40.00% (44/110) on a 40.00%
-      board. Cost is measured: 5 seats ~49 decisions, 7 ~119, 9 ~183, one call
-      each. The full script re-baselines every number, so pick one and say which -
-      and on the full script the day-1 denominator is the VOTED executions, a
-      fifth smaller than the executions themselves.
 - [ ] **A model in the referee's seat, for the discretionary choices only.** The
       spike the ladder was pointed at, and belfry makes it small: the choices are
       already isolated in one place and logged, so the arm replaces the seeded

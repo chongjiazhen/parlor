@@ -125,6 +125,17 @@ def summary_for(rows: list[dict]) -> dict:
         "model_votes": d["vote_decisions"] - d["vote_fallbacks"],
         "integrity": {"decisions": d["decisions"], "fallbacks": d["fallbacks"],
                       "recovered": d["recovered"]},
+    }, "args": {
+        "games": verdict.GAMES_PROMISED,
+        "arm": "llm",
+        "seats": 5,
+        "script": "compact",
+        "backend": "local",
+        "model": "qwen36-35b-a3b-iq3",
+        "rounds": 1,
+        "temperature": 0.0,
+        "no_thinking": False,
+        "seed": 6100,
     }}
 
 
@@ -330,6 +341,31 @@ class Voids(unittest.TestCase):
         self.assertIn("VERDICT:", text)
 
 
+class CriterionBinding(unittest.TestCase):
+    """Criterion arithmetic cannot attach to a record with changed run settings."""
+
+    def test_a_temperature_mismatch_is_not_given_a_criterion_verdict(self):
+        """Removing config validation would call a sampled-player arm pre-committed."""
+        rows = arm(60, 0.7, 0.3, seed=38)
+        summary = summary_for(rows)
+        summary["args"]["temperature"] = 0.8
+
+        text, code = run(rows, summary)
+
+        self.assertEqual(code, 3)
+        self.assertIn("temperature: expected 0.0, record 0.8", text)
+        self.assertIn("NOT this criterion", text)
+        self.assertNotIn("VERDICT:", text)
+
+    def test_cli_does_not_allow_the_criterion_game_count_to_be_overridden(self):
+        """Adding ``--games`` back would let an operator rewrite promised N."""
+        with unittest.mock.patch("sys.argv", ["x", "--games", "100"]):
+            with self.assertRaises(SystemExit) as raised:
+                verdict.main()
+
+        self.assertEqual(raised.exception.code, 2)
+
+
 class InstrumentControl(unittest.TestCase):
     """A number this file derives is worth nothing until it agrees with the scorer."""
 
@@ -363,11 +399,12 @@ class InstrumentControl(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("published no day-1 hits", text)
 
-    def test_an_off_campaign_record_is_marked_an_audit_not_a_verdict(self):
+    def test_an_off_campaign_record_is_rejected_before_a_verdict(self):
         text, code = run(arm(60, 0.7, 0.3, seed=45),
                          path="eval/records/somebody-elses.json")
-        self.assertEqual(code, 0)
-        self.assertIn("NOT the pre-committed arm", text)
+        self.assertEqual(code, 3)
+        self.assertIn("record path: expected", text)
+        self.assertNotIn("VERDICT:", text)
 
     def test_vote_provenance_reproduces_from_the_rows(self):
         rows = arm(60, 0.9, 0.1, seed=46)
@@ -502,7 +539,9 @@ class TheCliRunsTheControllerItShips(unittest.TestCase):
         buf = io.StringIO()
         code = 0
         with contextlib.redirect_stdout(buf):
-            with unittest.mock.patch("sys.argv", ["x", path, "--games", "60"]):
+            with (unittest.mock.patch("sys.argv", ["x", path]),
+                  unittest.mock.patch.object(
+                      verdict, "CAMPAIGN", Path(path).as_posix())):
                 try:
                     verdict.main()
                 except SystemExit as exc:

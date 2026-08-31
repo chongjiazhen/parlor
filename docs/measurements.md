@@ -111,8 +111,8 @@ mechanically derivable part.
 
 ## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it now PASSES
 
-**No model has played this rung.** Every row is the RANDOM policy: what the rules
-alone do, and what a live arm has to be read against.
+**Every row in this section is the RANDOM policy:** what the rules alone do, and
+what a live arm has to be read against. The first sampled-player reading is below.
 
 **These replace the 2026-08-28 columns, which were measured on a different game.**
 Two commits moved random play underneath them: `1b926f9` (a role search prefers the
@@ -195,6 +195,28 @@ py -3 -m eval.run_belfry --games 200 --arm random --seats 5  --script compact   
 py -3 -m eval.run_belfry --games 300 --arm random --seats 9  --script full   --rounds 1 --seed 7000 --out eval/records/belfry-control-9full.json
 py -3 -m eval.run_belfry --games 200 --arm random --seats 10 --script full   --rounds 1 --seed 9400 --out eval/records/belfry-control-10full.json
 ```
+
+## belfry live1 - sampled-player measurement, 2026-08-31
+
+Rendered record: [`transcripts/belfry-live1.md`](../transcripts/belfry-live1.md).
+100/100 local `qwen36-35b-a3b-iq3` games: 5 seats, compact script, one talk
+round, seed 6100, `--no-thinking`, temperature 0.8. It shares the 5-seat compact
+control's table, script, rounds and seed. Fallback was **1.49% (82/5515)**, below
+the 10% void bar; 12.84% (708/5515) were recovered legal answers.
+
+Good-seat vote discrimination was **+16.09pp [11.44pp, 20.82pp]**: 591/801 yes on
+evil nominees against 634/1099 yes on good nominees. Random control is +2.41pp
+[-1.49pp, +6.15pp] over 200 games. This record's game-bootstrap interval clears
+zero; it is a dated reading of this sampled-player arm, not a claim about models.
+Day-1 voted execution accuracy was 29/60 = 48.33% [36.17%, 60.69%] against 40.00%
+chance, so its interval spans chance. Good won 42/100 = 42.00% [32.80%, 51.79%];
+no deduction or deception result is inferred from that outcome.
+
+**Not an execution of `docs/belfry-live1-criterion.md`.** That promise fixed 60
+games, temperature 0.0 and no `--no-thinking`; this arm ran 100, 0.8 and
+`--no-thinking`. The criterion remains unedited. `eval.belfry_live1_verdict` now
+checks its full launch binding and rejects this record with exit 3 rather than
+printing a criterion verdict.
 
 ## Route: local IS the gate lane - corrected 2026-08-28
 

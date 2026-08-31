@@ -40,7 +40,8 @@ Five things it does, in the order the criterion uses them:
 
 Exit codes, so a caller can gate on it: **0** the criterion was applied, **1** the
 instrument control disagreed or the record is missing, **2** the run is void by its
-own pre-committed conditions.
+own pre-committed conditions, **3** the record does not match the criterion's
+pre-committed configuration.
 
 It infers no deduction or deception figure from the win rate. A win on this rung is
 a four-day chain and attributing it to one decision is not something the record
@@ -63,6 +64,20 @@ CAMPAIGN = "eval/records/belfry-live1.json"
 
 #: Pre-committed in ``docs/belfry-live1-criterion.md``, every one before any data.
 GAMES_PROMISED = 60
+#: Exact launch settings the criterion binds. A record at the campaign path is not
+#: enough: a changed player setting is a different arm and gets no criterion read.
+CRITERION_ARGS = {
+    "games": GAMES_PROMISED,
+    "arm": "llm",
+    "seats": 5,
+    "script": "compact",
+    "backend": "local",
+    "model": "qwen36-35b-a3b-iq3",
+    "rounds": 1,
+    "temperature": 0.0,
+    "no_thinking": False,
+    "seed": 6100,
+}
 #: Below this many good-seat votes on EITHER conditional arm, clause A is not read.
 ARM_FLOOR = 100
 #: Below this many misled good-seat votes, no misled/clear gap is reported. The
@@ -319,6 +334,22 @@ def control(summary: dict, derived: dict,
     return bad
 
 
+def criterion_mismatches(summary: dict, path: Path) -> list[str]:
+    """Reasons this record is not belfry live arm #1's promised configuration."""
+    bad = []
+    if path.as_posix() != CAMPAIGN:
+        bad.append(f"record path: expected {CAMPAIGN}, record {path.as_posix()}")
+    args = summary.get("args")
+    if not isinstance(args, dict):
+        return bad + ["record args: expected launch settings, record none"]
+    for name, expected in CRITERION_ARGS.items():
+        if name not in args:
+            bad.append(f"{name}: expected {expected!r}, record missing")
+        elif args[name] != expected:
+            bad.append(f"{name}: expected {expected!r}, record {args[name]!r}")
+    return bad
+
+
 def voids(derived: dict, promised: int) -> list[str]:
     """The pre-committed void conditions, in the criterion's own words."""
     out = []
@@ -399,10 +430,6 @@ def report(summary: dict, derived: dict, path: Path,
     score = summary.get("score", {})
     out = [f"belfry live arm #1 - {path.as_posix()}",
            "criterion: docs/belfry-live1-criterion.md (pre-committed, not editable)"]
-    if path.as_posix() != CAMPAIGN:
-        out += ["", f"** NOT the pre-committed arm ({CAMPAIGN}). The arithmetic "
-                    f"below is an audit of this record, not a verdict. **"]
-
     bad = control(summary, derived, rows)
     out += ["", "instrument control - the summary against the rows behind it"]
     if bad:
@@ -411,6 +438,14 @@ def report(summary: dict, derived: dict, path: Path,
                     "it agrees with what the scorer published."]
         return out, 1
     out += ["  the published vote and execution counts reproduce from the rows"]
+
+    mismatches = criterion_mismatches(summary, path)
+    if mismatches:
+        out += ["", "criterion binding"]
+        out += [f"  NOT this criterion: {mismatch}" for mismatch in mismatches]
+        out += ["", "no criterion verdict: record does not match the "
+                "pre-committed arm"]
+        return out, 3
 
     void = voids(derived, promised)
     out += ["", "void conditions, pre-committed"]
@@ -555,8 +590,6 @@ def main() -> None:
         description="apply belfry's pre-committed first-arm criterion")
     ap.add_argument("record", nargs="?", default=CAMPAIGN,
                     help=f"the run summary .json (default {CAMPAIGN})")
-    ap.add_argument("--games", type=int, default=GAMES_PROMISED,
-                    help="games the criterion promised, for the partial-run void")
     args = ap.parse_args()
 
     if hasattr(sys.stdout, "reconfigure"):
@@ -569,7 +602,7 @@ def main() -> None:
         print(f"no record at {exc.filename} - the arm has not been run")
         sys.exit(1)
 
-    lines, code = report(summary, recompute(rows), path, args.games, rows)
+    lines, code = report(summary, recompute(rows), path, GAMES_PROMISED, rows)
     print("\n".join(lines))
     sys.exit(code)
 
