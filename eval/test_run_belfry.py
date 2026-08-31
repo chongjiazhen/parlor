@@ -8,13 +8,16 @@ import os
 import random
 import tempfile
 import unittest
+from dataclasses import asdict
+from types import SimpleNamespace
 from unittest import mock
 
 from core.runlog import record_paths
 from eval.run_belfry import (build_backend, build_policies, one_game, report,
                              score)
 from games.belfry.player import (ExecutionRecord, GameRecord, LLMPolicy,
-                                 RandomPolicy, VoteRecord)
+                                 RandomPolicy, VoteRecord, play_game)
+from games.belfry.adjudicator import ChoiceEvent
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import Align
 from games.belfry.state import BadSetup
@@ -24,7 +27,8 @@ def args(**over) -> argparse.Namespace:
     base = dict(games=2, arm="random", seats=5, script="compact", backend=None,
                 model="auto", rounds=1, max_days=12, register="character",
                 retries=2, temperature=0.8, max_tokens=1536, timeout=120.0,
-                no_thinking=False, seed=None, out=None, adjudicator="random")
+                no_thinking=False, seed=None, out=None, adjudicator="random",
+                adjudicator_backend=None, adjudicator_model=None)
     base.update(over)
     return argparse.Namespace(**base)
 
@@ -283,6 +287,52 @@ class TestIntegrityAndRefusals(unittest.TestCase):
     def test_the_fallback_rate_is_over_decisions_and_not_games(self):
         s = score([self.rec(decisions=100, fallbacks=5)])
         self.assertAlmostEqual(s["integrity"]["fallback_rate"], 0.05)
+
+    def test_adjudicator_fallbacks_stay_out_of_player_integrity(self):
+        """A setup fallback is referee provenance, not a player decision."""
+        record = self.rec()
+        record.adjudicator = {"calls": 4, "fallbacks": 1, "recovered": 0,
+                              "events": [], "upstreams": {"judge": 3}}
+        summary = score([record])
+        self.assertEqual(summary["integrity"]["fallbacks"], 0)
+        self.assertEqual(summary["adjudicator_integrity"]["calls"], 4)
+        self.assertEqual(summary["adjudicator_integrity"]["fallback_rate"], 0.25)
+
+    def test_adjudicator_fallback_rate_over_the_bar_voids_the_report(self):
+        record = self.rec()
+        record.adjudicator = {"calls": 4, "fallbacks": 1, "recovered": 0,
+                              "events": [], "upstreams": {"judge": 3}}
+        self.assertIn("VOID: adjudicator fallback rate",
+                      report(score([record]), args(), 1.0))
+
+    def test_legacy_rows_have_no_adjudicator_integrity_stratum(self):
+        self.assertIsNone(score([self.rec()])["adjudicator_integrity"])
+
+    def test_adjudicator_events_are_serialized_with_the_game_row(self):
+        event = ChoiceEvent("sot_belief", ("witness",), "witness", False,
+                            False, "judge")
+        ref = SimpleNamespace(
+            n=0,
+            grim=SimpleNamespace(script=SimpleNamespace(name="stub"), seats=[],
+                                  adjudicator_events=[event],
+                                  alive_seats=lambda: []),
+            done=lambda: True,
+            winner="good",
+            reason="done",
+            day=1,
+            cause="demon-dead",
+            knowledge={},
+            executions=[],
+            public_events=[],
+            referee_log=[],
+        )
+        row = asdict(play_game(ref, {}))
+        self.assertIsNotNone(row["adjudicator"])
+        self.assertEqual(row["adjudicator"]["events"], [{
+            "key": "sot_belief", "options": ("witness",),
+            "selected": "witness", "fallback": False, "recovered": False,
+            "upstream": "judge",
+        }])
 
     def test_a_run_above_the_bar_is_VOIDED_in_its_own_report(self):
         s = score([self.rec(decisions=100, fallbacks=30)])

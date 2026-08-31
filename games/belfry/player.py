@@ -27,7 +27,7 @@ from __future__ import annotations
 import random
 import time
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 
 from core.backends import Backend
 from core.replies import (ParseError, parse_bool, parse_index, parse_index_set,
@@ -342,6 +342,9 @@ class GameRecord:
     log: list[str] = field(default_factory=list)
     upstreams: dict[str, int] = field(default_factory=dict)
     trace_sample: list[str] = field(default_factory=list)
+    #: Referee setup provenance, deliberately separate from player integrity.
+    #: ``None`` preserves the meaning of records written before adjudication.
+    adjudicator: dict | None = None
     #: Seat -> how many of the things it was told were false. Zero for every seat
     #: on a table with nothing that switches an ability off, which is what makes it
     #: readable as a check that the stratum below has a sample at all.
@@ -476,4 +479,14 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
         if line not in seen:
             seen.append(line)
     rec.trace_sample = seen[:8]
+    events = ref.grim.adjudicator_events
+    if events:
+        rec.adjudicator = {
+            "calls": len(events),
+            "fallbacks": sum(event.fallback for event in events),
+            "recovered": sum(event.recovered for event in events),
+            "events": [asdict(event) for event in events],
+            "upstreams": dict(Counter(event.upstream for event in events
+                                        if event.upstream)),
+        }
     return rec

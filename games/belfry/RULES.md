@@ -223,7 +223,12 @@ audit would otherwise have to grade.
 ## Discretion
 
 The choices a human referee would make with taste, made from the seeded RNG and
-logged referee-side:
+logged referee-side. The S8 model arm moves **setup-only** discretion: it may
+choose only a bounded offered menu during setup, never a player action, public
+announcement, or later night choice. Each model choice emits its offered options,
+selected option, fallback/recovery state, and upstream identity into private
+referee provenance. That provenance is transcript-only: it reaches neither a
+seat ask nor either public channel, and it is not an audit input.
 
 | Choice | When | How |
 |---|---|---|
@@ -272,10 +277,10 @@ appears only in the referee-side record.
 Each of these is a measured arm, not a convenience:
 
 - **Per-query discretion** for the ambiguous roles (§Discretion).
-- **A model in the referee's seat** for the discretionary choices, which is the
-  spike this rung's design makes cheap: the choices are already isolated and
-  logged, so replacing the RNG with a model changes one function and nothing about
-  the audit.
+- **A setup-only model referee** for bounded setup discretion. Its route is
+  separate from every player route, its temperature is fixed at 0.0, and its
+  private provenance is scored separately from player fallbacks. The paired arm
+  changes that source alone; it does not move player policy, payloads, or audit.
 - **Talk rounds** (`--rounds`), the largest single lever on cost.
 - **Script size**, which re-baselines every number.
 - **Dead seats speaking**, currently on. Turning it off is a rules change and

@@ -28,10 +28,13 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from games.belfry.roles import (ALIGNMENT, DISTRIBUTION, Align, Role, Script,
                                 Team)
+
+if TYPE_CHECKING:
+    from games.belfry.adjudicator import ChoiceEvent
 
 
 class Adjudicator(Protocol):
@@ -121,6 +124,8 @@ class Grimoire:
     mimic_as: str = ""
     #: Referee-side narration of every discretionary choice. Reaches no model.
     log: list[str] = field(default_factory=list)
+    #: Bounded model-adjudication provenance. Referee-side only.
+    adjudicator_events: list[ChoiceEvent] = field(default_factory=list)
 
     # ---- reading the board ---------------------------------------------------
 
@@ -325,6 +330,7 @@ def deal(n: int, script: Script, rng: random.Random,
                 "seat that must believe it holds one")
         believed = (adjudicator.sot_belief(spare, rng) if adjudicator is not None
                     else rng.choice(spare))
+        _record_adjudicator_events(grim, adjudicator)
         seats[sot].believes = believed
         grim.log.append(f"discretion: seat {sot} is the sot and believes it is "
                         f"the {believed.key}")
@@ -343,19 +349,21 @@ def deal(n: int, script: Script, rng: random.Random,
             herring = (adjudicator.herring_registration(good, rng)
                       if adjudicator is not None
                       else rng.choice(good))
+            _record_adjudicator_events(grim, adjudicator)
             grim.herring = herring
             grim.log.append(f"discretion: seat {grim.herring} reads as the demon "
                             f"to the diviner all game")
 
     if grim.find("hermit") is not None:
-        evil_roles = [r.key for r in script.roles if r.align is Align.EVIL
+        evil_roles = [r for r in script.roles if r.align is Align.EVIL
                       and r.key != "hermit"]
         if adjudicator is not None:
             hermit_evil, hermit_as_role = adjudicator.hermit_registration(evil_roles, rng)
-            hermit_as = hermit_as_role.key if hasattr(hermit_as_role, 'key') else str(hermit_as_role)
+            _record_adjudicator_events(grim, adjudicator)
+            hermit_as = hermit_as_role.key
         else:
             hermit_evil = rng.random() < 0.5
-            hermit_as = rng.choice(evil_roles) if evil_roles else "fiend"
+            hermit_as = rng.choice(evil_roles).key if evil_roles else "fiend"
         grim.hermit_evil = hermit_evil
         grim.hermit_as = hermit_as
         grim.log.append(
@@ -365,9 +373,10 @@ def deal(n: int, script: Script, rng: random.Random,
     if grim.find("mimic") is not None:
         if adjudicator is not None:
             mimic_good, mimic_as = adjudicator.mimic_registration(
-                [r.key for r in script.by_team(Team.TOWNSFOLK)], rng)
+                list(script.by_team(Team.TOWNSFOLK)), rng)
+            _record_adjudicator_events(grim, adjudicator)
             grim.mimic_good = mimic_good
-            grim.mimic_as = mimic_as.key if hasattr(mimic_as, 'key') else str(mimic_as)
+            grim.mimic_as = mimic_as.key
         else:
             grim.mimic_good = rng.random() < 0.5
             good_roles = [r.key for r in script.by_team(Team.TOWNSFOLK)]
@@ -377,6 +386,13 @@ def deal(n: int, script: Script, rng: random.Random,
             + (f"as good, and as the {grim.mimic_as}" if grim.mimic_good
                else "as evil, as itself"))
     return grim
+
+
+def _record_adjudicator_events(grim: Grimoire,
+                               adjudicator: Adjudicator | None) -> None:
+    """Copy bounded model provenance into the referee-only grimoire."""
+    if adjudicator is not None and hasattr(adjudicator, "events"):
+        grim.adjudicator_events[:] = adjudicator.events
 
 
 def _take(pool: list[Role], count: int, script: Script, what: str) -> list[Role]:

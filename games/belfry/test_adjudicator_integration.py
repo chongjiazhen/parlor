@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import random
 import unittest
 
+from games.belfry.adjudicator import ModelAdjudicator
+from games.belfry.audit import leak_audit
+from games.belfry.referee import BelfryReferee
 from games.belfry.roles import FULL, ROLES
 from games.belfry.state import Adjudicator, deal
 
@@ -33,6 +37,23 @@ class StubAdjudicator:
     def mimic_registration(self, good_roles, rng):
         self.mimic_calls += 1
         return (True, ROLES["witness"])
+
+
+class FixedModelBackend:
+    def complete_meta(self, context: str) -> tuple[str, str]:
+        return json.dumps({"choice": json.loads(context)["options"][0]}), "fixed-model"
+
+
+def gate_one_inputs(ref: BelfryReferee) -> tuple[tuple[str, ...], tuple[str, ...], str]:
+    """The bytes Gate #1 reads at this decision point, before its matching pass."""
+    turn = ref.pending()
+    assert turn is not None
+    return (
+        tuple(ref.seat_lines(seat, include_speech=False)
+              for seat in range(ref.n)),
+        tuple(ref.self_line(seat) for seat in range(ref.n)),
+        ref.ask(turn.seat),
+    )
 
 
 class TestAdjudicatorIntegration(unittest.TestCase):
@@ -85,6 +106,19 @@ class TestAdjudicatorIntegration(unittest.TestCase):
         self.assertNotIn("reads as the demon", log_text)  # herring not present
         # Check that hermit is NOT in the log since hermit not present  
         self.assertNotIn("the hermit registers", log_text)  # hermit not present
+
+    def test_adjudicator_provenance_does_not_change_gate_one_inputs(self):
+        adjudicator = ModelAdjudicator(FixedModelBackend(), random.Random(9))
+        ref = BelfryReferee.new(11, seed=42, script=FULL,
+                                adjudicator=adjudicator)
+        self.assertTrue(ref.grim.adjudicator_events)
+        before = gate_one_inputs(ref)
+        before_audit = leak_audit(ref)
+
+        ref.grim.adjudicator_events.clear()
+
+        self.assertEqual(gate_one_inputs(ref), before)
+        self.assertEqual(leak_audit(ref), before_audit)
 
 
 if __name__ == '__main__':

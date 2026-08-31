@@ -72,6 +72,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--backend", default="gray", choices=sorted(ENDPOINTS))
     ap.add_argument("--model", default="auto")
+    ap.add_argument("--require-served",
+                    help="fail unless every successful response names this exact "
+                         "upstream model in its response body")
     ap.add_argument("-n", "--calls", type=int, default=12,
                     help="burst size; 12 is enough to expose a cooldown (default: 12)")
     # A probe asks for 8 tokens. A call that has not answered in 30s is not slow,
@@ -121,8 +124,15 @@ def main(argv: list[str] | None = None) -> int:
         if len(served) > 1:
             print("  NOTE: more than one upstream answered - availability is not capability.")
             print("  Pin a model before any A/B, and stratify results by served upstream.")
-    carried = len(ok) >= n - 1
+    wrong = {name: count for name, count in served.items()
+             if args.require_served is not None and name != args.require_served}
+    carried = len(ok) >= n - 1 and not wrong
+    if wrong:
+        print("  WRONG UPSTREAM: expected "
+              f"{args.require_served}; got "
+              + ", ".join(f"{name} x{count}" for name, count in wrong.items()))
     print("VERDICT:", "can carry a stream" if carried else
+          "wrong upstream served" if wrong else
           "PARTIAL - single calls serve, a stream does not" if ok else
           "tier is not answering")
     return 0 if carried else 1
