@@ -51,6 +51,7 @@ CONTROL_ARGS = {
     "adjudicator": "random",
     "adjudicator_backend": None,
     "adjudicator_model": None,
+    "adjudicator_temperature": None,
     "out": CONTROL_CAMPAIGN,
 }
 MODEL_ARGS = {
@@ -58,6 +59,7 @@ MODEL_ARGS = {
     "adjudicator": "model",
     "adjudicator_backend": "local",
     "adjudicator_model": ADJUDICATOR_MODEL,
+    "adjudicator_temperature": ADJUDICATOR_TEMPERATURE,
     "out": MODEL_CAMPAIGN,
 }
 
@@ -384,8 +386,13 @@ def _model_trace(row: dict, seed: int, options: tuple[str, ...],
     if type(event["fallback"]) is not bool or type(event["recovered"]) is not bool:
         voids.append(f"model seed {seed} has non-boolean provenance flags")
         return None, False
-    if event["upstream"] is not None and not isinstance(event["upstream"], str):
-        voids.append(f"model seed {seed} has corrupt upstream provenance")
+    if event["fallback"] and event["upstream"] is not None:
+        voids.append(f"model seed {seed} fallback carries model provenance")
+        return None, False
+    if not event["fallback"] and event["upstream"] != ADJUDICATOR_MODEL:
+        voids.append(
+            f"model seed {seed} ran {event['upstream']!r}, not the committed "
+            f"{ADJUDICATOR_MODEL!r}")
         return None, False
     logged = _herring_from_log(row, "model", seed)
     if logged != event["selected"]:

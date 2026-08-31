@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+import tempfile
 import unittest
 from unittest import mock
 
@@ -58,6 +60,19 @@ class TestRunBelfryAdjudicator(unittest.TestCase):
         adjudicator = build_adjudicator(make_args(temperature=0.85), 6100)
         self.assertEqual(adjudicator.backend.temperature, 0.0)
         self.assertEqual(adjudicator.backend.model, "judge-model")
+
+    def test_summary_records_the_effective_adjudicator_temperature(self):
+        """A criterion can bind the hard setting only when the record carries it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out = f"{tmp}/arm.json"
+            argv = ["run_belfry.py", "--games", "0", "--adjudicator", "model",
+                    "--adjudicator-backend", "local", "--adjudicator-model",
+                    "judge-model", "--out", out]
+            with mock.patch("sys.argv", argv), mock.patch("builtins.print"):
+                main()
+            with open(out, encoding="utf-8") as fh:
+                summary = json.load(fh)
+        self.assertEqual(summary["args"]["adjudicator_temperature"], 0.0)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,9 @@ seats, compact script, one talk round, random player policy, and --no-thinking.
 The control uses the seeded random adjudicator and no model route. The moved side
 changes only the adjudicator to local qwen36-35b-a3b-iq3. Its sampler seed is the
 game seed, visible thinking is disabled by the driver, and its temperature is
-fixed in the driver at 0.0 rather than inherited from a player option.
+fixed in the driver at 0.0 rather than inherited from a player option. The model
+summary records that effective setting as `adjudicator_temperature: 0.0`; the
+control records it as null.
 
 The intended files are:
 
@@ -52,6 +54,8 @@ The arm is VOID, with no source result, when any of these holds:
 - a model choice opportunity has no event, an event exists with no opportunity,
   the event's menu or selected outcome disagrees with the reconstructed game, or
   its selected outcome disagrees with the referee log;
+- a fallback event carries non-null model provenance, or a non-fallback event's
+  upstream model identity is not exactly qwen36-35b-a3b-iq3;
 - a choice event exposes an input field outside the committed provenance schema
   key, options, selected, fallback, recovered, upstream;
 - the classifier labels are not balanced one random and one model trace for each

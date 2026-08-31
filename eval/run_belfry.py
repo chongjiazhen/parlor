@@ -57,6 +57,7 @@ from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
 ARMS = ("random", "llm", "llm-good", "llm-evil")
 
 ADJUDICATOR_ARMS = ("random", "model")
+ADJUDICATOR_TEMPERATURE = 0.0
 
 ADJUDICATOR_SYSTEM_PROMPT = (
     "You are the referee for a hidden-role game. Choose exactly one option from "
@@ -70,7 +71,7 @@ def build_adjudicator_backend(args, seed: int | None) -> Backend:
         model=args.adjudicator_model,
         api_key=api_key_from_env(),
         system_prompt=ADJUDICATOR_SYSTEM_PROMPT,
-        temperature=0.0,
+        temperature=ADJUDICATOR_TEMPERATURE,
         timeout=args.timeout,
         max_tokens=args.max_tokens,
         seed=seed,
@@ -83,6 +84,14 @@ def build_adjudicator(args, seed: int | None) -> ModelAdjudicator | None:
     if args.adjudicator == "random":
         return None
     return ModelAdjudicator(build_adjudicator_backend(args, seed), random.Random(seed))
+
+
+def recorded_args(args) -> dict:
+    """Persist the effective referee setting which is not a CLI option."""
+    recorded = vars(args).copy()
+    recorded["adjudicator_temperature"] = (
+        ADJUDICATOR_TEMPERATURE if args.adjudicator == "model" else None)
+    return recorded
 
 STATE = RunState()
 
@@ -467,7 +476,7 @@ def main() -> None:
     print(report(s, args, time.time() - started))
     if args.out:
         with open(record_paths(args.out)[0], "w", encoding="utf-8") as fh:
-            json.dump({"score": s, "args": vars(args)}, fh, indent=2)
+            json.dump({"score": s, "args": recorded_args(args)}, fh, indent=2)
         print(f"\nwrote {record_paths(args.out)[0]}")
 
 

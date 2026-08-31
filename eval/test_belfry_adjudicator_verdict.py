@@ -42,6 +42,7 @@ def _args(adjudicator: str) -> dict:
         "adjudicator_model": (
             "qwen36-35b-a3b-iq3" if adjudicator == "model" else None
         ),
+        "adjudicator_temperature": 0.0 if adjudicator == "model" else None,
         "out": (
             "eval/records/belfry-adjudicator-model.json"
             if adjudicator == "model"
@@ -79,14 +80,14 @@ def _arm(adjudicator: str, *, model_rank: int | None = None,
                 "selected": selected,
                 "fallback": fallback,
                 "recovered": False,
-                "upstream": None if fallback else "local",
+                "upstream": None if fallback else "qwen36-35b-a3b-iq3",
             }
             row["adjudicator"] = {
                 "calls": 1,
                 "fallbacks": int(fallback),
                 "recovered": 0,
                 "events": [event],
-                "upstreams": {} if fallback else {"local": 1},
+                "upstreams": {} if fallback else {"qwen36-35b-a3b-iq3": 1},
             }
             row["log"] = [line for line in row["log"]
                           if "reads as the demon to the diviner" not in line]
@@ -118,7 +119,9 @@ def _arm(adjudicator: str, *, model_rank: int | None = None,
             "fallbacks": adjudicator_falls,
             "fallback_rate": adjudicator_falls / adjudicator_calls,
             "recovered": 0,
-            "upstreams": {"local": adjudicator_calls - adjudicator_falls},
+            "upstreams": {
+                "qwen36-35b-a3b-iq3": adjudicator_calls - adjudicator_falls,
+            },
         }
     return {"args": _args(adjudicator), "score": score}, rows
 
@@ -189,7 +192,7 @@ class TestEvidenceBoundary(unittest.TestCase):
         row["adjudicator"] = None
         integrity = model[0]["score"]["adjudicator_integrity"]
         integrity["calls"] -= 1
-        integrity["upstreams"]["local"] -= 1
+        integrity["upstreams"]["qwen36-35b-a3b-iq3"] -= 1
         integrity["fallback_rate"] = integrity["fallbacks"] / integrity["calls"]
         lines, code = report(control, model)
         self.assertEqual(code, 2)
@@ -250,6 +253,34 @@ class TestRecipeBinding(unittest.TestCase):
         control, model = _arm("random"), _arm("model")
         model[0]["args"]["out"] = "eval/records/other.json"
         self.assertEqual(report(control, model)[1], 3)
+
+    def test_adjudicator_temperature_mismatch_is_not_this_criterion(self):
+        control, model = _arm("random"), _arm("model")
+        model[0]["args"]["adjudicator_temperature"] = 0.9
+        self.assertEqual(report(control, model)[1], 3)
+
+
+class TestAdjudicatorProvenance(unittest.TestCase):
+    def test_successful_event_requires_the_committed_model_identity(self):
+        control, model = _arm("random"), _arm("model")
+        for row in model[1]:
+            if row["adjudicator"]:
+                row["adjudicator"]["events"][0]["upstream"] = "wrong-model"
+                row["adjudicator"]["upstreams"] = {"wrong-model": 1}
+        model[0]["score"]["adjudicator_integrity"]["upstreams"] = {
+            "wrong-model": 20,
+        }
+        self.assertEqual(report(control, model)[1], 2)
+
+    def test_fallback_event_carries_no_upstream_identity(self):
+        control, model = _arm("random"), _arm("model", adjudicator_fallbacks=1)
+        row = next(row for row in model[1]
+                   if row["adjudicator"] and row["adjudicator"]["fallbacks"])
+        row["adjudicator"]["events"][0]["upstream"] = "qwen36-35b-a3b-iq3"
+        row["adjudicator"]["upstreams"] = {"qwen36-35b-a3b-iq3": 1}
+        summary = model[0]["score"]["adjudicator_integrity"]
+        summary["upstreams"] = {"qwen36-35b-a3b-iq3": 20}
+        self.assertEqual(report(control, model)[1], 2)
 
 
 class TestHeldOutClassifier(unittest.TestCase):
