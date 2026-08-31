@@ -323,6 +323,12 @@ def report(s: dict, args, elapsed: float) -> str:
             f"{adjudicator_integrity['fallbacks']}/{adjudicator_integrity['calls']} "
             "setup choices fell back to random "
             f"({adjudicator_integrity['fallback_rate']:.2%} caused)")
+        if adjudicator_integrity["fallback_rate"] > integrity.VOID_BAR:
+            out.append(
+                "  VOID: adjudicator fallback rate "
+                f"{adjudicator_integrity['fallback_rate']:.2%} is above the "
+                f"{integrity.VOID_BAR:.0%} ceiling, so the game outcomes below "
+                "do not measure the model's setup discretion.")
     vote_rate = s["vote_fallback_rate"]
     if vote_rate is not None:
         out.append(f"  vote fallback {s['vote_fallbacks']}/{s['vote_decisions']} "

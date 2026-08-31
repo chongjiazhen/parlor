@@ -298,6 +298,13 @@ class TestIntegrityAndRefusals(unittest.TestCase):
         self.assertEqual(summary["adjudicator_integrity"]["calls"], 4)
         self.assertEqual(summary["adjudicator_integrity"]["fallback_rate"], 0.25)
 
+    def test_adjudicator_fallback_rate_over_the_bar_voids_the_report(self):
+        record = self.rec()
+        record.adjudicator = {"calls": 4, "fallbacks": 1, "recovered": 0,
+                              "events": [], "upstreams": {"judge": 3}}
+        self.assertIn("VOID: adjudicator fallback rate",
+                      report(score([record]), args(), 1.0))
+
     def test_legacy_rows_have_no_adjudicator_integrity_stratum(self):
         self.assertIsNone(score([self.rec()])["adjudicator_integrity"])
 
