@@ -253,6 +253,19 @@ referee discretion. Records remain untracked in `eval/records/` and are not
 re-scored. `docs/belfry-adjudicator-v2-criterion.md` binds fresh records and a
 narrow whole-fence normalization before S8b starts.
 
+## belfry setup-only adjudicator - S8b read, 2026-08-31
+
+Rendered record: [`transcripts/belfry-adjudicator-s8b.md`](../transcripts/belfry-adjudicator-s8b.md).
+S8b repeated the frozen 60-game pair under its new criterion, over seeds
+6100..6159. Both player fallback rates were 0/2809 (0.00%). Model adjudicator
+fallback was 0/20 (0.00%); control adjudicator fallback is n/a.
+
+All 20 paired legal traces remained. Nine odd-seed trace pairs were held out;
+source accuracy was **88.89%**, above Wilson 95% chance upper endpoint **70.97%**
+(18 labelled held-out traces). Verdict: **DISTINGUISHABLE**. This establishes a
+trace difference from seeded random in bounded setup choices only. It does not
+establish choice quality, referee quality, deduction, deception, or wins.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost

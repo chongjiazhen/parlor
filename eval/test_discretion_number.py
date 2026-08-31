@@ -9,7 +9,7 @@ from eval.run_belfry import build_adjudicator, one_game, score
 from eval.discretion_number import (calculate_discretion_number,
                                     extract_discretionary_choices)
 from games.belfry.referee import BelfryReferee
-from games.belfry.roles import FULL
+from games.belfry.roles import FULL, ROLES
 from games.belfry.state import Adjudicator, deal
 
 
@@ -31,13 +31,13 @@ class FixedAdjudicator:
 
     def hermit_registration(self, evil_roles, rng):
         self.call_count += 1
-        # Always return (False, "fiend")
-        return (False, "fiend")
+        # Always return (False, fiend)
+        return (False, ROLES["fiend"])
 
     def mimic_registration(self, good_roles, rng):
         self.call_count += 1
-        # Always return (True, "witness")
-        return (True, "witness")
+        # Always return (True, witness)
+        return (True, ROLES["witness"])
 
 
 class TestDiscretionaryChoiceExtraction(unittest.TestCase):
@@ -83,9 +83,9 @@ class TestDiscretionNumberCalculation(unittest.TestCase):
             def herring_registration(self, good_seats, rng):
                 return good_seats[0] if good_seats else None
             def hermit_registration(self, evil_roles, rng):
-                return (False, "fiend")
+                return (False, ROLES["fiend"])
             def mimic_registration(self, good_roles, rng):
-                return (True, "witness")
+                return (True, ROLES["witness"])
         
         fixed_adjudicator = FixedAdjudicator()
         

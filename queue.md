@@ -45,9 +45,9 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
 | **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
-| **belfry** | done, scoring lane, control instrument, and first sampled-player arm read | **never** | S8 is VOID at 60.00% adjudicator fallback; S8b is frozen, separately routed, and bound by `docs/belfry-adjudicator-v2-criterion.md` |
+| **belfry** | done, scoring lane, control instrument, sampled-player arm, and S8 referee read | **never** | S8b is DISTINGUISHABLE: bounded setup-choice traces differ from seeded random; `docs/measurements.md` holds limits |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
-| **adjudicator** | S8 void; S8b frozen, unrun | referee only | belfry setup-only model arm: discretionary choices only, private provenance, fail-closed launcher, and committed criterion |
+| **adjudicator** | S8b read | referee only | 88.89% held-out source accuracy clears 70.97% Wilson chance ceiling; bounded trace difference only |
 
 ## Gates already called
 
@@ -147,7 +147,6 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | entry condition | done when |
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| **S8** | **Run S8b belfry model-adjudicator arms. READY 2026-08-31** - S8 was VOID at 12/20 (60.00%) adjudicator fallback; parser-formatting correction, fresh criterion, and frozen dual-arm recipe landed. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
 | **S13** | **Claim-shaped self-outing re-score. READY 2026-08-31** - replace the over-broad theme-name match, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
 | **S14** | **Changeling deal-versus-dawn wording. READY 2026-08-31** - make the sleep claim name dealt state, not post-night belief. | no changeling arm in flight | isolated model-facing edit, audit test, and S5 marked pre-change |
 | **S15** | **Cabal solver-seat arm. READY 2026-08-31** - make the existing mechanical reader a player policy without widening what it can inspect. | S14 closed and no cabal arm in flight | policy, phase tests, and demo smoke run; no measurement claimed |
@@ -194,12 +193,6 @@ Reference already written down, unmeasured unless it says otherwise:
   art (`arXiv:2205.00451`).
 - `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
   and the graded-taint fix that does.
-
-belfry - state and pointers are §What each rung owes; these are its rows.
-- [ ] **Run the frozen S8b setup-only referee arm.** S8 voided at 12/20 (60.00%)
-      adjudicator fallback. `eval/runs/belfry-adjudicator-v2.cmd` holds fresh
-      random-control and model arms; `docs/belfry-adjudicator-v2-criterion.md`
-      binds its whole-fenced-JSON parser grammar and recipe.
 
 Instrument and integrity:
 
