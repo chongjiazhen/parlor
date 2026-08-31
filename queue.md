@@ -45,7 +45,7 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
 | **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
-| **belfry** | done, scoring lane, control instrument, and first sampled-player arm read | **never** | referee-seat spike remains. `docs/measurements.md` §belfry and `transcripts/belfry-live1.md` carry live1; it is not the 60-game/0.0 criterion arm |
+| **belfry** | done, scoring lane, control instrument, and first sampled-player arm read | **never** | setup-only referee-seat arm is frozen, unrun, and separately routed; `docs/belfry-adjudicator-criterion.md` binds its control/model recipe |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
 | **adjudicator** | not built | n/a | the spike itself (S8) - a model in the referee's seat for the discretionary choices only, which belfry has already isolated and logged |
 
@@ -147,7 +147,7 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | entry condition | done when |
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has the `Adjudicator` Protocol and four setup-choice seams; random control keeps its old seeded deal stream. The repaired discretion instrument uses held-out source classification and preserves every registration outcome, but no model adjudicator exists yet. The 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | a model adjudicator and measured, non-VOID discretion arm |
+| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has a setup-only model adjudicator, private provenance, a committed criterion, and a frozen dual-arm recipe. Both arms are unrun; the 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
@@ -193,11 +193,9 @@ Reference already written down, unmeasured unless it says otherwise:
   and the graded-taint fix that does.
 
 belfry - state and pointers are §What each rung owes; these are its rows.
-- [ ] **A model in the referee's seat, for the discretionary choices only.** The
-      spike the ladder was pointed at, and belfry makes it small: the choices are
-      already isolated in one place and logged, so the arm replaces the seeded
-      draw and changes nothing about the audit. The measurement is whether a seat
-      can tell which referee it faced.
+- [ ] **Run the frozen setup-only referee arm.** `eval/runs/belfry-adjudicator.cmd`
+      holds the random control and separately routed model side; its criterion is
+      `docs/belfry-adjudicator-criterion.md`. Both arms remain unrun.
 
 Instrument and integrity:
 
