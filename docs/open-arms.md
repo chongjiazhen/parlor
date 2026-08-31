@@ -465,16 +465,13 @@ since been reworded in the queue is the live statement; this is the reasoning.
 
 ## Seat the solver as an ARM
 
-- [ ] **Seat the solver as an ARM** - the half of `docs/reference-policies.md` that
-      is still unbuilt. The instrument exists and scores records
-      (`games/cabal/solver.py`, `python -m eval.derivable`); what does not exist is
-      a `SolverPolicy` with an `act(ref, seat)` that plays. That needs policy and
-      driver plumbing plus GPU, and cabal no longer has a GPU program - so it queues
-      at the publish boundary or behind changeling, not behind a freeze. `evidence_from_referee(ref, seat)` is already the whole input and is gate
-      #1-safe by construction - it reads `entitled_knowledge` and `public_events`
-      and holds no referee. Note what an arm buys before building it: the hunt is
-      mechanically flat (proved), so a solver arm can only differ from random at the
-      VOTE, and it is the vote strata that turned out to be the live question.
+- [x] **Seat the solver as an ARM - BUILT 2026-08-31T16:30:30.3689832Z.**
+      `SolverPolicy` acts on mechanically certain VOTEs only and delegates mixed
+      evidence plus every other phase to `RandomPolicy`; `--solver` seats it in the
+      cabal demo. `evidence_from_referee(ref, seat)` remains the whole reader, so
+      gate #1 safety is by construction. No campaign or measurement claimed. The
+      hunt remains mechanically flat, so this policy can differ from random only at
+      the VOTE, where the live question remains.
 
 
 ## Seat the heuristic against the MODEL

@@ -36,7 +36,8 @@ from functools import lru_cache
 from itertools import permutations
 
 from core.observability import Knowledge
-from games.cabal.referee import CabalReferee
+from games.cabal.player import RandomPolicy
+from games.cabal.referee import CabalReferee, Phase
 from games.cabal.roles import (ROLES_BY_KEY, SETUP_5, Role, Setup, Team,
                                legal_hunt_targets)
 
@@ -69,6 +70,29 @@ class ConstraintViolation(AssertionError):
     stops meaning what §Spec says it means, which is the one failure that would make
     every number downstream read high and plausible.
     """
+
+
+@dataclass
+class SolverPolicy:
+    """Mechanical player: act only when hard constraints prove a vote.
+
+    ``evidence_from_referee`` is its only reader of hidden-state-adjacent facts.
+    A mixed posterior is not a mechanical conclusion, so it stays random rather
+    than importing a threshold or a behaviour model through this policy.
+    """
+
+    fallback: RandomPolicy
+
+    def act(self, ref: CabalReferee, seat: int) -> dict:
+        if ref.phase is not Phase.VOTE:
+            return self.fallback.act(ref, seat)
+        taint = team_taint(evidence_from_referee(ref, seat),
+                           tuple(ref.proposal or ()))
+        if taint == 0.0:
+            return {"vote": True}
+        if taint == 1.0:
+            return {"vote": False}
+        return self.fallback.act(ref, seat)
 
 
 @dataclass(frozen=True)

@@ -11,6 +11,7 @@ cheap way to eyeball whether agents will actually deceive.
     python -m games.cabal.demo --rounds 2            # two discussion rounds
     python -m games.cabal.demo --backend local --model qwen36-35b-a3b-iq3
     python -m games.cabal.demo --backend clean --speaker   # only discussion is live
+    python -m games.cabal.demo --solver                    # mechanical vote reader
     python -m games.cabal.demo --transcript game.md        # readable log on disk
     python -m games.cabal.demo --human 0                   # you play seat 0
     python -m games.cabal.demo --human 0 --backend local --model qwen36-35b-a3b-iq3
@@ -39,6 +40,7 @@ from games.cabal.audit import leak_audit, secret_terms  # noqa: F401 (re-export)
 from games.cabal.player import ACTION_KEYS, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee, Phase
 from games.cabal.roles import DEFAULT_THEME, THEMES
+from games.cabal.solver import SolverPolicy
 
 #: The standing frame a person needs and the per-turn ask does not carry: what
 #: wins, what the counters on the board do, what stays secret. Printed by the
@@ -102,6 +104,9 @@ def build_policies(ref: CabalReferee, args, rng: random.Random) -> dict:
                                                  rules_path=RULES_PATH),
                            retries=args.human_retries, fallback=fallback)
               for s in human_seats(args.human, ref.n, args.seed)}
+    if args.solver:
+        return {s: humans.get(s, SolverPolicy(fallback=fallback))
+                for s in ref.assignment}
     if not args.backend:
         return {s: humans.get(s, fallback) for s in ref.assignment}
     backend = Backend.named(
@@ -154,8 +159,11 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--theme", choices=list(THEMES), help="role skin (default: lodge)")
     ap.add_argument("--rounds", type=int, default=1, help="discussion rounds per proposal")
-    ap.add_argument("--backend", choices=["local", "clean", "gray"],
-                    help="run live players (default: random policy, no model)")
+    arm = ap.add_mutually_exclusive_group()
+    arm.add_argument("--backend", choices=["local", "clean", "gray"],
+                     help="run live players (default: random policy, no model)")
+    arm.add_argument("--solver", action="store_true",
+                     help="seat mechanical vote reader (no model calls)")
     ap.add_argument("--model", default="auto")
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--speaker", action="store_true",

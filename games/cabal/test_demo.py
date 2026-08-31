@@ -18,6 +18,7 @@ from core.console import ConsoleBackend, human_seats
 from games.cabal.demo import build_policies, opening_view
 from games.cabal.player import ACTION_KEYS, LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
+from games.cabal.solver import SolverPolicy
 
 
 def test_the_sample_view_is_withheld_from_a_human_table():
@@ -51,6 +52,18 @@ class _Args:
     seed = None
     human = "0"
     human_retries = 4
+    solver = False
+
+
+def test_solver_demo_seats_the_mechanical_policy_without_a_backend():
+    ref = CabalReferee.new(5, seed=3)
+    args = _Args()
+    args.human = None
+    args.solver = True
+
+    policies = build_policies(ref, args, random.Random(3))
+
+    assert all(isinstance(policy, SolverPolicy) for policy in policies.values())
 
 
 def test_only_the_named_seat_gets_a_console():

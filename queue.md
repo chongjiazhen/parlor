@@ -148,7 +148,6 @@ should launch first and spend the wait on a CPU slice.
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
 | **S13** | **Claim-shaped self-outing re-score. READY 2026-08-31** - replace the over-broad theme-name match, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
-| **S15** | **Cabal solver-seat arm. READY 2026-08-31** - make the existing mechanical reader a player policy without widening what it can inspect. | S14 closed and no cabal arm in flight | policy, phase tests, and demo smoke run; no measurement claimed |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
@@ -307,9 +306,6 @@ Spikes and unbuilt arms:
       derives from the game seed - a wall-clock actor voids the seed invariant.
       One new gate #1 failure and it is silent: audit a render against the
       entitlement snapshot taken when it was BUILT.
-- [ ] **Seat the solver as an ARM** - `SolverPolicy.act(ref, seat)` does not
-      exist. Gate #1-safe by construction. Note what it buys first: the hunt is
-      mechanically flat, so a solver arm can only differ at the VOTE.
 - [ ] **Seat the heuristic against the MODEL** - a table with heuristic and LLM
       seats, the arm that does not exist. Read the artifact warning in
       `docs/measurements.md` §Measured first: the all-heuristic arm's 99.5%
