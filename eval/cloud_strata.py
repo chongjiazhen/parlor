@@ -13,6 +13,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from core.stats import wilson
+from core.runlog import record_paths
 
 
 UNATTRIBUTED = "UNATTRIBUTED - fallback source unknown"
@@ -39,7 +40,12 @@ def score_records(records: list[dict]) -> dict[str, dict]:
         by_turn_seat = {}
         for decision in decisions:
             served_by = decision.get("served_by")
-            if served_by:
+            attempted = set(decision.get("attempted_upstreams") or [])
+            if decision.get("fell_back") and len(attempted) > 1:
+                cell = cells[UNATTRIBUTED]
+                cell["decisions"] += 1
+                cell["fallbacks"] += 1
+            elif served_by:
                 cell = cells[served_by]
                 cell["decisions"] += 1
                 cell["fallbacks"] += bool(decision.get("fell_back"))
@@ -101,7 +107,9 @@ def score_records(records: list[dict]) -> dict[str, dict]:
             },
             "votes": {
                 "clean": cell["clean"],
+                "clean_votes": cell["clean_votes"],
                 "tainted": cell["tainted"],
+                "tainted_votes": cell["tainted_votes"],
                 "discrimination": (clean_rate - tainted_rate
                                    if clean_rate is not None and tainted_rate is not None
                                    else None),
@@ -119,6 +127,11 @@ def score_records(records: list[dict]) -> dict[str, dict]:
 
 def load_paths(paths: list[str]) -> list[dict]:
     """Read run summary JSON and incremental JSONL records into one population."""
+    resolved = {str(Path(raw_path).resolve()) for raw_path in paths}
+    for raw_path in paths:
+        summary, jsonl = record_paths(raw_path)
+        if str(Path(summary).resolve()) in resolved and str(Path(jsonl).resolve()) in resolved:
+            raise ValueError(f"paired summary and JSONL inputs: {summary}, {jsonl}")
     records = []
     for raw_path in paths:
         path = Path(raw_path)
@@ -142,7 +155,8 @@ def report(score: dict[str, dict]) -> str:
             f"  votes      discrimination "
             + (f"{votes['discrimination']:+.2%}" if votes["discrimination"] is not None
                else "REFUSED")
-            + f" ({votes['clean']} clean approvals, {votes['tainted']} tainted approvals)",
+            + (f" ({votes['clean']}/{votes['clean_votes']} clean approvals, "
+               f"{votes['tainted']}/{votes['tainted_votes']} tainted approvals)"),
             f"  hunts      "
             + (f"{hunts['hits']}/{hunts['total']} ({hunts['accuracy']:.2%}, 95% CI "
                f"{hunts['ci95'][0]:.2%}-{hunts['ci95'][1]:.2%})"

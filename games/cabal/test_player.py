@@ -367,6 +367,18 @@ class TestPerDecisionAttribution(unittest.TestCase):
         self.assertTrue(all(d.fell_back for d in rec.decision_log))
         self.assertTrue(all(d.served_by == "up-a" for d in rec.decision_log))
 
+    def test_a_multi_upstream_fallback_stays_unattributed(self):
+        """Last retry cannot own earlier upstreams' refused responses."""
+        backend = TestUpstreamAttribution.Rotating("{}", ["up-a", "up-b"])
+        policy = LLMPolicy(backend=backend, retries=1, backoff=0,
+                           fallback=RandomPolicy(rng=random.Random(1)))
+        rec = play_game(CabalReferee.new(5, seed=7, discussion_rounds=1),
+                        {s: policy for s in FIXED})
+        self.assertTrue(rec.decision_log)
+        self.assertTrue(all(d.attempted_upstreams == ["up-a", "up-b"]
+                            for d in rec.decision_log))
+        self.assertTrue(all(d.served_by == "" for d in rec.decision_log))
+
     def test_the_log_carries_it_through_a_real_game(self):
         backend = TestUpstreamAttribution.Rotating('{"say": "hello"}', ["up-a"])
         ref = CabalReferee.new(5, seed=3, discussion_rounds=1)

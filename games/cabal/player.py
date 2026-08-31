@@ -171,6 +171,9 @@ class LLMPolicy:
     #: question worth asking under a routing alias, where the hunter and the voter
     #: in one game can be different models entirely.
     last_upstream: str = ""
+    #: Every upstream that answered an attempt on current decision. A fallback
+    #: through more than one route cannot honestly belong to its final retry.
+    last_attempted_upstreams: list[str] = field(default_factory=list)
     #: the complaint that refused the most recent ATTEMPT - a transport failure, an
     #: unparsed reply, an illegal move. Deliberately not the trace's last line: that
     #: is the "N attempts failed, playing random" summary, which says a fallback
@@ -189,6 +192,7 @@ class LLMPolicy:
     def act(self, ref: CabalReferee, seat: int) -> dict:
         self.last_fell_back = False
         self.last_upstream = ""
+        self.last_attempted_upstreams = []
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
@@ -206,6 +210,7 @@ class LLMPolicy:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
+                self.last_attempted_upstreams.append(served_by)
                 self.last_prompt_size = len(prompt)
                 self.last_reply_size = len(reply)
                 self.last_usage = getattr(self.backend, "last_usage", None)
@@ -360,6 +365,9 @@ class Decision:
     #: gateway picks per request, so a per-run mix cannot tell you whether the model
     #: that misread the hunt is the one that voted well.
     served_by: str = ""
+    #: Served upstreams for every attempt. ``served_by`` is empty on a fallback
+    #: that crossed upstreams, because no one upstream owns random's final move.
+    attempted_upstreams: list[str] = field(default_factory=list)
     prompt_size: int = 0
     reply_size: int = 0
     usage: dict | None = None
@@ -464,6 +472,11 @@ def play_game(
         prompt_size = getattr(policies[seat], "last_prompt_size", 0)
         reply_size = getattr(policies[seat], "last_reply_size", 0)
         usage = getattr(policies[seat], "last_usage", None)
+        attempted_upstreams = list(
+            getattr(policies[seat], "last_attempted_upstreams", []) or [])
+        served_by = str(getattr(policies[seat], "last_upstream", "") or "")
+        if fell_back and len(set(attempted_upstreams)) != 1:
+            served_by = ""
         rec.decision_log.append(Decision(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
@@ -475,7 +488,8 @@ def play_game(
             # A fallback remains random play (`fell_back` says that), but an
             # upstream that returned an illegal answer still owns the refusal.
             # Dropping it makes that upstream's fallback rate unmeasurable.
-            served_by=str(getattr(policies[seat], "last_upstream", "") or ""),
+            served_by=served_by,
+            attempted_upstreams=attempted_upstreams,
             prompt_size=prompt_size,
             reply_size=reply_size,
             usage=usage,

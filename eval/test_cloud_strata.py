@@ -1,6 +1,9 @@
 """Per-upstream cloud scoring uses stored decision provenance, never run totals."""
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from eval import cloud_strata as cs
 
@@ -40,11 +43,13 @@ class TestCloudStrata(unittest.TestCase):
         ])
 
         self.assertEqual(score["120b"]["votes"],
-                         {"clean": 1, "tainted": 0, "discrimination": 1.0})
+                         {"clean": 1, "clean_votes": 1, "tainted": 0,
+                          "tainted_votes": 1, "discrimination": 1.0})
         self.assertEqual(score["120b"]["hunts"]["hits"], 1)
         self.assertEqual(score["120b"]["hunts"]["total"], 1)
         self.assertEqual(score["nano"]["votes"],
-                         {"clean": 0, "tainted": 1, "discrimination": -1.0})
+                         {"clean": 0, "clean_votes": 1, "tainted": 1,
+                          "tainted_votes": 1, "discrimination": -1.0})
         self.assertEqual(score["nano"]["hunts"]["hits"], 0)
         self.assertEqual(score["nano"]["integrity"],
                          {"decisions": 4, "fallbacks": 1, "fallback_rate": 1 / 4})
@@ -57,7 +62,8 @@ class TestCloudStrata(unittest.TestCase):
         ])
 
         self.assertEqual(score["120b"]["votes"],
-                         {"clean": 1, "tainted": 1, "discrimination": 0.0})
+                         {"clean": 1, "clean_votes": 2, "tainted": 1,
+                          "tainted_votes": 2, "discrimination": 0.0})
         self.assertEqual(score["120b"]["hunts"]["hits"], 1)
         self.assertEqual(score["120b"]["hunts"]["total"], 2)
 
@@ -90,6 +96,38 @@ class TestCloudStrata(unittest.TestCase):
 
         self.assertEqual(score[cs.UNATTRIBUTED]["integrity"],
                          {"decisions": 1, "fallbacks": 1, "fallback_rate": 1.0})
+
+    def test_a_multi_upstream_fallback_is_not_charged_to_its_last_retry(self):
+        """Two served retries leave no honest per-upstream fallback denominator."""
+        record = game("up-b", clean=True, tainted=False, hunt_hit=True)
+        fallback = record["decision_log"][3]
+        fallback["fell_back"] = True
+        fallback["attempted_upstreams"] = ["up-a", "up-b"]
+
+        score = cs.score_records([record])
+
+        self.assertEqual(score["up-b"]["integrity"]["fallbacks"], 0)
+        self.assertEqual(score[cs.UNATTRIBUTED]["integrity"]["fallbacks"], 1)
+
+    def test_report_shows_vote_denominators(self):
+        """Approval counts without vote totals cannot price a thin cell."""
+        text = cs.report(cs.score_records([
+            game("120b", clean=True, tainted=False, hunt_hit=True),
+        ]))
+
+        self.assertIn("1/1 clean approvals, 0/1 tainted approvals", text)
+
+    def test_paired_summary_and_jsonl_inputs_are_refused(self):
+        """One run writes both artifacts; loading both would double every cell."""
+        with tempfile.TemporaryDirectory() as tmp:
+            summary = Path(tmp) / "run.json"
+            jsonl = Path(f"{summary}.jsonl")
+            payload = game("120b", clean=True, tainted=False, hunt_hit=True)
+            summary.write_text(json.dumps({"games": [payload]}), encoding="utf-8")
+            jsonl.write_text(json.dumps({"game": 0, **payload}) + "\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "paired"):
+                cs.load_paths([str(summary), str(jsonl)])
 
 
 if __name__ == "__main__":
