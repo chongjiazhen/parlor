@@ -67,6 +67,16 @@ class TestModelAdjudicator(unittest.TestCase):
             ROLES["gauge"])
         self.assertIs(adj.events[0].fallback, True)
 
+    def test_fenced_json_choice_is_accepted(self):
+        adj = ModelAdjudicator(
+            FakeBackend('```json\n{"choice":"witness"}\n```'), random.Random(9))
+
+        self.assertIs(
+            adj.sot_belief([ROLES["witness"], ROLES["gauge"]], random.Random(4)),
+            ROLES["witness"])
+        self.assertFalse(adj.events[0].fallback)
+        self.assertEqual(adj.events[0].upstream, "fake-upstream")
+
     def test_invalid_responses_fall_back_without_provenance(self):
         invalid_backends = [
             FakeBackend("not json"),

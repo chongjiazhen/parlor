@@ -10,6 +10,15 @@ from core.backends import Backend
 from games.belfry.roles import ROLES, Role
 
 
+def _json_reply(reply: str) -> str:
+    """Accept one bare JSON object or one whole fenced ``json`` block."""
+    text = reply.strip()
+    lines = text.splitlines()
+    if len(lines) >= 3 and lines[0] == "```json" and lines[-1] == "```":
+        return "\n".join(lines[1:-1])
+    return text
+
+
 @dataclass(frozen=True)
 class ChoiceEvent:
     key: str
@@ -30,7 +39,7 @@ class ModelAdjudicator:
         try:
             reply, upstream = self.backend.complete_meta(
                 json.dumps({"choice_key": key, "options": options}))
-            parsed = json.loads(reply)
+            parsed = json.loads(_json_reply(reply))
             if (type(parsed) is not dict or set(parsed) != {"choice"}
                     or type(parsed["choice"]) is not str
                     or parsed["choice"] not in options):

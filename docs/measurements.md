@@ -238,6 +238,21 @@ games, temperature 0.0 and no `--no-thinking`; this arm ran 100, 0.8 and
 checks its full launch binding and rejects this record with exit 3 rather than
 printing a criterion verdict.
 
+## belfry setup-only adjudicator - S8 void, 2026-08-31
+
+Rendered record: [`transcripts/belfry-adjudicator-s8-void.md`](../transcripts/belfry-adjudicator-s8-void.md).
+The frozen S8 pair ran 60 five-seat compact random-player games on seeds
+6100..6159. Player fallback was 0/2809 (0.00%) in both arms. The model
+adjudicator reached its 20 setup opportunities, but 12 fell back (60.00%), above
+the pre-committed 10% ceiling. S8 is VOID: no source-discrimination result.
+
+Route probe served `qwen36-35b-a3b-iq3` three times. Successful choice calls
+served that same upstream. Failed calls returned a complete fenced `json` object,
+which S8's bare-object parser rejected. This is response formatting, not a read of
+referee discretion. Records remain untracked in `eval/records/` and are not
+re-scored. `docs/belfry-adjudicator-v2-criterion.md` binds fresh records and a
+narrow whole-fence normalization before S8b starts.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost

@@ -22,6 +22,8 @@ from games.belfry.state import deal
 
 CONTROL_CAMPAIGN = "eval/records/belfry-adjudicator-control.json"
 MODEL_CAMPAIGN = "eval/records/belfry-adjudicator-model.json"
+V2_CONTROL_CAMPAIGN = "eval/records/belfry-adjudicator-v2-control.json"
+V2_MODEL_CAMPAIGN = "eval/records/belfry-adjudicator-v2-model.json"
 GAMES_PROMISED = 60
 FIRST_SEED = 6100
 LAST_SEED = 6159
@@ -62,6 +64,8 @@ MODEL_ARGS = {
     "adjudicator_temperature": ADJUDICATOR_TEMPERATURE,
     "out": MODEL_CAMPAIGN,
 }
+V2_CONTROL_ARGS = {**CONTROL_ARGS, "out": V2_CONTROL_CAMPAIGN}
+V2_MODEL_ARGS = {**MODEL_ARGS, "out": V2_MODEL_CAMPAIGN}
 
 EVENT_FIELDS = {
     "key", "options", "selected", "fallback", "recovered", "upstream",
@@ -461,11 +465,14 @@ def _fmt_rate(fallbacks: int, decisions: int) -> str:
     return f"{fallbacks}/{decisions} = {fallbacks / decisions:.2%}"
 
 
-def report(control_evidence, model_evidence) -> tuple[list[str], int]:
+def report(control_evidence, model_evidence, *,
+           control_args: dict = CONTROL_ARGS, model_args: dict = MODEL_ARGS,
+           criterion_path: str = "docs/belfry-adjudicator-criterion.md") \
+        -> tuple[list[str], int]:
     """Return the paired-arm read and its stable controller exit code."""
     out = [
         "belfry model adjudicator - paired source-discrimination arm",
-        "criterion: docs/belfry-adjudicator-criterion.md "
+        f"criterion: {criterion_path} "
         "(pre-committed, not editable)",
     ]
     try:
@@ -478,8 +485,8 @@ def report(control_evidence, model_evidence) -> tuple[list[str], int]:
 
     out += ["", "instrument control - summaries against their JSONL rows",
             "  both published integrity strata reproduce from raw rows"]
-    mismatches = (_recipe_mismatches(control, CONTROL_ARGS, "control")
-                  + _recipe_mismatches(model, MODEL_ARGS, "model"))
+    mismatches = (_recipe_mismatches(control, control_args, "control")
+                  + _recipe_mismatches(model, model_args, "model"))
     if mismatches:
         out += ["", "criterion binding"]
         out += [f"  NOT this criterion: {mismatch}" for mismatch in mismatches]
@@ -555,6 +562,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("control", nargs="?", default=CONTROL_CAMPAIGN)
     parser.add_argument("model", nargs="?", default=MODEL_CAMPAIGN)
+    parser.add_argument("--v2", action="store_true",
+                        help="score S8b fenced-JSON parser criterion")
     args = parser.parse_args(argv)
     try:
         control = load(Path(args.control))
@@ -562,7 +571,11 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, json.JSONDecodeError) as exc:
         print(f"missing or corrupt evidence: {exc}")
         return 1
-    lines, code = report(control, model)
+    config = ((V2_CONTROL_ARGS, V2_MODEL_ARGS,
+               "docs/belfry-adjudicator-v2-criterion.md") if args.v2 else
+              (CONTROL_ARGS, MODEL_ARGS, "docs/belfry-adjudicator-criterion.md"))
+    lines, code = report(control, model, control_args=config[0],
+                         model_args=config[1], criterion_path=config[2])
     print("\n".join(lines))
     return code
 

@@ -10,6 +10,8 @@ from pathlib import Path
 
 from eval.belfry_adjudicator_verdict import (
     Trace,
+    V2_CONTROL_ARGS,
+    V2_MODEL_ARGS,
     feature,
     held_out_accuracy,
     report,
@@ -283,6 +285,17 @@ class TestEvidenceBoundary(unittest.TestCase):
 
 
 class TestRecipeBinding(unittest.TestCase):
+    def test_v2_criterion_binds_fresh_record_paths(self):
+        control, model = _arm("random"), _arm("model")
+        control[0]["args"].update(V2_CONTROL_ARGS)
+        model[0]["args"].update(V2_MODEL_ARGS)
+        lines, code = report(
+            control, model, control_args=V2_CONTROL_ARGS,
+            model_args=V2_MODEL_ARGS,
+            criterion_path="docs/belfry-adjudicator-v2-criterion.md")
+        self.assertEqual(code, 0, "\n".join(lines))
+        self.assertIn("v2", lines[1])
+
     def test_launcher_emits_a_recipe_bound_by_controller(self):
         """A launcher timeout or output spelling that differs from the criterion fails."""
         recipes = _launcher_recipes()
