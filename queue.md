@@ -147,7 +147,10 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | entry condition | done when |
 |---|---|---|---|
 | ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| **S8** | **Next rung or publish. TAKEN 2026-08-28 and NOT closed** - Belfry has a setup-only model adjudicator, private provenance, a committed criterion, and a fail-closed frozen dual-arm recipe. Both arms are unrun; the 6/7p package and publish option remain untouched. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
+| **S8** | **Run the belfry model-adjudicator arms. READY 2026-08-31** - setup-only referee adjudicator, private provenance, committed criterion, and fail-closed frozen dual-arm recipe all landed. | S5 done, S1 called - **met** | paired arms measured and a non-VOID discretion read |
+| **S13** | **Claim-shaped self-outing re-score. READY 2026-08-31** - replace the over-broad theme-name match, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
+| **S14** | **Changeling deal-versus-dawn wording. READY 2026-08-31** - make the sleep claim name dealt state, not post-night belief. | no changeling arm in flight | isolated model-facing edit, audit test, and S5 marked pre-change |
+| **S15** | **Cabal solver-seat arm. READY 2026-08-31** - make the existing mechanical reader a player policy without widening what it can inspect. | S14 closed and no cabal arm in flight | policy, phase tests, and demo smoke run; no measurement claimed |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
