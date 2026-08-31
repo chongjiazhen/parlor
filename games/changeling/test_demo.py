@@ -9,14 +9,18 @@ from __future__ import annotations
 
 import io
 import random
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
 
 from core.console import ConsoleBackend, human_seats
 from games.changeling.demo import (build_policies, constrained_deal,
-                                   opening_view)
+                                    opening_view)
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
-                                     play_game)
+                                      play_game)
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import SETUP_5, Side
 
@@ -77,6 +81,19 @@ def test_a_hand_played_game_reaches_a_winner_with_gate_one_audited():
 
 
 # ---- --human-role: a UAT deal, and the stream it must not touch --------------
+
+
+def test_referee_transcript_flag_writes_a_live_game_log():
+    """Break caught: parser-only flag or post-game renderer leaves no tailable
+    sidecar during normal demo execution."""
+    with TemporaryDirectory() as tmp:
+        path = Path(tmp) / "referee.log"
+        run = subprocess.run(
+            [sys.executable, "-m", "games.changeling.demo", "--seed", "42",
+             "--rounds", "1", "--referee-transcript", str(path)],
+            text=True, capture_output=True, check=False)
+        assert run.returncode == 0, run.stderr
+        assert path.read_text(encoding="utf-8").splitlines()
 
 def _keys(dealt, centre):
     return sorted([c.key for c in dealt.values()] + [c.key for c in centre])
