@@ -372,8 +372,12 @@ record. Its 20 calls fell back 0/20, so every first ask was already answered
 legally; the first ask is byte-identical to the pre-retry one by design and by
 test, and the seeded menu rng is drawn only on a fallback, so the retry has no
 call here to change. Re-read after the change: recovered `0/20 = 0.00%`,
-everything else identical, exit 0. The v1 arm is where the retry bites - it is
-void at 12/20 adjudicator fallback.
+everything else identical, exit 0. **Nor does the v1 arm carry one**, though it
+fell back 12/20: `recovered` is set at PLAY time inside `ModelAdjudicator.choose`
+from `rule_refusals > 0`, so a record written before the retry existed holds the
+event and not the attempt history, and re-scoring cannot recover a fumble that had
+no second ask to make. v1 re-reads at recovered `0/20 = 0.00%`, exit 2 (void at
+60%). S29 closed on that: `docs/decisions.md` §No arm will produce `recovered > 0`.
 
 All 20 paired legal traces remained. Nine odd-seed trace pairs were held out;
 source accuracy was **88.89%**, above Wilson 95% chance upper endpoint **70.97%**

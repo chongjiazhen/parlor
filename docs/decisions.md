@@ -215,3 +215,55 @@ the classifier. Fixing the seeding here would have converged on that design and
 left two instruments answering one question, which is how a stale second copy
 wins an argument later. The delete is recoverable from history; nothing in the
 tree imported the module, and `docs/` never cited its number.
+
+## No arm will produce `recovered > 0` - S29 closed 2026-09-01T15:44:11+00:00
+
+The belfry adjudicator retry landed earlier the same day: `ModelAdjudicator` carries
+the seats' `retries=2` and doubling backoff, `ChoiceEvent.recovered` is set from a
+RULES refusal that later answered, and the paired verdict prints the recovered rate
+beside the fallback rate. Both were mutation-checked. What is recorded here is the
+other half of the slice's done-when: **no arm this repo intends to run will produce a
+record carrying `recovered > 0`**, so the retry is verified by test rather than by a
+live record, and S29 closes on that rather than staying open against evidence nobody
+is going to buy.
+
+**The adjudicator's twenty calls are twenty setup choices, not twenty turns.** Under
+`docs/belfry-adjudicator-v2-criterion.md` the only live discretion is the diviner's
+herring registration - which good seat reads as the demon - taken once at setup,
+uniform over good seats. Twenty of the frozen pair's sixty games seat a diviner, so
+the denominator is 20 choice events and 40 no-event rows.
+
+**Recovery needs a refusal to recover from, and neither arm has one available.**
+
+- **v2 (S8b) fell back 0/20.** Every first ask returned a legal seat off the offered
+  menu, so the retry loop never entered a second attempt. The opening ask is
+  byte-identical pre- and post-retry by design and by test, and the seeded menu rng
+  is drawn only on a fallback. Re-read fresh on the day: fallback `0/20 = 0.00%`,
+  recovered `0/20 = 0.00%`, source accuracy 88.89% unchanged, exit 0.
+- **v1 fell back 12/20 and is void at 60%.** It also re-reads at recovered
+  `0/20 = 0.00%`, exit 2 - and that zero is structural, not a finding. **`recovered`
+  is a PLAY-TIME field**: `ModelAdjudicator.choose` sets it from `rule_refusals > 0`
+  inside the attempt loop, and the record stores the resulting event, not the attempt
+  history behind it. No re-score of an existing record can recover a fumble that was
+  never re-asked, because at the time those twelve calls were made there was no
+  second ask to make.
+
+So the only record that could carry the field is a fresh arm run at a fallback rate
+high enough to fumble - which is a void record by construction the moment it
+succeeds, bought with GPU hours, to demonstrate an instrument the unit tests already
+demonstrate. That trade is not worth taking, and refusing it is the decision.
+
+**What would reopen this**, and neither is scheduled: a belfry arm on an upstream
+whose reply shape is not the one the v2 normalization already handles, run for its
+own sake rather than to exercise the retry; or a future rung whose adjudicator asks a
+question wide enough that a legal first answer stops being the common case. If either
+lands, the field is already instrumented and the verdict already prints it - that is
+what S29's code half bought, and it is the durable half.
+
+**S23's entry condition is amended in the same close.** It read "a belfry record whose
+adjudicator retried", which this decision makes unbuyable. The condition that was
+actually meant is the one its own reasoning names - a quality metric read over a 60%
+fallback rate measures the fallback - so it is now a belfry adjudicator record under
+the 10% void bar with every scored call the model's. The v2 pair MEETS that today at
+0/20 fallback and 20 paired legal traces, so S23 is unblocked on evidence, not by
+lowering a bar.
