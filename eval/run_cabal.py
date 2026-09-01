@@ -4,8 +4,9 @@
     python -m eval.run_cabal --games 200 --arm random          # the chance baseline
     python -m eval.run_cabal --games 20 --arm llm-good --backend clean --model gpt-oss-120b
     python -m eval.run_cabal --games 6 --backend local --model rocinante-x-12b-heretic-q4
+    python -m eval.run_cabal --games 200 --arm solver            # mechanical vote reader
 
-Four arms, because ``llm`` on both sides measures deduction and deception
+Five arms, because ``llm`` on both sides measures deduction and deception
 entangled - good failing to deduce and evil deceiving well look identical in the
 numbers. ``llm-good`` and ``llm-evil`` seat one side live against the random
 control, so the live side's contribution is the only thing moving. Note which
@@ -58,6 +59,7 @@ from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
                                 play_game)
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import DEFAULT_THEME, THEMES, Team
+from games.cabal.solver import SolverPolicy
 
 
 def _ci_text(ci, joiner: str = "-") -> str:
@@ -225,6 +227,7 @@ LIVE_TEAMS: dict[str, set] = {
     "llm": {Team.GOOD, Team.EVIL},
     "llm-good": {Team.GOOD},
     "llm-evil": {Team.EVIL},
+    "solver": set(),
 }
 
 
@@ -240,6 +243,8 @@ def build_policies(ref: CabalReferee, args, rng: random.Random,
     "same seeds, one variable" comparison was reading its variable against an
     unmeasured spread."""
     fallback = RandomPolicy(rng=rng)
+    if args.arm == "solver":
+        return {s: SolverPolicy(fallback=fallback) for s in ref.assignment}
     live = LIVE_TEAMS[args.arm] if args.backend else set()
     if not live:
         return {s: fallback for s in ref.assignment}
@@ -667,7 +672,8 @@ def main() -> None:
     ap.add_argument("--arm", choices=list(LIVE_TEAMS), default="llm",
                     help="which side runs on the model: 'random' is the chance "
                          "baseline (no model calls), 'llm-good'/'llm-evil' seat one "
-                         "side live against the random control")
+                         "side live against the random control, 'solver' seats the "
+                         "mechanical vote reader on every seat (no model calls)")
     ap.add_argument("--backend", choices=list(ENDPOINTS))
     ap.add_argument("--model", default="auto")
     ap.add_argument("--rounds", type=int, default=1)
@@ -700,6 +706,9 @@ def main() -> None:
                     help="which game to transcribe (default: the first completed one)")
     args = ap.parse_args()
     RUN_STATE.requested = args.games
+
+    if args.arm == "solver" and args.backend:
+        sys.exit("--arm solver does not use a backend (run without --backend)")
 
     if LIVE_TEAMS[args.arm] and not args.backend:
         sys.exit(f"--arm {args.arm} needs --backend "

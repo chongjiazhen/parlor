@@ -22,6 +22,7 @@ from eval.run_cabal import (LIVE_TEAMS, assert_scoreable, build_policies, report
 from games.cabal.player import LLMPolicy, RandomPolicy, play_game
 from games.cabal.referee import CabalReferee
 from games.cabal.roles import Team
+from games.cabal.solver import SolverPolicy
 
 
 def make_args(**kw):
@@ -63,8 +64,13 @@ class TestArms(unittest.TestCase):
         p = build_policies(self.ref, make_args(arm="llm", backend=None), self.rng)
         self.assertEqual(live_seats(self.ref, p), set())
 
+    def test_solver_seats_solver_policy_on_every_seat(self):
+        p = build_policies(self.ref, make_args(arm="solver"), self.rng)
+        self.assertEqual({s for s, pol in p.items() if isinstance(pol, SolverPolicy)},
+                         set(self.ref.assignment))
+
     def test_every_arm_is_wired(self):
-        self.assertEqual(set(LIVE_TEAMS), {"random", "llm", "llm-good", "llm-evil"})
+        self.assertEqual(set(LIVE_TEAMS), {"random", "llm", "llm-good", "llm-evil", "solver"})
 
 
 class TestGameSeedReachesTheModel(unittest.TestCase):
