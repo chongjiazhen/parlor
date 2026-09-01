@@ -119,19 +119,8 @@ behind each is `docs/open-arms.md`; read the entry before taking the row.**
 **Reference lives in `docs/README.md`**, which indexes every one of these and
 is maintained as an index. A second list here is the one that goes stale.
 
-Instrument and integrity - what is left of a 2026-09-01 review of
-`2d28e60..HEAD`, read from the files cited, not measured. No count here: five of
-its findings have since landed and a number in this line went stale twice.
-
-- [ ] **`eval/cloud_strata.py:59` raises on any `RandomPolicy` decision row**, so
-      it can only ever score a full-`llm` record - never `random`, `llm-good`,
-      `llm-evil` or a `--speaker` run. A random seat is a known non-model: exclude
-      it from the cells rather than treating it as corrupt provenance.
-- [ ] **`eval/audit_decisions.py:81` dispatches the claim matcher on
-      `name.isascii()`**, so a non-ASCII, non-Chinese skin - accented Latin,
-      Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
-      `_says` at least falls back to a substring that always matches. Only
-      `1984-cn` exercises the branch today, so no recorded number moves yet.
+Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
+all seven findings landed. Its rows are gone; git holds the record.
 
 - [ ] **Two read arms have no rendered transcript, and quorum has no renderer at
       all.** `docs/measurements.md` now cites belfry live2 AND quorum live4 with
@@ -141,6 +130,17 @@ its findings have since landed and a number in this line went stale twice.
       live2 is a re-run; `transcripts/` holds no quorum file of any kind, so live4
       needs the renderer written first. Records are
       `eval/records/{belfry-live2,quorum-live4}.json(.jsonl)`, untracked and durable.
+- [ ] **Three queue rows this session were discharged by commits and never
+      struck** - the changeling transcript handle (by `4c917e0`, whose message is
+      the row's own remedy), `audit_decisions`' unruled-language floor (by
+      `4813693`, ~11 h after the row was filed) and `cloud_strata`'s non-model cell
+      (by `0ed697b`). All three read as open work; two of the three were about to
+      be re-fixed. The gate ratchets queue.md's SIZE, not its TRUTH, and a stale
+      row costs more than a long file: it spends a session. Cheap deterministic
+      check - every row citing `path:line` is graded on whether that line still
+      holds the cited symbol, and a row whose citation has moved is reported, not
+      auto-struck (the fix may be real and the line merely shifted). `sed -n 81p
+      eval/audit_decisions.py` printed a BLANK LINE, which is the whole tell.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
