@@ -383,6 +383,82 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
                         "comparable with a skin that has a rule.")
     return bad, total, notes
 
+def claimed_a_role_it_was_not_dealt(games: list[dict]) -> tuple[int, int, list[str]]:
+    """A seat claiming, in the first person and the present tense, a role it does
+    not hold.
+
+    Separate from ``outed_own_role_in_public`` and deliberately so: that check
+    counts a seat naming the role it WAS dealt, which hands the table the game.
+    This one counts the opposite move, and the opposite move is not an error - a
+    mimic saying "I am the Seer" is the game working. It is counted because it is
+    the deception gate's raw material. Gate #2 is conditional on gate #3, and
+    measured with good voting at chance evil wins ~65% with no deception at all, so
+    a run's deception rate has to be READ rather than assumed from the win column.
+    A run where nobody ever claims a role they lack won gate #2 some other way.
+
+    HEURISTIC: the same claim shape as S13, so it inherits S13's narrowness. It
+    cannot see a false claim made obliquely ("the mission needs someone who has
+    seen the evils - that is me"), and it makes no judgement about whether the
+    claim was strategic or careless.
+
+    **Where the floor does NOT apply, and that is the design call.** A skin whose
+    language has no rule in ``CLAIM_RULES`` gets ``_claims_own_role``'s mention
+    floor, which is an over-count that check can afford: a seat mentioning its own
+    role is at least unusual. Here it is unaffordable. Mentioning a role you do not
+    hold - "seat 3 is the Thought Police" - is the single most ordinary sentence at
+    this table, so a containment floor would flag most of the record and hand the
+    reader a number that means nothing. There is no honest wrong-high answer here,
+    so this check REFUSES those games instead: they leave the denominator and are
+    named on the first note line. A refusal is legible; 0 and 95% are both lies.
+    """
+    bad, total, notes = 0, 0, []
+    unruled: Counter = Counter()
+    undealt = 0
+    by_team: Counter = Counter()
+    for g in games:
+        roles = {int(s): k for s, k in (g.get("assignment") or {}).items()}
+        theme = THEMES.get(str(g.get("theme") or ""))
+        lang = theme.lang if theme is not None else "en"
+        if lang not in CLAIM_RULES:
+            unruled[lang] += len(g.get("utterances") or [])
+            continue
+        keys = list(theme.role_names) if theme is not None else list(ROLES_BY_KEY)
+        for utt in g.get("utterances", []):
+            m = re.match(r"seat (\d+): (.*)", str(utt), re.S)
+            if not m:
+                continue
+            seat, said = int(m.group(1)), m.group(2)
+            total += 1
+            dealt = roles.get(seat, "")
+            if not dealt:
+                undealt += 1
+                continue
+            claimed = sorted({
+                key for key in keys if key != dealt
+                for nm in ([key] + ([theme.role_names[key]]
+                                    if theme is not None and key in theme.role_names
+                                    else []))
+                if _claims_own_role(said, nm, lang) == "claim"})
+            if claimed:
+                bad += 1
+                role = ROLES_BY_KEY.get(dealt)
+                by_team[role.team.name if role else "UNKNOWN"] += 1
+                notes.append(f"game {g.get('game')} seat {seat} holds '{dealt}' and "
+                             f"claimed {'/'.join(claimed)}: {said[:80]}")
+    if by_team:
+        notes.insert(0, "by the claimant's own team: "
+                        + ", ".join(f"{t} {n}" for t, n in sorted(by_team.items())))
+    if undealt:
+        notes.insert(0, f"{undealt} utterance(s) from a seat the assignment does "
+                        "not cover - counted in the denominator, not checked")
+    if unruled:
+        notes.insert(0, "REFUSED " + ", ".join(
+            f"{n} utterance(s) in '{lang}'" for lang, n in sorted(unruled.items()))
+            + " - no claim rule for that language, and this check has no floor: "
+              "naming a role you do not hold is ordinary table talk, so a mention "
+              "match would count most of the record. Out of the denominator.")
+    return bad, total, notes
+
 PROOF = [
     ("hunt named a seat it knew was evil", hunt_named_impossible),
 ]
@@ -398,17 +474,77 @@ COST = [
 HEURISTIC = [
     ("seat referred to itself in the third person", third_person_self),
     ("seat named its own role in public speech", outed_own_role_in_public),
+    ("seat claimed a role it was NOT dealt (deception, not an error)",
+     claimed_a_role_it_was_not_dealt),
 ]
+
+
+def _rotate_deals(games: list[dict]) -> list[dict]:
+    """The same records with every seat's DEAL moved one seat along.
+
+    Speech is untouched, so a claim that was about the speaker's own role is now
+    about somebody else's and the two claim checks must trade places.
+    """
+    out = []
+    for g in games:
+        a = g.get("assignment") or {}
+        keys, vals = list(a), [a[k] for k in (a or {})]
+        out.append(dict(g, assignment=dict(zip(keys, vals[1:] + vals[:1]))))
+    return out
+
+
+def control(games: list[dict]) -> int:
+    """Instrument control for the two claim-shaped checks. Exit 3 if it does not fire.
+
+    A 0 from a string matcher is the failure this whole file was rewritten for -
+    ``outed_own_role_in_public`` reported 0/1290 for weeks while looking for
+    vocabulary the players had no way to produce, and nothing about the output said
+    so. A zero is only evidence once the matcher has been shown to fire on the
+    record it returned that zero for.
+
+    Rotating the deals is the cheapest way to show it. The speech is unchanged, so
+    every claim a seat made about its OWN role is now a claim about a role it does
+    not hold: the two counts must swap. If both readings are 0 the instrument never
+    fired on this record and neither number means anything, which is a refusal (3),
+    not a pass. Only the claim checks are read here - the proof checks reason from
+    the deal, so under a rotated deal their output is nonsense and is not printed.
+    """
+    rotated = _rotate_deals(games)
+    rows = []
+    for name, fn in (("seat named its OWN role", outed_own_role_in_public),
+                     ("seat claimed a role it was NOT dealt",
+                      claimed_a_role_it_was_not_dealt)):
+        (bad, total, _), (rot, _, _) = fn(games), fn(rotated)
+        rows.append((name, bad, rot, total))
+        print(f"  {name}: {bad}/{total} as recorded -> {rot}/{total} with the "
+              "deals rotated one seat")
+    if all(bad == 0 and rot == 0 for _, bad, rot, _ in rows):
+        print("\nREFUSED: neither check fired on this record, in either reading. "
+              "The zeros above are a property of the matcher OR of the play and "
+              "this control cannot tell them apart - do not publish them.")
+        return 3
+    print("\nThe instrument fires on this record: a claim shape it can see is "
+          "present, so a 0 in the other column is a reading, not a blind spot.")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("jsonl", help="per-game JSONL from a run")
     ap.add_argument("--show", type=int, default=3, help="examples per check (default 3)")
+    ap.add_argument("--control", action="store_true",
+                    help="instrument control for the two claim checks: score "
+                         "the records again with every deal moved one seat "
+                         "along, where the two counts must swap. Exit 3 if "
+                         "neither fires.")
     args = ap.parse_args(argv)
 
     games = load(args.jsonl)
     print(f"{len(games)} games from {args.jsonl}\n")
+
+    if args.control:
+        print("== CONTROL - claim checks against a rotated deal ==")
+        return control(games)
 
     proof_total = 0
     for heading, checks in (

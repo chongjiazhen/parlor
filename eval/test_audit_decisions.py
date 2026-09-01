@@ -25,8 +25,9 @@ from __future__ import annotations
 import unittest
 from unittest import mock
 
-from eval.audit_decisions import (hunt_named_impossible, outed_own_role_in_public,
-                                  over_sabotage)
+from eval.audit_decisions import (_rotate_deals, claimed_a_role_it_was_not_dealt,
+                                  control, hunt_named_impossible,
+                                  outed_own_role_in_public, over_sabotage)
 from games.cabal.roles import THEMES, Team, Theme
 
 
@@ -254,6 +255,99 @@ class TestASkinWhoseLanguageHasNoRule(unittest.TestCase):
               "utterances": ["seat 0: Seat 3 repeats a Thought Police tell."]}])
         self.assertEqual(bad, 0)
         self.assertEqual(notes, [])
+
+
+class TestClaimedARoleItWasNotDealt(unittest.TestCase):
+    """The other half of the claim shape: a role the seat does NOT hold.
+
+    Deliberately not an error - a mimic saying "I am the Seer" is the game working
+    - so every case here is about the COUNT being readable, not about blame.
+    """
+
+    def game(self, said: str, seat: int = 0, theme: str = "1984-en",
+             assignment: dict | None = None) -> dict:
+        return {"game": 0, "theme": theme,
+                "assignment": assignment or {"0": "mimic", "1": "seer"},
+                "utterances": [f"seat {seat}: {said}"]}
+
+    def test_an_evil_seat_claiming_the_seers_skin_name_is_counted(self):
+        bad, total, notes = claimed_a_role_it_was_not_dealt(
+            [self.game("I am the Thought Police - seat 1 is lying.")])
+        self.assertEqual((bad, total), (1, 1))
+        self.assertIn("holds 'mimic' and claimed seer", notes[-1])
+
+    def test_the_seat_that_ACTUALLY_holds_it_is_not_counted_here(self):
+        """The separation from S13. The same sentence from the seer is a
+        self-outing, which `outed_own_role_in_public` counts and this does not -
+        one utterance must never land in both columns."""
+        g = self.game("I am the Thought Police - seat 0 is lying.", seat=1)
+        self.assertEqual(claimed_a_role_it_was_not_dealt([g])[0], 0)
+        self.assertEqual(outed_own_role_in_public([g])[0], 1)
+
+    def test_naming_another_seats_role_is_not_claiming_it(self):
+        """The floor's absence, in one case: this is the most ordinary sentence at
+        the table, and a containment match would count it."""
+        bad, total, _ = claimed_a_role_it_was_not_dealt(
+            [self.game("Seat 1 is the Thought Police.")])
+        self.assertEqual((bad, total), (0, 1))
+
+    def test_the_functional_key_is_claimable_with_no_theme(self):
+        bad, _, _ = claimed_a_role_it_was_not_dealt(
+            [self.game("I am the seer, and I have seen seat 1.", theme="")])
+        self.assertEqual(bad, 1)
+
+    def test_the_claimants_own_team_is_reported(self):
+        bad, _, notes = claimed_a_role_it_was_not_dealt(
+            [self.game("I am the Thought Police - seat 1 is lying.")])
+        self.assertEqual(bad, 1)
+        self.assertIn("EVIL 1", notes[0])
+
+    def test_a_language_with_no_claim_rule_is_REFUSED_not_scored(self):
+        """Where `outed_own_role_in_public` takes the mention floor, this check
+        cannot: naming a role you do not hold is ordinary table talk, so a
+        containment match would flag most of the record. Those games leave the
+        denominator and the refusal is on the first line."""
+        ja = Theme("1984-ja", {Team.GOOD: "\u30a4\u30f3\u30b0\u30bd\u30c3\u30af", Team.EVIL: "\u5144\u5f1f\u56e3"},
+                   {"seer": "\u601d\u60f3\u8b66\u5bdf", "mimic": "\u4e8c\u91cd\u4eba\u683c\u8005"}, lang="ja")
+        with mock.patch.dict(THEMES, {"1984-ja": ja}):
+            bad, total, notes = claimed_a_role_it_was_not_dealt(
+                [self.game("\u79c1\u306f\u601d\u60f3\u8b66\u5bdf\u3067\u3059\u3002", theme="1984-ja")])
+        self.assertEqual((bad, total), (0, 0))
+        self.assertIn("REFUSED", notes[0])
+        self.assertIn("'ja'", notes[0])
+
+
+class TestTheClaimControl(unittest.TestCase):
+    """A 0 from a string matcher is only evidence once the matcher has been shown
+    to fire on the record that produced it. Rotating the deal leaves the speech
+    alone, so the two claim counts must trade places."""
+
+    def games(self, said: str) -> list[dict]:
+        return [{"game": 0, "theme": "1984-en",
+                 "assignment": {"0": "seer", "1": "mimic"},
+                 "utterances": [f"seat 0: {said}"]}]
+
+    def test_rotating_the_deal_moves_a_self_outing_into_the_other_column(self):
+        g = self.games("I am the Thought Police.")
+        rot = _rotate_deals(g)
+        self.assertEqual(outed_own_role_in_public(g)[0], 1)
+        self.assertEqual(claimed_a_role_it_was_not_dealt(g)[0], 0)
+        self.assertEqual(outed_own_role_in_public(rot)[0], 0)
+        self.assertEqual(claimed_a_role_it_was_not_dealt(rot)[0], 1)
+
+    def test_the_speech_is_untouched_by_the_rotation(self):
+        g = self.games("I am the Thought Police.")
+        self.assertEqual(_rotate_deals(g)[0]["utterances"], g[0]["utterances"])
+        self.assertEqual(g[0]["assignment"], {"0": "seer", "1": "mimic"})
+
+    def test_a_record_that_fires_passes(self):
+        self.assertEqual(control(self.games("I am the Thought Police.")), 0)
+
+    def test_a_record_that_fires_in_NEITHER_reading_is_REFUSED(self):
+        """Exit 3, the same refusal the verdict tools use. `hunt20b` is a live
+        example: 0/1150 both ways, so its zero cannot be published as evidence of
+        a table that never claimed a role."""
+        self.assertEqual(control(self.games("Seat 1 has been quiet all round.")), 3)
 
 
 if __name__ == "__main__":
