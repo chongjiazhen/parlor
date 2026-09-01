@@ -171,8 +171,64 @@ if [ -n "$INDEX_CHANGED" ]; then
 
 That file is what stands in for folders in a flat docs/ directory. Past this
 length it is skimmed rather than used, and the layout is resting on a file
-nobody reads. Its own header carries the other three triggers and what the
-split would be if one fires. This commit is not blocked.
+nobody reads. docs/decisions.md §This directory stays flat carries the other
+three triggers and what the split would be if one fires. This commit is not
+blocked.
+MSG
+    fi
+fi
+# ---------------------------------------------------------------------------
+# A queue row's path:line citation is graded, and only reported.
+#
+# Three rows were discharged by commits and never struck on 2026-09-02, and two
+# of the three were about to be re-fixed by the session that found them. The gate
+# above ratchets queue.md's SIZE; nothing graded its TRUTH. A stale row costs more
+# than a long file - a long file costs a read, a stale row spends a session.
+#
+# It REPORTS and never strikes, because a moved citation is ambiguous by nature:
+# the fix may be real and the line merely shifted. Only a person can tell those
+# apart, so this hands them the list rather than acting on it.
+#
+# WHAT IT CANNOT SEE, and the limit is measured rather than assumed. Replayed
+# against the queue as it stood at bb343d4 it flagged both rows whose cited line
+# had gone blank - eval/audit_decisions.py:81 and eval/cloud_strata.py:59, the two
+# that were about to be re-fixed - and passed games/changeling/referee.py:79,
+# which was equally stale: its fix added a context manager BELOW the cited line,
+# so the citation still resolves to the symbol it names. This grades citation
+# integrity, not row truth. Two in three, for six lines and no false positives.
+if [ "$1" = "--range" ] && [ -n "$2" ]; then
+    QUEUE_CHANGED=$(git diff --name-only "$2" -- queue.md)
+    QUEUE_REF="${2##*..}:queue.md"
+    [ "$QUEUE_REF" = ":queue.md" ] && QUEUE_REF="HEAD:queue.md"
+else
+    QUEUE_CHANGED=$(git diff --cached --name-only -- queue.md)
+    QUEUE_REF=":queue.md"
+fi
+
+if [ -n "$QUEUE_CHANGED" ]; then
+    CITES=$(git show "$QUEUE_REF" 2>/dev/null         | grep -oE '`[A-Za-z0-9_./-]+[.](py|sh|md|cmd|json):[0-9]+`'         | tr -d '`' | sort -u         | while IFS=: read -r cf cl; do
+            if [ ! -f "$cf" ]; then
+                echo "  $cf:$cl  no such file in the tree"
+            else
+                ct=$(wc -l < "$cf" | tr -d " ")
+                if [ "$cl" -gt "$ct" ]; then
+                    echo "  $cf:$cl  past end of file ($ct lines)"
+                elif [ -z "$(sed -n "${cl}p" "$cf" | tr -d "[:space:]")" ]; then
+                    echo "  $cf:$cl  blank line"
+                fi
+            fi
+        done)
+    if [ -n "$CITES" ]; then
+        cat >&2 <<MSG
+
+[hygiene] advisory, not a failure: a queue row cites a line that has moved.
+
+$CITES
+
+Open the row before the citation. A line that has gone blank or off the end
+usually means the work landed and the row outlived it - but the fix may be real
+and the line merely shifted, so this reports and strikes nothing. This commit is
+not blocked.
 MSG
     fi
 fi

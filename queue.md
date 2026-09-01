@@ -130,17 +130,6 @@ all seven findings landed. Its rows are gone; git holds the record.
       live2 is a re-run; `transcripts/` holds no quorum file of any kind, so live4
       needs the renderer written first. Records are
       `eval/records/{belfry-live2,quorum-live4}.json(.jsonl)`, untracked and durable.
-- [ ] **Three queue rows this session were discharged by commits and never
-      struck** - the changeling transcript handle (by `4c917e0`, whose message is
-      the row's own remedy), `audit_decisions`' unruled-language floor (by
-      `4813693`, ~11 h after the row was filed) and `cloud_strata`'s non-model cell
-      (by `0ed697b`). All three read as open work; two of the three were about to
-      be re-fixed. The gate ratchets queue.md's SIZE, not its TRUTH, and a stale
-      row costs more than a long file: it spends a session. Cheap deterministic
-      check - every row citing `path:line` is graded on whether that line still
-      holds the cited symbol, and a row whose citation has moved is reported, not
-      auto-struck (the fix may be real and the line merely shifted). `sed -n 81p
-      eval/audit_decisions.py` printed a BLANK LINE, which is the whole tell.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
