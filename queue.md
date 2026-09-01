@@ -80,8 +80,8 @@ came from carrying one game's intuition into the other's denominator.
 These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
-by name, so do not renumber them. **Only live rows are below** - S1-S7 and
-S9-S11, struck and annotated, are `docs/slices.md`.
+by name, so do not renumber them. **Only live rows are below**; every struck
+and annotated slice is `docs/slices.md` - S1-S15, S32 and S35 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -129,7 +129,7 @@ behind each is `docs/open-arms.md`; read the entry before taking the row.**
 **Reference lives in `docs/README.md`**, which indexes every one of these and
 is maintained as an index. A second list here is the one that goes stale.
 
-Instrument and integrity - the seven below came out of a 2026-09-01 review of
+Instrument and integrity - the six below came out of a 2026-09-01 review of
 `2d28e60..HEAD` and are read from the files cited, not measured:
 
 - [ ] **`eval/discretion_number.py` is broken twice and may not be worth fixing.**
@@ -154,11 +154,6 @@ Instrument and integrity - the seven below came out of a 2026-09-01 review of
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
       `_says` at least falls back to a substring that always matches. Only
       `1984-cn` exercises the branch today, so no recorded number moves yet.
-- [ ] **belfry live2 has no rendered transcript.** `docs/measurements.md` cites
-      its numbers with nothing to open; live1 links
-      `transcripts/belfry-live1.md` and `AGENTS.md` makes the rendered
-      transcript the committed evidence for a claim. The record is
-      `eval/records/belfry-live2.json(.jsonl)`, untracked and durable.
 - [ ] **The changeling self-leak audit gained a conditional bypass.**
       `games/changeling/referee.py:506`'s `and dealt.key != held.key` switches the
       check off in a reachable state - 129 of 15000 seat-games measured, e.g. seed
@@ -171,6 +166,11 @@ Instrument and integrity - the seven below came out of a 2026-09-01 review of
       itself with `PermissionError` from `TemporaryDirectory` cleanup. A
       context-manager or a lazy per-write open removes the class.
 
+- [ ] **belfry live2 has no rendered transcript.** `docs/measurements.md` cites
+      its numbers with nothing to open; live1 links
+      `transcripts/belfry-live1.md` and `AGENTS.md` makes the rendered
+      transcript the committed evidence for a claim. The record is
+      `eval/records/belfry-live2.json(.jsonl)`, untracked and durable.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
