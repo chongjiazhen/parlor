@@ -26,19 +26,18 @@ class TestUATTranscriptIntegration(unittest.TestCase):
         console.stdout = io.StringIO()
         with TemporaryDirectory() as tmp:
             out_path = Path(tmp) / "referee.log"
-            ref = ChangelingReferee.new(
-                5, seed=seed, discussion_rounds=1, dealt=dealt, centre=centre,
-                transcript_path=out_path)
-            human = LLMPolicy(backend=console, retries=8,
-                              fallback=RandomPolicy(rng))
-            policies = {s: (human if s == 0 else RandomPolicy(rng))
-                        for s in range(ref.n)}
-            rec = play_game(ref, policies, uat=True)
-            self.assertTrue(rec.uat, "UAT flag not set on record")
-            self.assertEqual(ref.night.dealt[0].key, "spotter")
-            self.assertEqual(out_path.read_text(encoding="utf-8").splitlines(),
-                             rec.log)
-            ref.close()
+            with ChangelingReferee.new(
+                    5, seed=seed, discussion_rounds=1, dealt=dealt,
+                    centre=centre, transcript_path=out_path) as ref:
+                human = LLMPolicy(backend=console, retries=8,
+                                  fallback=RandomPolicy(rng))
+                policies = {s: (human if s == 0 else RandomPolicy(rng))
+                            for s in range(ref.n)}
+                rec = play_game(ref, policies, uat=True)
+                self.assertTrue(rec.uat, "UAT flag not set on record")
+                self.assertEqual(ref.night.dealt[0].key, "spotter")
+                self.assertEqual(out_path.read_text(encoding="utf-8").splitlines(),
+                                 rec.log)
 
 
 if __name__ == "__main__":

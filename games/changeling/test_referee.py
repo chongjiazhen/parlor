@@ -396,18 +396,39 @@ class TestOutcomeReadsTruth(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "referee.log"
             path.write_text("prior game\n", encoding="utf-8")
-            ref = ChangelingReferee.new(5, seed=4, discussion_rounds=1,
-                                        transcript_path=path)
-            self.assertEqual(path.read_text(encoding="utf-8").splitlines(),
-                             ["prior game", *ref.referee_log])
-            for seat in range(ref.n):
-                prompt = ref.prompt_for(seat)
-                for line in ref.referee_log:
-                    self.assertNotIn(line, prompt)
-            wolf = next(s for s in range(5) if ref.holds(s).side is Side.PACK)
-            self.all_point_at(ref, wolf)
-            lines = path.read_text(encoding="utf-8").splitlines()
-            self.assertEqual(lines, ["prior game", *ref.referee_log])
+            with ChangelingReferee.new(5, seed=4, discussion_rounds=1,
+                                       transcript_path=path) as ref:
+                self.assertEqual(path.read_text(encoding="utf-8").splitlines(),
+                                 ["prior game", *ref.referee_log])
+                for seat in range(ref.n):
+                    prompt = ref.prompt_for(seat)
+                    for line in ref.referee_log:
+                        self.assertNotIn(line, prompt)
+                wolf = next(s for s in range(5) if ref.holds(s).side is Side.PACK)
+                self.all_point_at(ref, wolf)
+                lines = path.read_text(encoding="utf-8").splitlines()
+                self.assertEqual(lines, ["prior game", *ref.referee_log])
+
+    def test_a_failure_inside_the_sidecar_block_is_not_masked_by_the_handle(self):
+        """Break caught: closing on the last line only closes when that line is
+        reached. An assertion above it leaves the handle open, Windows refuses to
+        remove the temp dir, and the test reports PermissionError - so the real
+        failure is invisible and every OTHER failure in the block hides too."""
+        with self.assertRaises(AssertionError):
+            with TemporaryDirectory() as tmp:
+                path = Path(tmp) / "referee.log"
+                with ChangelingReferee.new(5, seed=4, discussion_rounds=1,
+                                           transcript_path=path) as ref:
+                    self.assertEqual(ref.referee_log, [], "deliberate failure")
+
+    def test_close_is_idempotent_so_the_context_manager_composes(self):
+        """demo.py already closes in a finally. Nesting that inside the context
+        manager must not raise on the second close."""
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "referee.log"
+            with ChangelingReferee.new(5, seed=4, discussion_rounds=1,
+                                       transcript_path=path) as ref:
+                ref.close()
             ref.close()
 
 

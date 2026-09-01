@@ -92,6 +92,19 @@ class ChangelingReferee:
             self._transcript_fh.close()
             self._transcript_fh = None
 
+    def __enter__(self) -> "ChangelingReferee":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        """Close the sidecar on EVERY exit path, raising one included.
+
+        A caller that closes on its last line closes only when it reaches
+        that line. Under a temp dir on Windows the open handle then makes
+        cleanup raise ``PermissionError``, and the test reports THAT
+        instead of whatever assertion actually failed above it.
+        """
+        self.close()
+
     @property
     def n(self) -> int:
         return self.setup.n
