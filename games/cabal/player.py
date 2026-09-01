@@ -28,6 +28,7 @@ import time
 from collections import Counter
 from dataclasses import dataclass, field
 
+from core import callcost
 from core.backends import Backend
 from core.replies import (
     ParseError,
@@ -196,9 +197,7 @@ class LLMPolicy:
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
-        self.last_prompt_size = 0
-        self.last_reply_size = 0
-        self.last_usage = None
+        callcost.forget(self)
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -211,9 +210,7 @@ class LLMPolicy:
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
                 self.last_attempted_upstreams.append(served_by)
-                self.last_prompt_size = len(prompt)
-                self.last_reply_size = len(reply)
-                self.last_usage = getattr(self.backend, "last_usage", None)
+                callcost.note(self, prompt, reply, self.backend)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self._refused(seat, attempt, "transport", complaint)
@@ -314,7 +311,7 @@ class VoteRecord:
 
 
 @dataclass
-class Decision:
+class Decision(callcost.CallCost):
     """One decision as it was made: what the seat played, and the private reasoning
     it gave for playing it.
 
@@ -368,9 +365,6 @@ class Decision:
     #: Served upstreams for every attempt. ``served_by`` is empty on a fallback
     #: that crossed upstreams, because no one upstream owns random's final move.
     attempted_upstreams: list[str] = field(default_factory=list)
-    prompt_size: int = 0
-    reply_size: int = 0
-    usage: dict | None = None
 
 
 def played_summary(phase: Phase, action: dict) -> str:
@@ -469,9 +463,6 @@ def play_game(
         # filed before the move is applied, so a note written about THIS board is
         # dated to this board. It is a no-op when the notebook is off.
         stored = ref.note(seat, action.get("note", ""))
-        prompt_size = getattr(policies[seat], "last_prompt_size", 0)
-        reply_size = getattr(policies[seat], "last_reply_size", 0)
-        usage = getattr(policies[seat], "last_usage", None)
         attempted_upstreams = list(
             getattr(policies[seat], "last_attempted_upstreams", []) or [])
         served_by = str(getattr(policies[seat], "last_upstream", "") or "")
@@ -490,9 +481,7 @@ def play_game(
             # Dropping it makes that upstream's fallback rate unmeasurable.
             served_by=served_by,
             attempted_upstreams=attempted_upstreams,
-            prompt_size=prompt_size,
-            reply_size=reply_size,
-            usage=usage,
+            **callcost.spent(policies[seat]),
         ))
         return action
 

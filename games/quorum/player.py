@@ -33,6 +33,7 @@ import time
 from collections import Counter
 from dataclasses import dataclass, field
 
+from core import callcost
 from core.backends import Backend
 from core.replies import ParseError, parse_bool, parse_index, read_reply
 from games.quorum.audit import assert_no_leak
@@ -237,9 +238,7 @@ class LLMPolicy:
         self.last_refusal = ""
         self.last_refusals = 0
         self.last_rule_refusals = 0
-        self.last_prompt_size = 0
-        self.last_reply_size = 0
-        self.last_usage = None
+        callcost.forget(self)
         base = ref.prompt_for(seat)
         complaint = ""
         for attempt in range(self.retries + 1):
@@ -251,9 +250,7 @@ class LLMPolicy:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
                 self.last_upstream = served_by
-                self.last_prompt_size = len(prompt)
-                self.last_reply_size = len(reply)
-                self.last_usage = getattr(self.backend, "last_usage", None)
+                callcost.note(self, prompt, reply, self.backend)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 self._refused(seat, attempt, "transport", complaint)
@@ -309,7 +306,7 @@ class LLMPolicy:
 # ---- records --------------------------------------------------------------
 
 @dataclass
-class Decision:
+class Decision(callcost.CallCost):
     """One decision as it was made, plus the private reasoning behind it.
 
     ``think`` is referee-side and stays referee-side. Gate #1 is about the bytes a
@@ -332,9 +329,6 @@ class Decision:
     #: without inferring a policy class from a side or an arm name later.
     model_controlled: bool = False
     served_by: str = ""
-    prompt_size: int = 0
-    reply_size: int = 0
-    usage: dict | None = None
 
 
 @dataclass
@@ -482,9 +476,6 @@ def play_game(
             rec.recovered += 1
         rec.refused_attempts += refusals
         rec.rule_refused_attempts += rule_refusals
-        prompt_size = getattr(policy, "last_prompt_size", 0)
-        reply_size = getattr(policy, "last_reply_size", 0)
-        usage = getattr(policy, "last_usage", None)
         rec.decision_log.append(Decision(
             turn=rec.turns, seat=seat, phase=phase.value,
             played=played_summary(phase, action),
@@ -495,9 +486,7 @@ def play_game(
             model_controlled=isinstance(policy, LLMPolicy),
             served_by=("" if fell_back
                        else str(getattr(policy, "last_upstream", "") or "")),
-            prompt_size=prompt_size,
-            reply_size=reply_size,
-            usage=usage,
+            **callcost.spent(policy),
         ))
         return action
 
