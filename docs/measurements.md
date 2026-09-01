@@ -506,7 +506,8 @@ live3 stand unrun beside their own criteria, each superseded in writing.
 
 **No void condition fired.** Model fallback **0.04% of 2582 model-controlled
 decisions** against a 10% ceiling - that is ONE decision in the whole arm. 20
-played games as promised. No entitlement leak. No repeat `(seat, event)` claim - the first time that check, added at
+played games as promised. No entitlement leak. No repeat `(seat, event)`
+claim - the first time that check, added at
 `5a71004`, has run against a MODEL record rather than random play. It found
 nothing, so the void still has no positive case behind it and a duplicate
 remains a bug report rather than a finding. 46
