@@ -146,6 +146,12 @@ class TestOutedOwnRoleInPublic(unittest.TestCase):
             [self.game("1984-en", "As Thought Police, I urge approval.")])
         self.assertEqual((bad, total), (1, 1))
 
+    def test_identity_descriptor_before_own_role_is_a_self_outing(self):
+        """Natural identity wording must not bypass the claim-shaped check."""
+        bad, total, _ = outed_own_role_in_public(
+            [self.game("1984-en", "I am a member of the Thought Police.")])
+        self.assertEqual((bad, total), (1, 1))
+
     def test_naming_ANOTHER_seat_s_role_is_not_outing_your_own(self):
         bad, _, _ = outed_own_role_in_public(
             [self.game("1984-en", "Seat 1 is the Doublethinker.")])
@@ -159,6 +165,12 @@ class TestOutedOwnRoleInPublic(unittest.TestCase):
         bad, _, _ = outed_own_role_in_public(
             [self.game("1984-cn", "我就是思想警察,三号是思想犯。")])
         self.assertEqual(bad, 1)
+
+    def test_a_CJK_role_adjacent_description_is_not_a_self_outing(self):
+        """Possessive continuation says relation to role, not identity as role."""
+        bad, total, _ = outed_own_role_in_public(
+            [self.game("1984-cn", "我是思想警察的同事。")])
+        self.assertEqual((bad, total), (0, 1))
 
     def test_the_functional_key_is_still_matched(self):
         bad, _, _ = outed_own_role_in_public(

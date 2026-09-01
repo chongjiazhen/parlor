@@ -72,20 +72,23 @@ def _claims_own_role(text: str, name: str) -> bool:
     """Does a seat explicitly identify itself as ``name`` in present tense?
 
     Mentioning a role is table vocabulary, especially under a themed skin. S13
-    counts only a first-person claim: ``I am`` / ``I'm`` before the role, or
-    ``As <role>, I``. Chinese records use the equivalent ``我是`` / ``我就是``.
+    counts only a first-person claim: ``I am`` / ``I'm`` before the role (with a
+    short identity descriptor), or ``As <role>, I``. Chinese records use the
+    equivalent ``我是`` / ``我就是`` only when the role phrase ends there.
     """
     if not name:
         return False
     if name.isascii():
         role = rf"\b{re.escape(name)}\b"
         return re.search(
-            rf"\b(?:i am|i['’]m)\s+(?:(?:a|an|the)\s+)?{role}", text,
+            rf"\b(?:i am|i['’]m)\s+(?:(?:a|an|the)\s+)?"
+            rf"(?:(?:member|agent|officer)\s+of\s+(?:the\s+)?)?{role}", text,
             re.I) is not None or re.search(
                 rf"\bas\s+(?:(?:a|an|the)\s+)?{role}\s*[,;:-]?\s*i\b",
                 text, re.I) is not None
-    return (f"我是{name}" in text or f"我就是{name}" in text
-            or f"作为{name}，我" in text or f"作为{name},我" in text)
+    return re.search(
+        rf"我(?:是|就是){re.escape(name)}(?=$|[\s，,。.!！?？；;、）)])", text) is not None \
+        or re.search(rf"作为{re.escape(name)}[，,]\s*我", text) is not None
 
 
 # ---- PROOF checks ---------------------------------------------------------
