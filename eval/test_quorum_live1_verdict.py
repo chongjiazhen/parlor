@@ -313,6 +313,40 @@ def test_a_record_that_is_not_the_pre_committed_arm_says_so():
     assert "NOT the pre-committed arm" in text
 
 
+# ---- the arm binding: path and criterion document move together -------------
+
+def test_the_arm_in_force_is_live4_and_writes_its_own_record():
+    """docs/quorum-live4-criterion.md binds eval/records/quorum-live4.json.
+
+    Fails against the stale binding this replaced, which still named live3's
+    record after live4 superseded that promise.
+    """
+    assert verdict.CAMPAIGN == "eval/records/quorum-live4.json"
+    assert verdict.ARMS["live4"]["doc"] == "docs/quorum-live4-criterion.md"
+
+
+def test_the_live4_record_scores_as_the_pre_committed_arm():
+    text, _, _ = run(with_model_decisions(honest_proposer(28, 79)),
+                     path="eval/records/quorum-live4.json")
+    assert "NOT the pre-committed arm" not in text
+    assert "docs/quorum-live4-criterion.md" in text
+
+
+def test_the_header_names_the_document_that_promised_THAT_record():
+    """A retired promise still describes its own record, never another's."""
+    text, _, _ = run(with_model_decisions(honest_proposer(28, 79)),
+                     path="eval/records/quorum-live3.json")
+    assert "docs/quorum-live3-criterion.md" in text
+    assert "docs/quorum-live4-criterion.md" not in text
+
+
+def test_no_arm_binds_another_arms_record():
+    seen = [a["campaign"] for a in verdict.ARMS.values()]
+    assert len(seen) == len(set(seen))
+    for name, a in verdict.ARMS.items():
+        assert name in a["campaign"] and name in a["doc"]
+
+
 # ---- what the criterion refuses to report ----------------------------------
 
 def test_no_win_rate_is_reported():

@@ -2,7 +2,8 @@
 
     py -3 -m eval.quorum_live1_verdict
 
-``docs/quorum-live3-criterion.md`` is the promise. This file is that promise made
+``docs/quorum-live4-criterion.md`` is the promise it now binds, and ARMS below
+carries every promise this arithmetic has served. This file is that promise made
 mechanical, and it was written before any model had played a quorum seat - which
 is the only time it can be written honestly. A verdict script authored after the
 numbers land has had its statistic chosen with the numbers in view, which is the
@@ -54,10 +55,37 @@ from pathlib import Path
 from eval.quorum_claims import (bootstrap_claim_rate, chance,
                                 score as claim_score, verdicts)
 
-#: The arm the criterion binds. A different record still scores, loudly marked,
-#: because the arithmetic is worth auditing against any run - but only this one is
-#: the pre-committed arm.
-CAMPAIGN = "eval/records/quorum-live3.json"
+#: One arm's whole binding - the record it writes and the document that promised
+#: it - as a single object, so a superseding promise cannot move one without the
+#: other. It could: this file scored live3's path and printed live3's document
+#: after ``docs/quorum-live4-criterion.md`` superseded both, so a legitimate live4
+#: record would have been marked "NOT the pre-committed arm" and headed with a
+#: retired criterion. Same defect ``eval/belfry_adjudicator_verdict`` carried.
+#:
+#: Retired promises stay listed. This repo retires a criterion in writing rather
+#: than editing it, so live3's binding is still the truth about live3 even though
+#: no live3 arm ever ran.
+ARMS = {
+    "live3": {"campaign": "eval/records/quorum-live3.json",
+              "doc": "docs/quorum-live3-criterion.md"},
+    "live4": {"campaign": "eval/records/quorum-live4.json",
+              "doc": "docs/quorum-live4-criterion.md"},
+}
+
+#: The arm in force. A different record still scores, loudly marked, because the
+#: arithmetic is worth auditing against any run - but only this one is the
+#: pre-committed arm.
+CAMPAIGN = ARMS["live4"]["campaign"]
+
+
+def arm_for(path) -> dict | None:
+    """The arm a record path belongs to, or ``None`` for an ad-hoc audit.
+
+    Resolved from the PATH rather than a flag, so the header can never name a
+    criterion that did not promise the record underneath it.
+    """
+    p = path.as_posix()
+    return next((a for a in ARMS.values() if a["campaign"] == p), None)
 
 #: Pre-committed in ``docs/quorum-live1-criterion.md``, all four before any data.
 GAMES_PROMISED = 20
@@ -241,12 +269,15 @@ def call(claims: int, bar: float,
 
 def report(summary: dict, derived: dict, path: Path,
            promised: int) -> tuple[list[str], int]:
+    arm = arm_for(path)
+    doc = (arm or ARMS["live4"])["doc"]
     out = [f"quorum live arm - {path.as_posix()}",
-           "criterion: docs/quorum-live3-criterion.md (pre-committed, not "
-           "editable; supersedes the never-launched live2 promise in writing)"]
-    if path.as_posix() != CAMPAIGN:
-        out += ["", f"** NOT the pre-committed arm ({CAMPAIGN}). The arithmetic "
-                    f"below is an audit of this record, not a verdict. **"]
+           f"criterion: {doc} (pre-committed, not editable; each promise "
+           "supersedes the last in writing rather than being edited)"]
+    if arm is None:
+        out += ["", f"** NOT the pre-committed arm ({CAMPAIGN} is in force). The "
+                    f"arithmetic below is an audit of this record, not a "
+                    f"verdict. **"]
 
     bad = control(summary, derived)
     out += ["", "instrument control - the summary against the rows behind it"]
