@@ -89,7 +89,7 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
-| **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. | judgment | codex | no changeling arm in flight | committed criterion and tracked recipe; no record launched |
+| **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. **Unblocked 2026-09-02**: S33 closed without a model-facing change, so S5's baseline stands and this freezes on top of it. | judgment | codex | no changeling arm in flight - **met** | committed criterion and tracked recipe; no record launched |
 | **S19** | **Waker deck campaign.** Run S18's frozen control/model arms and render the verdict. | judgment | codex | S18 criterion and recipe committed | records, transcript, verdict and both fallback rates |
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
@@ -120,8 +120,9 @@ behind each is `docs/open-arms.md`; read the entry before taking the row.**
 **Reference lives in `docs/README.md`**, which indexes every one of these and
 is maintained as an index. A second list here is the one that goes stale.
 
-Instrument and integrity - the six below came out of a 2026-09-01 review of
-`2d28e60..HEAD` and are read from the files cited, not measured:
+Instrument and integrity - what is left of a 2026-09-01 review of
+`2d28e60..HEAD`, read from the files cited, not measured. No count here: five of
+its findings have since landed and a number in this line went stale twice.
 
 - [ ] **`eval/cloud_strata.py:59` raises on any `RandomPolicy` decision row**, so
       it can only ever score a full-`llm` record - never `random`, `llm-good`,
@@ -132,11 +133,6 @@ Instrument and integrity - the six below came out of a 2026-09-01 review of
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
       `_says` at least falls back to a substring that always matches. Only
       `1984-cn` exercises the branch today, so no recorded number moves yet.
-- [ ] **`games/changeling/referee.py:79` opens a transcript handle in
-      `__post_init__` that only `demo.py` reliably closes.** On Windows an open
-      handle blocks deletion, so an assertion firing inside the sidecar test masks
-      itself with `PermissionError` from `TemporaryDirectory` cleanup. A
-      context-manager or a lazy per-write open removes the class.
 
 - [ ] **Two read arms have no rendered transcript, and quorum has no renderer at
       all.** `docs/measurements.md` now cites belfry live2 AND quorum live4 with
