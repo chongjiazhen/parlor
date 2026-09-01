@@ -92,7 +92,6 @@ should launch first and spend the wait on a CPU slice.
 | **S29** | **Belfry adjudicator retry - CODE LANDED 2026-09-01, inline.** The adjudicator now carries the seats' `retries=2` / doubling backoff, `ChoiceEvent.recovered` is set from a rules refusal that later answered (transport is not recovery), and the paired verdict PRINTS the recovered rate beside the fallback rate. Both were mutation-checked. **The S8b re-baseline did not happen and cannot:** its 20 calls fell back 0/20, so every first ask was already legal, the first ask is byte-identical by design and test, and the fallback rng is drawn only on fallback - `--v2` re-read at `0/20 = 0.00%` recovered, exit 0, unchanged. What is left is a record with a NON-ZERO recovered count, and v2's prompt cannot supply one at 0% fallback; v1's 12/20 is the condition that would. | constrained | inline | S8 void diagnosed - **met** | a run whose records carry recovered > 0, or a recorded decision that no arm will produce one |
 | **S36** | **A lane slot runs a suite with a hole in it.** `eval/records/` is gitignored and therefore per-worktree, so in any slot `eval/test_deduction.py` errors at COLLECTION and 5 `eval/test_rule_errors.py` control tests error - and the `--accept` chain a worker is graded on cannot see them. **Landmine:** a `mklink /J` junction back to the main tree fixes collection and hands an untrusted worker write access to the records; the fixture set may need to be tracked instead. | constrained | inline | none | a slot collects the full suite, with no worker-writable path into `eval/records/` |
 | **S31** | **`audit_decisions` ascii dispatch.** Silent 0/N on any non-ASCII, non-Chinese skin. **SPLIT 2026-09-01 after three failed dispatches** (opencode twice on free-tier provider deaths, qwen once on the 18-min wall clock, every one leaving a pristine tree): `_says` is mechanical - the fallback always-matches by containment the way its own last line already does. `_claims_own_role` is NOT, because deciding what a first-person claim looks like in a script with no regex set is a design call, and a brief that says "decide the floor and say so" has no mechanical accept to grade. Do the second half inline. **Landmine:** giving the fallback another language's regex set repeats the bug one skin later and reads as fixed. | judgment | inline | none | a non-ASCII skin scores non-zero, the fallback proven by a skin with no regex set, and the `_claims_own_role` floor stated where it is read |
-| **S28** | **`discretion_number` fix-or-delete.** It crashes, and it measures deal differences alongside adjudicator behaviour. The paired verdict already does this correctly, so deletion is live and the call is a judgment. | judgment | codex | paired verdict read - **met** | either a scoped instrument with a dated read, or a deletion with the reason recorded |
 | **S16** | **False-claim instrument.** Define and test a match for a seat claiming a role it was not dealt, separate from S13's self-outing count. | judgment | codex | S13's claim shape is settled | stored records re-scored; date, denominator and fallback rate land together |
 | **S17** | **Changeling randomness instrument.** Read existing records for stated village claims against dealt/night state before changing a deck or prompt. | judgment | codex | completed changeling records exist - **met** | tracked instrument, rendered read, dated count and fallback rate |
 | **S33** | **Changeling self-leak rename.** `AGENTS.md` says a colliding term is RENAMED, not guarded around. Model-facing and RE-BASELINES S5, so it lands before S18 freezes a baseline on top of it. | judgment | codex | none | the term renamed, `find_leaks` left naive, and S5's baseline re-taken |
@@ -131,19 +130,6 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity - the six below came out of a 2026-09-01 review of
 `2d28e60..HEAD` and are read from the files cited, not measured:
 
-- [ ] **`eval/discretion_number.py` is broken twice and may not be worth fixing.**
-      `__main__` crashes - `FixedAdjudicator` returns role-name strings where
-      `deal()` calls `.key` (`games/belfry/state.py:379`) - and its two arms run
-      DIFFERENT seeds (`:114`), so the classifier separates them on deal
-      composition as well as on adjudicator behaviour. `belfry_adjudicator_verdict`
-      already pairs on identical seeds and reduces the feature to
-      `(key, option_count, selected_index)`. **Decide fix-or-delete before either.**
-- [ ] **The belfry adjudicator has no retry, and that is what voided S8.**
-      `games/belfry/adjudicator.py:38` falls back on one unparseable reply;
-      `--retries` reaches the player policies and never the adjudicator, and
-      `ChoiceEvent.recovered` is hardwired `False` (`:55`), so every check that
-      sums it is a permanent `0 == 0`. 12 of 20 S8 calls fell back on fenced-JSON
-      formatting alone. **RE-BASELINES S8b**, so it lands alone and says so.
 - [ ] **`eval/cloud_strata.py:59` raises on any `RandomPolicy` decision row**, so
       it can only ever score a full-`llm` record - never `random`, `llm-good`,
       `llm-evil` or a `--speaker` run. A random seat is a known non-model: exclude

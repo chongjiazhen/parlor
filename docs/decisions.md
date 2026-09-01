@@ -187,3 +187,31 @@ the whole row; **do not restate the reasoning here** when you touch it.
   marked unread. `CLAUDE.local.md` has the path. Do not re-import it and do not
   re-run the search half. Reading debt blocks only PUBLISHING.
 - **Ten theme arms across both games are built and NONE has been run.**
+
+## `eval/discretion_number.py` is DELETED, 2026-09-01 - S28 closed
+
+Deleted with `eval/test_discretion_number.py`. Both defects were re-confirmed
+against the files on the day, not inherited from the queue's diagnosis:
+
+- **Its two arms ran different deals.** Arm A took even seeds and arm B odd
+  (`base_seed + i*2` / `+ i*2 + 1`), so the classifier separated them on deal
+  composition as well as on adjudicator behaviour. That is the confound the
+  whole instrument existed to avoid, and it inflated the one number the module
+  published. It bit hardest where the tests looked greenest: a FIXED adjudicator
+  picks `spare_roles[0]` / `good_seats[0]`, so a different deal hands it a
+  different menu, and `test_discretion_number_random_vs_fixed` cleared its 0.7
+  bar partly on the seeds. `test_same_adjudicator_scores_at_chance` could not
+  catch it - two random arms are confounded identically, so it read 0.5 and
+  passed while the confound was live.
+- **Its `__main__` crashed.** `FixedAdjudicator` returned role-name STRINGS where
+  `deal()` reads `.key` (`games/belfry/state.py:379`), so the module's own
+  worked example died `AttributeError` after printing one line.
+
+**Why not fix it.** `eval/belfry_adjudicator_verdict.py` already answers the same
+question correctly and is the instrument behind a published number: it pairs the
+arms on IDENTICAL seeds, drops the unpaired ones, and reduces each trace to
+`(key, option_count, selected_index)` so neither the deal nor the label can reach
+the classifier. Fixing the seeding here would have converged on that design and
+left two instruments answering one question, which is how a stale second copy
+wins an argument later. The delete is recoverable from history; nothing in the
+tree imported the module, and `docs/` never cited its number.
