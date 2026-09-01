@@ -96,6 +96,27 @@ CHANCE_TOLERANCE = 0.02
 CONTROL_DISCRIMINATION = 0.0241
 CONTROL_BOOTSTRAP = (-0.0149, 0.0615)
 
+#: One arm's WHOLE binding - the record it reads, the settings it demands and the
+#: document that promised them - as a single object. They are not separate flags
+#: on purpose: ``--v2`` in ``eval/belfry_adjudicator_verdict.py`` switches the
+#: expected args and not the default record paths, so a bare invocation loads the
+#: v1 records and reports it as a criterion violation rather than as the wrong
+#: file. One binding, one switch, nothing that can half-move.
+#:
+#: live2 differs from live1 in ``no_thinking`` and nothing else. Measured
+#: 2026-09-01, live1's promised settings ran 58.33% fallback over two games and
+#: fire live1's own void condition, so the arm as promised cannot be read at any
+#: N. Every bar, floor and endpoint is carried across unedited -
+#: ``docs/belfry-live2-criterion.md`` §Why this file exists.
+ARMS = {
+    "live1": {"campaign": CAMPAIGN,
+              "args": CRITERION_ARGS,
+              "doc": "docs/belfry-live1-criterion.md"},
+    "live2": {"campaign": "eval/records/belfry-live2.json",
+              "args": {**CRITERION_ARGS, "no_thinking": True},
+              "doc": "docs/belfry-live2-criterion.md"},
+}
+
 
 def load(path: Path) -> tuple[dict, list[dict]]:
     """The summary the driver published, and the per-game rows behind it."""
@@ -334,15 +355,21 @@ def control(summary: dict, derived: dict,
     return bad
 
 
-def criterion_mismatches(summary: dict, path: Path) -> list[str]:
-    """Reasons this record is not belfry live arm #1's promised configuration."""
+def criterion_mismatches(summary: dict, path: Path,
+                         arm: dict | None = None) -> list[str]:
+    """Reasons this record is not the arm's promised configuration.
+
+    ``arm`` is one ``ARMS`` binding and carries BOTH the record path and the
+    settings, so a caller cannot check one arm's args against another's path."""
+    arm = ARMS["live1"] if arm is None else arm
+    campaign, criterion_args = arm["campaign"], arm["args"]
     bad = []
-    if path.as_posix() != CAMPAIGN:
-        bad.append(f"record path: expected {CAMPAIGN}, record {path.as_posix()}")
+    if path.as_posix() != campaign:
+        bad.append(f"record path: expected {campaign}, record {path.as_posix()}")
     args = summary.get("args")
     if not isinstance(args, dict):
         return bad + ["record args: expected launch settings, record none"]
-    for name, expected in CRITERION_ARGS.items():
+    for name, expected in criterion_args.items():
         if name not in args:
             bad.append(f"{name}: expected {expected!r}, record missing")
         elif args[name] != expected:
@@ -419,17 +446,20 @@ def _band(ci) -> str:
 
 
 def report(summary: dict, derived: dict, path: Path,
-           promised: int, rows: list[dict]) -> tuple[list[str], int]:
+           promised: int, rows: list[dict],
+           arm: dict | None = None) -> tuple[list[str], int]:
     # ``rows`` is REQUIRED, not optional. It WAS optional, every caller that
     # mattered had the rows in hand, and ``main`` did not pass them - so the
     # vote-provenance join in ``control`` sat behind ``if rows is not None`` and
     # never ran on the one path an operator executes. The suite stayed green
     # because the test helper passed them. A default here is a controller that
     # silently degrades to no controller, so the signature refuses one.
+    arm = ARMS["live1"] if arm is None else arm
     units = derived["units"]
     score = summary.get("score", {})
-    out = [f"belfry live arm #1 - {path.as_posix()}",
-           "criterion: docs/belfry-live1-criterion.md (pre-committed, not editable)"]
+    name = next(k for k, v in ARMS.items() if v is arm) if arm in ARMS.values()         else "?"
+    out = [f"belfry live arm {name} - {path.as_posix()}",
+           f"criterion: {arm['doc']} (pre-committed, not editable)"]
     bad = control(summary, derived, rows)
     out += ["", "instrument control - the summary against the rows behind it"]
     if bad:
@@ -439,7 +469,7 @@ def report(summary: dict, derived: dict, path: Path,
         return out, 1
     out += ["  the published vote and execution counts reproduce from the rows"]
 
-    mismatches = criterion_mismatches(summary, path)
+    mismatches = criterion_mismatches(summary, path, arm)
     off_criterion = bool(mismatches)
     out += ["", "criterion binding"]
     if off_criterion:
@@ -602,9 +632,16 @@ def report(summary: dict, derived: dict, path: Path,
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="apply belfry's pre-committed first-arm criterion")
-    ap.add_argument("record", nargs="?", default=CAMPAIGN,
-                    help=f"the run summary .json (default {CAMPAIGN})")
+    ap.add_argument("--criterion", choices=sorted(ARMS), default="live1",
+                    help="which pre-committed arm to bind (default live1). It "
+                         "switches the record path and the expected settings "
+                         "together; there is no flag for one without the other")
+    ap.add_argument("record", nargs="?",
+                    help="the run summary .json (default: the arm's own record)")
     args = ap.parse_args()
+    arm = ARMS[args.criterion]
+    if args.record is None:
+        args.record = arm["campaign"]
 
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -616,7 +653,8 @@ def main() -> None:
         print(f"no record at {exc.filename} - the arm has not been run")
         sys.exit(1)
 
-    lines, code = report(summary, recompute(rows), path, GAMES_PROMISED, rows)
+    lines, code = report(summary, recompute(rows), path, GAMES_PROMISED, rows,
+                         arm)
     print("\n".join(lines))
     sys.exit(code)
 

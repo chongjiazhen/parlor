@@ -384,6 +384,46 @@ class CriterionBinding(unittest.TestCase):
         self.assertIn("VERDICT: INFORMS", text)
         self.assertNotIn("DESCRIPTIVE audit", text)
 
+    def test_live2_differs_from_live1_in_exactly_one_setting(self):
+        """live2 exists because live1's settings void, not to move a bar. Any
+        second difference between the two bindings is a criterion being rewritten
+        with the numbers in view, and this is the only place it would show."""
+        one, two = verdict.ARMS["live1"]["args"], verdict.ARMS["live2"]["args"]
+
+        differ = {k for k in one | two if one.get(k) != two.get(k)}
+
+        self.assertEqual(differ, {"no_thinking"})
+        self.assertIs(two["no_thinking"], True)
+
+    def test_selecting_an_arm_moves_its_record_path_with_it(self):
+        """The --v2 bug in belfry_adjudicator_verdict: switching the expected
+        args without the default record path makes a bare invocation load the
+        OTHER arm's records and report it as a criterion violation."""
+        import contextlib
+        import io as _io
+        buf = _io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            with unittest.mock.patch("sys.argv", ["x", "--criterion", "live2"]):
+                with self.assertRaises(SystemExit):
+                    verdict.main()
+
+        self.assertIn("belfry-live2.json", buf.getvalue())
+        self.assertNotIn("belfry-live1.json", buf.getvalue())
+
+    def test_a_thinking_record_is_off_criterion_for_live2(self):
+        """The settings live1 promised are the ones live2 refuses, and the other
+        way round - or the two bindings would be interchangeable."""
+        rows = arm(60, 0.7, 0.3, seed=42)
+        summary = summary_for(rows)          # no_thinking False, live1's promise
+        path = Path(verdict.ARMS["live2"]["campaign"])
+
+        bad = verdict.criterion_mismatches(summary, path,
+                                           verdict.ARMS["live2"])
+
+        self.assertIn("no_thinking: expected True, record False", bad)
+        self.assertEqual(verdict.criterion_mismatches(
+            summary, Path(verdict.CAMPAIGN), verdict.ARMS["live1"]), [])
+
     def test_cli_does_not_allow_the_criterion_game_count_to_be_overridden(self):
         """Adding ``--games`` back would let an operator rewrite promised N."""
         with unittest.mock.patch("sys.argv", ["x", "--games", "100"]):
@@ -566,9 +606,16 @@ class TheCliRunsTheControllerItShips(unittest.TestCase):
         buf = io.StringIO()
         code = 0
         with contextlib.redirect_stdout(buf):
+            # The ARMS binding carries the campaign path, so pointing the tool
+            # at a temp record means moving the BINDING - patching CAMPAIGN alone
+            # would leave the criterion still bound to the real path, which is
+            # exactly the half-move the single-object binding exists to prevent.
+            here = Path(path).as_posix()
+            armed = {k: {**v, "campaign": here if k == "live1" else v["campaign"]}
+                     for k, v in verdict.ARMS.items()}
             with (unittest.mock.patch("sys.argv", ["x", path]),
-                  unittest.mock.patch.object(
-                      verdict, "CAMPAIGN", Path(path).as_posix())):
+                  unittest.mock.patch.object(verdict, "ARMS", armed),
+                  unittest.mock.patch.object(verdict, "CAMPAIGN", here)):
                 try:
                     verdict.main()
                 except SystemExit as exc:

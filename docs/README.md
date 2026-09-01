@@ -97,6 +97,13 @@ partly true is worse than none.
   because the instrument changed under it, never edited after a number landed. Read
   live4 for the arm; read the others only for what the instrument used to be. None
   is to be edited.
+- `docs/belfry-live2-criterion.md` - **the operative belfry pre-commitment**;
+  arithmetic `py -3 -m eval.belfry_live1_verdict --criterion live2`.
+  `-live1-` stands beside it and is NOT superseded on a bar: it promised
+  temperature 0.0 without `--no-thinking`, which measures 58.33% fallback on q36
+  and fires its own void condition, so the arm it describes cannot be read at any
+  N. live2 changes that one setting and carries every endpoint, floor and void
+  across verbatim. Neither is to be edited.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
