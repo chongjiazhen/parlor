@@ -73,6 +73,36 @@ opened the Claude one. The decision is unchanged; only the file holding it is.
   mix, so an `auto` run is honest about being several models averaged.
 
 
+## This directory stays flat - moved from `docs/README.md` 2026-09-02
+
+Nothing here is broken by a flat namespace. **The defects this layout has actually
+produced were stale claims and a partly-true index, which folders do not fix** -
+measured twice on 2026-09-02, when the index still said 23 files against 34 on disk
+and named a slice range six slices out of date.
+
+The split worth making, if one is, is the two classes with OPPOSITE maintenance
+rules: docs that must track the code (`action-channel`, `content-packs`,
+`model-facing-text`, `evidence-discipline`, `preset-axes`, `information-model`)
+against dated records that must never be edited (every criterion and verdict,
+`measurements`, `slices`).
+
+Four triggers, any one of which flips the answer. The first is checked by
+`scripts/hygiene-check.sh` as an advisory; the rest are judgement.
+
+1. `docs/README.md` passes **150 lines**, at which point the index that stands in
+   for folders is skimmed rather than used. **FIRED 2026-09-02 at 159 lines**, and
+   answered by subtraction rather than by folders - this section is most of what
+   came out, and it was never index material. That answer is available once. A
+   second firing on live entries is the trigger doing its job.
+2. A doc has **two plausible homes** and the answer matters - i.e. it is cited from
+   two different reader contexts.
+3. A **second contributor**, or external readers after publishing. Folders are a
+   coordination tool; a single author with `AGENTS.md` as the map does not need
+   them, and someone who cannot ask does.
+4. **~40 files**, as a crude backstop on scanning a flat directory. **34 on
+   2026-09-02**, so this one is closer than the prose suggested when it was written
+   against 23.
+
 ## Pre-committed criteria - all applied, all moved out
 
 None is edited to agree with its outcome; that is the whole value of a

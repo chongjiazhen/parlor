@@ -3,31 +3,19 @@
 The index of this directory, moved out of `queue.md` 2026-08-28. Durable material
 lives beside the code, not in the queue; `queue.md` keeps the open rows.
 
-**When this flat directory should become folders.** Nothing here is broken by 23
-files in one namespace - the defects this layout has actually produced were stale
-claims and a partly-true index, which folders do not fix. The split worth making,
-if one is, is the two classes with OPPOSITE maintenance rules: docs that must
-track the code (`action-channel`, `content-packs`, `model-facing-text`,
-`evidence-discipline`, `preset-axes`, `information-model`) against dated records
-that must never be edited (every criterion and verdict, `measurements`, `slices`).
-Four triggers, any one of which flips the answer - the first is checked by
-`scripts/hygiene-check.sh` as an advisory and the rest are judgement:
-
-1. This file passes **150 lines**, at which point the index that stands in for
-   folders is skimmed rather than used.
-2. A doc has **two plausible homes** and the answer matters - i.e. it is cited
-   from two different reader contexts.
-3. A **second contributor**, or external readers after publishing. Folders are a
-   coordination tool; a single author with `AGENTS.md` as the map does not need
-   them, and someone who cannot ask does.
-4. **~40 files**, as a crude backstop on scanning a flat directory.
+**Flat on purpose, and the call plus its four triggers is
+`docs/decisions.md` §This directory stays flat.** One of the four - this file
+passing 150 lines - FIRED on 2026-09-02 and was answered by subtraction, because
+the growth was stale claims and an argument that belonged in `decisions.md`. If it
+fires again on live index entries, the answer is folders.
 
 **Three of the files below are the queue's own drained halves** rather than design
 notes - what landed, what was measured, what was settled - and they are listed here
 because this file claims to be the index of the directory and an index that is
 partly true is worse than none.
-- `docs/slices.md` - the closed slice ledger, S1-S7 and S9-S11, struck and kept
-  because live rows cite them by name.
+- `docs/slices.md` - the closed slice ledger, struck and kept because live rows
+  cite them by name. `queue.md` names the current range; this file does not, so
+  the two cannot drift apart again.
 - `docs/measurements.md` - the dated numbers, the route call and the backend
   notes. **Read before trusting any number in this repo.**
 - `docs/decisions.md` - settled calls, applied criteria, and the CALLED-gate
