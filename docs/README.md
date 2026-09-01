@@ -30,9 +30,8 @@ partly true is worse than none.
   because live rows cite them by name.
 - `docs/measurements.md` - the dated numbers, the route call and the backend
   notes. **Read before trusting any number in this repo.**
-- `docs/decisions.md` - settled calls and the pre-committed criteria, all
-  applied. Carries the CALLED-gate table and the do-not-re-derive list, both
-  moved out of `queue.md` 2026-09-01.
+- `docs/decisions.md` - settled calls, applied criteria, and the CALLED-gate
+  table plus the do-not-re-derive list (out of `queue.md`, 2026-09-01).
 - `docs/open-arms.md` - 2026-08-28. The argument behind each open row in
   `queue.md`, which carries only the ask and the entry condition. **Read the
   entry for a row before taking that row**, not before picking one.
@@ -95,13 +94,12 @@ partly true is worse than none.
   rules rather than a learned policy, and the three rungs that follow. Unmeasured.
 - `docs/quorum-live4-criterion.md` - **the operative quorum pre-commitment**;
   arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
-  stand beside it, superseded IN WRITING and unrun: each was retired before launch
-  because the instrument changed under it, never edited after a number landed. Read
-  live4 for the arm; read the others only for what the instrument used to be.
+  stand beside it, superseded IN WRITING and unrun: each was retired before
+  launch because the instrument changed under it, never after a number landed.
 - `docs/belfry-live2-criterion.md` - **the operative belfry pre-commitment**;
   arithmetic `eval.belfry_live1_verdict --criterion live2`. `-live1-` beside it
-  is retired on RUNNABILITY, not a bar: its settings measure 58.33% fallback and
-  fire its own void. Neither is to be edited.
+  is retired on RUNNABILITY not a bar - its settings measure 58.33% fallback
+  and fire its own void. Neither is to be edited.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
