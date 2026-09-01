@@ -202,7 +202,47 @@ Reference already written down, unmeasured unless it says otherwise:
 - `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
   and the graded-taint fix that does.
 
-Instrument and integrity:
+Instrument and integrity - the seven below came out of a 2026-09-01 review of
+`2d28e60..HEAD` and are read from the files cited, not measured:
+
+- [ ] **`eval/discretion_number.py` is broken twice and may not be worth fixing.**
+      `__main__` crashes - `FixedAdjudicator` returns role-name strings where
+      `deal()` calls `.key` (`games/belfry/state.py:379`) - and its two arms run
+      DIFFERENT seeds (`:114`), so the classifier separates them on deal
+      composition as well as on adjudicator behaviour. `belfry_adjudicator_verdict`
+      already pairs on identical seeds and reduces the feature to
+      `(key, option_count, selected_index)`. **Decide fix-or-delete before either.**
+- [ ] **The belfry adjudicator has no retry, and that is what voided S8.**
+      `games/belfry/adjudicator.py:38` falls back on one unparseable reply;
+      `--retries` reaches the player policies and never the adjudicator, and
+      `ChoiceEvent.recovered` is hardwired `False` (`:55`), so every check that
+      sums it is a permanent `0 == 0`. 12 of 20 S8 calls fell back on fenced-JSON
+      formatting alone. **RE-BASELINES S8b**, so it lands alone and says so.
+- [ ] **`eval/cloud_strata.py:59` raises on any `RandomPolicy` decision row**, so
+      it can only ever score a full-`llm` record - never `random`, `llm-good`,
+      `llm-evil` or a `--speaker` run. A random seat is a known non-model: exclude
+      it from the cells rather than treating it as corrupt provenance.
+- [ ] **`eval/audit_decisions.py:81` dispatches the claim matcher on
+      `name.isascii()`**, so a non-ASCII, non-Chinese skin - accented Latin,
+      Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
+      `_says` at least falls back to a substring that always matches. Only
+      `1984-cn` exercises the branch today, so no recorded number moves yet.
+- [ ] **`--v2` in `eval/belfry_adjudicator_verdict.py:563` switches the expected
+      args and the criterion path but NOT the default record paths**, so a bare
+      `--v2` loads the v1 records and reads as a criterion violation rather than
+      as the wrong file. `belfry_live1_verdict`'s `ARMS` binding is the shape that
+      fixes it: path, args and document move as one object or not at all.
+- [ ] **The changeling self-leak audit gained a conditional bypass.**
+      `games/changeling/referee.py:506`'s `and dealt.key != held.key` switches the
+      check off in a reachable state - 129 of 15000 seat-games measured, e.g. seed
+      17 seat 0, dealt and held `swapper`, believes `pack`. `AGENTS.md` says a
+      colliding term gets RENAMED, not guarded around, and no test covers the
+      bypassed state. A rename is model-facing and **re-baselines S5**.
+- [ ] **`games/changeling/referee.py:79` opens a transcript handle in
+      `__post_init__` that only `demo.py` reliably closes.** On Windows an open
+      handle blocks deletion, so an assertion firing inside the sidecar test masks
+      itself with `PermissionError` from `TemporaryDirectory` cleanup. A
+      context-manager or a lazy per-write open removes the class.
 
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
