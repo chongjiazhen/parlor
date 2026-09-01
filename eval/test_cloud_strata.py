@@ -174,33 +174,33 @@ class TestCloudStrata(unittest.TestCase):
         # Hunt from RandomPolicy seat should not enter model's hunt cell
         self.assertEqual(score["120b"]["hunts"]["total"], 0)
 
-    def test_a_solver_row_is_not_reported_as_random_play(self):
-        """Break caught: naming the cell RANDOM_POLICY. HeuristicPolicy and
-        SolverPolicy set no last_upstream either, so their rows are identical to a
-        random one here - and this repo voids a run that plays at random under a
-        model's name. The label has to say what the record can actually tell."""
-        record = game("120b", clean=True, tainted=False, hunt_hit=True)
-        record["decision_log"][0] = {
-            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
-            "served_by": "", "attempted_upstreams": [],
-        }
-        score = cs.score_records([record])
-        self.assertIn(cs.NON_MODEL, score)
-        self.assertNotIn("random", cs.NON_MODEL.lower())
-
-    def test_a_served_model_row_is_never_read_as_non_model(self):
-        """Break caught: the classifier is safe only because complete_meta defaults
-        served_by to self.model and so never returns empty. A row that WAS served
-        must stay in its own cell no matter how thin the rest of the row is."""
-        record = game("120b", clean=True, tainted=False, hunt_hit=True)
-        record["decision_log"][0] = {
-            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
-            "served_by": "120b", "attempted_upstreams": [],
-        }
-        score = cs.score_records([record])
-        self.assertEqual(score["120b"]["integrity"]["decisions"], 4)
-        self.assertNotIn(cs.NON_MODEL, score)
-
+    def test_a_solver_row_is_not_reported_as_random_play(self):
+        """Break caught: naming the cell RANDOM_POLICY. HeuristicPolicy and
+        SolverPolicy set no last_upstream either, so their rows are identical to a
+        random one here - and this repo voids a run that plays at random under a
+        model's name. The label has to say what the record can actually tell."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "", "attempted_upstreams": [],
+        }
+        score = cs.score_records([record])
+        self.assertIn(cs.NON_MODEL, score)
+        self.assertNotIn("random", cs.NON_MODEL.lower())
+
+    def test_a_served_model_row_is_never_read_as_non_model(self):
+        """Break caught: the classifier is safe only because complete_meta defaults
+        served_by to self.model and so never returns empty. A row that WAS served
+        must stay in its own cell no matter how thin the rest of the row is."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "120b", "attempted_upstreams": [],
+        }
+        score = cs.score_records([record])
+        self.assertEqual(score["120b"]["integrity"]["decisions"], 4)
+        self.assertNotIn(cs.NON_MODEL, score)
+
     def test_unknown_provenance_still_raises(self):
         """A row with no served_by, no fallback, but attempted upstreams is an error."""
         record = game("120b", clean=True, tainted=False, hunt_hit=True)
