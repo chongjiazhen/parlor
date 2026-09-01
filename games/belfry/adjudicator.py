@@ -11,6 +11,28 @@ from core.backends import Backend
 from games.belfry.roles import ROLES, Role
 
 
+#: The placement rule the S23 steering arm states in the ask, frozen by
+#: `docs/belfry-discretion-quality-criterion.md`. Its CONTENT is a probe, not a
+#: claim about good refereeing: belfry's herring is mechanically exchangeable
+#: over the good seats (`Grimoire.registers_demon` reaches exactly one caller,
+#: `night.divine`), so there is no board-derived quality ordering to grade. What
+#: is gradable is whether bounded discretion follows a stated rule that needs the
+#: board to apply.
+HERRING_STEER_RULE = (
+    "Place the false demon read on the good seat sitting nearest the demon's "
+    "seat around the circle. If two are equally near, take the lower seat "
+    "number.")
+
+
+def preferred_herring(seats: int, demon_seat: int, good_seats: list[int]) -> int:
+    """The one seat `HERRING_STEER_RULE` names. Deterministic, board-derived, and
+    the scorer's whole ground truth - so it lives beside the rule text rather
+    than being restated in the verdict tool."""
+    return min(good_seats,
+               key=lambda s: (min((s - demon_seat) % seats,
+                                  (demon_seat - s) % seats), s))
+
+
 def _json_reply(reply: str) -> str:
     """Accept one bare JSON object or one whole fenced ``json`` block."""
     text = reply.strip()
@@ -49,13 +71,46 @@ class ModelAdjudicator:
     #: asked a narrower question than a seat, so a wider budget here would buy a
     #: discretion rate the seats' own numbers could not be read beside.
     retries: int = 2
+    #: The stated placement rule sent beside the board, or ``None`` for the blind
+    #: ask S8b measured. ``None`` is the default and keeps every existing arm
+    #: byte-identical: no board, no rule, no reordering.
+    steer: str | None = None
+    #: Seeds the ORDER the menu is offered in under steering. A model with a
+    #: fixed seat-index or list-position prior - which S8b showed this one has,
+    #: DISTINGUISHABLE at 88.89% - would otherwise be able to score above chance
+    #: against a rule it never read. Shuffled per call from the game seed, so the
+    #: order is reproducible by the scorer and unrelated to which option the rule
+    #: prefers.
+    ask_seed: int | None = None
     #: Seconds after a TRANSPORT failure, doubling. Same reason as the seats':
     #: retrying instantly burns the budget against an endpoint still throttled,
     #: and lands the choice on random.
     backoff: float = 2.0
 
-    def choose(self, key: str, options: list[str]) -> str:
+    def __post_init__(self) -> None:
+        if self.steer is not None and self.ask_seed is None:
+            raise ValueError("a steered adjudicator needs ask_seed: without it "
+                             "the offered order is fixed and a position prior "
+                             "scores against the rule for free")
+
+    def _offer(self, key: str, options: list[str]) -> list[str]:
+        """The menu as it goes out. Sorted for the blind ask, seeded-shuffled for
+        the steered one."""
+        if self.steer is None:
+            return options
+        order = random.Random(f"belfry-ask:{self.ask_seed}:{key}")
+        return order.sample(options, len(options))
+
+    def choose(self, key: str, options: list[str],
+               board: dict | None = None) -> str:
+        options = self._offer(key, options)
         ask = {"choice_key": key, "options": options}
+        if self.steer is not None:
+            # Referee-side facts only, and they stay referee-side: this payload
+            # reaches no seat ask and neither public channel (RULES §Discretion),
+            # which is what lets the referee be told the demon's seat at all.
+            ask["board"] = dict(board or {})
+            ask["rule"] = self.steer
         complaint, rule_refusals = "", 0
         for attempt in range(self.retries + 1):
             # The opening ask is byte-identical to the pre-retry one, so an arm's
@@ -91,9 +146,11 @@ class ModelAdjudicator:
         del rng
         return ROLES[self.choose("sot_belief", [r.key for r in spare_roles])]
 
-    def herring_registration(self, good_seats: list[int], rng: random.Random) -> int:
+    def herring_registration(self, good_seats: list[int], rng: random.Random,
+                             board: dict | None = None) -> int:
         del rng
-        return int(self.choose("herring_registration", [str(s) for s in good_seats]))
+        return int(self.choose("herring_registration",
+                               [str(s) for s in good_seats], board))
 
     def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
         del rng

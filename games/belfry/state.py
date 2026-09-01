@@ -44,8 +44,14 @@ class Adjudicator(Protocol):
         """Choose what the sot believes it is from spare townsfolk roles."""
         ...
 
-    def herring_registration(self, good_seats: list[int], rng: random.Random) -> int:
-        """Choose which good seat the herring reads as the demon to."""
+    def herring_registration(self, good_seats: list[int], rng: random.Random,
+                             board: dict | None = None) -> int:
+        """Choose which good seat the herring reads as the demon to.
+
+        ``board`` is referee-side setup fact - the seat count and the demon's
+        seat - and is sent only by an adjudicator that was given a placement rule
+        needing it. It reaches no seat ask and neither public channel.
+        """
         ...
 
     def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
@@ -346,7 +352,10 @@ def deal(n: int, script: Script, rng: random.Random,
     if grim.find_believer("diviner") is not None:
         good = [s.index for s in seats if s.align is Align.GOOD]
         if good:
-            herring = (adjudicator.herring_registration(good, rng)
+            demon_seat = next((s.index for s in seats
+                               if s.role.team is Team.DEMON), None)
+            board = {"seats": len(seats), "demon_seat": demon_seat}
+            herring = (adjudicator.herring_registration(good, rng, board)
                       if adjudicator is not None
                       else rng.choice(good))
             _record_adjudicator_events(grim, adjudicator)

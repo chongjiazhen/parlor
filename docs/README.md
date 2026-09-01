@@ -100,6 +100,10 @@ partly true is worse than none.
   arithmetic `eval.belfry_live1_verdict --criterion live2`. `-live1-` beside it
   is retired on RUNNABILITY not a bar - its settings measure 58.33% fallback
   and fire its own void. Neither is to be edited.
+- `docs/belfry-discretion-quality-criterion.md` - S23's pre-commitment, and the
+  finding that made it what it is: belfry's setup discretion has NO board-derived
+  quality ordering to grade, so what it grades is whether that discretion follows
+  a stated rule. Arithmetic `eval.belfry_steering_verdict --criterion s23`. Unrun.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

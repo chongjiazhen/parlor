@@ -49,7 +49,7 @@ from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
 from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import wilson
-from games.belfry.adjudicator import ModelAdjudicator
+from games.belfry.adjudicator import HERRING_STEER_RULE, ModelAdjudicator
 from games.belfry.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
@@ -83,7 +83,11 @@ def build_adjudicator(args, seed: int | None) -> ModelAdjudicator | None:
     """Keep random discretion on the referee's deal RNG, or model it separately."""
     if args.adjudicator == "random":
         return None
-    return ModelAdjudicator(build_adjudicator_backend(args, seed), random.Random(seed))
+    steered = getattr(args, "adjudicator_steer", False)
+    return ModelAdjudicator(
+        build_adjudicator_backend(args, seed), random.Random(seed),
+        steer=HERRING_STEER_RULE if steered else None,
+        ask_seed=seed if steered else None)
 
 
 def recorded_args(args) -> dict:
@@ -441,11 +445,18 @@ def main() -> None:
                     help="discretion source (random uses referee deal RNG)")
     ap.add_argument("--adjudicator-backend", choices=list(ENDPOINTS))
     ap.add_argument("--adjudicator-model")
+    ap.add_argument("--adjudicator-steer", action="store_true",
+                    help="send the board and one stated placement rule with each "
+                         "setup choice, and offer the menu in a seeded order. "
+                         "Off by default: the blind ask is what S8b measured, and "
+                         "this is a separate arm with its own criterion.")
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
 
     if args.arm != "random" and not args.backend:
         raise SystemExit(f"--arm {args.arm} needs --backend")
+    if args.adjudicator_steer and args.adjudicator != "model":
+        raise SystemExit("--adjudicator-steer needs --adjudicator model")
     if args.adjudicator == "model":
         if not args.adjudicator_backend:
             raise SystemExit("--adjudicator model needs --adjudicator-backend")

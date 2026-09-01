@@ -6,10 +6,12 @@ import json
 import random
 import unittest
 
-from games.belfry.adjudicator import ModelAdjudicator
+from eval.belfry_steering_verdict import offered_order
+from games.belfry.adjudicator import (HERRING_STEER_RULE, ModelAdjudicator,
+                                      preferred_herring)
 from games.belfry.player import RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
-from games.belfry.roles import FULL, ROLES
+from games.belfry.roles import COMPACT, FULL, ROLES, Team
 from games.belfry.state import deal
 
 
@@ -19,6 +21,20 @@ class FakeBackend:
 
     def complete_meta(self, _context: str) -> tuple[str, str]:
         return self.reply, "fake-upstream"
+
+
+class RecordingBackend:
+    """Keeps every ask, so a test can read the bytes that went out. Answers with
+    the first option it was offered unless told which to take, so a test about
+    the ask never trips the refusal loop it is not testing."""
+
+    def __init__(self, choice: str | None = None):
+        self.choice, self.contexts = choice, []
+
+    def complete_meta(self, context: str) -> tuple[str, str]:
+        self.contexts.append(context)
+        choice = self.choice or json.loads(context)["options"][0]
+        return json.dumps({"choice": choice}), "fake-upstream"
 
 
 class RaisingBackend:
@@ -240,6 +256,80 @@ class TestModelAdjudicator(unittest.TestCase):
         self.assertEqual(backend.calls, 2)
         self.assertFalse(adj.events[0].recovered)
         self.assertFalse(adj.events[0].fallback)
+
+
+class TestSteeredAsk(unittest.TestCase):
+    """The S23 arm's ask, bound by docs/belfry-discretion-quality-criterion.md."""
+
+    def test_the_blind_ask_is_unchanged_by_the_steering_field(self):
+        """Every arm before S23 must still send the bytes S8b measured: no board,
+        no rule, and the menu in the order the referee built it."""
+        backend = RecordingBackend("2")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
+
+        adj.herring_registration([0, 2, 4], random.Random(4),
+                                 {"seats": 5, "demon_seat": 1})
+
+        self.assertEqual(
+            json.loads(backend.contexts[0]),
+            {"choice_key": "herring_registration", "options": ["0", "2", "4"]})
+
+    def test_a_steered_ask_carries_the_board_and_the_rule(self):
+        backend = RecordingBackend("2")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0,
+                               steer=HERRING_STEER_RULE, ask_seed=6100)
+
+        adj.herring_registration([0, 2, 4], random.Random(4),
+                                 {"seats": 5, "demon_seat": 1})
+
+        ask = json.loads(backend.contexts[0])
+        self.assertEqual(ask["board"], {"seats": 5, "demon_seat": 1})
+        self.assertEqual(ask["rule"], HERRING_STEER_RULE)
+        self.assertEqual(sorted(ask["options"]), ["0", "2", "4"])
+
+    def test_the_steered_menu_is_offered_in_the_scorer_s_seeded_order(self):
+        """The order is the whole defence against a position prior scoring
+        against a rule it never read, so the scorer rebuilds it from the seed."""
+        backend = RecordingBackend("2")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0,
+                               steer=HERRING_STEER_RULE, ask_seed=6100)
+
+        adj.herring_registration([0, 2, 4], random.Random(4), {})
+
+        offered = json.loads(backend.contexts[0])["options"]
+        self.assertEqual(tuple(offered), offered_order(6100, ["0", "2", "4"]))
+        self.assertEqual(adj.events[0].options, tuple(offered))
+
+    def test_steering_without_an_ask_seed_refuses_to_be_built(self):
+        with self.assertRaises(ValueError):
+            ModelAdjudicator(FakeBackend("{}"), random.Random(9),
+                             steer=HERRING_STEER_RULE)
+
+    def test_the_board_reaches_the_referee_s_own_call_and_nothing_else(self):
+        """Gate #1 in the one place it cannot see: the demon's seat is a true
+        association, and it is legal here only because this payload goes to the
+        referee's own model and to neither public channel nor any seat ask."""
+        backend = RecordingBackend()
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0,
+                               steer=HERRING_STEER_RULE, ask_seed=6102)
+        grim = deal(5, COMPACT, random.Random(6102), adj)
+
+        self.assertEqual(len(backend.contexts), 1)
+        self.assertIn("demon_seat", backend.contexts[0])
+        demon = next(s.index for s in grim.seats if s.role.team is Team.DEMON)
+        self.assertEqual(
+            json.loads(backend.contexts[0])["board"],
+            {"seats": 5, "demon_seat": demon})
+        for line in grim.log:
+            self.assertNotIn("demon_seat", line)
+
+
+class TestPreferredHerring(unittest.TestCase):
+    def test_the_nearest_good_seat_is_the_shorter_way_round_the_circle(self):
+        self.assertEqual(preferred_herring(5, 0, [2, 3, 4]), 4)
+
+    def test_an_equal_distance_takes_the_lower_seat_number(self):
+        self.assertEqual(preferred_herring(5, 0, [1, 2, 4]), 1)
 
 
 if __name__ == "__main__":

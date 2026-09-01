@@ -267,3 +267,42 @@ fallback rate measures the fallback - so it is now a belfry adjudicator record u
 the 10% void bar with every scored call the model's. The v2 pair MEETS that today at
 0/20 fallback and 20 paired legal traces, so S23 is unblocked on evidence, not by
 lowering a bar.
+
+## Belfry's setup discretion has no quality axis, so S23 grades steerability
+
+Called 2026-09-01, writing `docs/belfry-discretion-quality-criterion.md`. S23 asked
+for a narrow gradable quality question about referee discretion. There is not one on
+this rung, and the criterion says so in its own opening rather than burying it.
+
+**The board is the argument.** `grim.herring` has exactly one reader,
+`Grimoire.registers_demon`, which applies it only when an asker is named - and
+`night.divine` is the only caller that names one, so the duelist's day power cannot
+be fooled by it. Compact five seats deal no outsiders, so the menu is the three
+townsfolk, all alive, one of them the diviner itself. Nothing in the board makes one
+of the three a better place for a read only the diviner will see, whose bite depends
+on picks that seat has not made yet.
+
+Two things follow, and both are decisions rather than observations:
+
+- **A rubric over those options would report S8b's finding again.** The choices are
+  exchangeable, so any above-chance rubric score is the seat-index prior the S8b read
+  already established as DISTINGUISHABLE - published a second time wearing the word
+  quality.
+- **Inventing a taste ground truth IS the general-referee claim S23 forbade.** Deciding
+  which placement a referee ought to prefer, then scoring a model against it, publishes
+  this repo's opinion about refereeing as if it were a measurement.
+
+**What is graded instead:** given the board and one stated placement rule, does the
+discretion FOLLOW the rule? Exact ground truth, chance baseline of 1/3 that needs no
+taste, and it is the half of "a referee that oversees without micromanaging" a run can
+buy - a referee whose discretion cannot be governed by a stated policy oversees
+nothing. The rule's CONTENT is a probe and the criterion refuses to defend it as good
+refereeing; its only job is that it cannot be applied without reading the board.
+
+**The menu is offered in a seeded order, and that is a control, not a variable.** S8b
+showed this model's blind choices carry a position or seat-index prior. Against a
+sorted menu such a prior can score against a rule it never read; shuffled, any fixed
+position strategy sits at exactly 1/3. Mutation-checked - sorting the menu turns the
+position-prior fixture from NOT SHOWN into STEERED. The cost is that the steered arm is
+NOT a one-variable delta from S8b, so it is not read against S8b: it is read against
+its own chance baseline, with S8b's blind 0/20 quoted only as the cost-of-steering line.
