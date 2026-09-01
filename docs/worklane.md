@@ -71,6 +71,33 @@ console line, a flag that parses one more value, a test-collection gap. Each
 carries a real acceptance command, which is what makes review cheap enough that
 delegating is worth the round trip.
 
+## The two axes a queue row carries
+
+`queue.md` states both per slice, because the row IS the brief and a second store
+of it drifts - measured 2026-09-01, seven slices existed only in an untracked
+index and their asks were never written, two of them at the front of the order.
+
+- **`judgment`** decides whether the slice may be delegated at all.
+  - `mechanical` - the accept command fully determines correctness. Delegate.
+  - `constrained` - mechanical, plus one landmine no test would catch. The
+    landmine is stated IN the row. **If you cannot state it, you do not
+    understand the slice well enough to delegate it.**
+  - `judgment` - no mechanical accept exists: wording a model reads, what a
+    number means, anything that re-baselines. In-session, always.
+- **`worker`** says who takes it: `opencode` for bounded worktree
+  implementation, `codex` for in-session judgment, record-backed work and review.
+  A slice that reads `eval/records/` cannot go to a worktree worker at all - that
+  directory is gitignored run output and is absent from a worktree.
+
+**A stated landmine is not a guarantee.** Both 2026-08-30 returns that named a
+landmine in the prompt violated that exact landmine and reported green: one was
+told "do not re-deal in a loop, it consumes draws from the seeded generator" and
+wrote the loop; the other was told to add a command "in the same shape" as the
+existing one and added the branch without its registry entry, leaving it
+unreachable. Prose instructs judgment; it cannot enforce. What holds is the
+accept chain - so a `constrained` row's landmine belongs in the acceptance
+command wherever it can be expressed as one.
+
 ## The batch
 
 Plans are written in the launcher's own sprint-plan format - one `### Slot`
