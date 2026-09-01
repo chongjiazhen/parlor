@@ -22,10 +22,9 @@ Narrow it to a campaign's own arms when you know them, and exclude the files
 that never carry the marker - `hunt6[ab]`, not `hunt6*`, which also matches
 `hunt6b-chain.log` and so reads "in flight" forever. **Never judge a run by a
 process probe.** Most of what it names is a fossil and no count of them is worth
-writing down: the marker landed in S4 (2026-08-27, `core/runlog.py`), so every
-log written before it lacks it permanently - the `hunt20*`, `huntcloud*` and
-unsuffixed `cl-powers-*` logs are all finished and all report as in flight. Read
-the answer against `queue.local.md`'s launch record, and treat a name it does
+writing down: the marker landed in S4 (2026-08-27, `core/runlog.py`), so every log
+written before it lacks it permanently. Read the answer against
+`queue.local.md`'s launch record, which names each one, and treat a name it does
 not list as a pre-S4 fossil rather than a run.
 
 **No progress figure, ETA or log-tail path is recorded here** - a count written
@@ -45,65 +44,9 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
 | **changeling** | done | yes - gate #3 HOLDS (S5) | seat the expansion deck. `waker` is the run worth having: it is TOLD what every other seat must infer, and its deck seats it in 62% of games, so one run carries its own control |
 | **quorum** | done | **never** | the live4 arm, and it is pure GPU. `docs/quorum-live4-criterion.md` §The arm, then `eval/quorum_live1_verdict.py`; live1-3 are superseded in writing, unrun. Seeds 11200..11219, and 5200..5599 / 7000..7399 are spent. **`--no-thinking` or the arm voids** - 12.90% fallback without it, 0.00% with |
-| **belfry** | done, scoring lane, control instrument, sampled-player arm, and S8 referee read | **never** | S8b is DISTINGUISHABLE: bounded setup-choice traces differ from seeded random; `docs/measurements.md` holds limits. **live1 is dead and live2 is the arm** - live1's criterion promised 0.0 WITHOUT `--no-thinking`, measured 58.33% fallback, so it voids at any N and its 100-game record is descriptive only. `docs/belfry-live2-criterion.md` moves that one setting and nothing else; run `eval/runs/belfry-live2.cmd`, score `--criterion live2` |
+| **belfry** | done, scoring lane, control instrument, sampled-player arm, and S8 referee read | **never** | S8b is DISTINGUISHABLE: bounded setup-choice traces differ from seeded random; `docs/measurements.md` holds limits. **live2 is the arm** and `docs/belfry-live2-criterion.md` is why live1 is not |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
 | **adjudicator** | S8b read | referee only | 88.89% held-out source accuracy clears 70.97% Wilson chance ceiling; bounded trace difference only |
-
-## Gates already called
-
-**Every called gate has left this file, and DURF now has one of its own.**
-
-| verdict | where it lives | recompute |
-|---|---|---|
-| DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%]. Read under the PRE-TOPOLOGY fixture; two model-facing edits landed the same day | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
-| the same gate under those edits - 2026-08-28, `durf-camp2` 99/100 [94.55%, 99.82%], iron-door leaks 8 -> 0. An AUDIT: the criterion binds camp1 by name | `docs/durf-rung.md` §The paired arm | `py -3 -m eval.durf_camp1_verdict --record eval/records/durf-camp2.json` |
-| its pre-committed criterion, unedited | `docs/durf-gate1-criterion.md` | - |
-| changeling gate #3 **HOLDS** - 2026-08-28 (S5), 200 games | `games/changeling/RULES.md` §S2 read | `py -3 -m eval.s5_verdict` |
-| its pre-committed criterion, as promised | `docs/changeling-gate3-criterion.md` | - |
-| cabal gate #3b **NOT SHOWN** - 2026-08-27 (S6). cabal's GPU program stops | `docs/gate3b-verdict.md` | `py -3 -m eval.s6_verdict` |
-| cabal gate #3a **RETIRED** - 2026-08-27 (S1), on arithmetic not budget | `docs/gate3a-retired.md` | `py -3 -m eval.gate3_arithmetic` |
-
-## What a session must not re-derive
-
-Each of these is settled, dated and written down somewhere else. The pointer is
-the whole row; **do not restate the reasoning here** when you touch it.
-
-- **The DURF fixture arms** - the void first read, the second arm, the
-  temperature arm and what each established: `docs/durf-rung.md` §First run,
-  §Second arm, §The temperature arm. Two operational facts that save a wasted
-  run: the action channel was never what failed (0/60 fallbacks across all four
-  runs), and **an adjudicator seat must not inherit a player seat's temperature**
-  - pass `--temperature 0.0` on any later durf run. `Backend.temperature` is
-  deliberately unchanged; it is shared with both games. Recipe:
-  `eval/runs/durf-fixture.cmd`, an arm is under three minutes.
-- **The DURF session engine, the campaign, the iron-door question and the
-  adjacency question** - all four landed 2026-08-28 and all four are in
-  `docs/durf-rung.md`. A term change has a price payable off records:
-  `py -3 -m eval.durf_rescore <record>.json --add "..." --check`.
-- **The powers re-run and both rule-error counts** - landed and closed
-  2026-08-28. `games/changeling/RULES.md` §The public rules text and §The two
-  rule-error counts. The fall in rule errors is NOT established; the powers text
-  is still the right rules text, on its own argument.
-- **Three changes that re-read an old record differently** - `fallback_rate`
-  keeps its name, changeling's knowledge class is keyed on what the seat was
-  TOLD, and `--out` is the summary path verbatim. `docs/measurements.md` §Three
-  changes. Read it before quoting any pre-2026-08-28 number.
-- **Three things recorded before they were measured** - the `--notebook` null,
-  the strawman answer, and the cost of a neutral canonical key.
-  `docs/decisions.md` §Three things recorded.
-- **What the successors reached** - the capability tell reproduced elsewhere, the
-  outside baseline that does not cover gate #3b, the fourth precedent for the
-  `--notebook` null, and the one result not to quote against it.
-  `docs/evidence-discipline.md` §What the successors reached.
-- **The CPU lane of the wait is SPENT** - the mechanical solver, the corpus
-  scorer and the heuristic rung are built, tested and measured.
-  `docs/reference-policies.md` §Results and §The control ladder, including the
-  supersession inside. None of it re-specifies a gate.
-- **The 2026-08-27 prior-work sweep is CLOSED and its output is off-repo, on
-  purpose** - it names third parties, quotes their prose and carries claims
-  marked unread. `CLAUDE.local.md` has the path. Do not re-import it and do not
-  re-run the search half. Reading debt blocks only PUBLISHING.
-- **Ten theme arms across both games are built and NONE has been run.**
 
 **Do not mix cabal and changeling in one session.** Separate `RULES.md` files,
 separate scorers, separate baselines - every number confusion in this file so far
@@ -169,38 +112,16 @@ menu of what a session can still do is `docs/open-arms.md` §While the card is
 busy; its reusable half is that an instrument scored against records that already
 exist costs nothing and can outrank the run it waits on.
 
-**S1 is called, and it freed half the queue.** S6 survives in a changed and
-bounded form; S7 and the cloud arm are dead. Read `docs/gate3a-retired.md` before
-restarting any cabal run. **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and
-nothing below reopens either** - what survives of both is re-homed to changeling,
-where a paired 20-game arm is ~30 min against cabal's 13.2 h.
+**Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
+either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
 
 ## The queue
 
 Open rows, unordered - the slice table above is what ranks them. **The reasoning
 behind each is `docs/open-arms.md`; read the entry before taking the row.**
 
-Reference already written down, unmeasured unless it says otherwise:
-
-- `docs/gate3a-retired.md` - the S1 verdict: the pricing table showing N was
-  never the binding constraint, the off-team cell that cannot hold a sign across
-  two draws, why 7p and 8p do not reopen it, **the paragraph gate #3a IS allowed
-  to be reported as**, and the self-outing read.
-- `docs/gate3b-verdict.md` - the S6 campaign, its pre-committed criterion
-  verbatim, and the three draw-dependent items resolved off the same records.
-- `docs/gate3-modelling-review.md` - the 2026-08-26 review that started it,
-  closed on all six items. **Read its header before its body**: its line
-  citations are stale and the gate it sharpened is the one S1 retired.
-- `docs/scripted-rungs-cabal.md` - why the ladder climbs on hand rules rather
-  than a learned policy, and the three rungs that follow. §0 is game-free and
-  moves to `docs/control-ladder.md` when a second game builds a rung.
-- `docs/content-packs.md` - the engine/content split for the endgame rung. Read
-  it before laying out `games/<rung>/`, not after.
-- `docs/preset-axes.md` - is every system a preset of flags over one engine? No,
-  and why a DSL is the wrong reach here. Carries the boundary of the formal prior
-  art (`arXiv:2205.00451`).
-- `docs/player-counts.md` - why a bigger table does not fix the thin denominator,
-  and the graded-taint fix that does.
+**Reference lives in `docs/README.md`**, which indexes every one of these and
+is maintained as an index. A second list here is the one that goes stale.
 
 Instrument and integrity - the seven below came out of a 2026-09-01 review of
 `2d28e60..HEAD` and are read from the files cited, not measured:

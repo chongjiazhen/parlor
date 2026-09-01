@@ -125,3 +125,65 @@ later:
   key that names a STATE rather than a role is a prompt variable, and renaming one
   is a MEASURED change on the same terms as a theme change, not a tidy-up. The
   invariant stands; what is new is that it has a cost worth watching for.
+
+
+## Gates already called - moved from the queue 2026-09-01
+
+Verbatim from `queue.md`. Every one is CALLED, so none of it can still
+change, which is what disqualified it from a queue. The recompute column is
+the point: a verdict nobody can re-derive is a number, not a result.
+
+**Every called gate has left this file, and DURF now has one of its own.**
+
+| verdict | where it lives | recompute |
+|---|---|---|
+| DURF gate #1 **HOLDS** - 2026-08-28, 91/100 sessions [83.77%, 95.19%]. Read under the PRE-TOPOLOGY fixture; two model-facing edits landed the same day | `docs/durf-rung.md` §The campaign | `py -3 -m eval.durf_camp1_verdict` |
+| the same gate under those edits - 2026-08-28, `durf-camp2` 99/100 [94.55%, 99.82%], iron-door leaks 8 -> 0. An AUDIT: the criterion binds camp1 by name | `docs/durf-rung.md` §The paired arm | `py -3 -m eval.durf_camp1_verdict --record eval/records/durf-camp2.json` |
+| its pre-committed criterion, unedited | `docs/durf-gate1-criterion.md` | - |
+| changeling gate #3 **HOLDS** - 2026-08-28 (S5), 200 games | `games/changeling/RULES.md` §S2 read | `py -3 -m eval.s5_verdict` |
+| its pre-committed criterion, as promised | `docs/changeling-gate3-criterion.md` | - |
+| cabal gate #3b **NOT SHOWN** - 2026-08-27 (S6). cabal's GPU program stops | `docs/gate3b-verdict.md` | `py -3 -m eval.s6_verdict` |
+| cabal gate #3a **RETIRED** - 2026-08-27 (S1), on arithmetic not budget | `docs/gate3a-retired.md` | `py -3 -m eval.gate3_arithmetic` |
+
+
+## What a session must not re-derive - moved from the queue 2026-09-01
+
+Each of these is settled, dated and written down somewhere else. The pointer is
+the whole row; **do not restate the reasoning here** when you touch it.
+
+- **The DURF fixture arms** - the void first read, the second arm, the
+  temperature arm and what each established: `docs/durf-rung.md` §First run,
+  §Second arm, §The temperature arm. Two operational facts that save a wasted
+  run: the action channel was never what failed (0/60 fallbacks across all four
+  runs), and **an adjudicator seat must not inherit a player seat's temperature**
+  - pass `--temperature 0.0` on any later durf run. `Backend.temperature` is
+  deliberately unchanged; it is shared with both games. Recipe:
+  `eval/runs/durf-fixture.cmd`, an arm is under three minutes.
+- **The DURF session engine, the campaign, the iron-door question and the
+  adjacency question** - all four landed 2026-08-28 and all four are in
+  `docs/durf-rung.md`. A term change has a price payable off records:
+  `py -3 -m eval.durf_rescore <record>.json --add "..." --check`.
+- **The powers re-run and both rule-error counts** - landed and closed
+  2026-08-28. `games/changeling/RULES.md` §The public rules text and §The two
+  rule-error counts. The fall in rule errors is NOT established; the powers text
+  is still the right rules text, on its own argument.
+- **Three changes that re-read an old record differently** - `fallback_rate`
+  keeps its name, changeling's knowledge class is keyed on what the seat was
+  TOLD, and `--out` is the summary path verbatim. `docs/measurements.md` §Three
+  changes. Read it before quoting any pre-2026-08-28 number.
+- **Three things recorded before they were measured** - the `--notebook` null,
+  the strawman answer, and the cost of a neutral canonical key.
+  `docs/decisions.md` §Three things recorded.
+- **What the successors reached** - the capability tell reproduced elsewhere, the
+  outside baseline that does not cover gate #3b, the fourth precedent for the
+  `--notebook` null, and the one result not to quote against it.
+  `docs/evidence-discipline.md` §What the successors reached.
+- **The CPU lane of the wait is SPENT** - the mechanical solver, the corpus
+  scorer and the heuristic rung are built, tested and measured.
+  `docs/reference-policies.md` §Results and §The control ladder, including the
+  supersession inside. None of it re-specifies a gate.
+- **The 2026-08-27 prior-work sweep is CLOSED and its output is off-repo, on
+  purpose** - it names third parties, quotes their prose and carries claims
+  marked unread. `CLAUDE.local.md` has the path. Do not re-import it and do not
+  re-run the search half. Reading debt blocks only PUBLISHING.
+- **Ten theme arms across both games are built and NONE has been run.**
