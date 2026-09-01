@@ -357,6 +357,33 @@ class CriterionBinding(unittest.TestCase):
         self.assertIn("NOT this criterion", text)
         self.assertNotIn("VERDICT:", text)
 
+    def test_a_refused_record_is_still_audited_below_the_refusal(self):
+        """The refusal used to RETURN, and this module is the ONLY reader of the
+        live1 record - so an early return left the figures already published in
+        transcripts/ and docs/measurements.md with no instrument in the tree.
+        Mutating the refusal back into `return out, 3` fails here."""
+        rows = arm(60, 0.7, 0.3, seed=39)
+        summary = summary_for(rows)
+        summary["args"]["temperature"] = 0.8
+
+        text, code = run(rows, summary)
+
+        self.assertEqual(code, 3)
+        self.assertIn("DESCRIPTIVE audit", text)
+        self.assertIn("CLAUSE A", text)
+        self.assertIn("discrimination", text)
+        self.assertIn("READING (no criterion verdict)", text)
+
+    def test_a_matching_record_says_so_and_keeps_its_verdict(self):
+        """The other half: labelling every record descriptive would be the same
+        instrument loss wearing the opposite sign."""
+        text, code = run(arm(60, 0.7, 0.3, seed=40))
+
+        self.assertEqual(code, 0)
+        self.assertIn("the record matches the pre-committed arm", text)
+        self.assertIn("VERDICT: INFORMS", text)
+        self.assertNotIn("DESCRIPTIVE audit", text)
+
     def test_cli_does_not_allow_the_criterion_game_count_to_be_overridden(self):
         """Adding ``--games`` back would let an operator rewrite promised N."""
         with unittest.mock.patch("sys.argv", ["x", "--games", "100"]):

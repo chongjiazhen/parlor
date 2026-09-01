@@ -49,6 +49,16 @@ Change them against a measurement, and change them HERE.
   the roles while the model drew freely, and two seed-1000 runs came back with 63
   missions and 74. An unpinned run still sends no seed - a default would make every
   run look reproducible while the records say nothing about it.
+- **An arm's settings come from its criterion, never from a launcher default or
+  a queue row.** `docs/<rung>-<arm>-criterion.md` is the promise, is not editable
+  after launch, and is the only place N, temperature and the flags are binding.
+  Cost when it was skipped: belfry live1 ran 100 games at temperature 0.8 with
+  `--no-thinking` against a criterion promising 60 at 0.0 without it, because the
+  queue row named flags and nobody opened the criterion - 11.5 h of GPU that can
+  be read but never called. **A refused record is still AUDITED**, exit 3 with
+  the arithmetic printed below the refusal: this repo publishes figures from
+  records, so a verdict tool that returns early leaves a published number with no
+  instrument in the tree.
 - **Gate #2 is conditional on gate #3.** Measured: with good voting at chance, evil
   wins ~65% with no deception at all.
 - **`core/` is what game #2 inherits; `games/<name>/` is what is about that game.**

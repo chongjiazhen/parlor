@@ -440,12 +440,25 @@ def report(summary: dict, derived: dict, path: Path,
     out += ["  the published vote and execution counts reproduce from the rows"]
 
     mismatches = criterion_mismatches(summary, path)
-    if mismatches:
-        out += ["", "criterion binding"]
+    off_criterion = bool(mismatches)
+    out += ["", "criterion binding"]
+    if off_criterion:
         out += [f"  NOT this criterion: {mismatch}" for mismatch in mismatches]
+        # The refusal used to RETURN here, and that cost more than it protected.
+        # This module is the only thing in the tree that reads the live1 record,
+        # so an early return left the figures already published in
+        # transcripts/belfry-live1.md and docs/measurements.md with no instrument
+        # anyone could re-run - a number whose provenance is a dead end, which is
+        # the failure this file exists to prevent. The verdict is still refused
+        # (exit 3, and no clause is CALLED below); what continues is the
+        # descriptive audit, labelled as one.
         out += ["", "no criterion verdict: record does not match the "
-                "pre-committed arm"]
-        return out, 3
+                    "pre-committed arm. What follows is a DESCRIPTIVE audit of "
+                    "the record as it stands - the same arithmetic over the same "
+                    "rows, binding nothing. No clause is called on it and no "
+                    "figure below may be quoted as a criterion result."]
+    else:
+        out += ["  the record matches the pre-committed arm"]
 
     void = voids(derived, promised)
     out += ["", "void conditions, pre-committed"]
@@ -453,7 +466,7 @@ def report(summary: dict, derived: dict, path: Path,
         out += [f"  VOID: {v}" for v in void]
         out += [f"  reported anyway: {derived['played']} played games, "
                 f"{derived['decisions']} decisions, {derived['errors']} errored"]
-        return out, 2
+        return out, 3 if off_criterion else 2
     out += [f"  fallback {derived['fallback_rate']:.2%} of {derived['decisions']} "
             f"decisions, under the {integrity.VOID_BAR:.0%} ceiling",
             f"  {derived['played']} played games, as promised"
@@ -489,7 +502,8 @@ def report(summary: dict, derived: dict, path: Path,
     point = discrimination(units)
     out += [f"  discrimination {_pct(point)}{_band(ci)} "
             f"(bootstrap over {len(units)} games)",
-            f"    VERDICT: {verdict}",
+            f"    {'READING (no criterion verdict)' if off_criterion else 'VERDICT'}"
+            f": {verdict}",
             f"    {why}",
             f"  the random control read {CONTROL_DISCRIMINATION:.2%} "
             f"[{CONTROL_BOOTSTRAP[0]:.2%}, {CONTROL_BOOTSTRAP[1]:.2%}] over 200 "
@@ -582,7 +596,7 @@ def report(summary: dict, derived: dict, path: Path,
             "no deduction or deception figure is inferred from the win rate: a win "
             "here is a four-day chain and the record does not attribute it to any "
             "one decision."]
-    return out, 0
+    return out, 3 if off_criterion else 0
 
 
 def main() -> None:
