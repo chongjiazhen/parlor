@@ -300,6 +300,15 @@ S8b repeated the frozen 60-game pair under its new criterion, over seeds
 6100..6159. Both player fallback rates were 0/2809 (0.00%). Model adjudicator
 fallback was 0/20 (0.00%); control adjudicator fallback is n/a.
 
+**S29 did not move this read, 2026-09-01.** The adjudicator gained the seats'
+retry that day, which re-baselines the instrument in general - but not this
+record. Its 20 calls fell back 0/20, so every first ask was already answered
+legally; the first ask is byte-identical to the pre-retry one by design and by
+test, and the seeded menu rng is drawn only on a fallback, so the retry has no
+call here to change. Re-read after the change: recovered `0/20 = 0.00%`,
+everything else identical, exit 0. The v1 arm is where the retry bites - it is
+void at 12/20 adjudicator fallback.
+
 All 20 paired legal traces remained. Nine odd-seed trace pairs were held out;
 source accuracy was **88.89%**, above Wilson 95% chance upper endpoint **70.97%**
 (18 labelled held-out traces). Verdict: **DISTINGUISHABLE**. This establishes a

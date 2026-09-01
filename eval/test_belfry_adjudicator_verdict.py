@@ -115,27 +115,31 @@ def _deal_row(seed: int) -> tuple[dict, object]:
 
 
 def _arm(adjudicator: str, *, model_rank: int | None = None,
-         adjudicator_fallbacks: int = 0) -> tuple[dict, list[dict]]:
+         adjudicator_fallbacks: int = 0,
+         adjudicator_recovered: int = 0) -> tuple[dict, list[dict]]:
     rows = []
     events_seen = 0
+    recovered_left = adjudicator_recovered
     for seed in SEEDS:
         row, grim = _deal_row(seed)
         if adjudicator == "model" and grim.find_believer("diviner") is not None:
             options = [str(s.index) for s in grim.seats if s.align is Align.GOOD]
             selected = options[(model_rank or 0) % len(options)]
             fallback = events_seen < adjudicator_fallbacks
+            recovered = not fallback and recovered_left > 0
+            recovered_left -= int(recovered)
             event = {
                 "key": "herring_registration",
                 "options": options,
                 "selected": selected,
                 "fallback": fallback,
-                "recovered": False,
+                "recovered": recovered,
                 "upstream": None if fallback else "qwen36-35b-a3b-iq3",
             }
             row["adjudicator"] = {
                 "calls": 1,
                 "fallbacks": int(fallback),
-                "recovered": 0,
+                "recovered": int(recovered),
                 "events": [event],
                 "upstreams": {} if fallback else {"qwen36-35b-a3b-iq3": 1},
             }
@@ -153,6 +157,8 @@ def _arm(adjudicator: str, *, model_rank: int | None = None,
         (row["adjudicator"] or {}).get("calls", 0) for row in rows)
     adjudicator_falls = sum(
         (row["adjudicator"] or {}).get("fallbacks", 0) for row in rows)
+    adjudicator_recovers = sum(
+        (row["adjudicator"] or {}).get("recovered", 0) for row in rows)
     score = {
         "games_requested": 60,
         "games_completed": 60,
@@ -168,7 +174,7 @@ def _arm(adjudicator: str, *, model_rank: int | None = None,
             "calls": adjudicator_calls,
             "fallbacks": adjudicator_falls,
             "fallback_rate": adjudicator_falls / adjudicator_calls,
-            "recovered": 0,
+            "recovered": adjudicator_recovers,
             "upstreams": {
                 "qwen36-35b-a3b-iq3": adjudicator_calls - adjudicator_falls,
             },
@@ -268,6 +274,37 @@ class TestEvidenceBoundary(unittest.TestCase):
     def test_summary_disagreement_is_corrupt_evidence(self):
         control, model = _arm("random"), _arm("model")
         model[0]["score"]["integrity"]["decisions"] += 1
+        self.assertEqual(report(control, model)[1], 1)
+
+    def test_a_recovered_choice_reads_through_and_is_reported(self):
+        """Until 2026-09-01 the adjudicator held ``recovered`` at a literal False,
+        so this whole path was 0 == 0 on every record ever written and could not
+        fail. The rate is printed BESIDE the fallback rate, never folded into it:
+        a recovered choice is the model's own, and it did not come for free."""
+        control, model = _arm("random"), _arm("model", adjudicator_recovered=4)
+
+        lines, code = report(control, model)
+
+        self.assertEqual(code, 0)
+        self.assertTrue(any("adjudicator recovered: 4/20" in line
+                            for line in lines))
+
+    def test_a_recovered_count_disagreeing_with_its_events_is_corrupt(self):
+        control, model = _arm("random"), _arm("model", adjudicator_recovered=4)
+        row = next(row for row in model[1]
+                   if row["adjudicator"] and row["adjudicator"]["recovered"])
+        row["adjudicator"]["recovered"] = 0
+
+        lines, code = report(control, model)
+
+        self.assertEqual(code, 1)
+        self.assertTrue(any("recovered count disagrees with events" in line
+                            for line in lines))
+
+    def test_a_summary_recovered_total_the_rows_do_not_carry_is_corrupt(self):
+        control, model = _arm("random"), _arm("model", adjudicator_recovered=4)
+        model[0]["score"]["adjudicator_integrity"]["recovered"] = 7
+
         self.assertEqual(report(control, model)[1], 1)
 
     def test_adjudicator_upstream_census_must_match_events(self):

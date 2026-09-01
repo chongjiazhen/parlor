@@ -26,6 +26,38 @@ class RaisingBackend:
         raise RuntimeError("unavailable")
 
 
+class RefusingThenAnsweringBackend:
+    """Malformed for the first ``refusals`` asks, then a legal choice.
+
+    The shape a recovered call has to have: the model, not the seeded menu, picks
+    the option, and it took the referee sending the reply back to get there.
+    """
+
+    def __init__(self, refusals: int, choice: str, bad: str = "not json"):
+        self.refusals, self.choice, self.bad = refusals, choice, bad
+        self.contexts: list[str] = []
+
+    def complete_meta(self, context: str) -> tuple[str, str]:
+        self.contexts.append(context)
+        if len(self.contexts) <= self.refusals:
+            return self.bad, "fake-upstream"
+        return json.dumps({"choice": self.choice}), "fake-upstream"
+
+
+class RaisingThenAnsweringBackend:
+    """Transport dies once, then answers. Recovery is a RULES word, so this call
+    is clean - counting it recovered would inflate the rate with the network."""
+
+    def __init__(self, choice: str):
+        self.choice, self.calls = choice, 0
+
+    def complete_meta(self, _context: str) -> tuple[str, str]:
+        self.calls += 1
+        if self.calls == 1:
+            raise RuntimeError("unavailable")
+        return json.dumps({"choice": self.choice}), "fake-upstream"
+
+
 class FirstOptionBackend:
     def __init__(self):
         self.contexts: list[str] = []
@@ -88,7 +120,7 @@ class TestModelAdjudicator(unittest.TestCase):
 
         for backend in invalid_backends:
             with self.subTest(backend=type(backend).__name__):
-                adj = ModelAdjudicator(backend, random.Random(9))
+                adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
                 self.assertIs(adj.sot_belief(roles, random.Random(4)), ROLES["gauge"])
                 event = adj.events[0]
                 self.assertTrue(event.fallback)
@@ -141,6 +173,73 @@ class TestModelAdjudicator(unittest.TestCase):
                             for payload in policy.payloads))
         self.assertTrue(all("fake-upstream" not in payload
                             for payload in policy.payloads))
+
+    def test_a_sent_back_reply_is_re_asked_and_counted_recovered(self):
+        """The reason S29 exists. Every published ``recovered`` count was a
+        structural zero, because the flag was a literal and one bad reply spent
+        the choice."""
+        backend = RefusingThenAnsweringBackend(1, "witness")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
+
+        self.assertIs(
+            adj.sot_belief([ROLES["witness"], ROLES["gauge"]], random.Random(4)),
+            ROLES["witness"])
+        event = adj.events[0]
+        self.assertTrue(event.recovered)
+        self.assertFalse(event.fallback)
+        self.assertEqual(event.selected, "witness")
+        self.assertEqual(event.upstream, "fake-upstream")
+
+    def test_the_re_ask_carries_the_complaint_and_leaves_the_first_ask_alone(self):
+        """The opening call stays the question S8b measured; only the re-ask is
+        new, and it says what was wrong or the model has no reason to differ."""
+        backend = RefusingThenAnsweringBackend(1, "witness")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
+
+        adj.sot_belief([ROLES["witness"], ROLES["gauge"]], random.Random(4))
+
+        self.assertEqual(
+            backend.contexts[0],
+            '{"choice_key": "sot_belief", "options": ["witness", "gauge"]}')
+        self.assertEqual(json.loads(backend.contexts[1])["choice_key"],
+                         "sot_belief")
+        self.assertIn("refused", json.loads(backend.contexts[1]))
+
+    def test_a_clean_first_reply_is_not_recovered(self):
+        adj = ModelAdjudicator(FirstOptionBackend(), random.Random(9), backoff=0.0)
+
+        adj.sot_belief([ROLES["witness"]], random.Random(4))
+
+        self.assertFalse(adj.events[0].recovered)
+
+    def test_the_retry_budget_is_bounded_and_the_fallback_is_not_recovered(self):
+        """Three attempts, then the seeded menu. A fallback that also read
+        recovered would let one call be counted in two partitions."""
+        backend = RefusingThenAnsweringBackend(99, "witness")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
+
+        self.assertIs(
+            adj.sot_belief([ROLES["witness"], ROLES["gauge"]], random.Random(4)),
+            ROLES["gauge"])
+        self.assertEqual(len(backend.contexts), 3)
+        event = adj.events[0]
+        self.assertTrue(event.fallback)
+        self.assertFalse(event.recovered)
+        self.assertIsNone(event.upstream)
+
+    def test_a_transport_failure_that_later_answers_is_clean_not_recovered(self):
+        """Recovery is the model being sent back by the rules. A 500 is the
+        network, and counting it would put the endpoint's health into a figure
+        that is supposed to read the model's discretion."""
+        backend = RaisingThenAnsweringBackend("witness")
+        adj = ModelAdjudicator(backend, random.Random(9), backoff=0.0)
+
+        self.assertIs(
+            adj.sot_belief([ROLES["witness"], ROLES["gauge"]], random.Random(4)),
+            ROLES["witness"])
+        self.assertEqual(backend.calls, 2)
+        self.assertFalse(adj.events[0].recovered)
+        self.assertFalse(adj.events[0].fallback)
 
 
 if __name__ == "__main__":

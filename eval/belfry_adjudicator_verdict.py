@@ -523,6 +523,11 @@ def report(control_evidence, model_evidence, *,
             f"{_fmt_rate(model.fallbacks, model.decisions)}",
             f"  model adjudicator fallback: "
             f"{_fmt_rate(model.adjudicator_fallbacks, model.adjudicator_calls)}",
+            # Beside the fallback rate, never folded into it: a recovered choice
+            # IS the model's, and hiding it would let a run that needed the
+            # referee on half its calls read as clean.
+            f"  model adjudicator recovered: "
+            f"{_fmt_rate(model.adjudicator_recovered, model.adjudicator_calls)}",
             f"  adjudicator route: local {ADJUDICATOR_MODEL}, temperature "
             f"{ADJUDICATOR_TEMPERATURE:.1f} fixed by the driver"]
 
