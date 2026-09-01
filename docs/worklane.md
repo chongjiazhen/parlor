@@ -32,6 +32,37 @@ against the very constant that produced it. They cannot fail on its value. Not a
 queue row on its own - noted here so the next person to read those assertions
 knows they are decorative.
 
+## Trust decides where a worktree lives
+
+Two homes, one question. A third location existed for a while and belonged to
+neither, which is how a logged-route worker came to run one `..` from the notes.
+
+- **Untrusted** - anything on a logged tier, or any worker running unsandboxed at
+  operator privilege: a slot directory OUTSIDE the repo's own tree, so the
+  untracked notes are not an ancestor of its cwd. A worktree materialises tracked
+  files only, but that is a fact about the worktree, not about the process: it
+  runs at full privilege and nothing stops it walking up. Verified 2026-09-01 - a
+  sibling of the repo root reads `../<repo>/.scratch/` in one hop, which is the
+  same exposure as dispatching from the root and voids the route argument the
+  same way.
+- **Trusted** - an in-session agent, or a worktree the operator drives by hand:
+  `.worktrees/<slice>` inside the repo. `git worktree list` finds it, `git
+  worktree remove` cleans it, and both properties are worth having whenever the
+  containment above is not what is being bought.
+
+The box paths behind both live in the operator's own notes, never here.
+
+**Branches say which they are.** `slice/<name>` is work meant for `main`;
+`lane/<slot>` is a raw worker return that has not been graded yet. A lane branch
+becomes a slice branch by passing review, and merging one that never did is the
+failure this whole note exists to prevent.
+
+**A merge ends with a sweep.** `git branch -d` refuses anything unmerged, so
+deleting merged branches after each integration cannot lose work and takes one
+command. Skipped, it compounds quietly: 2026-09-01 found eleven branches, eight
+of them fully merged with nothing ahead, the oldest 76 commits behind, and two
+worktrees still holding uncommitted drafts of work that had already landed.
+
 ## The route is chosen on data residency, not on job size
 
 The tempting split is small jobs to the local model, larger ones to the hosted
