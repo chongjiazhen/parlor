@@ -221,6 +221,16 @@ class Theme:
     #: renders exactly the bytes it rendered before this field existed - which is
     #: what keeps adding it a non-measured change for the shipping face.
     centre_name: str = "centre"
+    #: What language this skin SPEAKS. Every changeling skin renders in English
+    #: today (see the note above `THEME_INVESTITURE`), so the default is right for
+    #: all of them and this field changes no byte a model receives. It is declared
+    #: rather than inferred because a claim has a shape per language that no amount
+    #: of name-matching recovers, and a skin whose language nothing declares is read
+    #: by whichever rule the matcher happens to hold - cabal paid for that once as a
+    #: confident 0/1290 (`games/cabal/roles.py` §`lang`, S31). `eval.changeling_claims`
+    #: REFUSES a record whose skin names a language it has no claim rule for; with
+    #: no field there would be nothing to refuse on.
+    lang: str = "en"
 
 
 # Sterile functional skin - the fallback face, no fiction.

@@ -251,6 +251,38 @@ is aggregate discrimination; this reading shows many individual outcomes remain
 available to chance. `docs/open-arms.md` §"changeling feels random" owns the four
 open levers. Changing rules or model-facing text re-baselines this reading.
 
+## Changeling stated self-claims - S2 record re-read, 2026-09-01 (S17)
+
+Rendered evidence: [`transcripts/changeling-s17-stated-claims.md`](../transcripts/changeling-s17-stated-claims.md).
+`py -3 -m eval.changeling_claims` re-read S2's 200 games with no GPU and no new
+play; its control is `py -3 -m unittest eval.test_changeling_claims -v`. The S2
+record's fallback rate was **0.40%**, below the 10% void bar, and its 2 fallback
+utterances are out of every denominator. **Pre-S14 wording**, like the per-game
+deduction read above.
+
+A claim is scored true when it names a card the seat was actually shown itself as,
+`{dealt, belief}`. Deal claims ("I went to sleep as X") came in at **444/520 =
+85.4%** [82.1%, 88.2%] and present claims ("I am X") at **468/582 = 80.4%**
+[77.0%, 83.4%], against exact chance bars of 19.0% and 19.2% - a seat naming one of
+the deck's six cards at random. Scoring a deal claim against `dealt` ALONE was the
+first draft and the record refused it: of the 74 deal claims by a seat the night
+showed a new card, 65 name that later card and 1 names the deal, because the
+pre-S14 self-line called the later card the one the seat went to sleep as.
+
+**The finding is a negative one and it stands on its own.** `docs/open-arms.md`
+§"changeling feels random" holds that village seats have no reason to bluff, and
+that an all-honest table collapses the game. This table is not all-honest: a seat
+that believes itself a villager names no card it was ever shown on 48/343 deal
+claims (14.0%) and 65/433 present claims (15.0%). Wolf-believing seats are untrue
+on 49/149 present claims (32.9%), twice the village rate, which is the direction a
+working deception axis produces.
+
+Both counts are LOWER bounds: 844 of 1998 model-written utterances (42.2%) name a
+deck card in a shape the claim rules do not read. The rules are cabal's, widened
+2026-09-01 with an adornment gap that leaves S13's 7/1580 and S16's 0/1580 on
+`hunt20c` exactly where they were - pinned by a test, because a widening that moves
+a published number is a re-baseline.
+
 ## belfry live1 - sampled-player measurement, 2026-08-31
 
 Rendered record: [`transcripts/belfry-live1.md`](../transcripts/belfry-live1.md).

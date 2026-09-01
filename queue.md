@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S16, S31, S32, S35 and S36 today.
+and annotated slice is `docs/slices.md` - S1-S17, S31, S32, S35 and S36 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -90,7 +90,6 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
 | **S29** | **Belfry adjudicator retry - CODE LANDED 2026-09-01, inline.** The adjudicator now carries the seats' `retries=2` / doubling backoff, `ChoiceEvent.recovered` is set from a rules refusal that later answered (transport is not recovery), and the paired verdict PRINTS the recovered rate beside the fallback rate. Both were mutation-checked. **The S8b re-baseline did not happen and cannot:** its 20 calls fell back 0/20, so every first ask was already legal, the first ask is byte-identical by design and test, and the fallback rng is drawn only on fallback - `--v2` re-read at `0/20 = 0.00%` recovered, exit 0, unchanged. What is left is a record with a NON-ZERO recovered count, and v2's prompt cannot supply one at 0% fallback; v1's 12/20 is the condition that would. | constrained | inline | S8 void diagnosed - **met** | a run whose records carry recovered > 0, or a recorded decision that no arm will produce one |
-| **S17** | **Changeling randomness instrument.** Read existing records for stated village claims against dealt/night state before changing a deck or prompt. | judgment | codex | completed changeling records exist - **met** | tracked instrument, rendered read, dated count and fallback rate |
 | **S33** | **Changeling self-leak rename.** `AGENTS.md` says a colliding term is RENAMED, not guarded around. Model-facing and RE-BASELINES S5, so it lands before S18 freezes a baseline on top of it. | judgment | codex | none | the term renamed, `find_leaks` left naive, and S5's baseline re-taken |
 | **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. | judgment | codex | no changeling arm in flight | committed criterion and tracked recipe; no record launched |
 | **S19** | **Waker deck campaign.** Run S18's frozen control/model arms and render the verdict. | judgment | codex | S18 criterion and recipe committed | records, transcript, verdict and both fallback rates |

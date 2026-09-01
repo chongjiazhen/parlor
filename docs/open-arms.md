@@ -318,6 +318,16 @@ since been reworded in the queue is the live statement; this is the reasoning.
         records before any change**: how often does a village seat say something
         untrue? If the answer is ~never, the table is playing the collapsed game
         and the finding stands on its own, independent of any fix.
+        - **MEASURED 2026-09-01 (S17), and the reading does not hold here.** A seat
+          that believes itself a villager names a card it was never shown on 14.0%
+          of its deal claims and 15.0% of its present claims over S2's 200 games;
+          wolf-believing seats on 32.9% of present claims. So this table is not the
+          all-honest one the argument assumes, and a lever justified by "nobody has
+          any reason to lie" no longer has that justification here. Instrument
+          `py -3 -m eval.changeling_claims`, numbers and caveats in
+          `docs/measurements.md` §2026-09-01 (S17). Pre-S14 wording, and a LOWER
+          bound - 42.2% of utterances name a card in a shape the claim rules do not
+          read.
       - **A losing-is-winning role is the one genuinely new card here.** A seat
         that wins by being executed forces every other seat to weigh whether an
         accusation is being courted rather than earned, which is a reason to
