@@ -154,6 +154,11 @@ Instrument and integrity - the seven below came out of a 2026-09-01 review of
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
       `_says` at least falls back to a substring that always matches. Only
       `1984-cn` exercises the branch today, so no recorded number moves yet.
+- [ ] **belfry live2 has no rendered transcript.** `docs/measurements.md` cites
+      its numbers with nothing to open; live1 links
+      `transcripts/belfry-live1.md` and `AGENTS.md` makes the rendered
+      transcript the committed evidence for a claim. The record is
+      `eval/records/belfry-live2.json(.jsonl)`, untracked and durable.
 - [ ] **The changeling self-leak audit gained a conditional bypass.**
       `games/changeling/referee.py:506`'s `and dealt.key != held.key` switches the
       check off in a reachable state - 129 of 15000 seat-games measured, e.g. seed
