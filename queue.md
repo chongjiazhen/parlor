@@ -146,8 +146,19 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | entry condition | done when |
 |---|---|---|---|
-| ~~**S12**~~ | ~~**The delegation lane.**~~ **CLOSED 2026-08-30** - seven graded dispatches, 3 pass / 4 fail, one landed untouched. `docs/worklane.md` is the contract and carries what the batch returned; `.scratch/lane/README.md` is the index of what is still dispatchable and to whom. | - | **met** |
-| **S13** | **Claim-shaped self-outing re-score. READY 2026-08-31** - replace the over-broad theme-name match, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
+| **S13** | **Claim-shaped self-outing re-score.** Replace theme-name mention with first-person present-tense claim, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
+| **S16** | **False-claim instrument.** Define and test a match for a seat claiming a role it was not dealt, separate from S13's self-outing count. | S13's claim shape is settled | stored records re-scored; date, denominator and fallback rate land together |
+| **S17** | **Changeling randomness instrument.** Read existing records for stated village claims against dealt/night state before changing a deck or prompt. | completed changeling records exist - **met** | tracked instrument, rendered read, dated count and fallback rate |
+| **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. | no changeling arm in flight | committed criterion and tracked recipe; no record launched |
+| **S19** | **Waker deck campaign.** Run S18's frozen control/model arms and render the verdict. | S18 criterion and recipe committed | records, transcript, verdict and both fallback rates |
+| **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
+| **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
+| **S22** | **Changeling discussion-length arm.** Bind one extra discussion-round comparison without changing deck, wording or scorer. | a post-S14 baseline/criterion exists | paired recipe and criterion, ready to launch |
+| **S23** | **Belfry discretion-quality criterion.** Turn S8b's trace distinction into a narrow, gradable quality question without general-referee claims. | S8b read exists - **met** | pre-committed criterion, control, scorer and frozen recipe |
+| **S24** | **Off-map faction heartbeat spike.** Build the typed-fact entitlement-snapshot probe scoped in `docs/faction-heartbeat.md`. | no arm in flight | deterministic tick schedule, one audited render and explicit result |
+| **S25** | **Group-sequential campaign design.** Pre-commit alpha spending and stop boundaries for next campaign. | target metric and candidate campaign named | criterion document and recomputation test; no old record re-read as sequential |
+| **S26** | **Solver-seat control read.** Measure SolverPolicy versus random only where its entitled VOTE evidence can differ; no model and no cabal gate reopening. | S15 implementation exists - **met** | control recipe, result and fallback rate, scoped as policy evidence |
+| **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | no changeling arm in flight | criterion, exact payload delta and audit tests |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
