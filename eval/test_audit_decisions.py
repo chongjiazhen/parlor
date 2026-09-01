@@ -118,8 +118,7 @@ class TestOverSabotage(unittest.TestCase):
 
 
 class TestOutedOwnRoleInPublic(unittest.TestCase):
-    """Matched against the theme's display names, because those are the only words
-    a skinned run's speech contains."""
+    """Count explicit self-identifications, not ordinary role vocabulary."""
 
     def game(self, theme: str, said: str, seat: int = 0) -> dict:
         return {"game": 0, "theme": theme,
@@ -134,6 +133,18 @@ class TestOutedOwnRoleInPublic(unittest.TestCase):
                                   "thoughtcriminal.")])
         self.assertEqual((bad, total), (1, 1))
         self.assertIn("Thought Police", notes[0])
+
+    def test_own_role_used_as_an_outward_tell_is_not_a_self_outing(self):
+        """S13: role vocabulary is common table talk, not a claim by itself."""
+        bad, total, _ = outed_own_role_in_public(
+            [self.game("1984-en", "Seat 3 repeats a Thought Police tell.")])
+        self.assertEqual((bad, total), (0, 1))
+
+    def test_as_role_then_first_person_is_a_self_outing(self):
+        """S13 keeps an explicit present-tense claim in either common order."""
+        bad, total, _ = outed_own_role_in_public(
+            [self.game("1984-en", "As Thought Police, I urge approval.")])
+        self.assertEqual((bad, total), (1, 1))
 
     def test_naming_ANOTHER_seat_s_role_is_not_outing_your_own(self):
         bad, _, _ = outed_own_role_in_public(

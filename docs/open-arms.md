@@ -15,20 +15,6 @@ which is the same rule the 2026-08-28 `docs/` split followed. A row that has
 since been reworded in the queue is the live statement; this is the reasoning.
 
 
-## Count self-outings by a CLAIM-shaped match
-
-- [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with
-      it.** The open half of the read above. `outed_own_role_in_public` matches the
-      seat's own theme role name, which over-counts by ~3x (most hits are a seat
-      using its own role's word to accuse somebody else) while a functional-key
-      match sees nothing at all - the old 0/1290. Neither is a measurement. First
-      person and present tense is the fix, and it **RE-BASELINES the 26/1580
-      count**, so it lands with a re-score of the records rather than on its own.
-      It also cannot see the interesting case by construction: a mimic claiming to
-      be the seer is invisible to a check that matches only the seat's own role
-      name, so counting FALSE claims is a different check again.
-
-
 ## Gate #2 has a cheaper falsifiable design
 
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**

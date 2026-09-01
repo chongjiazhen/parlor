@@ -68,6 +68,26 @@ def _says(text: str, name: str) -> bool:
     return name in text
 
 
+def _claims_own_role(text: str, name: str) -> bool:
+    """Does a seat explicitly identify itself as ``name`` in present tense?
+
+    Mentioning a role is table vocabulary, especially under a themed skin. S13
+    counts only a first-person claim: ``I am`` / ``I'm`` before the role, or
+    ``As <role>, I``. Chinese records use the equivalent ``我是`` / ``我就是``.
+    """
+    if not name:
+        return False
+    if name.isascii():
+        role = rf"\b{re.escape(name)}\b"
+        return re.search(
+            rf"\b(?:i am|i['’]m)\s+(?:(?:a|an|the)\s+)?{role}", text,
+            re.I) is not None or re.search(
+                rf"\bas\s+(?:(?:a|an|the)\s+)?{role}\s*[,;:-]?\s*i\b",
+                text, re.I) is not None
+    return (f"我是{name}" in text or f"我就是{name}" in text
+            or f"作为{name}，我" in text or f"作为{name},我" in text)
+
+
 # ---- PROOF checks ---------------------------------------------------------
 
 def hunt_named_impossible(games: list[dict]) -> tuple[int, int, list[str]]:
@@ -249,8 +269,8 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
     itself hands the table the game, and if it happens often the good side's
     discrimination number is measuring that rather than deduction.
 
-    Naive substring, deliberately: the same reasoning as find_leaks. A false
-    positive is a line a human reads; a false negative is a blind spot.
+    A claim-shaped match is deliberately narrow: first person, present tense,
+    and the seat's role. Ordinary role vocabulary is not evidence of an outing.
 
     **Matches the THEME name as well as the functional key, and that is the whole
     point of the check working at all.** Speech is rendered in whatever skin the run
@@ -283,7 +303,7 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
             names = [key]
             if theme is not None and key in theme.role_names:
                 names.append(theme.role_names[key])
-            hit = next((nm for nm in names if _says(said, nm)), None)
+            hit = next((nm for nm in names if _claims_own_role(said, nm)), None)
             if hit:
                 bad += 1
                 notes.append(f"game {g.get('game')} seat {seat} said its own role "

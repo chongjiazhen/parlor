@@ -141,6 +141,7 @@ which is the opposite of outing itself.
   announcement true?" was never a question this number could answer. Counting FALSE
   claims needs a different check.
 
-**The open half stays open** and its row is in `queue.md`: a claim-shaped match
-(first person, present tense) is a code change that RE-BASELINES the 26/1580 count,
-so it lands with a re-score of the records rather than on its own.
+**S13 closed 2026-09-01T00:31:53.6091592Z.** Its claim-shaped matcher (first person,
+present tense) re-scored the records: `hunt20b` 0/1150 at 0.54% fallback and
+`hunt20c` 7/1580 at 1.78% fallback. `docs/measurements.md` carries the dated read.
+The separate false-claim question remains S16.

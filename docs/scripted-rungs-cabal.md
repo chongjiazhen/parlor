@@ -184,14 +184,13 @@ prose audited against what was not declared. A `claim(role)` action gives a bluf
 through prose, which is the naive-matcher failure that doc names as the RPG
 rung's hardest problem. Do not build the free-text version as a shortcut.
 
-**And it is not only this rung's problem.** The queue already carries a
-self-outing count that has to be rebuilt as a claim-shaped match, over-counting
-~3x on the theme-name version and reading 0/1290 on the functional-key one, with
-the note that a mimic claiming to be the seer is invisible to either because both
-match only the seat's OWN role name. A typed claim makes that count mechanical
-and makes false claims countable at the same time. So the channel serves three
-callers - this rung, the self-outing re-score, and the adjudicator's typed-fact
-surface - which is the argument for building it once rather than three times.
+**And it is not only this rung's problem.** S13's claim-shaped self-outing
+re-score cut `hunt20c` from 26/1580 to 7/1580, while the old functional-key
+match read 0/1290. A mimic claiming to be the seer remains invisible because the
+match sees only a seat's OWN role. A typed claim makes false claims mechanical.
+So the channel serves three callers - this rung, S16's false-claim instrument,
+and the adjudicator's typed-fact surface - which is the argument for building it
+once rather than three times.
 
 ---
 

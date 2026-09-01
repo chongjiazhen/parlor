@@ -146,7 +146,6 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | entry condition | done when |
 |---|---|---|---|
-| **S13** | **Claim-shaped self-outing re-score.** Replace theme-name mention with first-person present-tense claim, then re-score stored records as one read. | finished records exist - **met** | matcher, re-score, dated number, and fallback rate land together |
 | **S16** | **False-claim instrument.** Define and test a match for a seat claiming a role it was not dealt, separate from S13's self-outing count. | S13's claim shape is settled | stored records re-scored; date, denominator and fallback rate land together |
 | **S17** | **Changeling randomness instrument.** Read existing records for stated village claims against dealt/night state before changing a deck or prompt. | completed changeling records exist - **met** | tracked instrument, rendered read, dated count and fallback rate |
 | **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. | no changeling arm in flight | committed criterion and tracked recipe; no record launched |
@@ -205,11 +204,6 @@ Reference already written down, unmeasured unless it says otherwise:
 
 Instrument and integrity:
 
-- [ ] **Count self-outings by a CLAIM-shaped match, and re-score the records with
-      it.** `outed_own_role_in_public` over-counts by ~3x and a functional-key
-      match sees nothing; neither is a measurement. First person and present
-      tense is the fix. **RE-BASELINES the 26/1580 count**, so it lands with the
-      re-score, not on its own.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
