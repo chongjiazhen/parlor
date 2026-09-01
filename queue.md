@@ -127,18 +127,6 @@ its findings have since landed and a number in this line went stale twice.
       it can only ever score a full-`llm` record - never `random`, `llm-good`,
       `llm-evil` or a `--speaker` run. A random seat is a known non-model: exclude
       it from the cells rather than treating it as corrupt provenance.
-- [ ] **`games/belfry/referee.py:1023` excludes the viewer from its third-person
-      leak scan**, the same shape changeling carried until 2026-09-02 (`docs/slices.md`
-      S33), so a reveal naming a seat's own role in `reveal_forms`' phrasing INTO
-      that seat's render has nothing looking for it. **Latent, not live** - measured
-      2026-09-02 over 60 random 7-seat games, end-of-game renders only: 0 of 420
-      seat-checks reachable, because `_name_reveal` is always delivered to a seat
-      other than its subject. The near-miss is `:407`, where a reveal's subject IS
-      its recipient and is safe only because its text is second-person and
-      `entitled[successor].add(successor)` runs first. One reveal that names its
-      recipient in the third person makes it live, with no test watching. Fix is
-      one line - drop the `others` filter, pass `self_is_secret=True`, let
-      `entitled` decide - plus the mutation test changeling now carries.
 - [ ] **`eval/audit_decisions.py:81` dispatches the claim matcher on
       `name.isascii()`**, so a non-ASCII, non-Chinese skin - accented Latin,
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.

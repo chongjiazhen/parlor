@@ -556,6 +556,18 @@ class LeaksTheAsk(BelfryReferee):
                 + ".)")
 
 
+class NamesTheViewerToItself(BelfryReferee):
+    """The self-leak in the THIRD person - the shape the first scan could not see
+    while it excluded the viewer. A referee that writes a seat's own role into that
+    seat's render in `reveal_forms`' phrasing, which is what a refreshed or
+    mis-addressed reveal looks like."""
+
+    def seat_lines(self, seat: int, include_speech: bool = True) -> str:
+        return (super().seat_lines(seat, include_speech)
+                + "\n  "
+                + self.reveal_forms(seat, self.grim.role_of(seat).key)[0] + ".")
+
+
 class LeaksItsOwnTruth(BelfryReferee):
     """The bug this rung shares with `changeling`: a referee that renders what a
     seat IS where its belief was due."""
@@ -588,6 +600,25 @@ class TestGateOne(unittest.TestCase):
     def test_the_audit_catches_an_unentitled_reveal(self):
         ref = leaky(LeaksAnotherSeat, FIVE)
         self.assertTrue(leak_audit(ref))
+        with self.assertRaises(LeakDetected):
+            assert_no_leak(ref)
+
+    def test_the_audit_catches_a_seat_being_named_to_itself(self):
+        """The first scan excluded the viewer until 2026-09-02, so this exact leak
+        - a seat's own role written into its own render in the third person - had
+        no scan looking for it. Latent on the shipping referee, which is why the
+        mutant is the only thing that can prove the scan works.
+
+        The rig seats a seat that is WRONG about itself, and that is the whole
+        test: naming a seat its own role is not a leak for the seats entitled to
+        it, so a rig where everyone is right about themselves passes this mutant
+        honestly and proves nothing."""
+        ref = leaky(NamesTheViewerToItself,
+                    ["fiend", "venom", "sot", "gauge", "bulwark", "tally"])
+        self.assertTrue([s for s in range(ref.n) if s not in ref.entitled[s]],
+                        "this rig seats nobody wrong about itself")
+        found = leak_audit(ref)
+        self.assertTrue(found, "a seat named to itself passed the audit")
         with self.assertRaises(LeakDetected):
             assert_no_leak(ref)
 

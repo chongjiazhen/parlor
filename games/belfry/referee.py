@@ -1015,13 +1015,30 @@ class BelfryReferee:
         **This seat's own role, against its own line only**, and only for the seat
         that is wrong about itself - the one seat here with no entitlement to its
         own truth.
+
+        **The viewer is an ordinary seat in the first scan**, which is the half
+        `changeling` was missing until 2026-09-02 (`docs/slices.md` S33). That scan
+        used to exclude the viewer outright, so a reveal naming a seat's own role in
+        `reveal_forms`' third-person phrasing, written INTO that seat's render, had
+        nothing looking for it. `entitled` already decides the question and needs no
+        help: it holds the viewer exactly when belief and role agree, and `:407`
+        adds a successor demon to its own set before telling it.
+
+        **Latent here, not live, and the row that filed it says so** - measured over
+        60 random 7-seat games, 0 of 420 end-of-game seat-checks reachable, and the
+        source agrees: every reveal that names a role in the third person excludes
+        the recipient from its own target list (`legal_targets`, `_name_reveal`).
+        The one reveal whose subject IS its recipient is `:409`, and it is safe on
+        two counts - second-person text, and entitlement granted first. `divine`
+        may target self and names no role at all. So this closes a class rather
+        than a bug, for one line, and the mutation test is what keeps it closed.
         """
-        others = {s: t for s, t in self.secret_terms().items() if s != viewer}
         leaks = find_leaks(
             self.seat_lines(viewer, include_speech=False),
-            others,
+            self.secret_terms(),
             self.entitled[viewer],
             viewer,
+            self_is_secret=True,
         )
         if viewer not in self.entitled[viewer]:
             leaks += find_leaks(
