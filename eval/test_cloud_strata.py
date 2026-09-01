@@ -129,6 +129,90 @@ class TestCloudStrata(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "paired"):
                 cs.load_paths([str(summary), str(jsonl)])
 
+    def test_non_model_rows_are_excluded_from_model_cells(self):
+        """A mixed-arm record scores: random seats counted separately, not pooled."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        # Replace one decision with a RandomPolicy row (no served_by, no fallback, no attempted)
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "", "attempted_upstreams": [],
+        }
+
+        score = cs.score_records([record])
+
+        # RandomPolicy row goes to its own cell, excluded from model cells
+        self.assertEqual(score[cs.NON_MODEL]["integrity"]["decisions"], 1)
+        self.assertEqual(score[cs.NON_MODEL]["integrity"]["fallbacks"], 0)
+        # The 120b cell only has the remaining 3 decisions
+        self.assertEqual(score["120b"]["integrity"]["decisions"], 3)
+        self.assertEqual(score["120b"]["integrity"]["fallbacks"], 0)
+
+    def test_non_model_votes_and_hunts_are_excluded(self):
+        """RandomPolicy votes and hunts are excluded from model strata."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        # Make the vote decision a RandomPolicy row
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "", "attempted_upstreams": [],
+        }
+        # Make the hunt decision a RandomPolicy row
+        record["decision_log"][2] = {
+            "turn": 3, "seat": 4, "phase": "hunt", "fell_back": False,
+            "served_by": "", "attempted_upstreams": [],
+        }
+
+        score = cs.score_records([record])
+
+        # RandomPolicy cell has 2 decisions
+        self.assertEqual(score[cs.NON_MODEL]["integrity"]["decisions"], 2)
+        self.assertEqual(score[cs.NON_MODEL]["integrity"]["fallbacks"], 0)
+        # 120b cell has 2 decisions (the other vote and the discuss)
+        self.assertEqual(score["120b"]["integrity"]["decisions"], 2)
+        # Vote from RandomPolicy seat should not enter model's vote cells
+        self.assertEqual(score["120b"]["votes"]["clean_votes"], 0)
+        self.assertEqual(score["120b"]["votes"]["tainted_votes"], 1)
+        # Hunt from RandomPolicy seat should not enter model's hunt cell
+        self.assertEqual(score["120b"]["hunts"]["total"], 0)
+
+    def test_a_solver_row_is_not_reported_as_random_play(self):
+        """Break caught: naming the cell RANDOM_POLICY. HeuristicPolicy and
+        SolverPolicy set no last_upstream either, so their rows are identical to a
+        random one here - and this repo voids a run that plays at random under a
+        model's name. The label has to say what the record can actually tell."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "", "attempted_upstreams": [],
+        }
+        score = cs.score_records([record])
+        self.assertIn(cs.NON_MODEL, score)
+        self.assertNotIn("random", cs.NON_MODEL.lower())
+
+    def test_a_served_model_row_is_never_read_as_non_model(self):
+        """Break caught: the classifier is safe only because complete_meta defaults
+        served_by to self.model and so never returns empty. A row that WAS served
+        must stay in its own cell no matter how thin the rest of the row is."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "120b", "attempted_upstreams": [],
+        }
+        score = cs.score_records([record])
+        self.assertEqual(score["120b"]["integrity"]["decisions"], 4)
+        self.assertNotIn(cs.NON_MODEL, score)
+
+    def test_unknown_provenance_still_raises(self):
+        """A row with no served_by, no fallback, but attempted upstreams is an error."""
+        record = game("120b", clean=True, tainted=False, hunt_hit=True)
+        # This is not a RandomPolicy row (has attempted_upstreams) and not a fallback
+        record["decision_log"][0] = {
+            "turn": 1, "seat": 0, "phase": "vote", "fell_back": False,
+            "served_by": "", "attempted_upstreams": ["upstream-a"],
+        }
+
+        with self.assertRaisesRegex(ValueError, "served_by"):
+            cs.score_records([record])
+
 
 if __name__ == "__main__":
     unittest.main()

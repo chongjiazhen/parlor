@@ -17,6 +17,7 @@ from core.runlog import record_paths
 
 
 UNATTRIBUTED = "UNATTRIBUTED - fallback source unknown"
+NON_MODEL = "NON-MODEL - no upstream served this seat"
 
 
 def _cell() -> dict:
@@ -32,6 +33,30 @@ def _served(decision: dict, *, game: int, outcome: str) -> str:
     return served_by
 
 
+def _is_non_model(decision: dict) -> bool:
+    """No upstream served this seat, and no fallback erased one that did.
+
+    This is what the record can actually distinguish, and the cell is named for
+    it rather than for RandomPolicy. Three policies produce these rows -
+    ``RandomPolicy``, ``HeuristicPolicy`` (games/cabal/heuristic.py) and
+    ``SolverPolicy`` (games/cabal/solver.py) - none of which sets
+    ``last_upstream``, so the driver stores ``served_by=""``. Calling that cell
+    RANDOM would report a solver arm as random play, which is the same error as
+    a random policy wearing a model's name, running the other way.
+
+    Safe against eating a real model row because ``Backend.complete_meta``
+    returns ``str(body.get("model") or self.model)`` (core/backends.py) - never
+    empty. A served LLM decision therefore always carries a non-empty
+    ``served_by``, and the only way to lose it is a fallback, which ``fell_back``
+    reports. If that default is ever removed, model rows start landing here
+    silently: ``test_a_served_model_row_is_never_read_as_non_model`` pins it.
+    """
+    return ("served_by" in decision
+            and not decision.get("served_by")
+            and not decision.get("fell_back")
+            and not (decision.get("attempted_upstreams") or []))
+
+
 def score_records(records: list[dict]) -> dict[str, dict]:
     """Score each served upstream from stored games without pooling cells."""
     cells = defaultdict(_cell)
@@ -40,16 +65,25 @@ def score_records(records: list[dict]) -> dict[str, dict]:
         by_turn_seat = {}
         for decision in decisions:
             served_by = decision.get("served_by")
-            attempted = set(decision.get("attempted_upstreams") or [])
-            if decision.get("fell_back") and len(attempted) > 1:
+            attempted = list(decision.get("attempted_upstreams") or [])
+            fell_back = bool(decision.get("fell_back"))
+
+            # A seat no upstream served. Excluded from the model cells and
+            # counted on its own, never pooled into UNATTRIBUTED - that means a
+            # model served the row and the provenance was erased, which is a
+            # different fact with a different denominator.
+            if _is_non_model(decision):
+                cell = cells[NON_MODEL]
+                cell["decisions"] += 1
+            elif fell_back and len(set(attempted)) > 1:
                 cell = cells[UNATTRIBUTED]
                 cell["decisions"] += 1
                 cell["fallbacks"] += 1
             elif served_by:
                 cell = cells[served_by]
                 cell["decisions"] += 1
-                cell["fallbacks"] += bool(decision.get("fell_back"))
-            elif decision.get("fell_back"):
+                cell["fallbacks"] += fell_back
+            elif fell_back:
                 # Legacy rows erased provenance on every fallback, whatever caused
                 # it. Keep this denominator visible without inventing attribution.
                 cell = cells[UNATTRIBUTED]
@@ -72,6 +106,8 @@ def score_records(records: list[dict]) -> dict[str, dict]:
                 raise ValueError(f"game {game_index} vote has no decision record")
             if decision.get("fell_back"):
                 continue
+            if _is_non_model(decision):
+                continue
             cell = cells[_served(decision, game=game_index, outcome="vote")]
             if vote.get("team_has_evil"):
                 cell["tainted_votes"] += 1
@@ -89,6 +125,8 @@ def score_records(records: list[dict]) -> dict[str, dict]:
                 raise ValueError(f"game {game_index} hunt has no unique decision record")
             decision = hunt_decisions[0]
             if decision.get("fell_back"):
+                continue
+            if _is_non_model(decision):
                 continue
             cell = cells[_served(decision, game=game_index, outcome="hunt")]
             cell["hunts"] += 1
