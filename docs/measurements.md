@@ -239,6 +239,45 @@ games, temperature 0.0 and no `--no-thinking`; this arm ran 100, 0.8 and
 checks its full launch binding and rejects this record with exit 3 rather than
 printing a criterion verdict.
 
+## belfry live2 - the criterion-bound arm, READ 2026-09-01
+
+The first belfry live arm to execute its own criterion. Scored with
+`py -3 -m eval.belfry_live1_verdict --criterion live2`, exit 0.
+60/60 local `qwen36-35b-a3b-iq3` games in 23104 s: 5 seats, compact script, one
+talk round, seed 6100, temperature 0.0, `--no-thinking`, exactly as
+`docs/belfry-live2-criterion.md` promised. Fallback **1.28% of 3353 decisions**,
+far below the 10% void bar; vote fallback **0/1972 = 0.00%**; 243/3353 (7.25%)
+were recovered legal answers.
+
+**Clause A INFORMS.** Good seats voted yes on an evil nominee 351/471 = 74.52%
+[70.40%, 78.25%] against 369/681 = 54.19% [50.43%, 57.89%] on a good one -
+discrimination **20.34% [13.77%, 27.01%]**, game-bootstrap floor clearing zero
+over 60 games. The random control reads 2.41% [-1.49%, 6.15%] over 200 games and
+does not clear that bar, which is what earns this figure the right to be read. A
+dated snapshot of one model on one script at one talk round, never a claim about
+models.
+
+**Clause B does not decide.** Day-1 executions 16/38 = 42.11% [27.85%, 57.81%]
+against a 40.00% chance rate on the same boards; the interval spans chance. At 60
+games that is ~21% power against a true 50%, so it is not evidence of absence -
+said in advance, in the criterion.
+
+Descriptive, gating nothing: good-seat accuracy 57.55% against an always-no floor
+of 59.11% on the same 1152 votes, gap -1.56% [-7.18%, 4.19%]; pooled executions
+35/77 = 45.45% [34.81%, 56.53%]; good won 48.33% [36.17%, 60.69%] over decided
+games; 2.4 days per game; attrition 31, demon-dead 29. Misled good-seat votes
+came to 98, under the pre-committed floor of 200, so no misled/clear gap is
+reported - the criterion expected about 49.
+
+**Why this arm exists, and what it cost to find out.** `docs/belfry-live1-criterion.md`
+promised temperature 0.0 WITHOUT `--no-thinking`. Measured 2026-09-01, those exact
+settings run **58.33% fallback** (63/108 over two games, 10 of 10 seat-games above
+the bar) at 1805 s/game: the arm as promised fires its own void condition at any N,
+because a reasoning distill spends the token cap inside `reasoning_content` and
+returns empty content. live2 changes that one launch setting and nothing else -
+every bar, floor, endpoint and void condition carried across unedited, and live1's
+criterion left unedited beside its own record. The flag is worth 58.33% -> 1.28%.
+
 ## belfry setup-only adjudicator - S8 void, 2026-08-31
 
 Rendered record: [`transcripts/belfry-adjudicator-s8-void.md`](../transcripts/belfry-adjudicator-s8-void.md).
