@@ -68,27 +68,67 @@ def _says(text: str, name: str) -> bool:
     return name in text
 
 
-def _claims_own_role(text: str, name: str) -> bool:
-    """Does a seat explicitly identify itself as ``name`` in present tense?
+def _claim_en(text: str, name: str) -> bool:
+    """``I am`` / ``I'm`` before the role, with a short identity descriptor, or
+    ``As <role>, I``."""
+    role = rf"\b{re.escape(name)}\b" if name.isascii() else re.escape(name)
+    return re.search(
+        rf"\b(?:i am|i['’]m)\s+(?:(?:a|an|the)\s+)?"
+        rf"(?:(?:member|agent|officer)\s+of\s+(?:the\s+)?)?{role}", text,
+        re.I) is not None or re.search(
+            rf"\bas\s+(?:(?:a|an|the)\s+)?{role}\s*[,;:-]?\s*i\b", text,
+            re.I) is not None
 
-    Mentioning a role is table vocabulary, especially under a themed skin. S13
-    counts only a first-person claim: ``I am`` / ``I'm`` before the role (with a
-    short identity descriptor), or ``As <role>, I``. Chinese records use the
-    equivalent ``我是`` / ``我就是`` only when the role phrase ends there.
+
+def _claim_zh(text: str, name: str) -> bool:
+    """``我是`` / ``我就是`` only where the role phrase ends there - a possessive
+    continuation (``我是思想警察的同事``) says relation to the role, not identity as
+    it - or ``作为<role>，我``."""
+    return re.search(rf"我(?:是|就是){re.escape(name)}"
+                     rf"(?=$|[\s，,。.!！?？；;、）)])", text) is not None \
+        or re.search(rf"作为{re.escape(name)}[，,]\s*我", text) is not None
+
+
+#: One entry per language whose claim shape somebody has actually written down.
+#: Keyed on the skin's DECLARED language (``Theme.lang``), never on the script of
+#: the text or of the role name - that is the landmine. A Japanese skin names its
+#: roles in the same kanji a Chinese one does, so a name-keyed branch hands it the
+#: Chinese rule, which looks for ``我是``, which a Japanese sentence never carries:
+#: a confident 0/N one skin later, reading exactly like a fix. Latin script says as
+#: little - French is Latin and says ``Je suis``.
+CLAIM_RULES = {"en": _claim_en, "zh": _claim_zh}
+
+
+def _claims_own_role(text: str, name: str, lang: str = "en") -> str:
+    """How this text names ``name`` as the SPEAKER's own role: ``"claim"``,
+    ``"mention"``, or ``""``.
+
+    Mentioning a role is table vocabulary, especially under a themed skin, so S13
+    counts only a first-person present-tense claim. The two rules above are the
+    only claim shapes anyone here has written down.
+
+    **The floor, and why it is not silence.** A skin in a third language matches
+    neither rule, and the honest report of "this file cannot tell a claim from a
+    mention here" is NOT a zero: a zero is indistinguishable from clean play, and
+    that is exactly the bug that had ``outed_own_role_in_public`` reporting 0/1290
+    on a skin it could not read. So an unruled language falls back to the plain
+    mention test in ``_says`` - the same containment that function's own last line
+    already falls back to - and says which test answered.
+
+    **The floor OVER-counts, on purpose, and the caller must say so.** "Seat 3 is
+    the Thought Police" counts too, so a ``mention`` total is an upper bound on
+    claims, never a claim count, and must not be compared against a skin that has a
+    rule. Wrong-high and loud is the floor a checker owes a language it does not
+    speak, in a HEURISTIC check whose contract is already that a human reads the
+    hits; wrong-low and quiet is the bug. Adding a language means adding its rule to
+    ``CLAIM_RULES``, never widening another language's regex to reach it.
     """
     if not name:
-        return False
-    if name.isascii():
-        role = rf"\b{re.escape(name)}\b"
-        return re.search(
-            rf"\b(?:i am|i['’]m)\s+(?:(?:a|an|the)\s+)?"
-            rf"(?:(?:member|agent|officer)\s+of\s+(?:the\s+)?)?{role}", text,
-            re.I) is not None or re.search(
-                rf"\bas\s+(?:(?:a|an|the)\s+)?{role}\s*[,;:-]?\s*i\b",
-                text, re.I) is not None
-    return re.search(
-        rf"我(?:是|就是){re.escape(name)}(?=$|[\s，,。.!！?？；;、）)])", text) is not None \
-        or re.search(rf"作为{re.escape(name)}[，,]\s*我", text) is not None
+        return ""
+    rule = CLAIM_RULES.get(lang)
+    if rule is None:
+        return "mention" if _says(text, name) else ""
+    return "claim" if rule(text, name) else ""
 
 
 # ---- PROOF checks ---------------------------------------------------------
@@ -286,14 +326,26 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
 
     A record with no theme is checked on the functional key alone and SAYS so;
     silently narrowing the match is how the 0/1290 happened the first time.
+
+    **A skin whose language has no claim rule is counted at the floor, and the
+    count says so on its first line.** ``_claims_own_role`` falls back to a plain
+    mention there rather than to zero, so for those games this number is an UPPER
+    bound - mentions, not claims - and is not comparable with a skin that has a
+    rule. The alternative reads better and lies: a language-blind matcher returns 0
+    on a run full of self-outings, and a 0 in this column is indistinguishable from
+    a table that never outed itself. Same failure as the 0/1290, one skin over.
     """
     bad, total, notes = 0, 0, []
     unskinned = 0
+    floor = 0
+    floor_langs: set[str] = set()
     for g in games:
         roles = {int(s): k for s, k in (g.get("assignment") or {}).items()}
         theme = THEMES.get(str(g.get("theme") or ""))
         if theme is None and g.get("utterances"):
             unskinned += 1
+        # No theme means the functional keys, which are English.
+        lang = theme.lang if theme is not None else "en"
         for utt in g.get("utterances", []):
             m = re.match(r"seat (\d+): (.*)", str(utt), re.S)
             if not m:
@@ -306,17 +358,30 @@ def outed_own_role_in_public(games: list[dict]) -> tuple[int, int, list[str]]:
             names = [key]
             if theme is not None and key in theme.role_names:
                 names.append(theme.role_names[key])
-            hit = next((nm for nm in names if _claims_own_role(said, nm)), None)
+            hit = next(((nm, how) for nm in names
+                        if (how := _claims_own_role(said, nm, lang))), None)
             if hit:
+                nm, how = hit
                 bad += 1
-                notes.append(f"game {g.get('game')} seat {seat} said its own role "
-                             f"'{hit}': {said[:80]}")
+                if how == "mention":
+                    floor += 1
+                    floor_langs.add(lang)
+                notes.append(f"game {g.get('game')} seat {seat} "
+                             f"{'said its own role' if how == 'claim' else 'MENTIONED its own role'}"
+                             f" '{nm}': {said[:80]}")
     if unskinned:
         notes.insert(0, f"{unskinned} game(s) record no known theme - checked "
                         "against the functional key only, which a skinned run "
                         "never speaks")
+    if floor:
+        # First, because it changes what the COUNT is, and `--show` truncates the
+        # tail: `audit_decisions.CLAIM_RULES` has no claim shape for this skin's
+        # language, so those hits are mentions and the number is an upper bound.
+        notes.insert(0, f"{floor} of these are MENTIONS, not claims - no claim rule "
+                        f"for {'/'.join(sorted(floor_langs))}, so they are the "
+                        "stated floor and the count is an UPPER BOUND. Not "
+                        "comparable with a skin that has a rule.")
     return bad, total, notes
-
 
 PROOF = [
     ("hunt named a seat it knew was evil", hunt_named_impossible),

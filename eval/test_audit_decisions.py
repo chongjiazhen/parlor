@@ -23,9 +23,11 @@ A test that only ever sees ``SETUP_5`` under ``1984-en`` passes on all three bug
 from __future__ import annotations
 
 import unittest
+from unittest import mock
 
 from eval.audit_decisions import (hunt_named_impossible, outed_own_role_in_public,
                                   over_sabotage)
+from games.cabal.roles import THEMES, Team, Theme
 
 
 def mission_event(index: int, fails: int, need: int = 1) -> list:
@@ -185,6 +187,73 @@ class TestOutedOwnRoleInPublic(unittest.TestCase):
         bad, _, notes = outed_own_role_in_public([g])
         self.assertEqual(bad, 0)
         self.assertIn("no known theme", notes[0])
+
+
+class TestASkinWhoseLanguageHasNoRule(unittest.TestCase):
+    """The floor. `CLAIM_RULES` holds `en` and `zh`; every other skin is counted by
+    plain mention and the count says so.
+
+    Written against skins that do not ship, which is the point - the bug this pins
+    is not visible on any record in the tree, and would surface as a clean 0/N the
+    first time somebody reskinned the game into a third language. Both fakes name
+    their roles in kanji, because that is the shape that defeats a matcher keyed on
+    the role name or on the script of the text: a Japanese skin looks Chinese to
+    both, and says none of the Chinese claim words.
+    """
+
+    JA = Theme("1984-ja", {Team.GOOD: "\u30a4\u30f3\u30b0\u30bd\u30c3\u30af", Team.EVIL: "\u5144\u5f1f\u56e3"},
+               {"seer": "\u601d\u60f3\u8b66\u5bdf", "mimic": "\u4e8c\u91cd\u4eba\u683c\u8005"}, lang="ja")
+    #: The same skin with its language MISDECLARED as Chinese - the landmine, held
+    #: as a fixture so the test below can show what it costs.
+    AS_ZH = Theme("1984-ja-mislabelled", JA.faction_names, JA.role_names, lang="zh")
+
+    def game(self, said: str, seat: int = 0) -> dict:
+        return {"game": 0, "theme": "1984-ja",
+                "assignment": {"0": "seer", "1": "mimic"},
+                "utterances": [f"seat {seat}: {said}"]}
+
+    def audit(self, said: str, theme: Theme | None = None):
+        with mock.patch.dict(THEMES, {"1984-ja": theme or self.JA}):
+            return outed_own_role_in_public([self.game(said)])
+
+    def test_a_self_outing_in_an_unruled_language_SCORES(self):
+        """\u79c1\u306f\u601d\u60f3\u8b66\u5bdf\u3067\u3059 - "I am the Thought Police". No rule reads it, so the
+        floor does, and the run is not reported as clean."""
+        bad, total, _ = self.audit("\u79c1\u306f\u601d\u60f3\u8b66\u5bdf\u3067\u3059\u3002\u4e09\u756a\u306f\u601d\u60f3\u72af\u3060\u3002")
+        self.assertEqual((bad, total), (1, 1))
+
+    def test_the_count_says_on_its_FIRST_line_that_these_are_mentions(self):
+        """The floor is only honest if the reader is told - the number means
+        something different here, and `--show` truncates the tail, not the head."""
+        _, _, notes = self.audit("\u79c1\u306f\u601d\u60f3\u8b66\u5bdf\u3067\u3059\u3002")
+        self.assertIn("MENTIONS, not claims", notes[0])
+        self.assertIn("ja", notes[0])
+        self.assertIn("UPPER BOUND", notes[0])
+
+    def test_the_floor_OVER_counts_and_that_is_the_accepted_trade(self):
+        """"Seat 3 is the Thought Police" is not a self-outing, and under a ruled
+        skin it is not counted. Here it is, because the floor cannot tell. Pinned
+        rather than hidden: wrong-high and loud beats wrong-low and silent, and a
+        reader who sees this line knows to read the hits."""
+        bad, _, notes = self.audit("\u4e09\u756a\u306f\u601d\u60f3\u8b66\u5bdf\u3060\u3002")
+        self.assertEqual(bad, 1)
+        self.assertIn("MENTIONED its own role", notes[1])
+
+    def test_declaring_the_wrong_language_is_the_SILENT_zero_this_replaces(self):
+        """The landmine, priced. Reach for the nearest regex set - the same kanji,
+        so surely the Chinese rule - and the skin scores 0 while every seat outs
+        itself. That is the 0/1290 again, and it is why `Theme.lang` is declared by
+        the skin instead of guessed from the names it carries."""
+        bad, total, _ = self.audit("\u79c1\u306f\u601d\u60f3\u8b66\u5bdf\u3067\u3059\u3002", theme=self.AS_ZH)
+        self.assertEqual((bad, total), (0, 1))
+
+    def test_a_ruled_skin_is_unaffected_by_the_floor_existing(self):
+        """No mention line, and ordinary role talk still scores zero."""
+        bad, _, notes = outed_own_role_in_public(
+            [{"game": 0, "theme": "1984-en", "assignment": {"0": "seer"},
+              "utterances": ["seat 0: Seat 3 repeats a Thought Police tell."]}])
+        self.assertEqual(bad, 0)
+        self.assertEqual(notes, [])
 
 
 if __name__ == "__main__":
