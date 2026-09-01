@@ -167,11 +167,14 @@ Instrument and integrity - the six below came out of a 2026-09-01 review of
       itself with `PermissionError` from `TemporaryDirectory` cleanup. A
       context-manager or a lazy per-write open removes the class.
 
-- [ ] **belfry live2 has no rendered transcript.** `docs/measurements.md` cites
-      its numbers with nothing to open; live1 links
-      `transcripts/belfry-live1.md` and `AGENTS.md` makes the rendered
-      transcript the committed evidence for a claim. The record is
-      `eval/records/belfry-live2.json(.jsonl)`, untracked and durable.
+- [ ] **Two read arms have no rendered transcript, and quorum has no renderer at
+      all.** `docs/measurements.md` now cites belfry live2 AND quorum live4 with
+      nothing to open, while `AGENTS.md` makes the rendered transcript the
+      committed evidence for a claim and live1 links `transcripts/belfry-live1.md`.
+      Unequal work: belfry has a render path in `eval/belfry_live1_verdict.py`, so
+      live2 is a re-run; `transcripts/` holds no quorum file of any kind, so live4
+      needs the renderer written first. Records are
+      `eval/records/{belfry-live2,quorum-live4}.json(.jsonl)`, untracked and durable.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
