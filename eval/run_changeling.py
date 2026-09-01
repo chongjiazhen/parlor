@@ -43,7 +43,7 @@ from core.stats import bootstrap_ci, wilson
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
 from games.changeling.referee import ChangelingReferee
-from games.changeling.roles import DEFAULT_THEME, THEMES
+from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 
 #: Measured on this game at 5 seats with uniform random votes, n=4000, and on the
 #: SAME denominator the report prints beside it: games that seated a wolf at dawn.
@@ -119,7 +119,7 @@ def one_game(index: int, args) -> GameRecord:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
-    ref = ChangelingReferee.new(5, seed=seed, theme=theme,
+    ref = ChangelingReferee.new(args.seats, seed=seed, theme=theme,
                                 discussion_rounds=args.rounds)
     try:
         return play_game(ref, build_policies(ref, args, rng, seed))
@@ -153,7 +153,12 @@ def _accuracy(games: list[GameRecord], keep=lambda v: True) -> float | None:
     return hits / total if total else None
 
 
-def score(records: list[GameRecord]) -> dict:
+def score(records: list[GameRecord], seats: int = 5) -> dict:
+    """``seats`` rides in the score because ``_chance`` needs it and gets only this
+    dict. It DEFAULTS TO 5 rather than being required: every record written before
+    2026-09-02 was a five-seat game and carries no such key, and `eval.s5_verdict`
+    still reads S2's. A default that matched the new deck would silently rescore
+    every old record against the wrong table."""
     played = [r for r in records if r.error is None and r.winner]
 
     # Games with no wolf seated at dawn are unwinnable by the village however well
@@ -203,6 +208,7 @@ def score(records: list[GameRecord]) -> dict:
 
     blind = strata["none"]
     return {
+        "seats": seats,
         "games_requested": len(records),
         "games_completed": len(played),
         "games_scored": len(winnable),
@@ -336,8 +342,14 @@ def _chance(s: dict) -> float:
     from a constant, because RULES.md measured that the baseline nearly doubles
     between them and a run does not control which it deals.
     """
+    seats = s.get("seats", 5)
     total = weighted = 0
     for w, (_, n) in s["gate3_deduction"]["by_dawn_wolves"].items():
+        # JSON has no integer keys, so a score dict READ BACK from a record hands
+        # this loop "1" where the live one hands it 1. In-process the shipped path
+        # never sees a string; a reader recomputing the bar off a written record -
+        # which the waker criterion asks for by name - dies on the subtraction.
+        w = int(w)
         if w == 0:
             continue
         # Weight by VILLAGER VOTES, not by games. The rate this gates is per-vote,
@@ -345,8 +357,12 @@ def _chance(s: dict) -> float:
         # dawn's 4 - so game-weighting set the bar ~1.8 points too high and made
         # gate #3 harder than chance. The instrument-control test cannot catch a
         # bias this size: at 300 games the blind CI is +/-7pp. Review, 2026-08-27.
-        votes = n * (5 - w)
-        weighted += votes * (w / 4)   # 4 seats a villager may point at
+        # Both factors are the TABLE's, not constants: a villager is one of
+        # ``seats - w`` voters and may point at ``seats - 1`` others. Hardcoded 5
+        # and 4 here would have returned SETUP_5's bar for a six-seat run - a
+        # plausible number, wrong by ~5 points, with nothing raising.
+        votes = n * (seats - w)
+        weighted += votes * (w / (seats - 1))
         total += votes
     return weighted / total if total else 0.0
 
@@ -392,6 +408,10 @@ def main() -> None:
                          "pass. A reasoning-distill model can fail to terminate "
                          "its reasoning and no token cap fixes that; see "
                          "core/backends.py. A MEASURED change, off by default.")
+    ap.add_argument("--seats", type=int, default=5, choices=sorted(SETUPS),
+                    help="which registered deck to deal - 5 is the shipped "
+                         "SETUP_5 every recorded number was played on, 6 is the "
+                         "waker deck. A deck change re-baselines everything.")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
@@ -421,7 +441,7 @@ def main() -> None:
             line += f"  ERROR {rec.error}"
         print(line, file=sys.stderr, flush=True)
 
-    scored = score(records)
+    scored = score(records, seats=args.seats)
     print(report(scored, args, time.time() - started))
     if args.out:
         with open(record_paths(args.out)[0], "w", encoding="utf-8") as fh:

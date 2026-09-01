@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import inspect
 import os
+import json
 import random
 import tempfile
 import unittest
@@ -21,12 +22,15 @@ import eval.run_cabal
 from core.runlog import record_paths
 from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
+from games.changeling.referee import ChangelingReferee
+from games.changeling.roles import SETUPS
 
 
 def make_args(**kw):
     base = dict(arm="random", backend=None, model="none", rounds=1, retries=0,
                 register="character", temperature=0.8, timeout=5.0,
-                max_tokens=512, theme=None, seed=1000, games=1, out=None)
+                max_tokens=512, theme=None, seed=1000, games=1, out=None,
+                seats=5)
     base.update(kw)
     return argparse.Namespace(**base)
 
@@ -99,6 +103,30 @@ class TestChanceIsComputedFromTheRunsOwnMix(unittest.TestCase):
         two = {"gate3_deduction": {"by_dawn_wolves": {2: (0, 100)}}}
         self.assertAlmostEqual(_chance(one), 0.25)
         self.assertAlmostEqual(_chance(two), 0.50)
+
+    def test_the_bar_is_read_off_the_TABLE_and_not_off_a_constant(self):
+        """A six-seat villager is one of more voters and points at more seats, so
+        its chance bar is 20% where the five-seat bar is 25%. Hardcoded 5 and 4
+        returned SETUP_5's number for a six-seat run - plausible, ~5 points wrong,
+        and nothing raises."""
+        rows = {"gate3_deduction": {"by_dawn_wolves": {1: (0, 100)}}}
+        self.assertAlmostEqual(_chance({**rows, "seats": 5}), 0.25)
+        self.assertAlmostEqual(_chance({**rows, "seats": 6}), 0.20)
+
+    def test_the_bar_survives_a_json_round_trip(self):
+        """JSON has no integer keys. The criterion asks a reader to recompute the
+        bar off the written record, and before this the string key died on the
+        subtraction - in-process it never appears, so no shipped path showed it."""
+        live = {"seats": 6, "gate3_deduction": {"by_dawn_wolves": {1: (0, 100)}}}
+        onwire = json.loads(json.dumps(live))
+        self.assertEqual(list(onwire["gate3_deduction"]["by_dawn_wolves"]), ["1"])
+        self.assertAlmostEqual(_chance(onwire), _chance(live))
+
+    def test_a_record_written_before_seats_existed_reads_as_five(self):
+        """Every record before 2026-09-02 was five-seat and carries no key.
+        `eval.s5_verdict` still reads S2's, so the default is not a convenience."""
+        rows = {"gate3_deduction": {"by_dawn_wolves": {1: (0, 100)}}}
+        self.assertAlmostEqual(_chance(rows), _chance({**rows, "seats": 5}))
 
     def test_unwinnable_games_do_not_drag_chance_down(self):
         mixed = {"gate3_deduction": {"by_dawn_wolves": {0: (0, 50), 1: (0, 100)}}}
@@ -233,3 +261,41 @@ class TestBothDriversAgreeOnWhatOutMeans(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheWakerDeckIsDealable(unittest.TestCase):
+    """S18 froze deck A. The criterion is only binding if the flag it names runs."""
+
+    def test_seats_six_deals_nine_cards_at_six_seats_with_a_waker(self):
+        """Asserted on the RECORD, not on ``SETUPS[6]``. A test that reads the
+        registry passes just as happily when ``one_game`` ignores the flag and
+        deals five - which is what a mutant that reverted it did, silently."""
+        setup = SETUPS[6]
+        self.assertEqual((setup.n, setup.centre, len(setup.deck)), (6, 3, 9))
+        self.assertIn("waker", [c.key for c in setup.deck])
+
+        rec = one_game(0, make_args(seats=6, games=1, seed=7))
+        self.assertIsNone(rec.error, rec.error)
+        self.assertEqual(len(rec.truth), 6, "the run did not deal six seats")
+        self.assertEqual(sorted(rec.truth), list(range(6)))
+
+        five = one_game(0, make_args(seats=5, games=1, seed=7))
+        self.assertEqual(len(five.truth), 5, "the flag changed nothing")
+
+    def test_the_waker_is_seated_in_most_deals_so_one_run_carries_its_control(self):
+        """RULES.md measured 62.0% over 4000 nights. This asserts the SHAPE - the
+        card is usually seated and sometimes in the centre - not the figure, which
+        belongs to the criterion and moves with the RNG."""
+        seated = 0
+        for seed in range(200):
+            ref = ChangelingReferee.new(6, seed=seed)
+            if any(c.key == "waker" for c in ref.night.dealt.values()):
+                seated += 1
+        self.assertTrue(40 <= seated <= 170,
+                        f"waker seated in {seated}/200 - one run no longer "
+                        "carries its own control")
+
+    def test_the_five_seat_deck_still_seats_no_waker(self):
+        """A deck change re-baselines everything, so SETUP_5 must not drift."""
+        self.assertNotIn("waker", [c.key for c in SETUPS[5].deck])
+

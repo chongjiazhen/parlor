@@ -316,11 +316,23 @@ variety.
   single self-reveal with no partner line is `waker`, uniquely. The same reasoning
   the `swapper` already needs, one step shorter.
 
-### The decks that would seat them - designed 2026-08-27, built by nothing
+### The decks that would seat them - designed 2026-08-27; deck A REGISTERED 2026-09-02
 
-Paper. No `Setup` is registered, no number has moved, and the measurement waits on
-the 200-game run. What follows is the design and the arithmetic behind it, so that
-work is a launch rather than a session.
+**Deck A is no longer paper.** `SETUP_6_WAKER` is registered in `roles.py`,
+`eval.run_changeling --seats 6` deals it, `eval.strata --deck SETUP_6_WAKER` prices
+it, and its campaign is frozen in `docs/changeling-waker-criterion.md` - which is
+the binding statement of its bar and flags, not this section. Deck B (`kindred`)
+is still paper and still needs `require_seated_kin`.
+
+**Two figures below did not survive the instrument, and are left as written rather
+than retrofitted.** The `blind/game` column is a paper definition; measured with
+`eval.strata`, on the S10 told-based rule the gate is actually cut with, the move
+is 1.340 -> 1.416 (+5.7%), not 1.02 -> 1.18 (+16%). Direction agrees, magnitude
+does not. The criterion carries the binding table; the design is kept here so the
+gap between a predicted deck and a measured one stays visible.
+
+What follows is the design and the arithmetic behind it, so that work is a launch
+rather than a session.
 
 **Every deck change here costs at least TWO variables, and that is structural.**
 `Setup.__post_init__` enforces `len(deck) == n + centre`, so a card cannot be added

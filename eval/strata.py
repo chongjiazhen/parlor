@@ -23,12 +23,13 @@ import random
 from collections import Counter
 
 from games.changeling.night import resolve_night
-from games.changeling.roles import KNOWLEDGE_CLASSES, SETUP_5, Setup, Side
+from games.changeling.roles import (KNOWLEDGE_CLASSES, SETUP_5, SETUP_6_WAKER,
+                                    Setup, Side)
 
 #: The decks this reports on. ``SETUP_5`` is the shipped one and the only deck any
 #: recorded number was played on; a caller adds a row here to price a new deck
 #: before building it.
-DECKS: dict[str, Setup] = {"SETUP_5": SETUP_5}
+DECKS: dict[str, Setup] = {"SETUP_5": SETUP_5, "SETUP_6_WAKER": SETUP_6_WAKER}
 
 
 def dealt_class(night, seat: int) -> str:

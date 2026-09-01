@@ -191,7 +191,32 @@ SETUP_5 = Setup(
     centre=3,
 )
 
-SETUPS: dict[int, Setup] = {5: SETUP_5}
+#: **Deck A, the `waker` deck** - designed 2026-08-27 (RULES.md §The decks that
+#: would seat them, candidate W-c), registered 2026-09-02 for the S18 criterion.
+#:
+#: Six seats and three centre, because `Setup.__post_init__` requires
+#: ``len(deck) == n + centre`` - a card cannot be added without a second variable,
+#: and growing the TABLE was measured better on every axis than growing the centre
+#: or cutting a `bystander`. Cutting one was the armchair move and is the wrong
+#: one: it halves the gate's own blind denominator, 1.02 blind seats per game to
+#: 0.51, to buy an instrument that measures something else.
+#:
+#: Measured over 4000 resolved nights: blind/game 1.18 (+16% on `SETUP_5`),
+#: unwinnable 1.8% (from 2.8%), `identity`-told-nothing 9.3% (from 17.4%), and the
+#: `waker` seated in 62.0% of deals - which is why one run carries its own control.
+#:
+#: **This is a NEW BASELINE, not a variant of the old one.** Wolf density moves
+#: from 2/5 to 2/6, so the accusation chance baseline is not derivable from
+#: `SETUP_5`'s and must be re-measured with `--arm random` before any deduction
+#: claim rests on it.
+SETUP_6_WAKER = Setup(
+    n=6,
+    deck=(PACK, PACK, SPOTTER, SWAPPER, SWITCHER, DECEIVED, BYSTANDER, BYSTANDER,
+          WAKER),
+    centre=3,
+)
+
+SETUPS: dict[int, Setup] = {5: SETUP_5, 6: SETUP_6_WAKER}
 
 #: Every card the game defines, dealt by a shipped setup or not. A skin must name
 #: all of them - the referee looks a display name up by key, so a theme missing one

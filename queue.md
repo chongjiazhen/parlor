@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S17, S23, S29-S36 today.
+and annotated slice is `docs/slices.md` - S1-S18, S23, S29-S36 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -89,8 +89,7 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
-| **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. **Unblocked 2026-09-02**: S33 closed without a model-facing change, so S5's baseline stands and this freezes on top of it. | judgment | codex | no changeling arm in flight - **met** | committed criterion and tracked recipe; no record launched |
-| **S19** | **Waker deck campaign.** Run S18's frozen control/model arms and render the verdict. | judgment | codex | S18 criterion and recipe committed | records, transcript, verdict and both fallback rates |
+| **S19** | **Waker deck campaign.** Run S18's frozen arms and render the verdict. **LAUNCH-READY 2026-09-02** - `eval/runs/changeling-waker.cmd waker1 200 12000 qwen36-35b-a3b-iq3`, ~6.1 h, and it runs its own random control after. Settings bind from `docs/changeling-waker-criterion.md`, NOT from the row or the launcher. Arm the model first: `kill-gpu`, then arm, then read `/v1/models`. | judgment | codex | S18 criterion and recipe committed - **met** | records, transcript, verdict and both fallback rates |
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
 | **S22** | **Changeling discussion-length arm.** Bind one extra discussion-round comparison without changing deck, wording or scorer. | judgment | codex | a post-S14 baseline/criterion exists | paired recipe and criterion, ready to launch |
