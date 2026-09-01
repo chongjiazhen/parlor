@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -364,6 +365,94 @@ def report(summary: dict, derived: dict, path: Path,
     return out, 0
 
 
+def transcript(summary: dict, derived: dict, path, promised: int,
+               rendered_at: str) -> list[str]:
+    """The record as a committed artifact, in the shape `transcripts/` already
+    holds for belfry.
+
+    **A rendering, not a second scorer.** Every figure comes from ``recompute``
+    and the same helpers ``report`` uses, so the transcript cannot disagree with
+    the verdict - which is the failure a separate renderer invites, and the
+    reason this is a flag on the tool that already owns the arithmetic rather
+    than a new module beside it. `AGENTS.md` makes the rendered transcript the
+    committed evidence for a published claim, and `docs/measurements.md` cited
+    quorum live4 with nothing a reader could open.
+
+    The RECORD stays untracked; this is the tracked half, and it names the
+    untracked file it came from so the pair can be checked by anyone who has it.
+    """
+    arm = arm_for(path)
+    doc = (arm or ARMS["live4"])["doc"]
+    args = summary.get("args", {})
+    score = summary.get("score", {})
+    claims = derived["claims"]
+    name = path.stem
+
+    def band(office):
+        return bootstrap_claim_rate(derived["played_rows"], office,
+                                    samples=BOOTSTRAP_SAMPLES,
+                                    seed=BOOTSTRAP_SEED)
+
+    out = ["# Quorum - %s measurement rendering" % name, "",
+           "Rendered %s from untracked" % rendered_at,
+           "`%s` and its `.jsonl` sibling." % path.as_posix(), "",
+           "## Arm identity", ""]
+    if arm is None:
+        out += ["**NOT the pre-committed arm** - an audit of an ad-hoc record; "
+                "`%s` is what the criterion promised." % CAMPAIGN, ""]
+    out += ["%d games | `--arm %s` | %s talk round(s) | seed %s | %s `%s` | %s"
+            "temperature %s"
+            % (derived["played"], args.get("arm", "?"), args.get("rounds", "?"),
+               args.get("seed", "?"), args.get("backend", "?"),
+               args.get("model", "?"),
+               "`--no-thinking` | " if args.get("no_thinking") else "",
+               args.get("temperature", "?")), "",
+            "Criterion `%s`, pre-committed and not editable. Each quorum promise "
+            "supersedes the last in writing rather than being edited." % doc,
+            "", "## Record rendering", "",
+            "| measure | %s |" % name, "|---|---|",
+            "| games | %d/%d |" % (derived["played"], promised)]
+    for office in OFFICES:
+        row = claims["by_office"][office]
+        ci = band(office)
+        b = " [%.2f%%, %.2f%%]" % (ci[0] * 100, ci[1] * 100) if ci else ""
+        out.append("| %s honest claims | %d/%d = %.2f%%%s, chance %.2f%% |"
+                   % (office, row["honest"], row["claims"], row["rate"] * 100,
+                      b, chance(office) * 100))
+    out += ["| lies | %d, of which %d uncontradictable |"
+            % (claims["lies"], claims["safe_lies"]),
+            "| honest on a forced draw | %.2f%% (%d claims) |"
+            % (claims["honest_on_forced"] * 100, claims["forced_claims"]),
+            "| honest when the office had a choice | %.2f%% |"
+            % (claims["honest_on_free"] * 100),
+            "| by side | majority %.2f%%, minority %.2f%% |"
+            % (claims["by_side"]["majority"] * 100,
+               claims["by_side"]["minority"] * 100),
+            "| model fallback | %.2f%% of %d model-controlled decisions |"
+            % (derived["model_fallback_rate"] * 100, derived["model_decisions"]),
+            "| run-wide fallback | %.2f%% of %d |"
+            % (derived["fallback_rate"] * 100, derived["decisions"]),
+            "| recovered legal answer | %d |" % score.get("recovered", 0),
+            "| writs enacted with a choice | %d |"
+            % score.get("writs_with_a_choice", 0), ""]
+
+    verdicts = ["%s %s" % (o, call(claims["by_office"][o]["claims"],
+                                   chance(o), band(o))[0]) for o in OFFICES]
+    out += ["## What it reads", "",
+            "Clause B: %s. The interval is a per-game bootstrap, resamples "
+            "pinned at %d with seed %d - claims inside one game are correlated "
+            "by the game that produced them, so the game is the resampling unit "
+            "and never the claim." % ("; ".join(verdicts), BOOTSTRAP_SAMPLES,
+                                      BOOTSTRAP_SEED),
+            "",
+            "**A dated snapshot of one model, never a claim about models.** No "
+            "win rate is reported and no deception figure is inferred from one: "
+            "`majority_wins` is a property of the deck at this scale. Recompute "
+            "every figure above with `py -3 -m eval.quorum_live1_verdict %s`."
+            % path.as_posix()]
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="apply quorum's pre-committed first-arm criterion")
@@ -371,6 +460,12 @@ def main() -> None:
                     help=f"the run summary .json (default {CAMPAIGN})")
     ap.add_argument("--games", type=int, default=GAMES_PROMISED,
                     help="games the criterion promised, for the partial-run void")
+    ap.add_argument("--transcript", metavar="PATH",
+                    help="also render the record as a committable "
+                         "transcript. A REFUSED record still renders - the "
+                         "refusal is the finding, and a renderer that "
+                         "returned early would leave a published number "
+                         "with no artifact behind it.")
     args = ap.parse_args()
 
     path = Path(args.record)
@@ -380,8 +475,17 @@ def main() -> None:
         print(f"no record at {exc.filename} - the arm has not been run")
         sys.exit(1)
 
-    lines, code = report(summary, recompute(rows), path, args.games)
+    derived = recompute(rows)
+    lines, code = report(summary, derived, path, args.games)
     print("\n".join(lines))
+    if args.transcript:
+        # Stamped from the CLOCK, never from a date in a prompt: a handover
+        # date is a contamination vector and nothing objects to a wrong one.
+        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        body = transcript(summary, derived, path, args.games, stamp)
+        Path(args.transcript).write_text(
+            chr(10).join(body) + chr(10), encoding="utf-8")
+        print("wrote " + args.transcript)
     sys.exit(code)
 
 

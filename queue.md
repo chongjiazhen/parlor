@@ -122,14 +122,6 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
-- [ ] **Two read arms have no rendered transcript, and quorum has no renderer at
-      all.** `docs/measurements.md` now cites belfry live2 AND quorum live4 with
-      nothing to open, while `AGENTS.md` makes the rendered transcript the
-      committed evidence for a claim and live1 links `transcripts/belfry-live1.md`.
-      Unequal work: belfry has a render path in `eval/belfry_live1_verdict.py`, so
-      live2 is a re-run; `transcripts/` holds no quorum file of any kind, so live4
-      needs the renderer written first. Records are
-      `eval/records/{belfry-live2,quorum-live4}.json(.jsonl)`, untracked and durable.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records

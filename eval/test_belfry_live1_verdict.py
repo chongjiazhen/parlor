@@ -648,3 +648,65 @@ class TheCliRunsTheControllerItShips(unittest.TestCase):
     def test_report_refuses_to_be_called_without_rows(self):
         with self.assertRaises(TypeError):
             verdict.report({}, {}, Path("x"), 60)
+
+
+class TranscriptIsARendering(unittest.TestCase):
+    """`transcripts/belfry-live1.md` was authored by hand. This is what stops the
+    next one from being, and what stops it disagreeing with the verdict."""
+
+    def render(self, rows, promised: int = verdict.GAMES_PROMISED,
+               path: str = verdict.CAMPAIGN, arm=None) -> str:
+        from pathlib import Path
+        summary = summary_for(rows)
+        derived = verdict.recompute(rows)
+        return "\n".join(verdict.transcript(summary, derived, Path(path),
+                                            promised, arm, "STAMP"))
+
+    def test_it_agrees_with_the_verdict_it_renders(self):
+        """The failure a separate renderer invites: a committed artifact that
+        disagrees with the tool a reader recomputes from. Both read one
+        ``recompute``, and this says so rather than the docstring."""
+        rows = arm(60, 0.70, 0.30, seed=11)
+        text, _ = run(rows)
+        doc = self.render(rows, arm=verdict.ARMS["live1"])
+        self.assertIn("VERDICT: INFORMS", text)
+        self.assertIn("Clause A: INFORMS", doc)
+        for token in ("yes on an evil nominee", "yes on a good nominee"):
+            counts = text.split(token)[1].split("=")[0].strip()
+            self.assertIn(counts, doc, f"{token} counts differ from the verdict")
+
+        # The other side of the same guard, and the half that makes it real: a
+        # transcript that hardcoded the happy verdict passed everything above.
+        chance_rows = arm(60, 0.50, 0.50, seed=12)
+        chance_text, _ = run(chance_rows)
+        chance_doc = self.render(chance_rows, arm=verdict.ARMS["live1"])
+        self.assertIn("VERDICT: NOT SHOWN", chance_text)
+        self.assertIn("Clause A: NOT SHOWN", chance_doc)
+        self.assertNotIn("Clause A: INFORMS", chance_doc)
+
+    def test_a_refused_record_still_renders(self):
+        """`AGENTS.md`: a refused record is still audited. This repo publishes
+        figures from records, so a renderer that returned early would leave a
+        published number with no artifact behind it."""
+        rows = arm(60, 0.70, 0.30, seed=11)
+        for row in rows:
+            row["decisions"] = 100
+            row["fallbacks"] = 50
+        text, code = run(rows)
+        self.assertNotEqual(code, 0)
+        self.assertIn("VOID", text)
+        doc = self.render(rows, arm=verdict.ARMS["live1"])
+        self.assertIn("measurement rendering", doc)
+        self.assertIn("| fallback |", doc)
+
+    def test_an_ad_hoc_record_says_it_is_not_a_pre_committed_arm(self):
+        doc = self.render(arm(60, 0.70, 0.30, seed=11), arm=None)
+        self.assertIn("NOT a pre-committed arm", doc)
+
+    def test_it_names_the_untracked_record_it_came_from(self):
+        """The record is gitignored and the transcript is not, so the tracked
+        half has to name its source or the pair cannot be checked."""
+        doc = self.render(arm(60, 0.70, 0.30, seed=11),
+                          arm=verdict.ARMS["live1"])
+        self.assertIn("untracked", doc)
+        self.assertIn(verdict.CAMPAIGN, doc)

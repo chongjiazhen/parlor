@@ -422,3 +422,59 @@ def test_the_duplicate_scan_reads_the_record_not_the_referee():
             game([claim(0, "proposer", ["writ"] * 3, seat=1)], [d])]
     assert verdict.duplicate_claims(rows) == [(0, 2, 0, 3)]
     assert verdict.duplicate_claims([]) == []
+
+
+# ---- the transcript is a rendering, never a second scorer --------------------
+
+def render(rows, promised: int = 1, path: str = verdict.CAMPAIGN) -> str:
+    from pathlib import Path
+    derived = verdict.recompute(rows)
+    return "\n".join(verdict.transcript(
+        summary_for(derived), derived, Path(path), promised, "STAMP"))
+
+
+def test_the_transcript_agrees_with_the_verdict_it_renders():
+    """The failure a separate renderer invites: a committed artifact that
+    disagrees with the tool the claim is recomputed from. Both come from one
+    ``recompute``, and this is what says so rather than the docstring."""
+    rows = with_model_decisions(honest_proposer(28, 79))
+    text, _, _ = run(rows)
+    doc = render(rows)
+    assert "proposer: 28/79" in text
+    assert "| proposer honest claims | 28/79 = " in doc
+    # the verdict word itself, not just the counts
+    assert ("INFORMS" in text) == ("INFORMS" in doc)
+
+
+def test_a_refused_record_still_renders():
+    """`AGENTS.md`: a refused record is still audited, because this repo
+    publishes figures from records and a renderer that returned early would
+    leave a published number with no artifact behind it. The void is the
+    finding, and the artifact has to carry it."""
+    rows = with_model_decisions(honest_proposer(28, 79))
+    rows[0]["decisions"] = 100
+    rows[0]["fallbacks"] = 11
+    rows[0]["decision_log"] = [{"turn": i, "seat": 0, "phase": "vote",
+                                "played": "votes yes", "fell_back": i < 11,
+                                "model_controlled": True} for i in range(100)]
+    text, code, _ = run(rows)
+    assert code == 2 and "VOID" in text
+    doc = render(rows)
+    assert "measurement rendering" in doc
+    assert "| model fallback |" in doc
+
+
+def test_an_ad_hoc_record_says_it_is_not_the_arm():
+    """Same guard the report carries: a header must never imply a criterion
+    promised a record it did not."""
+    doc = render(with_model_decisions(honest_proposer(28, 79)),
+                 path="eval/records/somebody-elses.json")
+    assert "NOT the pre-committed arm" in doc
+
+
+def test_the_transcript_names_the_untracked_record_it_came_from():
+    """The record is gitignored and the transcript is not, so the tracked half
+    has to name its source or the pair cannot be checked."""
+    doc = render(with_model_decisions(honest_proposer(28, 79)))
+    assert verdict.CAMPAIGN in doc
+    assert "untracked" in doc

@@ -309,6 +309,8 @@ printing a criterion verdict.
 
 The first belfry live arm to execute its own criterion. Scored with
 `py -3 -m eval.belfry_live1_verdict --criterion live2`, exit 0.
+Rendered evidence `transcripts/belfry-live2.md`, written by that same
+command with `--transcript` so the artifact cannot disagree with the tool.
 60/60 local `qwen36-35b-a3b-iq3` games in 23104 s: 5 seats, compact script, one
 talk round, seed 6100, temperature 0.0, `--no-thinking`, exactly as
 `docs/belfry-live2-criterion.md` promised. Fallback **1.28% of 3353 decisions**,
@@ -602,7 +604,9 @@ priced from the coupled one and is superseded in writing, unrun.
 ## quorum live4 - the first quorum arm with a model in a seat, READ 2026-09-01
 
 The criterion-bound arm of `docs/quorum-live4-criterion.md`, scored with
-`py -3 -m eval.quorum_live1_verdict`, exit 0. 20/20 games in 6522 s (326 s/game)
+`py -3 -m eval.quorum_live1_verdict`, exit 0. Rendered evidence
+`transcripts/quorum-live4.md`, written by that same command with
+`--transcript`. 20/20 games in 6522 s (326 s/game)
 on local `qwen36-35b-a3b-iq3`: `--arm llm`, one discussion round, temperature
 0.0, `--no-thinking`, seeds 11200..11219, exactly as promised. live1, live2 and
 live3 stand unrun beside their own criteria, each superseded in writing.

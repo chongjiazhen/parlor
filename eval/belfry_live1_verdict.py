@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -109,10 +110,10 @@ CONTROL_BOOTSTRAP = (-0.0149, 0.0615)
 #: N. Every bar, floor and endpoint is carried across unedited -
 #: ``docs/belfry-live2-criterion.md`` §Why this file exists.
 ARMS = {
-    "live1": {"campaign": CAMPAIGN,
+    "live1": {"key": "live1", "campaign": CAMPAIGN,
               "args": CRITERION_ARGS,
               "doc": "docs/belfry-live1-criterion.md"},
-    "live2": {"campaign": "eval/records/belfry-live2.json",
+    "live2": {"key": "live2", "campaign": "eval/records/belfry-live2.json",
               "args": {**CRITERION_ARGS, "no_thinking": True},
               "doc": "docs/belfry-live2-criterion.md"},
 }
@@ -629,6 +630,90 @@ def report(summary: dict, derived: dict, path: Path,
     return out, 3 if off_criterion else 0
 
 
+def transcript(summary: dict, derived: dict, path: Path, promised: int,
+               arm: dict | None, rendered_at: str) -> list[str]:
+    """The record as a committed artifact, in the shape `transcripts/` already
+    holds - `transcripts/belfry-live1.md` was AUTHORED by hand, and this is what
+    stops the next one from being.
+
+    **A rendering, not a second scorer.** Every figure comes from the same
+    ``derived``/``units`` the verdict reads, so the committed artifact cannot
+    disagree with the tool a reader recomputes from. `AGENTS.md` makes the
+    rendered transcript the committed evidence for a published claim, and
+    `docs/measurements.md` cited live2 with nothing to open.
+
+    The RECORD stays untracked; this is the tracked half, and it names the
+    untracked file it came from so the pair can be checked by anyone who has it.
+    """
+    units = derived["units"]
+    score = summary.get("score", {})
+    args = summary.get("args", {})
+    name = path.stem
+    doc = (arm or {}).get("doc", "-")
+
+    out = ["# Belfry - %s measurement rendering" % name, "",
+           "Rendered %s from untracked" % rendered_at,
+           "`%s` and its `.jsonl` sibling." % path.as_posix(), "",
+           "## Arm identity", ""]
+    if arm is None:
+        out += ["**NOT a pre-committed arm** - the arithmetic below is an audit "
+                "of this record, never a criterion verdict.", ""]
+    out += ["%d games | `--arm %s` | %s seats | %s script | %s talk round(s) | "
+            "seed %s | %s `%s` | %stemperature %s"
+            % (derived["played"], args.get("arm", "?"), args.get("seats", "?"),
+               args.get("script", "?"), args.get("rounds", "?"),
+               args.get("seed", "?"), args.get("backend", "?"),
+               args.get("model", "?"),
+               "`--no-thinking` | " if args.get("no_thinking") else "",
+               args.get("temperature", "?")), "",
+            "Criterion `%s`, pre-committed and not editable." % doc,
+            "", "## Record rendering", "",
+            "| measure | %s |" % name, "|---|---|",
+            "| games | %d/%d |" % (derived["played"], promised)]
+
+    n_e, n_g = total(units, "n_evil"), total(units, "n_good")
+    if n_e and n_g:
+        out += ["| yes on evil nominee | %d/%d = %s |"
+                % (total(units, "yes_evil"), n_e,
+                   _pct(total(units, "yes_evil") / n_e)),
+                "| yes on good nominee | %d/%d = %s |"
+                % (total(units, "yes_good"), n_g,
+                   _pct(total(units, "yes_good") / n_g))]
+    verdict, _why, ci = call_primary(units)
+    out.append("| good-seat vote discrimination | %s%s (bootstrap over %d games) |"
+               % (_pct(discrimination(units)), _band(ci), len(units)))
+    live, hits = total(units, "day1_live"), total(units, "day1_hits")
+    if live:
+        out.append("| day-1 voted execution accuracy | %d/%d = %s |"
+                   % (hits, live, _pct(hits / live)))
+    out += ["| fallback | %d/%d = %s |"
+            % (derived["fallbacks"], derived["decisions"],
+               _pct(derived["fallback_rate"])),
+            "| vote fallback | %d/%d = %s |"
+            % (derived["vote_fallbacks"], derived["vote_decisions"],
+               _pct(derived["vote_fallback_rate"])),
+            "| recovered legal answer | %s |" % _pct(derived["recovered_rate"]),
+            "| good win rate | %s |"
+            % _pct(score.get("good_win_rate", 0.0)), ""]
+
+    out += ["## What it reads", "",
+            "Clause A: %s. The interval is a per-game bootstrap over %d games - "
+            "votes inside one game are correlated by the board that produced "
+            "them, so the game is the resampling unit and never the vote. The "
+            "random control read %.2f%% [%.2f%%, %.2f%%] over 200 games and does "
+            "not clear this bar, which is what earns the figure the right to be "
+            "read." % (verdict, len(units), CONTROL_DISCRIMINATION * 100,
+                       CONTROL_BOOTSTRAP[0] * 100, CONTROL_BOOTSTRAP[1] * 100),
+            "",
+            "**A dated snapshot of one model on one script at one talk round, "
+            "never a claim about models.** No deduction or deception figure is "
+            "inferred from the win rate: a win here is a four-day chain and the "
+            "record does not attribute it to any one decision. Recompute every "
+            "figure above with `py -3 -m eval.belfry_live1_verdict --criterion "
+            "%s`." % (arm or {}).get("key", "live2")]
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="apply belfry's pre-committed first-arm criterion")
@@ -638,6 +723,12 @@ def main() -> None:
                          "together; there is no flag for one without the other")
     ap.add_argument("record", nargs="?",
                     help="the run summary .json (default: the arm's own record)")
+    ap.add_argument("--transcript", metavar="PATH",
+                    help="also render the record as a committable "
+                         "transcript. A REFUSED record still renders - the "
+                         "refusal is the finding, and a renderer that "
+                         "returned early would leave a published number "
+                         "with no artifact behind it.")
     args = ap.parse_args()
     arm = ARMS[args.criterion]
     if args.record is None:
@@ -653,9 +744,16 @@ def main() -> None:
         print(f"no record at {exc.filename} - the arm has not been run")
         sys.exit(1)
 
-    lines, code = report(summary, recompute(rows), path, GAMES_PROMISED, rows,
-                         arm)
+    derived = recompute(rows)
+    lines, code = report(summary, derived, path, GAMES_PROMISED, rows, arm)
     print("\n".join(lines))
+    if args.transcript:
+        # Stamped from the CLOCK, never from a date in a prompt.
+        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        body = transcript(summary, derived, path, GAMES_PROMISED, arm, stamp)
+        Path(args.transcript).write_text(
+            chr(10).join(body) + chr(10), encoding="utf-8")
+        print("wrote " + args.transcript)
     sys.exit(code)
 
 
