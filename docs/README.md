@@ -95,15 +95,11 @@ partly true is worse than none.
   arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
   stand beside it, superseded IN WRITING and unrun: each was retired before launch
   because the instrument changed under it, never edited after a number landed. Read
-  live4 for the arm; read the others only for what the instrument used to be. None
-  is to be edited.
+  live4 for the arm; read the others only for what the instrument used to be.
 - `docs/belfry-live2-criterion.md` - **the operative belfry pre-commitment**;
-  arithmetic `py -3 -m eval.belfry_live1_verdict --criterion live2`.
-  `-live1-` stands beside it and is NOT superseded on a bar: it promised
-  temperature 0.0 without `--no-thinking`, which measures 58.33% fallback on q36
-  and fires its own void condition, so the arm it describes cannot be read at any
-  N. live2 changes that one setting and carries every endpoint, floor and void
-  across verbatim. Neither is to be edited.
+  arithmetic `eval.belfry_live1_verdict --criterion live2`. `-live1-` beside it
+  is retired on RUNNABILITY, not a bar: its settings measure 58.33% fallback and
+  fire its own void. Neither is to be edited.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
