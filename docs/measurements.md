@@ -385,6 +385,30 @@ source accuracy was **88.89%**, above Wilson 95% chance upper endpoint **70.97%*
 trace difference from seeded random in bounded setup choices only. It does not
 establish choice quality, referee quality, deduction, deception, or wins.
 
+## belfry steered discretion - S23 read, 2026-09-01
+
+Rendered record: [`transcripts/belfry-steering-s23.md`](../transcripts/belfry-steering-s23.md).
+The frozen S23 pair ran 360 five-seat compact random-player games on seeds
+6100..6459, model arm 201 s on local `qwen36-35b-a3b-iq3` at temperature 0.0.
+Both player fallback rates were 0/16568 (0.00%). Steered adjudicator fallback was
+0/152 (0.00%), recovered 0/152; control adjudicator rate is n/a. **A richer ask
+cost nothing at the parser**: the board and the rule went out beside the menu and
+every first ask still came back legal, as in S8b's blind 0/20.
+
+152 of the 360 games seated a diviner and so asked the question. Against the
+stated placement rule, steered compliance was **46.05%** (70/152), above the
+Wilson 95% chance upper endpoint **40.71%**: **STEERED**. The seeded-random
+control complied 49/152 = 32.24% on the same boards against the same rule, inside
+its own chance interval - which is the instrument control that says the rule is
+chance-neutral here and the steered number is not reading a skewed bar.
+
+**The size is the finding, not the verdict.** The rule was ignored on 82 of 152
+calls. What is evidenced is a tendency toward a stated policy, not obedience to
+one, and nothing here supports a referee that may be RELIED on to keep a rule. It
+establishes no choice quality, no referee quality, deduction, deception or wins,
+and the rule's content is a probe rather than a claim about good refereeing
+(`docs/decisions.md` §Belfry's setup discretion has no quality axis).
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost
