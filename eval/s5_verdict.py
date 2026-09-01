@@ -107,8 +107,26 @@ def stratum(cls: str):
     return lambda v: v["knowledge_class"] == cls
 
 
+def seats_in(game: dict) -> int:
+    """How many seats this game was played with, read off the RECORD.
+
+    Not a constant and not a flag. ``derived_chance`` and ``blind_chance`` below
+    hardcoded 5 and 4 - correct for every record that existed when they were
+    written, and silently wrong the moment a deck changes the table. A six-seat
+    record would have been scored against ``SETUP_5``'s bar: a plausible number,
+    several points off, with nothing raising. The same defect was found and fixed
+    in ``eval.run_changeling._chance`` on 2026-09-02; this is its twin, in the tool
+    that actually calls the gate.
+
+    ``truth`` is a dawn holding per seat, so its length IS the table. Falls back to
+    5 for a row that predates the field rather than guessing from the deck, because
+    every such record is a five-seat one.
+    """
+    return len(game.get("truth") or {}) or 5
+
+
 def derived_chance(games: list[dict]) -> float:
-    """A villager pointing at random hits a wolf at (dawn wolves)/(4 other seats),
+    """A villager pointing at random hits a wolf at (dawn wolves)/(other seats),
     weighted by VILLAGER VOTES over the run's own mix of one- and two-wolf dawns.
 
     Recomputed rather than read off the log because this is the figure the scorer
@@ -120,8 +138,9 @@ def derived_chance(games: list[dict]) -> float:
         wolves = dawn_wolves(game)
         if not wolves:
             continue
-        seats = 5 - wolves                      # villager seats voting this game
-        weighted += seats * (wolves / 4)
+        n_seats = seats_in(game)
+        seats = n_seats - wolves                # villager seats voting this game
+        weighted += seats * (wolves / (n_seats - 1))
         total += seats
     return weighted / total if total else 0.0
 
@@ -139,7 +158,7 @@ def blind_chance(games: list[dict]) -> float:
         if not wolves:
             continue
         n = votes([game], stratum("none"))
-        weighted += n * (wolves / 4)
+        weighted += n * (wolves / (seats_in(game) - 1))
         total += n
     return weighted / total if total else 0.0
 

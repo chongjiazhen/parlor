@@ -112,3 +112,53 @@ class TestPerGame(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---- the chance bar is the TABLE's, not a constant -------------------------
+
+def _game(truth: dict, votes_none: int = 0) -> dict:
+    """One record row: dawn holdings per seat, plus blind villager votes."""
+    return {"truth": {str(s): k for s, k in truth.items()},
+            "votes": [{"seat": 0, "target": 1, "voter_holds_pack": False,
+                       "target_holds_pack": False, "knowledge_class": "none",
+                       "voter_believes_pack": False, "voter_diverged": False}
+                      for _ in range(votes_none)]}
+
+
+def test_seats_are_read_off_the_record_not_assumed():
+    from eval.s5_verdict import seats_in
+    assert seats_in(_game({0: "pack", 1: "bystander"})) == 2
+    assert seats_in(_game({i: "bystander" for i in range(6)})) == 6
+    # a row predating the field is a five-seat record, never a guess
+    assert seats_in({}) == 5
+
+
+def test_the_chance_bar_moves_with_the_TABLE():
+    """Hardcoded 5 and 4 returned SETUP_5's bar for a six-seat record - a
+    plausible number, several points off, with nothing raising. One wolf among
+    five seats is 1/4 to a random villager; among six it is 1/5."""
+    from eval.s5_verdict import derived_chance
+    five = _game({0: "pack", 1: "b", 2: "b", 3: "b", 4: "b"})
+    six = _game({0: "pack", 1: "b", 2: "b", 3: "b", 4: "b", 5: "b"})
+    assert abs(derived_chance([five]) - 0.25) < 1e-9
+    assert abs(derived_chance([six]) - 0.20) < 1e-9
+
+
+def test_the_blind_bar_moves_with_the_table_too():
+    """Same defect, same fix, the other function - and it is the one cut on the
+    stratum the gate is actually read from."""
+    from eval.s5_verdict import blind_chance
+    five = _game({0: "pack", 1: "b", 2: "b", 3: "b", 4: "b"}, votes_none=3)
+    six = _game({0: "pack", 1: "b", 2: "b", 3: "b", 4: "b", 5: "b"}, votes_none=3)
+    assert abs(blind_chance([five]) - 0.25) < 1e-9
+    assert abs(blind_chance([six]) - 0.20) < 1e-9
+
+
+def test_s2_is_a_five_seat_record_so_its_published_bar_cannot_move():
+    """The generalisation must be a no-op on every record that exists. S5's read
+    is published; widening arithmetic whose numbers are published is a
+    re-baseline unless the numbers are shown not to move."""
+    from eval.s5_verdict import S2, load, seats_in
+    _, games = load(S2)
+    assert games, "S2 record missing - this test guards a published number"
+    assert {seats_in(g) for g in games} == {5}
