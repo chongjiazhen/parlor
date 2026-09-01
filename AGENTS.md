@@ -106,6 +106,21 @@ Change them against a measurement, and change them HERE.
   prose paid for by merging two wrapped lines PASSES a line ratchet and fails a
   byte one. Read it before writing a row, not by failing the gate:
   `sh scripts/hygiene-check.sh --budget`.
+- **A finding this tree does not hold becomes a ROW, before it becomes a
+  question.** The queue is the only thing a cold session reads; nothing downstream
+  reads a transcript, so a finding named in a closing summary and left for an
+  answer is a finding lost the moment the session ends. Write the row, then say you
+  wrote it - never the reverse, and never gated on a yes. Standing commit
+  authorization already covers the write. Cost when it was not, 2026-09-02: the
+  belfry twin of the S33 viewer-exclusion was reported as a loose end with an
+  offer to file it, and survived only because the operator asked why it had not
+  been filed.
+
+  **The row is the budget, and it is one row.** This is not licence to promote a
+  finding into a doc, a rule or a design note; those have their own homes and
+  their own gates. And a row is written against what was MEASURED, not what was
+  inferred - the belfry row cost 60 games to find out the gap is latent, which is
+  most of what the row is worth. An unmeasurable finding says so inside the row.
 - **Publish hygiene is a GATE, not a pass.** `scripts/hygiene-check.sh` runs from
   `.git/hooks/pre-commit` and reads the lines a commit ADDS, which is why it needs
   no list of what is excused - and a list of what is excused would be a map to the
