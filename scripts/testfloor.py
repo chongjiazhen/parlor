@@ -19,10 +19,23 @@ import sys
 
 
 def collected(path: str) -> int:
-    out = subprocess.run(
+    """Node count, or -1 where collection itself failed.
+
+    pytest exits non-zero and prints `Interrupted: N errors during collection`
+    when a test module raises on import - and it still prints the ids it got to,
+    so counting lines alone reads a file that never entered the suite as a merely
+    smaller one. That is how a slot ran for a session with `eval/test_deduction`
+    absent from every grade (S36). The return code is the only thing that says
+    collection was complete, so it is checked, and its output is printed.
+    """
+    run = subprocess.run(
         [sys.executable, "-m", "pytest", path, "--collect-only", "-q"],
-        capture_output=True, text=True).stdout
-    return sum(1 for line in out.splitlines() if "::" in line)
+        capture_output=True, text=True)
+    if run.returncode:
+        print(run.stdout, file=sys.stderr)
+        print(run.stderr, file=sys.stderr)
+        return -1
+    return sum(1 for line in run.stdout.splitlines() if "::" in line)
 
 
 def main(argv: list[str]) -> int:
@@ -32,12 +45,17 @@ def main(argv: list[str]) -> int:
     bad = False
     for path, floor in zip(argv[::2], argv[1::2]):
         n = collected(path)
+        if n < 0:
+            print(f"{path}: COLLECTION FAILED - see the pytest output above")
+            bad = True
+            continue
         ok = n >= int(floor)
         print(f"{path}: collected {n}, floor {floor} - {'ok' if ok else 'SHRANK'}")
         bad |= not ok
     if bad:
-        print("test count fell below its floor: tests were deleted or renamed out "
-              "of collection. Add tests; delete none.", file=sys.stderr)
+        print("test count fell below its floor, or a module did not collect at "
+              "all: tests were deleted, renamed out of collection, or are erroring "
+              "on import. Add tests; delete none.", file=sys.stderr)
     return 1 if bad else 0
 
 

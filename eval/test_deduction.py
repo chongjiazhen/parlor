@@ -8,21 +8,31 @@ Everything else here is worth nothing until that passes.
 """
 from __future__ import annotations
 
+import functools
 import unittest
 
+from eval import records_gate
 from eval.deduction import PACK, min_flips, per_game, winner_from
 from eval.s5_verdict import S2, load, winnable
 
-_, GAMES = load(S2)
-PLAYED = [g for g in GAMES if g.get("winner") and g.get("votes")]
+
+@functools.cache
+def recorded() -> list[dict]:
+    """S2's games, or a skip where S2 was never run. Read lazily: at module level
+    this raised at COLLECTION in any tree without the records, which took the six
+    synthetic cases below out of the suite along with the two controls that
+    actually need a run (`eval/records_gate.py`)."""
+    records_gate.demand(S2, f"{S2}.jsonl")
+    return load(S2)[1]
 
 
 class TestTheRuleMatchesTheReferee(unittest.TestCase):
     def test_every_recorded_game_replays_to_its_recorded_winner(self):
         """The control. If this fails, no figure in `deduction.py` means anything -
         the rule it counts with is not the rule the games were played under."""
-        self.assertGreater(len(PLAYED), 100, "the control needs the S5 records")
-        for game in PLAYED:
+        played = [g for g in recorded() if g.get("winner") and g.get("votes")]
+        self.assertGreater(len(played), 100, "the control needs the S5 records")
+        for game in played:
             votes = {v["seat"]: v["target"] for v in game["votes"]}
             if len(votes) != len(game["truth"]):
                 continue
@@ -59,7 +69,8 @@ class TestDecisiveness(unittest.TestCase):
     def test_some_recorded_games_had_more_slack_than_the_cap(self):
         """``None`` is a real outcome on real games, not a shape that never occurs -
         without this the cap could be wrong in the safe-looking direction."""
-        self.assertTrue(any(per_game(g)["min_flips"] is None for g in winnable(GAMES)))
+        self.assertTrue(
+            any(per_game(g)["min_flips"] is None for g in winnable(recorded())))
 
     def test_an_incomplete_vote_map_is_not_scored_as_decisive(self):
         truth = {"0": PACK, "1": "spotter", "2": "switcher"}

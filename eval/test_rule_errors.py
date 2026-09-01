@@ -7,6 +7,7 @@ docstring; a test here that contradicts one of them is the test to change.
 
 import unittest
 
+from eval import records_gate
 from eval import rule_errors as re_
 
 
@@ -148,10 +149,14 @@ class TestBlindFloor(unittest.TestCase):
 
 class TestControl(unittest.TestCase):
     """The reproduction gate. It runs against the records on disk, because that is
-    the only thing it can be a control ON."""
+    the only thing it can be a control ON - so in a tree that holds no run output
+    it SKIPS rather than erroring, and says so (`eval/records_gate.py`). The two
+    cases that only need synthetic input are in the class below, where a slot
+    still runs them."""
 
     @classmethod
     def setUpClass(cls):
+        records_gate.demand(*[p for pair in re_.PAIRS.values() for p in pair])
         cls.pairs = {label: {"before": re_.score_arm(re_.load(b)),
                              "after": re_.score_arm(re_.load(a))}
                      for label, (b, a) in re_.PAIRS.items()}
@@ -166,6 +171,13 @@ class TestControl(unittest.TestCase):
         self.assertEqual(len(self.pairs["2026-08-27"]["after"]["B"]),
                          re_.PRIOR_B["after"])
 
+    def test_main_exits_zero_on_the_records_as_they_stand(self):
+        self.assertEqual(re_.main([]), 0)
+
+
+class TestTheControlFails(unittest.TestCase):
+    """Synthetic on both sides, so it needs no records and survives a slot."""
+
     def test_the_control_reports_a_disagreement_by_FAILING_not_by_printing(self):
         """Mutation guard: the gate has to be the thing that fails. A control that
         only prints passes just as happily when it stops agreeing."""
@@ -178,9 +190,6 @@ class TestControl(unittest.TestCase):
         broken = {"x": {"before": {"utterances": 199, "B": []},
                         "after": {"utterances": 200, "B": []}}}
         self.assertTrue(re_.control(broken))
-
-    def test_main_exits_zero_on_the_records_as_they_stand(self):
-        self.assertEqual(re_.main([]), 0)
 
 
 if __name__ == "__main__":
