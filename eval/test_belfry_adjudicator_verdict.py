@@ -9,12 +9,14 @@ import unittest
 from pathlib import Path
 
 from eval.belfry_adjudicator_verdict import (
+    ARMS,
     Trace,
     V2_CONTROL_ARGS,
     V2_MODEL_ARGS,
     feature,
     held_out_accuracy,
     report,
+    resolve,
     split_traces,
 )
 from games.belfry.roles import Align, COMPACT, ROLES
@@ -384,6 +386,56 @@ class TestHeldOutClassifier(unittest.TestCase):
         self.assertTrue(any("model adjudicator fallback:" in line
                             for line in lines))
         self.assertTrue(any("source accuracy" in line for line in lines))
+
+
+class TestArmBinding(unittest.TestCase):
+    """One switch moves the record paths and the expected settings together.
+
+    The bug: --v2 switched the expected args and the criterion document while the
+    positional defaults stayed on v1, so a bare --v2 scored the V1 RECORDS against
+    the v2 promise and printed a criterion violation. Every assertion below on a
+    v2 path fails against that code, which is what makes them worth having.
+    """
+
+    def test_bare_v2_flag_resolves_the_v2_records(self):
+        arm, control, model = resolve(["--v2"])
+        self.assertEqual(control, Path("eval/records/belfry-adjudicator-v2-control.json"))
+        self.assertEqual(model, Path("eval/records/belfry-adjudicator-v2-model.json"))
+        self.assertIs(arm, ARMS["v2"])
+
+    def test_bare_criterion_v2_resolves_the_v2_records(self):
+        self.assertEqual(resolve(["--criterion", "v2"])[1:], resolve(["--v2"])[1:])
+
+    def test_default_is_v1_and_unchanged(self):
+        arm, control, model = resolve([])
+        self.assertEqual(control, Path("eval/records/belfry-adjudicator-control.json"))
+        self.assertEqual(model, Path("eval/records/belfry-adjudicator-model.json"))
+        self.assertIs(arm, ARMS["v1"])
+
+    def test_the_paths_and_the_expected_args_never_half_move(self):
+        """The whole point of the binding: args agree with the paths they score."""
+        for name in ARMS:
+            with self.subTest(arm=name):
+                arm, control, model = resolve(["--criterion", name])
+                self.assertEqual(Path(arm["control_args"]["out"]), control)
+                self.assertEqual(Path(arm["model_args"]["out"]), model)
+
+    def test_explicit_positionals_still_win(self):
+        """The tool is pointed at ad-hoc records by hand and must keep working."""
+        arm, control, model = resolve(["--v2", "a.json", "b.json"])
+        self.assertEqual((control, model), (Path("a.json"), Path("b.json")))
+        self.assertIs(arm, ARMS["v2"])
+
+    def test_the_tracked_v2_recipe_still_parses(self):
+        """eval/runs/belfry-adjudicator-v2.cmd:35 spells it this way, and
+        docs/slices.md cites the same line as the arithmetic behind S8b."""
+        arm, control, model = resolve([
+            "eval/records/belfry-adjudicator-v2-control.json",
+            "eval/records/belfry-adjudicator-v2-model.json",
+            "--v2",
+        ])
+        self.assertIs(arm, ARMS["v2"])
+        self.assertEqual(control.name, "belfry-adjudicator-v2-control.json")
 
 
 if __name__ == "__main__":

@@ -90,7 +90,6 @@ should launch first and spend the wait on a CPU slice.
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
 | **S29** | **Belfry adjudicator retry.** Give the adjudicator the retry the players already have, so a discretionary choice is not spent on the first malformed reply. **Landmines:** it RE-BASELINES S8b, so it lands alone; and `ChoiceEvent.recovered` must actually be SET, not merely made settable - every check that sums it is a permanent `0 == 0` today. | constrained | opencode | S8 void diagnosed - **met** | recovered counted non-zero in a record, and S8b re-run unblocked |
-| **S32** | **`--v2` default record paths.** The tool an S8b re-run is scored with misreads its own flag. `belfry_live1_verdict.ARMS` is the shape to copy. | mechanical | opencode | none | the flag resolves to the paths it names, with a test that fails on the old default |
 | **S34** | **Referee transcript handle.** An open file handle makes a failing sidecar test mask itself with `PermissionError`, hiding whatever else fails beside it. | mechanical | opencode | none | the handle closed on every exit path, and the sidecar test failing for its own reason |
 | **S30** | **`cloud_strata` random rows.** Scores only full-`llm` records today. **Landmine:** a `RandomPolicy` row is a KNOWN non-model - exclude it from the cells, never bucket it as unknown provenance. | constrained | opencode | none | mixed-arm records scored, with the random rows excluded and counted separately |
 | **S31** | **`audit_decisions` ascii dispatch.** Silent 0/N on any non-ASCII, non-Chinese skin. **Landmine:** the fallback must always-match the way `_says` does, or a second language's regex set repeats the bug one skin later. | constrained | opencode | none | a non-ASCII skin scores non-zero, and the fallback proven by a skin with no regex set |
@@ -156,11 +155,6 @@ Instrument and integrity - the seven below came out of a 2026-09-01 review of
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
       `_says` at least falls back to a substring that always matches. Only
       `1984-cn` exercises the branch today, so no recorded number moves yet.
-- [ ] **`--v2` in `eval/belfry_adjudicator_verdict.py:563` switches the expected
-      args and the criterion path but NOT the default record paths**, so a bare
-      `--v2` loads the v1 records and reads as a criterion violation rather than
-      as the wrong file. `belfry_live1_verdict`'s `ARMS` binding is the shape that
-      fixes it: path, args and document move as one object or not at all.
 - [ ] **The changeling self-leak audit gained a conditional bypass.**
       `games/changeling/referee.py:506`'s `and dealt.key != held.key` switches the
       check off in a reachable state - 129 of 15000 seat-games measured, e.g. seed

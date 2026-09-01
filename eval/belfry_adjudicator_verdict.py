@@ -67,6 +67,29 @@ MODEL_ARGS = {
 V2_CONTROL_ARGS = {**CONTROL_ARGS, "out": V2_CONTROL_CAMPAIGN}
 V2_MODEL_ARGS = {**MODEL_ARGS, "out": V2_MODEL_CAMPAIGN}
 
+# One arm's WHOLE binding - the record paths it reads, the settings it demands,
+# and the document that promised them - as a single object. They are not separate
+# flags on purpose: the old --v2 flag switched the expected args and not the
+# default record paths, so a bare invocation loaded the v1 records and reported
+# it as a criterion violation rather than as the wrong file. One binding, one
+# switch, nothing that can half-move.
+ARMS = {
+    "v1": {
+        "control": CONTROL_CAMPAIGN,
+        "model": MODEL_CAMPAIGN,
+        "control_args": CONTROL_ARGS,
+        "model_args": MODEL_ARGS,
+        "doc": "docs/belfry-adjudicator-criterion.md",
+    },
+    "v2": {
+        "control": V2_CONTROL_CAMPAIGN,
+        "model": V2_MODEL_CAMPAIGN,
+        "control_args": V2_CONTROL_ARGS,
+        "model_args": V2_MODEL_ARGS,
+        "doc": "docs/belfry-adjudicator-v2-criterion.md",
+    },
+}
+
 EVENT_FIELDS = {
     "key", "options", "selected", "fallback", "recovered", "upstream",
 }
@@ -558,24 +581,44 @@ def report(control_evidence, model_evidence, *,
     return out, 0
 
 
-def main(argv: list[str] | None = None) -> int:
+def resolve(argv: list[str] | None = None) -> tuple[dict, Path, Path]:
+    """The arm one invocation binds, and the two record paths that come with it.
+
+    Separated from ``main`` so the binding is testable without loading a record.
+    The bug this replaced was entirely in which paths a flag resolved to, and a
+    test that must read evidence off disk to see that is too expensive to exist.
+    An explicitly supplied positional still wins, because the tool is also
+    pointed at ad-hoc records by hand.
+    """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("control", nargs="?", default=CONTROL_CAMPAIGN)
-    parser.add_argument("model", nargs="?", default=MODEL_CAMPAIGN)
+    parser.add_argument("--criterion", choices=sorted(ARMS), default="v1",
+                        help="which pre-committed arm to bind (default v1). It "
+                             "switches the record paths and the expected settings "
+                             "together; there is no flag for one without the other")
     parser.add_argument("--v2", action="store_true",
-                        help="score S8b fenced-JSON parser criterion")
+                        help="alias for --criterion v2. Kept because "
+                             "eval/runs/belfry-adjudicator-v2.cmd is a tracked "
+                             "recipe and docs/slices.md cites this spelling as "
+                             "the arithmetic behind a published S8b number")
+    parser.add_argument("control", nargs="?", default=None)
+    parser.add_argument("model", nargs="?", default=None)
     args = parser.parse_args(argv)
+    arm = ARMS["v2" if args.v2 else args.criterion]
+    return (arm,
+            Path(args.control) if args.control else Path(arm["control"]),
+            Path(args.model) if args.model else Path(arm["model"]))
+
+
+def main(argv: list[str] | None = None) -> int:
+    arm, control_path, model_path = resolve(argv)
     try:
-        control = load(Path(args.control))
-        model = load(Path(args.model))
+        control = load(control_path)
+        model = load(model_path)
     except (OSError, json.JSONDecodeError) as exc:
         print(f"missing or corrupt evidence: {exc}")
         return 1
-    config = ((V2_CONTROL_ARGS, V2_MODEL_ARGS,
-               "docs/belfry-adjudicator-v2-criterion.md") if args.v2 else
-              (CONTROL_ARGS, MODEL_ARGS, "docs/belfry-adjudicator-criterion.md"))
-    lines, code = report(control, model, control_args=config[0],
-                         model_args=config[1], criterion_path=config[2])
+    lines, code = report(control, model, control_args=arm["control_args"],
+                         model_args=arm["model_args"], criterion_path=arm["doc"])
     print("\n".join(lines))
     return code
 
