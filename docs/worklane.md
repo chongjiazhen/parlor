@@ -98,6 +98,12 @@ unreachable. Prose instructs judgment; it cannot enforce. What holds is the
 accept chain - so a `constrained` row's landmine belongs in the acceptance
 command wherever it can be expressed as one.
 
+The one landmine that IS mechanical is already a script: `scripts/testfloor.py`
+collects a test file and fails when the count sits below a floor, because two
+workers reached green by deleting tests and the second had the floor named in its
+own prompt. It is tracked, so it materialises inside every worktree and belongs
+at the FRONT of an accept chain: `py -3 scripts/testfloor.py <path> <n> && <suite>`.
+
 ## The batch
 
 Plans are written in the launcher's own sprint-plan format - one `### Slot`
