@@ -45,6 +45,22 @@ class LeaksOwnTruth(ChangelingReferee):
                 f"({self.theme.side_names[card.side]}).")
 
 
+class RefreshesOwnStaleReveal(ChangelingReferee):
+    """The self-leak in the THIRD person: a referee that restates a seat's own
+    night reveal as dawn truth instead of as history.
+
+    The plausible bug, not a contrived one - ``_knowledge_line`` already writes
+    "Seat 4 held the X." into seat 4's own render, because ``TAKE`` and ``WAKE``
+    record a ``Knowledge`` about the acting seat itself. Refreshing that label to
+    current truth is a one-word edit and leaks the seat's dawn card back to it.
+    """
+
+    def _knowledge_line(self, k):
+        if k.label != "switched" and k.seat >= 0 and not k.label.startswith("fellow-"):
+            return "  - " + self.reveal_forms(k.seat, self.holds(k.seat).key)[0]
+        return super()._knowledge_line(k)
+
+
 class LeaksAnotherSeat(ChangelingReferee):
     """A referee that names a seat's dawn card in a reveal nobody was entitled to."""
 
@@ -256,6 +272,49 @@ class TestGateOne(unittest.TestCase):
         self.assertTrue(caught, "a referee rendering dawn truth passed the audit")
         for seat in leaky.night.diverged():
             self.assertIn(seat, caught)
+
+    def test_the_audit_catches_a_self_leak_in_the_third_person(self):
+        """The first scan used to exclude the viewer, so a leak ABOUT a seat written
+        INTO that seat's own render had no scan looking for it. Measured when the
+        exclusion was there: 470 leaks over 15000 seat-games, none caught."""
+        caught = 0
+        for seed in range(200):
+            leaky = RefreshesOwnStaleReveal.new(5, seed=seed)
+            for seat, leaks in leaky.audit_all().items():
+                if any(s == seat for s, _ in leaks):
+                    caught += 1
+        self.assertTrue(caught, "a refreshed self-reveal passed the audit")
+
+    def test_the_honest_referee_is_silent_under_the_same_scan(self):
+        """The other half of the mutation check: the scan that catches the mutant
+        above must not fire on the shipping renderer, or it is noise rather than a
+        gate. `test_no_leak_in_any_seat_across_many_deals` sweeps this too; this
+        names the self case so a regression says which half broke."""
+        for seed in range(200):
+            ref = ChangelingReferee.new(5, seed=seed)
+            for seat in range(ref.n):
+                self.assertEqual(
+                    [t for s, t in ref.audit(seat) if s == seat], [],
+                    f"seed {seed} seat {seat} reported itself")
+
+    def test_a_seat_still_holding_what_it_was_dealt_is_not_a_self_leak(self):
+        """The state the second scan's ``dealt.key != held.key`` guard excludes, and
+        the reason it is not a bypass: with the dealt and dawn cards the same card,
+        a referee rendering the deal and one rendering dawn truth write the same
+        bytes, so nothing distinguishes them and there is nothing to catch."""
+        found = 0
+        for seed in range(400):
+            ref = ChangelingReferee.new(5, seed=seed)
+            leaky = LeaksOwnTruth.new(5, seed=seed)
+            for seat in range(ref.n):
+                if seat in ref.entitled_seats(seat):
+                    continue
+                if ref.night.dealt[seat].key != ref.holds(seat).key:
+                    continue
+                found += 1
+                self.assertEqual(ref.self_line(seat), leaky.self_line(seat))
+                self.assertEqual(ref.audit(seat), [])
+        self.assertTrue(found, "no diverged seat held its own deal in 400 games")
 
     def test_the_audit_catches_an_unentitled_reveal_about_another_seat(self):
         leaky = LeaksAnotherSeat.new(5, seed=7)

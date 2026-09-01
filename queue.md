@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S17, S23, S29-S32 and S34-S36 today.
+and annotated slice is `docs/slices.md` - S1-S17, S23, S29-S36 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -89,7 +89,6 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
-| **S33** | **Changeling self-leak rename.** `AGENTS.md` says a colliding term is RENAMED, not guarded around. Model-facing and RE-BASELINES S5, so it lands before S18 freezes a baseline on top of it. | judgment | codex | none | the term renamed, `find_leaks` left naive, and S5's baseline re-taken |
 | **S18** | **Waker deck campaign design.** Freeze deck, score, seeds, control and criterion for post-S14 changeling evidence. | judgment | codex | no changeling arm in flight | committed criterion and tracked recipe; no record launched |
 | **S19** | **Waker deck campaign.** Run S18's frozen control/model arms and render the verdict. | judgment | codex | S18 criterion and recipe committed | records, transcript, verdict and both fallback rates |
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
@@ -133,12 +132,6 @@ Instrument and integrity - the six below came out of a 2026-09-01 review of
       Japanese, Korean, Cyrillic - matches nothing and reports 0/N silently.
       `_says` at least falls back to a substring that always matches. Only
       `1984-cn` exercises the branch today, so no recorded number moves yet.
-- [ ] **The changeling self-leak audit gained a conditional bypass.**
-      `games/changeling/referee.py:506`'s `and dealt.key != held.key` switches the
-      check off in a reachable state - 129 of 15000 seat-games measured, e.g. seed
-      17 seat 0, dealt and held `swapper`, believes `pack`. `AGENTS.md` says a
-      colliding term gets RENAMED, not guarded around, and no test covers the
-      bypassed state. A rename is model-facing and **re-baselines S5**.
 - [ ] **`games/changeling/referee.py:79` opens a transcript handle in
       `__post_init__` that only `demo.py` reliably closes.** On Windows an open
       handle blocks deletion, so an assertion firing inside the sidecar test masks

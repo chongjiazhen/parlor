@@ -839,10 +839,31 @@ convenient:
   byte-identical for every seat. A string that is the same for all seats carries no
   information about any seat. A test asserts the invariance; the moment a seat fact
   is interpolated into it, that assertion is what catches it.
-- **A seat's own card is audited against its own line only.** `self_line` is the
-  only place the referee asserts anything about a seat to that seat, so it is the
-  only place a self-leak can live. Auditing a seat's own term against its whole
-  context would fire every time a wolf is told about its partner.
+- **A seat's own card is audited in both persons, at the scope each phrasing can
+  reach.** The referee addresses a seat in the second person about itself and in the
+  third person about everyone, so a self-leak has two shapes. The second-person form
+  is `self_reveal_forms` against `self_line`, which is the only place the referee
+  asserts anything about a seat to that seat in that voice. The third-person form is
+  the seat's ordinary `reveal_forms` association against its whole context, with
+  `entitled_seats` - which adds the viewer exactly when belief and truth agree -
+  deciding whether it may appear.
+
+  **The third-person half was missing until 2026-09-02**, and it was a false
+  negative rather than a scope: the first scan excluded the viewer outright. But
+  `TAKE` and `WAKE` record a `Knowledge` about the acting seat ITSELF, so
+  `_knowledge_line` writes "Seat 4 held the X." into seat 4's own render - correctly,
+  as history. A referee that refreshed that label to dawn truth would leak the seat's
+  card back to it in exactly the phrasing the scan was already searching for, about
+  the one seat it was not searching. Measured against that mutant: **470 leaks over
+  15000 seat-games, none caught; 0 false positives on the honest renderer over the
+  same 15000.** `test_referee` carries both halves.
+
+- **`dealt.key != held.key` on the second-person scan is not a bypass.** It reads
+  like one, and was filed as one. When the dealt and dawn cards are the same card, a
+  referee rendering the deal and one rendering dawn truth emit byte-identical lines -
+  measured, 129 of 15000 seat-games, identical in all 129. There is no leak to
+  detect there, and the only thing the scan could report is the honest deal. A
+  test covers the state rather than a comment claiming it.
 
 ## Themes are display-only
 

@@ -501,18 +501,40 @@ class ChangelingReferee:
         its whole context would report a leak every time a spotter was told about
         the OTHER wolf, which is a reveal it is entitled to.
 
+        **This seat's own card in the THIRD person, against everything too.** The
+        first scan used to exclude the viewer outright, and that was a false
+        negative rather than a scope: ``entitled_knowledge`` records
+        ``Knowledge(seat, ...)`` about the viewer ITSELF at ``TAKE`` and at ``WAKE``
+        (``night.py``), so ``_knowledge_line`` can write "Seat 4 held the X." into
+        seat 4's own render. Historical, and therefore fine - until a referee
+        refreshes such a reveal to dawn truth, which is a self-leak wearing the
+        third-person phrasing that scan was already searching for. Measured against
+        a mutant that does exactly that: **470 leaks over 15000 seat-games, none of
+        them caught**, because the one seat the leak was about was the one seat
+        excluded. The viewer is an ordinary seat here now, and ``entitled_seats``
+        - which already adds the viewer exactly when belief and truth agree - is
+        what keeps the honest referee silent. Measured: 0 false positives over the
+        same 15000.
+
         Both halves stay naive substring matching, per the repo invariant. What
-        changed is where each one looks, and the narrowing is argued rather than
-        convenient: ``self_line`` is the only place the referee asserts anything
-        about this seat to this seat, so it is the only place a self-leak can live.
+        differs is the phrasing each searches for, and that is the reason there are
+        two: the referee addresses a seat in the second person about itself and in
+        the third person about everyone, so a self-leak has two shapes and one scan
+        cannot hold both terms at both scopes.
         """
-        others = {s: t for s, t in self.secret_terms().items() if s != viewer}
         leaks = find_leaks(
             self.seat_lines(viewer, include_speech=False),
-            others,
+            self.secret_terms(),
             self.entitled_seats(viewer),
             viewer,
+            self_is_secret=True,
         )
+        # ``dealt.key != held.key`` is not a bypass, though it reads as one. When
+        # the dealt and dawn cards are the SAME card, a referee rendering the deal
+        # and one rendering dawn truth emit byte-identical lines - measured, 129 of
+        # 15000 seat-games, identical in all 129 - so there is no leak to detect and
+        # the only thing the check could report is the honest deal. `test_referee`
+        # covers that state rather than leaving it to this comment.
         dealt = self.night.dealt[viewer]
         held = self.holds(viewer)
         if (viewer not in self.entitled_seats(viewer)
