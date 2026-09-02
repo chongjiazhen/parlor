@@ -385,3 +385,39 @@ rule touches a lone wolf on any deck, so it too must run before the merge or be
 re-barred after (a CPU job, 5376 random votes, cheap). Decided: re-bar after the
 merge, since the deck's question does not depend on which rules the control used
 and a fresh bar is minutes of CPU.
+
+## Belfry names its source, 2026-09-02
+
+Decided by the operator; the row is verbatim below. The edit landed the same
+turn: `games/belfry/RULES.md:11` now opens "Modelled on Blood on the Clocktower,
+in which a referee holds a board of tokens, wakes players one at a time, and is
+allowed to choose", matching the form the other three rungs already use. The
+descriptive clause was kept because it says WHY the game was picked, which the
+bare title does not. **The de-branding question this settles is the general one:
+a nominative "Modelled on <title>" line STAYS.** Naming the game is descriptive
+use, mechanics are not copyrightable, and stripping the title makes the rung's
+gate strata and chance baseline uncheckable against what they reproduce - the
+same argument that kept the benchmark citations in `docs/reference-policies.md`.
+The boundary that does the work is unchanged and already held: no brand reaches
+a directory, module, class, role key or card key.
+
+One fact found while deciding it and not in the row: `README.md:124` had named
+the game since before the row was written, so the tree's front page named what
+the rung's own canonical rules file circumlocuted.
+
+- [ ] **Belfry is the only rung that does not name the game it is modelled on,
+      and nothing says why.** `games/cabal/RULES.md:14`, `games/changeling/RULES.md:10`
+      and `games/quorum/RULES.md:11` each open "Modelled on <title>. Nominative
+      reference only", the form the tree-describes-parlor invariant licenses.
+      `games/belfry/RULES.md:11` instead describes a "town-square family" - a
+      circumlocution that identifies the same game to any reader who knows it,
+      while `docs/` names that game outright in five places. So the caution buys
+      nothing and the asymmetry reads as an unstated policy. Decide it either way
+      and write it down: name it like the other three, or state the rule that
+      exempts it. **Checked 2026-09-02 and NOT a finding: no brand reaches a
+      canonical key.** The one code hit, `games/changeling/roles.py:331` mapping
+      `pack` to a folklore word, is a SKIN value on the werewolf face and the key
+      stays functional. That line is the one worth guarding - a brand migrating
+      from prose into a module, class, role or card key - and unlike the gate's
+      other patterns these names are already public in the tree, so a literal
+      check would ship nothing a clone does not already hold.

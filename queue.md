@@ -351,23 +351,6 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       that outlived the work around it. Argument, not code; costs no card. The
       off-repo half stays off-repo - `CLAUDE.local.md` has the path, and naming it
       here is the signpost the hygiene invariant forbids.
-- [ ] **Belfry is the only rung that does not name the game it is modelled on,
-      and nothing says why.** `games/cabal/RULES.md:14`, `games/changeling/RULES.md:10`
-      and `games/quorum/RULES.md:11` each open "Modelled on <title>. Nominative
-      reference only", the form the tree-describes-parlor invariant licenses.
-      `games/belfry/RULES.md:11` instead describes a "town-square family" - a
-      circumlocution that identifies the same game to any reader who knows it,
-      while `docs/` names that game outright in five places. So the caution buys
-      nothing and the asymmetry reads as an unstated policy. Decide it either way
-      and write it down: name it like the other three, or state the rule that
-      exempts it. **Checked 2026-09-02 and NOT a finding: no brand reaches a
-      canonical key.** The one code hit, `games/changeling/roles.py:331` mapping
-      `pack` to a folklore word, is a SKIN value on the werewolf face and the key
-      stays functional. That line is the one worth guarding - a brand migrating
-      from prose into a module, class, role or card key - and unlike the gate's
-      other patterns these names are already public in the tree, so a literal
-      check would ship nothing a clone does not already hold.
-
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`

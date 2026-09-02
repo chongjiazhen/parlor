@@ -8,8 +8,8 @@ three.
 Rules live here, next to the game. `core/` is what a fourth game would inherit;
 `games/belfry/` is what is about this one.
 
-Modelled on the town-square family of games in which a referee holds a board of
-tokens, wakes players one at a time, and is allowed to choose. Nominative reference
+Modelled on Blood on the Clocktower, in which a referee holds a board of tokens,
+wakes players one at a time, and is allowed to choose. Nominative reference
 only - no role name, ability text or art from any published game appears in the
 code, and the canonical layer (directory, module, class, role keys) uses functional
 keys and a house name, the way the Avalon-shaped rung is called `cabal`. The role
