@@ -104,6 +104,10 @@ partly true is worse than none.
   villager accuracy. Direction not pre-committed. Arithmetic
   `eval.skin_pair_verdict` (Newcombe on the difference, paired game bootstrap
   beside it). LAUNCHED 2026-09-02.
+- `docs/changeling-rounds-pair-criterion.md` - S22: `--rounds 2` vs `--rounds 3`
+  on `folk`, same seeds as the name-form pair. Arithmetic
+  `eval.rounds_pair_verdict`, which also pins every setting to the record's own
+  `args`. Ready to launch, UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

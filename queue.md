@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S19, S23, S29-S36 today.
+and annotated slice is `docs/slices.md` - S1-S19, S22, S23, S29-S36 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -91,7 +91,6 @@ should launch first and spend the wait on a CPU slice.
 |---|---|---|---|---|---|
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
-| **S22** | **Changeling discussion-length arm.** Bind one extra discussion-round comparison without changing deck, wording or scorer. | judgment | codex | a post-S14 baseline/criterion exists | paired recipe and criterion, ready to launch |
 | **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | judgment | codex | no changeling arm in flight | criterion, exact payload delta and audit tests |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
