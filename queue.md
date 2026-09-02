@@ -285,6 +285,17 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       Serial local lane; `--no-thinking` is a property of the rung, not the bench.
       **Entry condition: no arm in flight** - it queues behind every frozen arm on
       the merge list, all of which pair against a control that expires.
+      **The gate is the source-rules MERGE, not an idle card** (2026-09-02): every
+      frozen arm pairs against `cl-rounds2.json`, a control recorded on
+      `qwen36-35b-a3b-iq3`, so a re-arm before those run voids them - and the merge
+      re-baselines the rung anyway, so a second model's control is the only moment
+      it is marginal cost rather than a new debt. **One candidate is already
+      measured, and the row read as if none were:** `rocinante-x-12b-heretic-q4` is
+      Rocinante-X-12B, and its cabal reading is the bench's own question answered
+      apart - prose good enough to fabricate a prior conversation with no prompt
+      escalation, vote discrimination -0.2% at chance (`docs/measurements.md`
+      2026-08-25 and §Backend notes). One point, on the other rung and under the
+      superseded vote rule, so it sharpens the prior and does not spend the bench.
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`
