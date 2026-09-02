@@ -117,6 +117,23 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 re-baselines the rung, or its pair is void. Which arm earns its ~7 h of card
 first is the operator's ranking; the criteria are frozen and wait.
 
+**GPU order, decided 2026-09-02** (reasoning in `docs/decisions.md`):
+mixed-pack (`slice/changeling-mixed`, ~2 h) first - cheapest, only arm that
+shows the heuristic village's 77.36% against a random pack collapsing
+against a live one. Then briefing (`slice/fanout-s21`, ~5 h) - tests
+`AGENTS.md`'s own standing-context position; either sign changes a written
+invariant. Then notebook (`slice/changeling-notebook`, ~5 h) - largest
+prompt change, a prediction recorded in advance, second point on briefing's
+axis. **Cut after #3**: run those three (~12 h), then merge source-rules -
+owed a fresh baseline anyway, so deferring turn-taking (`slice/fanout-s27`,
+`slice/fanout-simul` - shares s27's recipe, decide before launch whether it
+rides alone) and phrasing (`slice/fanout-replies` - primary stat is refusal
+rate, near 0%, lowest information per hour) costs a criterion rewrite each
+against the post-merge baseline, not an extra control run. mixed-village
+(arm 2 of mixed-pack's recipe, ~3 h) rides along unless cut. Kindred
+re-bars after the merge - its bar does not depend on the control's rules,
+a fresh one is minutes of CPU.
+
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
 moves: merge source-rules FIRST, then rebase simul onto it and re-run its 20-seed

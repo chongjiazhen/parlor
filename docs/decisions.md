@@ -348,3 +348,40 @@ about the new baseline rather than an ask:
   lone wolf peeks - so the blind stratum on the re-baselined chance floor is
   SMALLER, not larger. A scorer expecting the old stratum size would read the
   first post-merge control as short.
+
+
+## GPU order for the frozen changeling arms, 2026-09-02
+
+Six frozen rows hold seven unlaunched changeling arms, every one pairing against
+S22's `cl-rounds2.json`, so every one must merge and RUN before the source-rules
+merge re-baselines the rung. Running all seven first costs ~30 h of card behind a
+chain that already has ~20 h left. The operator asked for the ranking.
+
+Costs are read off the skin arm of the same day: 200 games of a 5-live-seat arm
+took 18273 s (~5.1 h). Live seats per game scale the bill: mixed-pack has 2,
+mixed-village has 3.
+
+| # | arm | branch | cost | why here |
+|---|---|---|---|---|
+| 1 | mixed-pack | `slice/changeling-mixed` | ~2 h | Cheapest by far, and the only arm that can show the all-heuristic village's 77.36% against a random pack collapsing against a live pack. The heuristic branch's landed docs mean nothing until this reads. A single landed arm is a valid read under its criterion. |
+| 2 | briefing | `slice/fanout-s21` | ~5 h | Tests the repo's own standing position (`AGENTS.md`: the payload is a budget, the per-phase drip is deliberate). Absence is the novel arm - every build reads from source states full rules and none ablates it. Direction is genuinely open: the `_night_against_the_table` inversion says more context can hurt. Either sign changes a written invariant, the highest information per hour on the shelf. |
+| 3 | notebook | `slice/changeling-notebook` | ~5 h | The largest prompt change here - memory across rounds - with a falsifiable prediction recorded in advance (moves deduction more than win rate). Paired with briefing it gives two points on the "does standing context help at all" axis, against the same control, same seeds. |
+| 4 | turns random-active | `slice/fanout-s27` | ~5 h | A mechanism arm, not a context arm: it prices seats going unasked. Plausible small effect, no invariant riding on it. Worth running, not worth running before the merge. |
+| 5 | turns simultaneous | `slice/fanout-simul` | ~5 h | Its own criterion says the effect can only live in round 1. Shares one recipe with #4 (two arms serial), so it comes with #4 or the recipe is edited before launch. |
+| 6 | phrasing | `slice/fanout-replies` | ~5 h | Its primary statistic is the refusal rate, and the live arms on this model run at ~0% fallback (skin arm of the same day: 0/15 on most games). A rate at zero cannot fall, so the primary read is foreclosed unless the positive arm makes things worse. The accuracy read is secondary and seventeen strings move at once. Lowest expected information per hour. |
+| 7 | mixed-village | (arm 2 of #1's recipe) | ~3 h | Live village vs scripted pack: can a model read a scripted tell. Secondary by its own criterion; it runs automatically after #1 unless the card is cut. |
+
+**The cut: run #1-#3 before the source-rules merge (~12 h), then merge.** Not
+because #4-#7 are worthless, but because the merge is owed a fresh two-round
+`llm` baseline under the new rules anyway ("merge and re-measure the bar", the
+source-rules row). That post-merge baseline is the control the deferred arms
+need. So deferring them costs a criterion rewrite each (they are unlaunched, so
+editable) and no extra control run, while running them first costs ~20 h of card
+and holds the merge.
+
+**Kindred is the one thing this ranking does not settle.** Its bar
+(`kin-chance.json`, 25.39%) was measured under the current rules and the peek
+rule touches a lone wolf on any deck, so it too must run before the merge or be
+re-barred after (a CPU job, 5376 random votes, cheap). Decided: re-bar after the
+merge, since the deck's question does not depend on which rules the control used
+and a fresh bar is minutes of CPU.
