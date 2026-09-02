@@ -12,3 +12,7 @@
   anything suggests a run may still be live.
 - **Commit at logical batch points without asking** - standing authorization for
   this repo, 2026-08-27. Push stays ask-first.
+- **Guard or defensive branch -> `tdd` skill, test before code.** The red run
+  against the missing guard is the mutation check, with no restore or bytecode
+  trap; a guard test green on its first run was written after the guard and is
+  the vacuous tell.
