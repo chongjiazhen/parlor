@@ -210,13 +210,12 @@ Rules and setup changes, each of which re-baselines what runs under it:
       the measurement, which was always the cost. **Worth it for what they
       degrade about INFORMATION, never as a sampling fix** - a bigger table makes
       the thin denominator worse. Blocked only by cabal having no GPU program.
-- [ ] **Seat `kindred` - deck B, and it is the half still on paper.** The waker
-      half of this row is DONE (S18/S19: `SETUP_6_WAKER` registered, run, read).
-      Deck B needs `require_seated_kin`, because on a free deal the pair fails to
-      form more often than it forms - lone 47.1% against pair 45.2%, and the
-      constraint lifts the pair to 86.0%. Design is `games/changeling/RULES.md`
-      §The decks that would seat them; the precedent is `require_seated_pack`.
-      A new deck is a NEW criterion and re-baselines everything under it.
+- [ ] **Run `kindred` deck B - BUILT 2026-09-02, NEVER RUN.** `SETUP_7_KIN` with
+      `require_seated_kin` (both seated or both centre; pair 87.6%, 1.07 retries
+      a game, measured on the code), selectable as `--deck SETUP_7_KIN`. Shipped
+      decks deal byte-identically to before. What is left is the criterion: wolf
+      density is 2/7, so the accusation chance bar must be re-measured with
+      `--arm random --seats 7` first. A new deck re-baselines everything under it.
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** Public-domain folk-game vocabulary (Mafia,
       Davidoff 1986), no branding question, on a rung already built. **This is
