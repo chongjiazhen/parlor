@@ -176,6 +176,7 @@ def test_s2_is_a_five_seat_record_so_its_published_bar_cannot_move():
     is published; widening arithmetic whose numbers are published is a
     re-baseline unless the numbers are shown not to move."""
     from eval.s5_verdict import S2, load, seats_in
+    records_gate.demand(S2, f"{S2}.jsonl")
     _, games = load(S2)
     assert games, "S2 record missing - this test guards a published number"
     assert {seats_in(g) for g in games} == {5}
