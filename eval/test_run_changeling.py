@@ -22,7 +22,8 @@ import eval.run_cabal
 from core.runlog import record_paths
 from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
-from games.changeling.referee import ChangelingReferee
+from games.changeling.referee import (TURNS_FIXED, TURNS_RANDOM_ACTIVE,
+                                      ChangelingReferee)
 from games.changeling.roles import SETUPS
 
 
@@ -30,7 +31,7 @@ def make_args(**kw):
     base = dict(arm="random", backend=None, model="none", rounds=1, retries=0,
                 register="character", temperature=0.8, timeout=5.0,
                 max_tokens=512, theme=None, seed=1000, games=1, out=None,
-                seats=5)
+                seats=5, turns=TURNS_FIXED)
     base.update(kw)
     return argparse.Namespace(**base)
 
@@ -38,6 +39,19 @@ def make_args(**kw):
 def random_records(n: int, seed: int = 1000):
     args = make_args(seed=seed)
     return [one_game(i, args) for i in range(n)]
+
+
+class TestTheTurnModeReachesTheRecord(unittest.TestCase):
+    """`--turns` is off by default and has to be readable off a landed record:
+    a scorer that assumed the mode would read two different games as one arm."""
+
+    def test_the_default_is_the_shipped_order(self):
+        self.assertEqual(one_game(0, make_args()).turns, TURNS_FIXED)
+
+    def test_the_flag_reaches_the_record(self):
+        rec = one_game(0, make_args(turns=TURNS_RANDOM_ACTIVE))
+        self.assertEqual(rec.turns, TURNS_RANDOM_ACTIVE)
+        self.assertIsNone(rec.error)
 
 
 class TestRandomArmScoresAtChance(unittest.TestCase):

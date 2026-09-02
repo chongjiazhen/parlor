@@ -115,6 +115,12 @@ partly true is worse than none.
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
   `eval.gate2_pair_verdict`. UNLAUNCHED.
+- `docs/changeling-turns-criterion.md` - S27: `--turns fixed` vs
+  `--turns random-active` on `folk`, reusing S22's two-round record as arm 1. A
+  round becomes a budget of n turns, the floor is drawn each turn from the game
+  seed's own stream, and the seat on it may listen instead of speaking. Arithmetic
+  `eval.turns_pair_verdict`; the criterion names the exact two strings that move
+  and voids the read if the source-rules merge lands first. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

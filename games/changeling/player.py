@@ -25,7 +25,9 @@ from core import callcost
 from core.backends import Backend
 from core.replies import ParseError, parse_index, read_reply
 from games.changeling.audit import assert_no_leak
-from games.changeling.referee import ChangelingReferee, IllegalAction, Phase
+from games.changeling.referee import (TURNS_FIXED, TURNS_RANDOM_ACTIVE,
+                                      ChangelingReferee, IllegalAction,
+                                      Phase)
 from games.changeling.roles import Side
 
 
@@ -42,8 +44,14 @@ def parse_action(reply: str, ref: ChangelingReferee, seat: int) -> dict:
     obj = read_reply(reply, ACTION_KEYS)
     out = {"think": str(obj.get("think", ""))[:400]}
     if ref.phase is Phase.DISCUSS:
-        said = " ".join(str(obj.get("say", "")).split())
-        if not said:
+        if "say" not in obj:
+            # A MISSING field is a malformed reply in either mode. Reading it as
+            # the idle action would launder a parse failure into a legal move and
+            # out of the fallback count, which is the one number every other
+            # number in this repo ships beside.
+            raise ParseError('missing "say"')
+        said = " ".join(str(obj["say"]).split())
+        if not said and ref.turn_mode != TURNS_RANDOM_ACTIVE:
             raise ParseError('missing "say" (an empty utterance is not a move)')
         out["say"] = said
     elif ref.phase is Phase.VOTE:
@@ -64,12 +72,18 @@ class RandomPolicy:
 
     def act(self, ref: ChangelingReferee, seat: int) -> dict:
         if ref.phase is Phase.DISCUSS:
-            return {"say": self.rng.choice([
+            lines = [
                 "I slept badly and I have nothing yet.",
                 f"Seat {self.rng.choice(ref.legal_votes(seat))} is quiet.",
                 "I am what I went to sleep as, for whatever that is worth.",
                 "Someone here woke up and moved. Say who.",
-            ])}
+            ]
+            # The control has to be able to play every legal move, or the arm's
+            # own baseline is a different game from the arm. Appended rather than
+            # inserted so the draws under `fixed` are the ones they always were.
+            if ref.turn_mode == TURNS_RANDOM_ACTIVE:
+                lines.append("")
+            return {"say": self.rng.choice(lines)}
         if ref.phase is Phase.VOTE:
             return {"vote": self.rng.choice(ref.legal_votes(seat))}
         raise IllegalAction(f"no action in phase {ref.phase.value}")
@@ -224,6 +238,11 @@ class GameRecord:
     #: played before 2026-09-02 under ``plurality`` - a flat tally accused every
     #: seat - and any instrument replaying votes must read it, never assume it.
     vote_rule: str = "plurality-min2"
+    #: The turn order the game was played under, one of ``referee.TURN_MODES``.
+    #: Records without this key were played before 2026-09-02 under ``fixed``, and
+    #: an instrument comparing two records must read it rather than assume it: the
+    #: modes differ in one rendered line and in what a discussion turn can be.
+    turns: str = TURNS_FIXED
     #: Dawn holdings and beliefs, side by side. Both, because a record that kept
     #: only one of them could not answer the question this game exists to ask.
     truth: dict[int, str] = field(default_factory=dict)
@@ -288,7 +307,7 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
     by default and stays that way: the property this arena exists to prove must not
     be something a caller can forget to switch on.
     """
-    rec = GameRecord(theme=ref.theme.name, uat=uat)
+    rec = GameRecord(theme=ref.theme.name, uat=uat, turns=ref.turn_mode)
     turn = 0
     try:
         if audit:
@@ -298,14 +317,23 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
                 if audit:
                     assert_no_leak(ref)
                 action = policies[seat].act(ref, seat)
-                # What `speak` PUBLISHED, not what the policy proposed. speak()
-                # normalises whitespace and truncates to MAX_UTTERANCE_CHARS, so
-                # storing the raw string left the record holding text no seat ever
-                # saw - anything reading `utterances` would then be analysing a
-                # different corpus from the one the models were shown.
-                rec.utterances.append(ref.speak(seat, action["say"]))
+                if action["say"]:
+                    # What `speak` PUBLISHED, not what the policy proposed. speak()
+                    # normalises whitespace and truncates to MAX_UTTERANCE_CHARS, so
+                    # storing the raw string left the record holding text no seat
+                    # ever saw - anything reading `utterances` would then be
+                    # analysing a different corpus from the one the models were
+                    # shown.
+                    rec.utterances.append(ref.speak(seat, action["say"]))
+                    played = "speaks"
+                else:
+                    # Legal only under `random-active`; the referee refuses it
+                    # anywhere else. Recorded as a decision like any other, because
+                    # it cost a model call and it spent a turn.
+                    ref.listen(seat)
+                    played = "listens"
                 _record_decision(rec, policies[seat], turn, seat, "discuss",
-                                 "speaks", action)
+                                 played, action)
                 turn += 1
             ref.close_round()
 

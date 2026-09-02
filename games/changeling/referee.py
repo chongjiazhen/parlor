@@ -56,6 +56,18 @@ MAX_UTTERANCE_CHARS = 280
 MAX_RECORD_LINES = 60
 
 
+#: Turn-taking modes. `fixed` is the shipped order every recorded number was
+#: played under - seat 0 to seat n-1, every seat asked once per round.
+TURNS_FIXED = "fixed"
+#: `random-active` makes a round a BUDGET of `n` speaking turns and draws the seat
+#: on the clock afresh each turn, with replacement. The decision count per round is
+#: therefore unchanged, which is the whole reason it pairs against `fixed`: one
+#: variable moves and the GPU bill does not. The seat on the clock may also LISTEN,
+#: which publishes nothing and spends its own turn and nobody else's.
+TURNS_RANDOM_ACTIVE = "random-active"
+TURN_MODES = (TURNS_FIXED, TURNS_RANDOM_ACTIVE)
+
+
 @dataclass
 class ChangelingReferee:
     setup: Setup
@@ -65,6 +77,16 @@ class ChangelingReferee:
     phase: Phase = Phase.DISCUSS
     round_index: int = 0
     votes: dict[int, int] = field(default_factory=dict)
+    #: Which turn-taking mode this game is played under; one of ``TURN_MODES``.
+    turn_mode: str = TURNS_FIXED
+    #: The seed the turn schedule derives from. Its OWN stream, never the deal's:
+    #: ``resolve_night`` consumes an unknown number of draws, so a shared stream
+    #: would make the turn mode move the deal and the pair would not be a pair.
+    turn_seed: int | None = None
+    #: Position within the current round's schedule. Advanced by ``speak`` and by
+    #: ``listen``, reset by ``close_round``. Read by ``acting_seats``, which is what
+    #: makes the gate #1 audit see exactly the seat that is about to be asked.
+    turn_index: int = 0
     accused: tuple[int, ...] = ()
     winner: str | None = None
     reason: str = ""
@@ -75,8 +97,23 @@ class ChangelingReferee:
     #: Optional observer-only sidecar. Never read by any render or policy path.
     transcript_path: str | Path | None = field(default=None, repr=False)
     _transcript_fh: TextIO | None = field(default=None, init=False, repr=False)
+    _turn_rng: random.Random | None = field(default=None, init=False, repr=False)
+    #: round index -> that round's schedule. CACHED rather than redrawn, because
+    #: ``acting_seats`` reads the schedule on every audit and a redraw there would
+    #: audit one seat and ask another.
+    _schedules: dict[int, tuple[int, ...]] = field(default_factory=dict,
+                                                   init=False, repr=False)
 
     def __post_init__(self) -> None:
+        if self.turn_mode not in TURN_MODES:
+            raise ValueError(
+                f"unknown turn mode {self.turn_mode!r}; choose from "
+                f"{list(TURN_MODES)}")
+        # A str seed is hashed by `random.seed` itself (bytes -> int), so this is
+        # reproducible across processes without depending on PYTHONHASHSEED.
+        self._turn_rng = random.Random(
+            None if self.turn_seed is None
+            else f"changeling-turns:{self.turn_seed}")
         if self.transcript_path is not None:
             self._transcript_fh = open(self.transcript_path, "a", encoding="utf-8")
 
@@ -113,6 +150,7 @@ class ChangelingReferee:
     def new(cls, n: int = 5, seed: int | None = None,
             theme: Theme = DEFAULT_THEME, discussion_rounds: int = 2,
             choose=None, dealt=None, centre=None,
+            turn_mode: str = TURNS_FIXED,
             transcript_path: str | Path | None = None) -> "ChangelingReferee":
         """``dealt``/``centre`` pin the deal, forwarded to ``resolve_night``. They
         exist so a caller that needs a NAMED deal still comes through this one
@@ -123,6 +161,7 @@ class ChangelingReferee:
         night = resolve_night(setup, rng, choose, dealt=dealt, centre=centre)
         ref = cls(setup=setup, night=night, theme=theme,
                   discussion_rounds=discussion_rounds,
+                  turn_mode=turn_mode, turn_seed=seed,
                   transcript_path=transcript_path)
         for line in night.log:
             ref._log(line)
@@ -131,9 +170,21 @@ class ChangelingReferee:
         ref.public_events.append(
             ("event", "Night passes. At dawn everyone is at the table, and the "
                       "cards have had all night to move."))
-        ref.public_events.append(
-            ("event", f"Discussion opens: {discussion_rounds} round(s), seat 0 "
-                      f"first."))
+        # The ONE line in a seat's render that the turn mode moves. Under `fixed`
+        # it is byte-identical to what every recorded number was played under; a
+        # mode-neutral rewrite would have re-baselined the pair's own control.
+        # Under `random-active` it has to change: telling a seat "seat 0 first"
+        # while the referee draws the floor at random is a referee-written
+        # falsehood, which is a worse cost than the second changed line.
+        if turn_mode == TURNS_RANDOM_ACTIVE:
+            ref.public_events.append(
+                ("event", f"Discussion opens: {discussion_rounds} round(s) of "
+                          f"{setup.n} turns; each turn the floor goes to one "
+                          f"seat, drawn at random."))
+        else:
+            ref.public_events.append(
+                ("event", f"Discussion opens: {discussion_rounds} round(s), "
+                          f"seat 0 first."))
         return ref
 
     # ---- what a seat may see -------------------------------------------------
@@ -313,7 +364,12 @@ class ChangelingReferee:
         for the model like any other, and exactly the regression that would
         otherwise go unseen."""
         if self.phase is Phase.DISCUSS:
-            return tuple(range(self.n))
+            if self.turn_mode == TURNS_FIXED:
+                return tuple(range(self.n))
+            order = self.speaking_order()
+            if self.turn_index >= len(order):
+                return ()
+            return (order[self.turn_index],)
         if self.phase is Phase.VOTE:
             return tuple(s for s in range(self.n) if s not in self.votes)
         return ()
@@ -336,6 +392,18 @@ class ChangelingReferee:
         unattributed difference between this game's ask and `cabal`'s.
         """
         if self.phase is Phase.DISCUSS:
+            if self.turn_mode == TURNS_RANDOM_ACTIVE:
+                # The idle action, stated as a thing to DO rather than as a
+                # permission not to act, per docs/model-facing-text.md. The last
+                # clause is the rule the seat needs in order to price it: silence
+                # is not free, it spends the floor.
+                return ("The table looks to you. Speak, or listen this turn and "
+                        "let the floor pass on. Reply as one JSON object: "
+                        '{"think": "your private reasoning", '
+                        '"say": "what the table hears"}. '
+                        f"Keep `say` under {MAX_UTTERANCE_CHARS} characters; an "
+                        "empty `say` means you listen, the table hears nothing, "
+                        "and the turn is spent.")
             return ("Speak to the table. Reply as one JSON object: "
                     '{"think": "your private reasoning", '
                     '"say": "what the table hears"}. '
@@ -355,7 +423,31 @@ class ChangelingReferee:
     # ---- the day -------------------------------------------------------------
 
     def speaking_order(self) -> list[int]:
-        return list(range(self.n))
+        """The seats to be asked, in order, for the CURRENT round.
+
+        Under ``fixed`` this is every seat once. Under ``random-active`` it is
+        ``n`` draws WITH REPLACEMENT from the referee's own seeded stream: the
+        budget is turns, not seats, so a seat can hold the floor twice in a round
+        and another can go unasked. Drawn once per round and cached - the audit
+        calls this on every turn, and a redraw there would audit a different seat
+        from the one about to be asked.
+        """
+        if self.turn_mode == TURNS_FIXED:
+            return list(range(self.n))
+        schedule = self._schedules.get(self.round_index)
+        if schedule is None:
+            assert self._turn_rng is not None
+            schedule = tuple(self._turn_rng.randrange(self.n)
+                             for _ in range(self.n))
+            self._schedules[self.round_index] = schedule
+        return list(schedule)
+
+    def on_the_clock(self) -> int | None:
+        """The seat holding the floor, or ``None`` when the round is spent."""
+        order = self.speaking_order()
+        if self.turn_index >= len(order):
+            return None
+        return order[self.turn_index]
 
     def speak(self, seat: int, text: str) -> str:
         """Publish one utterance and RETURN what was published.
@@ -366,15 +458,46 @@ class ChangelingReferee:
         """
         if self.phase is not Phase.DISCUSS:
             raise IllegalAction(f"seat {seat} spoke during {self.phase.value}")
+        if self.turn_mode == TURNS_RANDOM_ACTIVE and self.on_the_clock() != seat:
+            # The floor is a rule under this mode, not a convention of the driver
+            # loop. Enforced here so a caller that iterates its own order gets a
+            # refusal rather than a game whose schedule silently is not the one
+            # the referee drew and the audit read.
+            raise IllegalAction(
+                f"seat {seat} spoke while the floor was with "
+                f"{self.on_the_clock()}")
         said = " ".join(text.split())[:MAX_UTTERANCE_CHARS]
         self.public_events.append(("speech", f"Seat {seat}: {said}"))
+        self.turn_index += 1
         return said
+
+    def listen(self, seat: int) -> None:
+        """The idle action: spend the floor and publish nothing.
+
+        It exists only under ``random-active``, and refusing it elsewhere is the
+        point rather than tidiness - under ``fixed`` every seat is asked once per
+        round, so a silent turn there would be a seat dropping out of the record
+        with no mode saying it could. Refused rather than coerced into an empty
+        utterance, per this module's contract: a coerced move hides an agent bug.
+        """
+        if self.turn_mode != TURNS_RANDOM_ACTIVE:
+            raise IllegalAction(
+                f"seat {seat} listened under {self.turn_mode} turn order, where "
+                "every seat is asked once a round")
+        if self.phase is not Phase.DISCUSS:
+            raise IllegalAction(f"seat {seat} listened during {self.phase.value}")
+        holder = self.on_the_clock()
+        if holder != seat:
+            raise IllegalAction(
+                f"seat {seat} listened while the floor was with {holder}")
+        self.turn_index += 1
 
     def close_round(self) -> None:
         """One full pass of the table is done."""
         if self.phase is not Phase.DISCUSS:
             raise IllegalAction("closed a discussion round outside discussion")
         self.round_index += 1
+        self.turn_index = 0
         if self.round_index >= self.discussion_rounds:
             self.phase = Phase.VOTE
             self.public_events.append(

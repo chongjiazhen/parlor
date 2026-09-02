@@ -42,7 +42,7 @@ from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import bootstrap_ci, wilson
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
-from games.changeling.referee import ChangelingReferee
+from games.changeling.referee import TURN_MODES, TURNS_FIXED, ChangelingReferee
 from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 
 #: Measured on this game at 5 seats with uniform random votes, n=4000, and on the
@@ -120,7 +120,8 @@ def one_game(index: int, args) -> GameRecord:
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
     ref = ChangelingReferee.new(args.seats, seed=seed, theme=theme,
-                                discussion_rounds=args.rounds)
+                                discussion_rounds=args.rounds,
+                                turn_mode=args.turns)
     try:
         return play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
@@ -413,6 +414,14 @@ def main() -> None:
                          "SETUP_5 every recorded number was played on, 6 is the "
                          "waker deck, 7 is the kindred deck and has never been "
                          "run. A deck change re-baselines everything.")
+    ap.add_argument("--turns", choices=list(TURN_MODES), default=TURNS_FIXED,
+                    help="who holds the floor in discussion. `fixed` is seat 0 "
+                         "to seat n-1, every seat asked once a round, and is "
+                         "what every recorded number was played under. "
+                         "`random-active` makes a round a budget of n turns, "
+                         "draws the seat on the clock afresh each turn, and "
+                         "offers it the choice to listen instead of speaking. "
+                         "A MEASURED change, off by default.")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
