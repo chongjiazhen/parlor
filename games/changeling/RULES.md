@@ -656,8 +656,9 @@ Clause by clause, including the two that needed care:
   and reading it as "the waker changes nothing" would be reading the wrong stratum.
   What the deck bought is in the criterion's table - a lower chance bar, fewer
   unwinnable games, and 10.3% `identity`-told-nothing contamination against
-  `SETUP_5`'s 18.7%. **Whether the waker seat itself votes better than the table is
-  the question this deck was built to ask, and it is still unasked.**
+  `SETUP_5`'s 18.7%. **Whether the waker seat itself votes better than the table was
+  the question this deck was built to ask, and it is ANSWERED below - 
+  against the like-for-like set, no.**
 
 **One interim look is disclosed.** At game 50 the blind stratum was inspected to
 check the criterion's power assumption; the gate statistic was printed in the same
@@ -666,6 +667,27 @@ stands - but this criterion spends no alpha, so the interim figure has no standi
 and is cited nowhere. Recorded rather than omitted, because an undisclosed look is
 exactly what group-sequential design exists to prevent, and the queue carries an
 open row saying that design must be built BEFORE a campaign rather than retrofitted.
+
+### The waker seat's own read - answered 2026-09-02, and the answer is "not shown"
+
+The criterion pre-registered this as an observation with no bar. It stays one, and
+the numbers are in `docs/measurements.md`. The finding in one line:
+
+**Against every other villager the waker is +8.37% [1.46%, 14.87%]; against the
+`identity` stratum alone it is +6.96% [-2.11%, 15.98%], which spans zero.**
+
+The first difference is close to tautological and should not be quoted on its own.
+The table it compares against includes blind villagers the night told NOTHING, so
+any seat holding information beats them - that measures having knowledge, not
+having knowledge about YOURSELF. The like-for-like set is the seats that also know
+a card, and against those this run shows nothing.
+
+That is the deck's own question, and the honest answer at 122 waker votes is **not
+shown**, not "no". One vote per game is the ceiling the criterion named before the
+run, and it is the binding constraint here rather than the effect being absent: the
+point estimate leans the right way throughout. A deck that seated two waker-class
+cards, or a longer arm, is what would settle it - and either is a NEW criterion,
+never a re-read of these records.
 
 ## The chance baseline, MEASURED (2026-08-26)
 

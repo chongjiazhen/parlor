@@ -348,6 +348,37 @@ waker is not blind - it is told what it holds - so its own vote leaves this
 denominator by construction. The split was pre-registered as an observation with no
 bar and stays one.
 
+**The waker seat's own read, 2026-09-02 - and the like-for-like comparison does
+NOT clear zero.** Pre-registered in the criterion as an observation with no bar,
+and it stays one. `py -3 -m eval.waker_verdict` prints it; the differences carry a
+game bootstrap, because two overlapping Wilson bands answer "could each rate equal
+some third value", which is not the question asked.
+
+| | rate | votes |
+|---|---|---|
+| waker seat | 54.10% [45.27%, 62.68%] | 122 |
+| every other villager | 45.73% [41.09%, 50.44%] | 433 |
+| ...of those, `identity` only | 47.14% [39.06%, 55.38%] | 140 |
+| **difference vs the whole table** | **+8.37% [1.46%, 14.87%]** - clears zero | |
+| **difference vs `identity` only** | **+6.96% [-2.11%, 15.98%]** - SPANS zero | |
+
+**Read the second difference, not the first.** The whole table includes blind
+villagers the night told nothing, so a seat that knows anything beats them; that
+comparison is close to tautological on this deck. The honest set is the `identity`
+stratum - seats that also know a card - and against those the waker's advantage
+does not clear zero. **So this run carries no evidence that knowing your OWN card
+helps beyond knowing a card at all**, which is the claim the deck was built to
+test. The point estimate leans the right way and the interval will not support it
+at this N: 122 waker votes, one per game, exactly the limit the criterion named in
+advance.
+
+Two more, neither of them a gate. Splitting the waker on whether the night moved
+its card gives 57.69% [38.95%, 74.46%] over 26 votes against 53.12% [43.22%,
+62.79%] over 96 - the moved cell is 26 votes and settles nothing. And an instrument
+control worth keeping: **0 waker votes are marked diverged**, which is the card
+working as specified, since `WAKE` is last in `NIGHT_ORDER` and nothing moves after
+it. Anything but zero there means the night order changed under this read.
+
 **One interim look is disclosed.** At game 50 the blind stratum was inspected to
 check the criterion's power assumption (1.354 blind votes/game against the priced
 1.383); the gate statistic was printed in the same pass. Nothing was acted on, no

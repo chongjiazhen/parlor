@@ -1,6 +1,6 @@
 # Changeling - waker arm verdict
 
-Rendered 2026-09-02T00:32:04Z from untracked
+Rendered 2026-09-02T01:09:29Z from untracked
 `eval/records/waker1.json` and its `.jsonl` sibling, by `py -3 -m eval.waker_verdict`.
 
 Criterion `docs/changeling-waker-criterion.md`, pre-committed and not editable.
@@ -65,6 +65,18 @@ free off the same records, and none of them a gate
    diverged        42.81% (313 votes)
    intact          47.88% (543 votes)
    None of the three may be promoted to a gate after the fact.
+
+the waker SEAT itself - the question the deck was built to ask
+   pre-registered as an OBSERVATION with no bar. Differences carry a game bootstrap; two overlapping Wilson bands are not a comparison.
+   waker seat               54.10% [45.27%, 62.68%] (122 votes)
+   every other villager     45.73% [41.09%, 50.44%] (433 votes)
+   ...of those, identity    47.14% [39.06%, 55.38%] (140 votes)
+   difference vs the whole table   8.37% [1.46%, 14.87%]  - the interval clears zero
+   difference vs identity only     6.96% [-2.11%, 15.98%]  - the interval SPANS zero
+   instrument control: 0 waker vote(s) marked diverged - WAKE is last, so belief always matches truth here and anything but zero means the night order changed under this read
+   waker, card was moved    57.69% [38.95%, 74.46%] (26 votes)
+   waker, card untouched    53.12% [43.22%, 62.79%] (96 votes)
+   No bar, no verdict, and not promotable to one - the criterion said so before the run.
 
 **A dated snapshot of one model on one deck, never a claim about models.**
 ```

@@ -265,3 +265,81 @@ class TheWakerSplitIsNotAGate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheWakerSeatRead(unittest.TestCase):
+    """The question the deck was built to ask, pre-registered as an observation."""
+
+    def seated(self, waker_hits, table_hits, n_games=100):
+        """Games where seat 1 is the waker; its vote and the table's differ."""
+        rows = []
+        for i in range(n_games):
+            g = game([], seats=6)
+            # dealt AND truth: a waker whose card was not moved. Setting only
+            # `dealt` made every fixture game a moved-card game, which is not the
+            # common case and quietly emptied the untouched cell.
+            g["dealt"]["1"] = "waker"
+            g["truth"]["1"] = "waker"
+            g["votes"] = [
+                dict(vote(i < waker_hits, cls="identity"), seat=1),
+                dict(vote(i < table_hits, cls="identity"), seat=2),
+                dict(vote(i < table_hits, cls="none"), seat=3),
+            ]
+            rows.append(g)
+        return rows
+
+    def test_the_waker_seat_is_the_one_DEALT_the_card(self):
+        g = self.seated(1, 1, 1)[0]
+        self.assertEqual(verdict.waker_seat(g), 1)
+        g["dealt"]["1"] = "bystander"
+        self.assertIsNone(verdict.waker_seat(g))
+
+    def test_the_waker_is_not_also_counted_in_the_table(self):
+        """A seat on both sides of the comparison would shrink every difference
+        toward zero, silently."""
+        rows = self.seated(60, 30)
+        w = {id(v) for v in verdict.waker_votes(rows)}
+        t = {id(v) for v in verdict.table_votes(rows)}
+        self.assertTrue(w and t)
+        self.assertFalse(w & t, "the waker's vote is in both sets")
+
+    def test_a_real_gap_reads_and_no_gap_does_not(self):
+        big = "\n".join(verdict.waker_seat_read(self.seated(90, 20)))
+        self.assertIn("clears zero", big)
+        flat = "\n".join(verdict.waker_seat_read(self.seated(50, 50)))
+        self.assertIn("SPANS zero", flat)
+
+    def test_a_POSITIVE_point_estimate_can_still_span_zero(self):
+        """The guard that makes the interval load-bearing.
+
+        A read that printed its point estimate AS its own interval passed
+        every other case here - a large gap and a zero gap answer the same
+        either way. 52 against 50 is the discriminating shape: the point is
+        +2.00% and the game bootstrap still spans zero, so a zero-width
+        interval would report a difference the data does not carry.
+        """
+        out = "\n".join(verdict.waker_seat_read(self.seated(52, 50)))
+        line = [l for l in out.splitlines()
+                if "difference vs the whole table" in l][0]
+        self.assertIn("2.00%", line)
+        self.assertIn("SPANS zero", line)
+
+    def test_the_diverged_control_is_asserted_not_assumed(self):
+        """WAKE is last in NIGHT_ORDER, so the waker's belief always matches its
+        truth. The read prints that count so a night-order change cannot pass
+        unnoticed as a quiet zero-vote cell."""
+        out = "\n".join(verdict.waker_seat_read(self.seated(60, 40)))
+        self.assertIn("instrument control: 0 waker vote(s) marked diverged", out)
+
+    def test_card_moved_reads_dealt_against_dawn_truth(self):
+        g = self.seated(1, 1, 1)[0]
+        self.assertFalse(verdict.card_moved(g, 1))
+        g["truth"]["1"] = "spotter"
+        self.assertTrue(verdict.card_moved(g, 1))
+
+    def test_it_carries_no_bar_and_no_verdict(self):
+        out = "\n".join(verdict.waker_seat_read(self.seated(90, 20)))
+        self.assertIn("no bar", out)
+        self.assertIn("not promotable", out)
+        for word in ("HOLDS", "NOT SHOWN", "VERDICT:"):
+            self.assertNotIn(word, out)

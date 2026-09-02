@@ -131,6 +131,144 @@ def integrity_lines(summary: dict, games: list[dict]) -> tuple[list[str], bool]:
     return out, voided
 
 
+def waker_seat(game: dict) -> int | None:
+    """The seat DEALT the waker, or ``None``. Dealt, not held: this read is about
+    the seat that performed the wake, and ``WAKE`` is last in ``NIGHT_ORDER`` so
+    nothing moves after it - that seat's belief matches its dawn truth whatever
+    card it ends up holding, which is the whole property the deck was built to
+    seat."""
+    for seat, card in (game.get("dealt") or {}).items():
+        if card == "waker":
+            return int(seat)
+    return None
+
+
+def waker_votes(games: list[dict]) -> list[dict]:
+    """Villager votes cast BY the waker seat. A wolf's vote is a different act, so
+    ``villager_votes`` has already dropped them - including a waker whose card was
+    stolen and who holds ``pack`` at dawn."""
+    out = []
+    for game in games:
+        seat = waker_seat(game)
+        if seat is None:
+            continue
+        out += [v for v in villager_votes(game) if v["seat"] == seat]
+    return out
+
+
+def table_votes(games: list[dict]) -> list[dict]:
+    """Every OTHER villager vote at the same tables - the comparison set."""
+    out = []
+    for game in games:
+        seat = waker_seat(game)
+        if seat is None:
+            continue
+        out += [v for v in villager_votes(game) if v["seat"] != seat]
+    return out
+
+
+def _rate(vs: list[dict]) -> float | None:
+    return sum(v["target_holds_pack"] for v in vs) / len(vs) if vs else None
+
+
+def card_moved(game: dict, seat: int) -> bool:
+    """Did the night move this seat's card? Dealt against dawn truth."""
+    return (game.get("dealt") or {}).get(str(seat)) != game["truth"].get(str(seat))
+
+
+def _diff(games: list[dict], pick_a, pick_b):
+    """(rate_a - rate_b) over a resampled list of GAMES, or ``None``.
+
+    The unit is the game, not the vote - the waker's vote and the table's votes in
+    one game share a deal, a night and a table, so treating them as independent
+    draws reports an interval far tighter than the data supports. Same reason
+    belfry resamples games for discrimination.
+    """
+    a = [v for g in games for v in pick_a(g)]
+    b = [v for g in games for v in pick_b(g)]
+    if not a or not b:
+        return None
+    return (sum(v["target_holds_pack"] for v in a) / len(a)
+            - sum(v["target_holds_pack"] for v in b) / len(b))
+
+
+def waker_seat_read(games: list[dict]) -> list[str]:
+    """**The question this deck was built to ask.** An OBSERVATION with no bar -
+    the criterion pre-registered it that way and forbids promoting it after the
+    fact, because the seat casts one vote per game.
+
+    Three comparisons, fixed before the numbers were looked at, and each reported
+    as a DIFFERENCE with a game bootstrap rather than two intervals side by side.
+    Overlapping Wilson bands are not a comparison: they answer "could each rate be
+    equal to some third value", which is not the question.
+
+    1. the waker seat against every other villager at the same tables;
+    2. the waker seat against the ``identity`` stratum only - the like-for-like
+       set, since both know a card, so a gap here is about knowing YOUR OWN card
+       rather than about knowing one at all;
+    3. the waker split on whether the night MOVED its card, which is the
+       divergence question the rung exists for. Not on ``voter_diverged``: the
+       waker wakes last in ``NIGHT_ORDER``, so nothing moves after it and its
+       belief always matches its truth. That field is False for this seat by
+       construction, and the read below asserts it rather than quietly reporting
+       a zero-vote cell.
+
+    **The waker is never in the blind stratum**, so the seated-versus-centre split
+    in `docs/measurements.md` cannot answer this and is a different reading.
+    """
+    seated = [g for g in games if waker_seat(g) is not None]
+
+    # One implementation each, shared with the module-level readers - a
+    # second copy here is what a test can guard while the report calls the
+    # other. Measured: a mutant that put the waker back into the table set
+    # passed 24 of 24 while these were duplicated.
+    def w_of(g):
+        return waker_votes([g])
+
+    def t_of(g):
+        return table_votes([g])
+
+    def ident_of(g):
+        return [v for v in t_of(g) if v["knowledge_class"] == "identity"]
+
+    out = ["", "the waker SEAT itself - the question the deck was built to ask",
+           "   pre-registered as an OBSERVATION with no bar. Differences carry a "
+           "game bootstrap; two overlapping Wilson bands are not a comparison."]
+
+    wv, tv = [v for g in seated for v in w_of(g)], [v for g in seated for v in t_of(g)]
+    iv = [v for g in seated for v in ident_of(g)]
+    for label, vs in (("waker seat", wv), ("every other villager", tv),
+                      ("...of those, identity", iv)):
+        n = len(vs)
+        out.append(f"   {label:24s} {_pct(_rate(vs))}"
+                   f"{_ci(wilson(round((_rate(vs) or 0) * n), n))} ({n} votes)")
+
+    for label, pick in (("vs the whole table", t_of), ("vs identity only", ident_of)):
+        point = _diff(seated, w_of, pick)
+        ci = bootstrap_ci(seated, lambda gs, p=pick: _diff(gs, w_of, p))
+        reads = (ci is not None and (ci[0] > 0 or ci[1] < 0))
+        out.append(f"   difference {label:20s} {_pct(point)}{_ci(ci)}"
+                   + ("  - the interval clears zero" if reads
+                      else "  - the interval SPANS zero"))
+
+    diverged = [v for v in wv if v["voter_diverged"]]
+    out.append(f"   instrument control: {len(diverged)} waker vote(s) marked "
+               "diverged - WAKE is last, so belief always matches truth here and "
+               "anything but zero means the night order changed under this read")
+
+    moved = [v for g in seated for v in w_of(g) if card_moved(g, waker_seat(g))]
+    intact = [v for g in seated for v in w_of(g)
+              if not card_moved(g, waker_seat(g))]
+    for label, vs in (("waker, card was moved", moved),
+                      ("waker, card untouched", intact)):
+        n = len(vs)
+        out.append(f"   {label:24s} {_pct(_rate(vs))}"
+                   f"{_ci(wilson(round((_rate(vs) or 0) * n), n))} ({n} votes)")
+    out.append("   No bar, no verdict, and not promotable to one - the criterion "
+               "said so before the run.")
+    return out
+
+
 def report(path: str = CAMPAIGN, control_path: str = CONTROL) -> tuple[list[str], int]:
     summary, games = load(path)
     args = summary.get("args", {})
@@ -286,6 +424,7 @@ def report(path: str = CAMPAIGN, control_path: str = CONTROL) -> tuple[list[str]
         out.append(f"   {label:12s}    {_pct(hit / len(vs) if vs else None)} "
                    f"({len(vs)} votes)")
     out.append("   None of the three may be promoted to a gate after the fact.")
+    out += waker_seat_read(live)
 
     out += ["", "**A dated snapshot of one model on one deck, never a claim about "
             "models.**"]
