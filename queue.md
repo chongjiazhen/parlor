@@ -42,7 +42,7 @@ CALLED; this is what is left. `GLOSSARY.md` defines rung, arm and void.
 | rung | engine | model in a seat | what it owes |
 |---|---|---|---|
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so the rows it still holds (evil over-sabotage, the 6/7p package) are parked on that, not on work |
-| **changeling** | done | yes - gate #3 HOLDS on BOTH decks (S5 five-seat, S19 six-seat waker) | the `waker` deck is seated, read, and its own question is ANSWERED - against the like-for-like `identity` set the waker seat's advantage does not clear zero (`+6.96% [-2.11%, 15.98%]`), so the deck shows no evidence that knowing your OWN card beats knowing a card. **Not shown, not no**: 122 waker votes is the one-vote-per-game ceiling the criterion named. Settling it needs a NEW criterion - a longer arm or a deck seating two waker-class cards - never a re-read of these records. `kindred` deck B is still paper and needs `require_seated_kin` |
+| **changeling** | done | yes - gate #3 HOLDS on BOTH decks (S5 five-seat, S19 six-seat waker) | the `waker` deck is seated, read, and its own question is ANSWERED - against the like-for-like `identity` set the waker seat's advantage does not clear zero (`+6.96% [-2.11%, 15.98%]`), so the deck shows no evidence that knowing your OWN card beats knowing a card. **Not shown, not no**: 122 waker votes is the one-vote-per-game ceiling the criterion named. Settling it needs a NEW criterion - a longer arm or a deck seating two waker-class cards - never a re-read of these records. `kindred` deck B is FROZEN and unlaunched - its row below |
 | **quorum** | done, and the live4 arm READ 2026-09-01 | **never** | nothing runnable. Both clauses INFORM - proposer 74.04% [64.86%, 83.16%] vs an exact 25.00%, enactor 69.52% [64.29%, 75.53%] vs 33.33%, over one fallback decision in 2582; `docs/measurements.md`, read that before citing either. Seeds 11200..11219 now spent alongside 5200..5599 / 7000..7399, so a fifth arm needs fresh ones and a criterion of its own. The repeat-claim void has still never fired |
 | **belfry** | done, scoring lane, control instrument, sampled-player arm, S8 referee read, and the live2 arm READ | **never** | **One arm frozen 2026-09-02, unlaunched: the session-memory night arm** (`docs/belfry-night-transcript-criterion.md`, recipe `eval/runs/belfry-night-transcript.cmd [after-log]`, seeds 15000..15999, ~1 h of card) - the referee's own transcript as its memory, the arm both night reads end by naming. Queues behind the changeling chain. S8b is DISTINGUISHABLE and live2's Clause A INFORMS at 20.34% [13.77%, 27.01%] over 1.28% fallback - both in `docs/measurements.md`, read that before citing either. Clause B spans chance and no second arm chases it. S29's adjudicator retry LANDED 2026-09-01 and did NOT re-baseline S8b - that record fell back 0/20, so it holds no call the retry could have changed, and S29 CLOSED the same day on the finding that no arm will carry `recovered > 0` (`docs/decisions.md`). The retry is verified by test, and the rung owes no run for it |
 | **DURF** | done | yes - gate #1 91/100, then 99/100 under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S19, S22, S23, S29-S36 today.
+and annotated slice is `docs/slices.md` - S1-S20, S22, S23, S29-S36 today.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -89,7 +89,6 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
-| **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
 | **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | judgment | codex | no changeling arm in flight | criterion, exact payload delta and audit tests |
 
@@ -128,20 +127,23 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
+**Merge queue behind the chain read, 2026-09-02.** Worktrees unfreeze the code
+half of this file: a branch cannot touch the checkout the chain imports from,
+so the entry condition "no changeling arm in flight" is met on a branch and the
+freeze binds only the MERGE. Branches waiting: `slice/changeling-source-rules`,
+`slice/changeling-heuristic`, and the off-by-default arm branches below
+(`slice/changeling-notebook`, `slice/fanout-*`). **Order is forced by the
+controls:** every prompt arm pairs against S22's `cl-rounds2.json`, so it must
+merge AND RUN before the source-rules merge re-baselines the rung, or its pair is
+void. Which of those arms earns its ~7 h of card first is the operator's ranking;
+the criteria are frozen and wait.
+
 
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
       would have died on it silently. Cheap probe: log the lock's ctime against
       the tool-call transcript next time.
-- [ ] **A chained recipe REFUSES early, it does not queue - track the waiter.**
-      Every `[after-log]` recipe exits the moment its predecessor's log lacks the
-      marker, so "launch early, costs nothing" launched nothing. 2026-09-02 the
-      changeling tail (rounds pair, gate2 arm, belfry transcript) was carried by
-      an untracked poll-then-call payload under `%LOCALAPPDATA%\parlor\`, 30 s
-      polls, 24 h bound, `PARLOR TAIL DONE` marker. Done when
-      `eval/runs/chain-tail.cmd` holds that waiter as a tracked recipe taking
-      `<log> <recipe>...`, and the two rows below stop saying "launch early".
 - [ ] **Two behaviours the auditor prices, neither of them bugs** - a good seat
       approving a known-tainted team (7/76) and evil over-sabotaging. The
       consequence that matters is for gate #3a's metric, not for the seats.
@@ -181,9 +183,14 @@ fallback rates, and landed between campaigns rather than into one:
       capability-dependent sign. **ABSENCE is the novel arm** - every build read
       from source states full rules in the system prompt and none ablates that.
       **Done when** a paired arm exists.
-- [ ] **A per-seat private notebook - BUILT 2026-08-26, UNMEASURED.**
-      `--notebook`, off by default. Gate #1 holds by construction and the audit
-      says so. Nothing about it is quotable until a paired arm exists.
+- [ ] **A per-seat private notebook - FROZEN 2026-09-02 as a changeling arm,
+      unlaunched, on `slice/changeling-notebook` (`bb1e7c5`).** Promoted to
+      `core/notebook.py` (two games needed it); `--notebook` on the changeling
+      runner, notes stamped by round, off by default and byte-identical off.
+      Criterion `docs/changeling-notebook-criterion.md`, one arm against
+      `cl-rounds2.json`, recipe `eval/runs/changeling-notebook-arm.cmd <log>`,
+      read `py -3 -m eval.notebook_pair_verdict`. Must RUN before the
+      source-rules merge (merge queue above). Nothing quotable until it has.
 - [ ] **Theme as an experimental variable, not a default to fix**
       (`docs/moral-framing.md`). Re-homed to changeling at 1/26th the GPU cost;
       `1984-en` stays cabal's face on every committed transcript. Arms built
@@ -235,16 +242,21 @@ Rules and setup changes, each of which re-baselines what runs under it:
       transcript`: RECALLS or NO RECALL against the withheld 94/122, and BELOW or
       AS GOOD AS the supplied 152/163, on intervals. Entry condition: the card -
       it refuses until the log it is handed carries a PARLOR done marker, so
-      hand it the changeling chain's last log, behind a waiter (row above).
+      hand it the chain's last log via `eval/runs/chain-tail.cmd`.
 - [ ] **The runner prints `SETUP_5`'s pre-`plurality-min2` pack reference
       (60.49%) beside every deck.** Seen on the 7-seat bar run. A print, not a
-      score; both deck criteria already say not to read it. Fix after the chain
-      has read - `eval/run_changeling.py` is on the chained recipes' path.
+      score; both deck criteria already say not to read it. **FIXED on
+      `slice/fanout-print` (`1d62b3c`)**: the figure prints only for the deck
+      AND vote rule it was measured under, which no current run matches, so
+      every report now prints a labelled absence. Merge after the chain reads.
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** Public-domain folk-game vocabulary (Mafia,
       Davidoff 1986), no branding question, on a rung already built. **This is
       why a vanilla Werewolf RUNG is not worth building** - same rung as cabal,
-      plus elimination.
+      plus elimination. **BUILT on `slice/fanout-wolf` (`1d12c74`), unrun**:
+      `--theme werewolf`, a second folk-family face with descriptive card names
+      - one published game's coined role names were asked for and declined
+      under the branding invariant. Merge after the chain reads.
 
 Human-seat play - triaged from one operator's hand-played session, 2026-08-29.
 Nothing here is measured; the code claims are read from the files cited. Which
