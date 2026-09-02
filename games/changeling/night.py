@@ -42,9 +42,12 @@ def centre_slot(ref: int) -> int:
     return -1 - ref
 
 
-#: A deal is retried until it seats a ``pack``. The predicate is the policy; this
-#: is the structural bound beside it, because a predicate that can never be
-#: satisfied (a deck with no ``pack``) would otherwise spin forever unattended.
+#: A deal is retried until it satisfies the setup's constraints - a seated
+#: ``pack``, and on a deck that asks for it, ``kindred`` both seated or both in the
+#: centre. The predicates are the policy; this is the structural bound beside
+#: them, because a predicate that can never be satisfied (a deck with no ``pack``)
+#: would otherwise spin forever unattended. Deck B spends 1.07 retries a game,
+#: measured over 4000 seeded deals - the design predicted 0.92.
 MAX_DEAL_ATTEMPTS = 200
 
 
@@ -109,25 +112,43 @@ class NightResult:
         return card.knowledge_class if self.knowledge[seat] else "none"
 
 
-def deal(setup: Setup, rng: random.Random) -> tuple[dict[int, Card], list[Card]]:
-    """Deal seats and centre, refusing a deal that seats no ``pack``.
+def _kin_together(setup: Setup, seats: dict[int, Card]) -> bool:
+    """``require_seated_kin``: every ``kindred`` in the deck is seated, or none is.
 
-    Both ``pack`` cards land in the centre in 6/56 of unconstrained deals at this
-    size, and every one of those games is unwinnable by accusation - not hard, but
-    undefined. RULES.md states the constraint publicly so seats may reason from it.
+    A lone seated ``kindred`` wakes, meets nobody, and is a blind villager the deal
+    labelled ``identity`` - so a deck that holds the card without this predicate
+    spends half its games measuring nothing about it (RULES.md §Deck B).
+    """
+    in_deck = sum(c.key == "kindred" for c in setup.deck)
+    seated = sum(c.key == "kindred" for c in seats.values())
+    return seated in (0, in_deck)
+
+
+def deal(setup: Setup, rng: random.Random) -> tuple[dict[int, Card], list[Card]]:
+    """Deal seats and centre, refusing a deal the setup's constraints reject.
+
+    ``require_seated_pack``: both ``pack`` cards land in the centre in 6/56 of
+    unconstrained deals at five seats, and every one of those games is unwinnable
+    by accusation - not hard, but undefined. ``require_seated_kin``: the ``kindred``
+    pair is seated whole or not at all. RULES.md states both constraints publicly
+    so seats may reason from them.
     """
     deck = list(setup.deck)
     for _ in range(MAX_DEAL_ATTEMPTS):
         rng.shuffle(deck)
         seats = {i: deck[i] for i in range(setup.n)}
         centre = deck[setup.n:]
-        if not setup.require_seated_pack:
-            return seats, centre
-        if any(c.side is Side.PACK for c in seats.values()):
-            return seats, centre
+        if (setup.require_seated_pack
+                and not any(c.side is Side.PACK for c in seats.values())):
+            continue
+        if setup.require_seated_kin and not _kin_together(setup, seats):
+            continue
+        return seats, centre
     raise ImpossibleDeal(
-        f"no deal in {MAX_DEAL_ATTEMPTS} attempts seated a pack card - check the "
-        f"deck ({[c.key for c in setup.deck]}) against require_seated_pack")
+        f"no deal in {MAX_DEAL_ATTEMPTS} attempts satisfied the constraints - "
+        f"check the deck ({[c.key for c in setup.deck]}) against "
+        f"require_seated_pack={setup.require_seated_pack} and "
+        f"require_seated_kin={setup.require_seated_kin}")
 
 
 def legal_targets(seat: int, act: Act, n: int, centre: int) -> list:

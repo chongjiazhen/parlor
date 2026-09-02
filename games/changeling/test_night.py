@@ -64,6 +64,91 @@ class TestDeal(unittest.TestCase):
             Setup(n=5, deck=(PACK, PACK), centre=3)
 
 
+class TestKinDeal(unittest.TestCase):
+    """Deck B's second constraint. On a free deal the `kindred` pair fails to form
+    more often than it forms (RULES.md: lone 47.1% against pair 45.2%), and a lone
+    kindred is a blind villager mislabelled `identity` - the S10 finding happening
+    twice. `require_seated_kin` refuses the lone deal: both seated or both centre."""
+
+    def seated_kin(self, seats) -> int:
+        return sum(c.key == "kindred" for c in seats.values())
+
+    def test_a_deal_with_exactly_one_kindred_seated_is_refused(self):
+        from games.changeling.roles import SETUP_7_KIN
+        self.assertTrue(SETUP_7_KIN.require_seated_kin)
+        for seed in range(400):
+            seats, _ = deal(SETUP_7_KIN, random.Random(seed))
+            self.assertIn(self.seated_kin(seats), (0, 2),
+                          f"seed {seed} seated a lone kindred")
+
+    def test_both_seated_and_both_centre_are_each_accepted(self):
+        """The 14% both-centre games are the deck's own control, not a refusal."""
+        from games.changeling.roles import SETUP_7_KIN
+        seen = {self.seated_kin(deal(SETUP_7_KIN, random.Random(s))[0])
+                for s in range(400)}
+        self.assertEqual(seen, {0, 2})
+
+    def test_the_constraint_still_seats_a_pack(self):
+        """It sits ON TOP of `require_seated_pack`, not instead of it."""
+        from games.changeling.roles import SETUP_7_KIN
+        for seed in range(400):
+            seats, _ = deal(SETUP_7_KIN, random.Random(seed))
+            self.assertTrue(any(c.side is Side.PACK for c in seats.values()),
+                            f"seed {seed} seated no pack")
+
+    def test_without_the_flag_the_same_deck_deals_lone_kindred(self):
+        """The control for the tests above: a mutant that ignored the flag would
+        pass them only if lone deals never occurred, and they do - about half."""
+        from games.changeling.roles import SETUP_7_KIN
+        from dataclasses import replace
+        free = replace(SETUP_7_KIN, require_seated_kin=False)
+        lone = sum(self.seated_kin(deal(free, random.Random(s))[0]) == 1
+                   for s in range(400))
+        self.assertGreater(lone, 100, f"only {lone}/400 lone deals unconstrained")
+
+    def test_the_pair_forms_far_more_often_under_the_constraint(self):
+        """RULES.md priced 86.0% under the constraint against 45.2% free, over 4000
+        nights. This asserts the SHAPE with loose bounds - the figures belong to
+        the criterion and move with the RNG."""
+        from games.changeling.roles import SETUP_7_KIN
+        from dataclasses import replace
+        free = replace(SETUP_7_KIN, require_seated_kin=False)
+        n = 2000
+        pair = sum(self.seated_kin(deal(SETUP_7_KIN, random.Random(s))[0]) == 2
+                   for s in range(n)) / n
+        pair_free = sum(self.seated_kin(deal(free, random.Random(s))[0]) == 2
+                        for s in range(n)) / n
+        self.assertGreater(pair, 0.75, f"constrained pair rate {pair:.1%}")
+        self.assertLess(pair_free, 0.60, f"free pair rate {pair_free:.1%}")
+
+    def test_a_deck_that_cannot_satisfy_both_constraints_RAISES(self):
+        """Two seats, one pack that must sit, two kindred that must sit together
+        or not at all: every deal seats exactly one kindred."""
+        stuck = Setup(n=2, deck=(PACK, KINDRED, KINDRED), centre=1,
+                      require_seated_kin=True)
+        with self.assertRaises(ImpossibleDeal):
+            deal(stuck, random.Random(0))
+
+    def test_the_kin_deck_is_exactly_the_deck_RULES_md_specifies(self):
+        from collections import Counter
+        from games.changeling.roles import SETUP_7_KIN, SETUPS
+        self.assertEqual((SETUP_7_KIN.n, SETUP_7_KIN.centre, len(SETUP_7_KIN.deck)),
+                         (7, 3, 10))
+        self.assertEqual(Counter(c.key for c in SETUP_7_KIN.deck),
+                         Counter(pack=2, kindred=2, spotter=1, swapper=1,
+                                 switcher=1, deceived=1, bystander=2))
+        self.assertIs(SETUPS[7], SETUP_7_KIN)
+
+    def test_the_shipped_decks_do_not_carry_the_flag(self):
+        """A live campaign runs under both. The default is off so their deals are
+        byte-identical to what they were."""
+        from games.changeling.roles import SETUP_5, SETUP_6_WAKER
+        self.assertFalse(SETUP_5.require_seated_kin)
+        self.assertFalse(SETUP_6_WAKER.require_seated_kin)
+        self.assertNotIn("kindred", [c.key for c in SETUP_5.deck])
+        self.assertNotIn("kindred", [c.key for c in SETUP_6_WAKER.deck])
+
+
 class TestNoSwapMeansNoDivergence(unittest.TestCase):
     """The control. Without it every divergence test below proves nothing - a night
     that diverged every seat would pass all of them."""

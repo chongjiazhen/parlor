@@ -25,7 +25,7 @@ import unittest
 from games.changeling.night import (centre_ref, is_centre, legal_targets,
                                     resolve_night)
 from games.changeling.roles import (ALL_CARDS, CARDS, NIGHT_ORDER, SETUP_5,
-                                    THEMES, Act, Side, indefinite)
+                                    SETUPS, THEMES, Act, Side, indefinite)
 
 RULES = pathlib.Path(__file__).with_name("RULES.md").read_text(encoding="utf-8")
 
@@ -113,6 +113,87 @@ class TestRulesTablesMatchTheCode(unittest.TestCase):
                 if other != key:
                     self.assertNotIn(other, card.power.lower(),
                                      f"{key}'s power names {other}")
+
+
+class TestTheExpansionDecksMatchTheirProse(unittest.TestCase):
+    """The shipped deck's composition is asserted from a markdown TABLE above. The
+    expansion decks are specified in PROSE instead, which is the weaker surface: a
+    card list inside a sentence drifts from the code silently, and a deck
+    composition is not a typo - it re-baselines every number played on it.
+
+    So each registered deck's multiset is read back out of the sentence that
+    specifies it. Written when deck B landed, and deliberately covering deck A too:
+    deck A shipped with its prose unchecked and a 200-game campaign was read off it.
+    """
+
+    def deck_from_prose(self, sentence: str) -> collections.Counter:
+        """The card list in a deck's spec sentence, as a multiset.
+
+        ``pack`` x2 means two, a bare ``spotter`` means one. This PARSES the doc
+        rather than restating it, which is the whole point - a test carrying its own
+        copy of the list would just move the drift into itself.
+        """
+        start = RULES.find(sentence)
+        self.assertNotEqual(start, -1, f"could not find {sentence!r} in RULES.md")
+        body = RULES[start + len(sentence):]
+        # The spec runs to the first bullet of the argument below it. Bounded
+        # rather than greedy, and the bound is what
+        # `test_the_parse_is_not_vacuous` checks: the first version cut on a
+        # blank line, which does not exist here, so it swallowed the bullets and
+        # read `kindred` seven times.
+        body = body.split("\n- ")[0]
+        got: collections.Counter = collections.Counter()
+        for key, mult in re.findall(r"`([a-z]+)`(?:\s*x(\d+))?", body):
+            got[key] += int(mult) if mult else 1
+        return got
+
+    def assert_deck_matches_prose(self, sentence: str, seats: int) -> None:
+        setup = SETUPS[seats]
+        self.assertEqual(self.deck_from_prose(sentence),
+                         collections.Counter(c.key for c in setup.deck))
+        self.assertEqual((setup.n, setup.centre), (seats, 3))
+        self.assertEqual(len(setup.deck), seats + 3)
+
+    def test_deck_A_is_the_deck_its_sentence_specifies(self):
+        self.assert_deck_matches_prose(
+            "**Deck A, for `waker`: 6 seats, 3 centre, 9 cards.**", 6)
+
+    def test_deck_B_is_the_deck_its_sentence_specifies(self):
+        self.assert_deck_matches_prose(
+            "**Deck B, for `kindred`: 7 seats, 3 centre, 10 cards, plus a seating "
+            "constraint.**", 7)
+
+    def test_the_parse_is_not_vacuous(self):
+        """The control for the two above. A `deck_from_prose` that returned an empty
+        counter, or one that swallowed the surrounding argument, would pass or fail
+        them for reasons that have nothing to do with the deck - so pin what it
+        actually read off deck B's sentence."""
+        got = self.deck_from_prose(
+            "**Deck B, for `kindred`: 7 seats, 3 centre, 10 cards, plus a seating "
+            "constraint.**")
+        self.assertEqual(sum(got.values()), 10, f"parsed {dict(got)}")
+        self.assertEqual(got["pack"], 2)
+        self.assertEqual(got["kindred"], 2)
+        self.assertNotIn("waker", got, "the parse ran past deck B's own sentence")
+
+    def test_the_kin_constraint_the_doc_promises_is_the_one_the_deck_carries(self):
+        """RULES.md states the constraint publicly so seats may reason from it, and
+        lists it among the surfaces a fabricated belief must survive. A deck that
+        shipped without the flag would make both of those statements false while
+        dealing a game that looks entirely legal."""
+        self.assertIn("`require_seated_kin`: **both seated or both in the centre**",
+                      RULES)
+        self.assertTrue(SETUPS[7].require_seated_kin)
+        self.assertTrue(any(c.key == "kindred" for c in SETUPS[7].deck),
+                        "the kin constraint is on a deck holding no kindred")
+
+    def test_the_shipped_deck_carries_neither_expansion_card(self):
+        """A deck change re-baselines every recorded number, and `SETUP_5` is the
+        deck all of them were played on."""
+        keys = [c.key for c in SETUP_5.deck]
+        for expansion in ("kindred", "waker"):
+            self.assertNotIn(expansion, keys)
+        self.assertFalse(SETUP_5.require_seated_kin)
 
 
 class TestEverySkinIsNamedAndCollisionFree(unittest.TestCase):

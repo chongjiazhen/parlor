@@ -534,6 +534,53 @@ class TestThemesChangeNoRule(unittest.TestCase):
                              {s: ref.believes(s).key for s in range(5)}))
         self.assertEqual(len(set(map(str, outcomes))), 1)
 
+    def test_gate_one_holds_on_every_registered_deck(self):
+        """The sweeps above are pinned to `SETUP_5`, so a deck registered later is
+        audited by nothing. Deck B is exactly the case that matters: `kindred` is
+        the second MEET card, and RULES.md records that the first shared kin
+        sentence produced a real leak the day the card landed. Iterated over
+        `SETUPS` rather than listed, so the next deck is covered on registration
+        instead of on remembering."""
+        from games.changeling.roles import SETUPS
+        for n in sorted(SETUPS):
+            for seed in range(60):
+                ref = ChangelingReferee.new(n, seed=seed)
+                self.assertEqual(ref.audit_all(), {},
+                                 f"{n} seats, seed {seed} leaked")
+
+    def test_the_kindred_pair_sees_itself_and_nobody_else_on_the_kin_deck(self):
+        """MEET groups by dealt KEY, not by act. On the deck that seats both cards
+        the property has to hold against the real deal rather than a pinned one:
+        every seated `kindred` names its fellow and no wolf, and no `pack` seat is
+        ever named a fellow-kindred.
+
+        Asserted over the games where the pair IS seated, with a floor on how many
+        those were - `require_seated_kin` puts them at ~88%, and a run of seeds
+        that seated none would pass this test having checked nothing."""
+        from games.changeling.roles import SETUPS
+        paired = 0
+        for seed in range(200):
+            ref = ChangelingReferee.new(7, seed=seed)
+            night = ref.night
+            kin = [s for s in range(7) if night.dealt[s].key == "kindred"]
+            self.assertIn(len(kin), (0, 2), f"seed {seed} seated a lone kindred")
+            for seat in range(7):
+                fellows = [k.seat for k in night.knowledge[seat]
+                           if k.label == "fellow-kindred"]
+                if night.dealt[seat].key == "kindred":
+                    self.assertEqual(fellows, [s for s in kin if s != seat],
+                                     f"seed {seed}: seat {seat} met the wrong set")
+                else:
+                    self.assertEqual(fellows, [],
+                                     f"seed {seed}: seat {seat} was told a "
+                                     "fellow-kindred it is not entitled to")
+            if len(kin) == 2:
+                paired += 1
+        self.assertGreater(paired, 150,
+                           f"the pair was seated in only {paired}/200 deals - the "
+                           "constraint is not doing its job and this test checked "
+                           "little")
+
     def test_gate_one_holds_under_every_theme(self):
         for theme in THEMES.values():
             for seed in range(40):
