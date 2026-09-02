@@ -188,7 +188,12 @@ fallback rates, and landed between campaigns rather than into one:
       (that scope is excluded on the invariance argument) and is caught 40/40
       from `seat_lines`. The rule for every standing-context arm from here.
       `docs/changeling-briefing-criterion.md`, `eval.briefing_pair_verdict`, one
-      arm against `cl-rounds2`. Merge queue above.
+      arm against `cl-rounds2`. Merge queue above. **Playable at the console on
+      `slice/fanout-s21-demo` (`ffa90b2`)**, which branches from the arm: the
+      same flag on `games/changeling/demo.py`, and the console's own furniture
+      briefing drops when it is on, because `briefing_text()` already reaches a
+      human seat inside its printed payload. Console-only - no model-facing
+      byte moves, so the criterion is untouched and still binds the arm.
 - [ ] **A per-seat private notebook - FROZEN 2026-09-02 as a changeling arm,
       unlaunched, on `slice/changeling-notebook` (`bb1e7c5`).** Promoted to
       `core/notebook.py` (two games needed it); `--notebook` on the changeling
