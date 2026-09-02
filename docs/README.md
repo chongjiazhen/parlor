@@ -125,6 +125,11 @@ partly true is worse than none.
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
   `eval.gate2_pair_verdict`. UNLAUNCHED.
+- `docs/changeling-mixed-criterion.md` - the hand-written rung seated against
+  LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
+  §"changeling heuristic rung" names: a rung read against a control that cannot
+  talk is partly reading its own twin. Pairs against `cl-heuristic.json` rescored
+  on its first 200 games, so it runs BEFORE the source-rules merge. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
