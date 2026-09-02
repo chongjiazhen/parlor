@@ -81,7 +81,7 @@ These are the units: each is one session's worth, has a stated entry condition,
 and ends in a thing that exists. **Take exactly one.** They are ordered by what
 unblocks what, so **the numbers are IDs, not positions**; live rows cite slices
 by name, so do not renumber them. **Only live rows are below**; every struck
-and annotated slice is `docs/slices.md` - S1-S20, S22, S23, S29-S36 today.
+and annotated slice is `docs/slices.md` - S1-S23, S29-S36 today - every slice is struck.
 
 The split that matters is GPU-bound versus attention-bound. A GPU run needs a
 launch and a log tail, not a session watching it - so an S with a run in it
@@ -89,8 +89,7 @@ should launch first and spend the wait on a CPU slice.
 
 | # | slice | judgment | worker | entry condition | done when |
 |---|---|---|---|---|---|
-| **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
-| **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | judgment | codex | no changeling arm in flight | criterion, exact payload delta and audit tests |
+| - | **The table is empty 2026-09-02.** The next slice is cut from the rows below when one earns a session; the merge queue and the four frozen prompt arms are what a cold session picks up first. | | | | |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
 #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay with
@@ -172,17 +171,24 @@ the criteria are frozen and wait.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
-- [ ] **Negation pass over the model-facing strings** (rule:
-      `.claude/rules/model-facing-text.md`, path-scoped). Steering by prohibition
-      makes the banned behaviour more available; three live prompts do it. The
-      referee's hard refusals stay. **UNBLOCKED 2026-08-28.** Re-homed to
-      changeling (S1).
-- [ ] **Does the standing frame belong in the PAYLOAD? A `--briefing` arm.** The
-      per-phase drip is deliberate and unplayable for a person, which is why the
-      console got a `BRIEFING` outside the payload. Expect a
-      capability-dependent sign. **ABSENCE is the novel arm** - every build read
-      from source states full rules in the system prompt and none ablates that.
-      **Done when** a paired arm exists.
+- [ ] **Negation pass - FROZEN 2026-09-02 as a changeling arm, unlaunched, on
+      `slice/fanout-neg` (`8abd79e`).** Nine strings in one table
+      (`games/changeling/phrasing.py`) behind `--phrasing positive`; the `as-is`
+      default is pinned to a hash computed before the table and mutation-checked.
+      One new run against `cl-rounds2`, PRIMARY statistic the refusal rate;
+      `docs/changeling-phrasing-criterion.md`, `eval.phrasing_pair_verdict`.
+      Merge queue above. Left out on purpose: `core/replies.py`'s parser
+      complaints, shared by five games, so a positive seat gets a positive
+      wrapper around an as-is complaint - biases toward NOT SHOWN, its own arm.
+- [ ] **Does the standing frame belong in the PAYLOAD? `--briefing` - FROZEN
+      2026-09-02 (S21), unlaunched, on `slice/fanout-s21` (`c298173`).** The
+      frame is 553 bytes on a 1620-byte render, off by default and byte-identical
+      off. **It renders inside `seat_lines`, never `preamble`**: measured, a
+      leaky frame placed in the preamble escapes gate #1's per-seat scan 40/40
+      (that scope is excluded on the invariance argument) and is caught 40/40
+      from `seat_lines`. The rule for every standing-context arm from here.
+      `docs/changeling-briefing-criterion.md`, `eval.briefing_pair_verdict`, one
+      arm against `cl-rounds2`. Merge queue above.
 - [ ] **A per-seat private notebook - FROZEN 2026-09-02 as a changeling arm,
       unlaunched, on `slice/changeling-notebook` (`bb1e7c5`).** Promoted to
       `core/notebook.py` (two games needed it); `--notebook` on the changeling
@@ -270,9 +276,6 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
       one parlor-shaped question only: whether fallback rate and deduction move
       together or apart across tunes, which is what an RP tune is supposed to buy.
       Serial local lane; `--no-thinking` is a property of the rung, not the bench.
-- [ ] **Let a seat choose to speak rather than be scheduled to.** The same ask as
-      the turn-taking row above - bidding, or random active-seat with an idle
-      action - and it should be taken as ONE arm with it, not twice.
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. A changeling heuristic rung
@@ -295,10 +298,16 @@ Spikes and unbuilt arms:
       was model capability: identical prompts, -0.2% on the 12B against +66% on
       120B-class. `--simultaneous` is built and unmeasured; the salience line has
       no measured benefit anywhere and is a removal candidate.
-- [ ] **Turn-taking has FOUR options, not two** - cabal's fixed order, the
-      built-but-unmeasured `--simultaneous`, bidding for the right to speak, and
-      random active-seat selection with a non-advancing idle action, which is the
-      cheapest. Worth one paired arm if table talk ever needs to carry evidence.
+- [ ] **Turn-taking - the random-active arm is FROZEN 2026-09-02 (S27),
+      unlaunched, on `slice/fanout-s27` (`c2c68ad`).** `--turns random-active`:
+      a round is a budget of n turns, the floor drawn with replacement from the
+      seed's own stream, the active seat offered an idle `listen`. Two
+      referee strings move, the opening event and the active ask - the event had
+      to, or the referee would say "seat 0 first" of a random floor; the test
+      whitelists exactly that line. `docs/changeling-turns-criterion.md`,
+      `eval.turns_pair_verdict`, one arm against `cl-rounds2`. Merge queue above.
+      Still unmeasured: cabal's `--simultaneous` and bidding; if either is ever
+      run on changeling it shares this criterion's shape, not a second one.
 - [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
       the `action_prompt` if-chain, and `ACTION_KEYS`. `docs/action-channel.md`.
 
