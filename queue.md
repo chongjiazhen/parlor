@@ -222,8 +222,9 @@ Rules and setup changes, each of which re-baselines what runs under it:
 
 - [ ] **Evil over-sabotages** - 41% of sunk missions hand over the pair for free.
       **Two fixes, NOT one, and keeping them apart is the whole judgement:**
-      (a) **disclose `need`** is a harness BUG - public rules information withheld
-      from the ask - and lands unconditionally and alone; (b) **naming the partner**
+      (a) **disclose `need`** was a harness BUG and LANDED in `c43274e` - the
+      MISSION ask states the threshold; this row kept saying it was open. What
+      remains is (b) only: **naming the partner**
       is a HINT and the one measurement on this exact move says it HURTS on q36.
       This is also a confound in gate #3a: expect discrimination to DROP, and
       that drop is a truer number.
