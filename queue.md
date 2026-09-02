@@ -177,9 +177,14 @@ fallback rates, and landed between campaigns rather than into one:
       default is pinned to a hash computed before the table and mutation-checked.
       One new run against `cl-rounds2`, PRIMARY statistic the refusal rate;
       `docs/changeling-phrasing-criterion.md`, `eval.phrasing_pair_verdict`.
-      Merge queue above. Left out on purpose: `core/replies.py`'s parser
-      complaints, shared by five games, so a positive seat gets a positive
-      wrapper around an as-is complaint - biases toward NOT SHOWN, its own arm.
+      Merge queue above. **The parser's complaints were left out and are now
+      IN, `99bdc68` on `slice/fanout-replies`**: `core/replies.py` holds a
+      `Complaints` table of eight, default pinned to a sha256 computed before
+      the table, and the other four games are pinned through their own parse
+      paths rather than by a default nobody exercises. Found in wiring it -
+      `Phrasing.retry` had a golden hash and no consumer, so the positive arm
+      was shipping the as-is retry sentence. Criterion amended before launch:
+      seventeen strings, one variable, and it freezes at launch.
 - [ ] **Does the standing frame belong in the PAYLOAD? `--briefing` - FROZEN
       2026-09-02 (S21), unlaunched, on `slice/fanout-s21` (`c298173`).** The
       frame is 553 bytes on a 1620-byte render, off by default and byte-identical
