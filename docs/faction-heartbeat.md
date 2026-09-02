@@ -115,3 +115,36 @@ is what game #2 inherits, and promotion waits on evidence that a second game nee
 it. No game in the tree has a faction, the RPG rung that would is not built, and a
 scheduler written speculatively into the primitive layer is the hardening this file
 exists to warn about.
+
+## Built 2026-09-02 - what the spike found
+
+`games/heartbeat/` is the cheapest version above, built S24 and scored on the one
+question. **The snapshot audit is sound at this size.** Each render carries the
+entitlement snapshot taken in the same step it was built - tick, the facts that
+existed, and what each seat held - and `audit(render, snapshot)` takes those two
+things and nothing else. Fixture (`test_fixture_counts_caught_against_missed`):
+six leaks injected at ticks 2-7, four of whose facts went public at t+1 by a
+route the faction did not own. **Snapshot audit: 6 of 6 caught. Recompute at end
+of run: 4 of 6 missed, 2 caught** - the two whose facts never went public. The
+first version of the loop audited at the end against the world as it then stood,
+and the guard test went red against it; that red run is the mutation check, and
+it was repeated by hand after the fix.
+
+Two things the build settled beyond the note:
+
+- **A fact's statement must carry its own sentinel**, and `World.add_fact`
+  refuses one that does not. The first guard fixture leaked a statement whose
+  term was not in it, and the leak audited clean with the snapshot in place - a
+  fact the matcher cannot see leave is unaudited whatever the snapshot says.
+- **The clock is `random.Random(f"schedule:{seed}")` and nothing else.** Records
+  are byte-identical across two runs at one seed; no record field names a time,
+  a pid or a process, so the deployment question stays a deployment question.
+
+**Promotion evidence, not promotion.** The heartbeat imports `WorldFact`,
+`find_fact_leaks` and `check_facts` from `games/durf/facts.py` - it is the second
+consumer of the fact-keyed adapter, which is what the `core/` invariant asks for
+before a thing moves. It stays in `games/durf/` until a slice moves it; nothing in
+`core/`, no game's `Phase` enum, `action_prompt` chain or `ACTION_KEYS` was
+touched. Faction decisions are tallied in their own `Tally` with their own
+fallback rate; there are no seat decisions in the spike to pool them with, and
+the seam (`Policy.choose`) is where a model policy would drop in.
