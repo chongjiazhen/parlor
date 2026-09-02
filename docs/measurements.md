@@ -562,6 +562,19 @@ referee quality, deduction, deception or wins; players were random on both sides
 and the win split (control good 55.76%, model 54.05%) is the deal plus the
 model's setup choices, which this arm did not grade.
 
+## belfry night coherence, prior WITHHELD - launched 2026-09-02, VOID at 400/1000
+
+Recipe `eval/runs/belfry-night-noprior.cmd`, criterion
+`docs/belfry-night-noprior-criterion.md`, seeds 13000..13999. Control 1000/1000
+in 34 s. The model arm played 399 games at 0 fallback and raised gate #1 on the
+400th: `LeakDetected: [(3, 2, 'seat 2 is the Fiend')]`, seed 13400. Reproduced
+deterministically: a night-3 lie to the sot named the heir as the Fiend, the
+heir succeeded on night 5, and the audit found the lie true against the
+current grimoire. No summary was written, so the verdict tool cannot print its
+arithmetic; the arm is VOID by row count and the finding is a queue row. The
+gate did what it is for: it raised, and nothing under it was published.
+Stamped 2026-09-02T04:14:14Z.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost
