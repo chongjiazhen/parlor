@@ -17,6 +17,12 @@ Two channels leave this module, and the difference is the whole point:
     (``render_context(seat, include_speech=False)``). What never enters either
     channel is a player's private reasoning: ``speak()`` takes exactly the one
     string the player nominated as public.
+
+One more channel has exactly two readers. ``conference`` is what the evil pair
+say to each other once good holds three missions and before the hunter names.
+It is rendered to the pair and to nobody else; the audit treats every line of it
+as a secret of its speaker (``games/cabal/audit.py``), so a byte of it reaching
+any other seat is a gate #1 failure, not a rules quirk.
 """
 
 from __future__ import annotations
@@ -35,6 +41,7 @@ class Phase(Enum):
     DISCUSS = "discuss"
     VOTE = "vote"
     MISSION = "mission"
+    CONFER = "confer"
     HUNT = "hunt"
     DONE = "done"
 
@@ -103,6 +110,14 @@ class CabalReferee:
     notes: dict[int, list[str]] = field(default_factory=dict)
     _pending_speech: list[tuple[str, str]] = field(default_factory=list)
     speech_ptr: int = 0                                  # slots consumed this discussion
+    #: The evil-only conference before the hunt: (speaker, words), one entry per
+    #: seat the night introduced to its partner, in seat order. A channel with
+    #: exactly the pair as readers - rendered to them and to nobody else, and
+    #: audited as a secret of its speaker for every other seat (``audit.py``).
+    #: Player-authored, so it leaves the audit VIEW with speech; the referee's
+    #: frame around it names no seat and no role.
+    conference: list[tuple[int, str]] = field(default_factory=list)
+    confer_ptr: int = 0                                  # conference slots consumed
     max_record_lines: int = MAX_RECORD_LINES
     # ("event", text) referee-authored | ("speech:<seat>", text) player-authored.
     # Order preserved: the record is one interleaved timeline.
@@ -310,6 +325,17 @@ class CabalReferee:
                 lines.append(f"  [{dropped} earlier line(s) trimmed - oldest table "
                              "talk goes first, mission results and votes last]")
             lines += kept
+        # The pair's own channel. Only a conference seat renders it, and it rides
+        # with ``include_speech`` because every word in it is player-authored:
+        # the partner calling a seat the seer is a claim, and the audit view drops
+        # claims. What the audit checks instead is that these bytes reach NO seat
+        # outside the pair - see ``audit.leak_audit``.
+        if include_speech and self.conference and seat in self.conference_seats():
+            lines.append("Your side's conference before the strike (only your "
+                         "side hears this):")
+            for speaker, rendered in self.conference_lines():
+                mine = speaker == seat
+                lines.append(f"  {'(you) ' if mine else ''}{rendered}")
         # Last, so it sits closest to the ask: it is this seat's own carried read,
         # and the thing it was written to survive is the next decision.
         if include_notes and self.notebook and self.notes.get(seat):
@@ -481,11 +507,62 @@ class CabalReferee:
         if sum(1 for r in self.results if not r) >= 3:
             self._win(Team.EVIL, "three missions failed")
         elif sum(self.results) >= 3:
-            self.phase = Phase.HUNT
             self._event("three missions held; the endgame strike is called")
+            self._open_conference()
         else:
             self.phase = Phase.PROPOSE
         return success
+
+    # ---- the conference: the pair's channel before the strike -------------
+
+    def conference_seats(self) -> list[int]:
+        """Who confers, in seat order: every evil seat the night introduced to a
+        partner. Derived from ``known_allies`` rather than from ``Team.EVIL``, so
+        the channel exists exactly between seats that already know each other -
+        under the blind-evil variant the stray is named to nobody and nobody is
+        named to it, and a conference that reached it would itself be the reveal
+        the variant withholds. An empty pair means no conference and the hunt
+        follows the third mission directly.
+        """
+        return sorted(s for s in self.assignment if known_allies(self.assignment, s))
+
+    def conference_lines(self) -> list[tuple[int, str]]:
+        """Each conference entry as the referee renders it, with its speaker. One
+        function, two readers: ``render_context`` shows these lines to the pair,
+        and ``audit.leak_audit`` treats each as a secret of its speaker, so the
+        bytes the audit hunts for are the bytes the pair is shown."""
+        return [(seat, f'seat {seat} confers: "{said}"') for seat, said in self.conference]
+
+    def next_conferrer(self) -> int | None:
+        if self.phase is not Phase.CONFER:
+            return None
+        order = self.conference_seats()
+        return order[self.confer_ptr] if self.confer_ptr < len(order) else None
+
+    def _open_conference(self) -> None:
+        self.confer_ptr = 0
+        self.phase = Phase.CONFER if self.conference_seats() else Phase.HUNT
+
+    def confer(self, seat: int, text: str) -> None:
+        """One seat's words to its own side, before the strike. Same shape as
+        ``speak()`` - normalised, truncated, non-empty, in order - with a different
+        destination: ``conference`` rather than ``public_events``, so it is never a
+        public fact and never table talk. When the last conferrer has spoken the
+        hunt opens."""
+        self._require(Phase.CONFER)
+        expected = self.next_conferrer()
+        if seat != expected:
+            raise IllegalAction(f"seat {expected} confers now, not seat {seat}")
+        said = " ".join(str(text).split())[:MAX_UTTERANCE_CHARS]
+        if not said:
+            raise IllegalAction("a word to your side cannot be empty")
+        self.conference.append((seat, said))
+        self._private_log(f'seat {seat} confers: "{said}"')
+        self.confer_ptr += 1
+        if self.confer_ptr >= len(self.conference_seats()):
+            self.phase = Phase.HUNT
+
+    # ---- the hunt ---------------------------------------------------------
 
     def legal_hunt_targets(self, hunter: int) -> list[int]:
         """Every seat ``hunter`` may name, in seat order.
@@ -644,6 +721,18 @@ class CabalReferee:
                 f"number of fails becomes public. {rule} {stake}\n"
                 f'Format: {{{scratch}, "card": "success"|"fail"}}'
             )
+        if p is Phase.CONFER:
+            others = [s for s in self.conference_seats() if s != seat]
+            partner = " and ".join(f"seat {s}" for s in others) or "your side"
+            return (
+                f"{head}\nThree missions held, so your side has one strike left. "
+                f"Before it, you and {partner} confer on a channel only your "
+                "side hears; every other seat receives none of it. Tell your side "
+                "which seat you read as the hidden informant and what in the record "
+                "points there, so the strike lands well. One or two short sentences, "
+                f"at most {MAX_UTTERANCE_CHARS} characters.\n"
+                f'Format: {{{scratch}, "say": "<your words to your side>"}}'
+            )
         if p is Phase.HUNT:
             return (
                 f"{head}\nThree missions held, so your side has one strike left: "
@@ -695,6 +784,9 @@ class CabalReferee:
             return sorted(self.assignment)
         if p is Phase.MISSION:
             return sorted(self.proposal)
+        if p is Phase.CONFER:
+            nxt = self.next_conferrer()
+            return [nxt] if nxt is not None else []
         if p is Phase.HUNT:
             return [self.seat_of("hunter")]
         return []

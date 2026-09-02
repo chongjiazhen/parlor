@@ -88,7 +88,7 @@ def parse_action(reply: str, ref: CabalReferee) -> dict:
         if "team" not in obj:
             raise ParseError('missing "team"')
         out["team"] = parse_team(obj["team"], ref.n, size)
-    elif p is Phase.DISCUSS:
+    elif p is Phase.DISCUSS or p is Phase.CONFER:
         said = " ".join(str(obj.get("say", "")).split())
         if not said:
             raise ParseError('missing "say" (an empty utterance is not a move)')
@@ -138,6 +138,13 @@ class RandomPolicy:
         if p is Phase.MISSION:
             evil = ref.assignment[seat].team is Team.EVIL
             return {"card": evil and self.rng.random() < self.fail_rate}
+        if p is Phase.CONFER:
+            # legal noise to its own side: a seat it may name in the hunt, or
+            # nothing - the control has no read to share.
+            return {"say": self.rng.choice([
+                "I have no read on where the informant sits.",
+                f"Seat {self.rng.choice(ref.legal_hunt_targets(seat))} is my guess.",
+            ])}
         if p is Phase.HUNT:
             # uses only what this seat is entitled to know: itself, and the fellow
             # evil the night named. `1/len` of this set is the chance baseline gate
@@ -383,6 +390,8 @@ def played_summary(phase: Phase, action: dict) -> str:
         return "approve" if action.get("vote") else "reject"
     if phase is Phase.MISSION:
         return "plays FAIL" if action.get("card") else "plays success"
+    if phase is Phase.CONFER:
+        return "confers"
     if phase is Phase.HUNT:
         return f"names seat {action.get('target')}"
     return phase.value
@@ -430,6 +439,11 @@ class GameRecord:
     #: ``think`` is discarded by the driver and is in neither channel, and a seat's
     #: notebook is in neither either - it goes back only to the seat that wrote it.
     public_events: list[tuple[str, str]] = field(default_factory=list)
+    #: The evil pair's conference before the hunt, (speaker, words) in order. A
+    #: channel with two readers, kept apart from ``public_events`` so nothing that
+    #: renders the public record can pick it up by accident; the transcript shows
+    #: it referee-side, beside the assignment reveal.
+    conference: list[tuple[int, str]] = field(default_factory=list)
     #: Referee-side log: the deal, the win reason, every public event. Never shown
     #: to a seat - this is the document a human reads after the game.
     log: list[str] = field(default_factory=list)
@@ -553,6 +567,11 @@ def play_game(
             cards = {s: decide(s)["card"] for s in sorted(ref.proposal)}
             rec.fails_played += sum(1 for c in cards.values() if c)
             ref.mission(cards)
+        elif ref.phase is Phase.CONFER:
+            seat = ref.next_conferrer()
+            action = decide(seat)
+            # as with speech: only "say" crosses, and here it crosses to the pair
+            ref.confer(seat, action["say"])
         elif ref.phase is Phase.HUNT:
             hunter = ref.seat_of("hunter")
             target = decide(hunter)["target"]
@@ -571,6 +590,7 @@ def play_game(
     rec.missions = list(ref.results)
     rec.reason = ref.log[-1] if ref.log else ""
     rec.public_events = list(ref.public_events)
+    rec.conference = list(ref.conference)
     rec.log = list(ref.log)
     rec.theme = ref.theme.name
     seen: list[str] = []
