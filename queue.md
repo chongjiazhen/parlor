@@ -316,11 +316,11 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       2026-09-02 by reading them against the rungs that landed after them. Done
       when each doc states the position the measurement supports, with the
       superseded reading kept and dated rather than deleted.
-      **(a) `docs/action-channel.md:84` says gate #1 "does not survive a model
+      **(a) `docs/action-channel.md:82` says gate #1 "does not survive a model
       DM"**, written 2026-08-25 from a design read, with "the innkeeper looks
       nervous" as a leak carrying zero substring overlap. The DURF campaign then
       measured it: gate #1 HELD 91/100, then 99/100 under the topology edits, and
-      `durf-rung.md:809` decides the opposite call - a declared fact is entitled
+      `docs/durf-rung.md:811` decides the opposite call - a declared fact is entitled
       by definition, the audit is correctly silent, and the forward-reveal
       behaviour is a COUNT with no criterion. The innkeeper case is the one the
       count covers, not a leak: a GM that infers a nervous novice and telegraphs
@@ -328,7 +328,7 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       which is the real open question and is not what the 08-25 paragraph says.
       **(b) `docs/open-arms.md` §While the card is busy rejects Secret Hitler as
       "the same rung as cabal ... its policy deck is more rules, not a different
-      knowledge model."** `games/quorum/RULES.md:10` opens "Modelled on Secret
+      knowledge model."** `games/quorum/RULES.md:11` opens "Modelled on Secret
       Hitler" and argues at length that it IS a different knowledge model -
       entitlement cascades over an object created in play, keyed to a rotating
       office, and the proposer's discard is an entitlement that EXPIRES one step
