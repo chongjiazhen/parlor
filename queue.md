@@ -157,6 +157,23 @@ the one that goes stale.
       control JSONs turned 8 skips into 6 failures and 3 errors, and moving them
       aside restored the tail. Fix per-record, not per-directory. Done when a fresh
       worktree can write a record and the suite tail stays green.
+- [ ] **Gate #3's bar is computed on two different deals and the arm-level
+      verdict flips between them.** `eval.run_changeling._chance` weights the
+      run's OWN deal by all villager votes; `skin_pair_verdict.REFERENCE_CHANCE`
+      is 35.84%, the same estimator frozen off the n=4000 sweep. Measured on the
+      skin pair 2026-09-02: both llm arms and the control's first 200 games are
+      seed-identical (251 blind votes, dawn mix 4/92/104), so the only reason the
+      in-run log printed 36.47% and the tool 35.84% is that the control pooled
+      1000 games. On those 200 deals `s5_verdict.blind_chance` - the gate's own
+      stratum - is 35.46%, and the seed-matched random control MEASURED 34.26%
+      [28.67%, 40.33%]. `greek-named`'s Wilson floor is 35.90%: HOLDS against the
+      criterion's bar, NOT SHOWN against the log's, by 0.06%. The pair figure is
+      untouched - identical deals, the bar cancels - so nothing published moves.
+      Do NOT promote `blind_chance`: s5_verdict already refuses it as choosing
+      the statistic with the numbers in view. Done when one bar is named for the
+      arm-level gate and `_chance`'s printed line stops claiming a verdict the
+      criterion never gave it. `rounds_pair_verdict` imports `own_bar` and reads
+      the live chain, so it inherits this.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
@@ -271,7 +288,9 @@ Runs that are frozen and want card:
       audit's third scan is graded, is `docs/faction-heartbeat.md` §Seated in
       belfry, on the branch. Open, each its own row when taken: the rumour rule is
       LINEAR on a circular table, and at 5 seats most scheduled beats never fire.
-      Entry condition: the merge list above.
+      Entry condition was written as the merge list; it is in fact link 3 of
+      the launched chain and runs AHEAD of the ranked arms. The GPU order's
+      ~20 h chain estimate counts it, so the chain is not drift - this row was.
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
 measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
