@@ -575,6 +575,39 @@ arithmetic; the arm is VOID by row count and the finding is a queue row. The
 gate did what it is for: it raised, and nothing under it was published.
 Stamped 2026-09-02T04:14:14Z.
 
+## belfry night coherence, prior WITHHELD - READ 2026-09-02, COHERENT and NEEDS MEMORY
+
+Rendered record: [`transcripts/belfry-night-noprior.md`](../transcripts/belfry-night-noprior.md).
+The relaunch under the succession fix (`819963d`) ran the frozen pair on seeds
+13000..13999, model arm 2969 s on local `qwen36-35b-a3b-iq3` at temperature 0.0
+with `--adjudicator-night --adjudicator-night-no-prior`, control 30 s. Player
+fallback 0/166782 (0.00%) control and 0/167780 (0.00%) model; adjudicator
+fallback 0/2335 (0.00%), recovered 23. Every non-fallback gauge choice was
+served by `qwen36-35b-a3b-iq3`. All 1000 control rows and the 399 completed
+model rows are byte-identical to the void run; game 400 is the leak board with
+the lie now naming the Witness.
+
+The control produced 159 pairs and held the lie on 81 (**50.94%**, Wilson
+[43.24%, 58.60%]), containing one half: instrument passes. The model arm
+produced 122 pairs and held the lie on 94 (**77.05%**, Wilson [68.83%, 83.62%],
+bootstrap-by-game 2.5th percentile 68.75%). Both floors clear one half:
+**COHERENT**. Against the supplied-prior read's 152/163 (Wilson lower endpoint
+88.32%) the withheld arm's upper endpoint is 83.62%: **NEEDS MEMORY**. Counts
+re-derived from the JSONL matched the verdict tool.
+
+**What it says.** With no channel to its earlier telling, the model's false
+count is mostly a content function of the board: three in four pairs hold
+without a reminder, well above the one half a position-picker would score.
+And the reminder is load-bearing: supplied `prior` moved coherence from 77% to
+93% on non-overlapping intervals, so the referee's consistency is partly the
+harness's memory and partly the model's own policy. This bounds "oversees
+without micromanaging" for this model at "consistent when reminded, mostly
+consistent unaided", and says nothing about a referee that keeps its own memory
+across calls, because no arm gives it one. The model side also produced fewer
+false tellings (384 against 460) and fewer pairs (122 against 159): its setup
+choices move which seats are switched off, and the pair count is its own, as
+the criterion said it would be.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost

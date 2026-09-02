@@ -104,9 +104,11 @@ PLAY-TIME discretion arm** - the false count a switched-off gauge is told, held
 across nights - `docs/belfry-night-coherence-criterion.md`, recipe
 `eval/runs/belfry-night.cmd`, READ 2026-09-02 **COHERENT**: the model held the
 lie on 152/163 pairs (93.25%, Wilson floor 88.32%) against a control at 84/158
-(53.16%, containing one half), 0.00% fallback on every side -
-`docs/measurements.md` §belfry night coherence. Its follow-up, the arm that
-withholds `prior`, is a row below.
+(53.16%, containing one half), 0.00% fallback on every side. Its follow-up with
+`prior` withheld READ the same day **COHERENT and NEEDS MEMORY**: 94/122
+(77.05%, Wilson [68.83%, 83.62%]) against a control at 81/159, below the
+supplied read on non-overlapping intervals - `docs/measurements.md` §belfry
+night coherence, both sections. Nothing on this axis is in flight.
 **While a run is in flight**, the standing
 menu of what a session can still do is `docs/open-arms.md` §While the card is
 busy; its reusable half is that an instrument scored against records that already
@@ -126,16 +128,6 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
-- [ ] **Belfry night coherence with `prior` WITHHELD - RELAUNCHED 2026-09-02
-      under the succession fix (`819963d`), IN FLIGHT.** Criterion
-      `docs/belfry-night-noprior-criterion.md`, recipe
-      `eval/runs/belfry-night-noprior.cmd`, verdict `eval.belfry_night_verdict
-      --criterion withheld`. The first launch died at game 400 on gate #1
-      (seed 13400: a night-3 lie named the heir as the Fiend, the heir
-      succeeded on night 5) and is VOID; the fix is the referee's, a minion is
-      never lied about as the demon, so both arms re-run and the 2026-09-02
-      supplied-prior read stays a dated read under the older lie space. The
-      read lands in `docs/measurements.md`.
 
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes

@@ -98,7 +98,7 @@ partly true is worse than none.
   Chance is exactly one half per pair. Arithmetic `eval.belfry_night_verdict`.
 - `docs/belfry-night-noprior-criterion.md` - its follow-up, the same ask with
   `prior` withheld: grades whether the false count is a content function of the
-  board. `eval.belfry_night_verdict --criterion withheld`. Built, unrun.
+  board. `eval.belfry_night_verdict --criterion withheld`. READ 2026-09-02.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
