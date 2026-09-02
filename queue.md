@@ -92,7 +92,6 @@ should launch first and spend the wait on a CPU slice.
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
 | **S22** | **Changeling discussion-length arm.** Bind one extra discussion-round comparison without changing deck, wording or scorer. | judgment | codex | a post-S14 baseline/criterion exists | paired recipe and criterion, ready to launch |
-| **S26** | **Solver-seat control read.** Measure SolverPolicy versus random only where its entitled VOTE evidence can differ; no model and no cabal gate reopening. **Blocked on an instrument gap:** `SolverPolicy` defers to its fallback for every non-VOTE phase and every mixed posterior, and those draws route around `LLMPolicy`'s counter - so `--arm solver` reports `0.00%` fell back over 429 decisions most of which WERE random, and the gate prose calls the arm "played at random". The mechanical-vs-deferred split has to be counted before the read means anything. | judgment | codex | `--arm solver` runs - **met**; deferred-decision count does not exist | control recipe, result, the mechanical/deferred split, and fallback rate, scoped as policy evidence |
 | **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | judgment | codex | no changeling arm in flight | criterion, exact payload delta and audit tests |
 
 **Direction, called 2026-08-27 against the literature** (argument off-repo): gate
@@ -240,6 +239,14 @@ Spikes and unbuilt arms:
       derives from the game seed - a wall-clock actor voids the seed invariant.
       One new gate #1 failure and it is silent: audit a render against the
       entitlement snapshot taken when it was BUILT.
+- [ ] **The solver on GOOD seats only, random evil - the control S26 points at
+      and does not exist.** S26 read `--arm solver` with the solver on every
+      seat: 30.95% of votes proved, good wins 17.25% against random's 34.00%,
+      because evil seats vote mechanically AGAINST their own team and every
+      tainted team is rejected, so no mission ever fails. `LIVE_TEAMS` and
+      `build_policies` seat the solver everywhere; the arm that seats it on good
+      alone is where that artefact stops. `docs/measurements.md` §2026-09-02
+      (S26), `transcripts/cabal-solver-control.md`. CPU only, seeds fresh.
 - [ ] **Seat the heuristic against the MODEL** - a table with heuristic and LLM
       seats, the arm that does not exist. Read the artifact warning in
       `docs/measurements.md` §Measured first: the all-heuristic arm's 99.5%

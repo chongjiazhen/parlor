@@ -71,7 +71,7 @@ if errorlevel 1 (
     echo [pair] Both arms or the pairing is lost, and a lone after arm buys nothing.
     echo [pair] Read %BEFORE%\%OUTDIR%\%TAGB%.log for what happened.
   )>>"%PAIRLOG%"
-  echo PARLOR PAIR DONE rc=1 arms=1/2>>"%PAIRLOG%"
+  echo PARLOR PAIR DONE rc=1 arms=1/2 >>"%PAIRLOG%"
   exit /b 1
 )
 
@@ -88,9 +88,9 @@ call "%~dp0changeling-local.cmd" %TAGA% %GAMES% %SEED% %MODEL% llm
 findstr /c:"PARLOR DONE rc=0" "%OUTDIR%\%TAGA%.log" >nul
 if errorlevel 1 (
   echo [pair] arm 2 did not write PARLOR DONE rc=0 - the pair is incomplete.>>"%PAIRLOG%"
-  echo PARLOR PAIR DONE rc=1 arms=1/2>>"%PAIRLOG%"
+  echo PARLOR PAIR DONE rc=1 arms=1/2 >>"%PAIRLOG%"
   exit /b 1
 )
 
 echo [pair] both arms down %DATE% %TIME%>>"%PAIRLOG%"
-echo PARLOR PAIR DONE rc=0 arms=2/2>>"%PAIRLOG%"
+echo PARLOR PAIR DONE rc=0 arms=2/2 >>"%PAIRLOG%"
