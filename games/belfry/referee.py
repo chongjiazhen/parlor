@@ -50,7 +50,8 @@ from games.belfry.night import Reveal
 from games.belfry.roles import (DISTRIBUTION, FIRST_NIGHT, OTHER_NIGHT,
                                 ROLES, Align, Script, Team)
 from games.belfry.roles import DEFAULT_SCRIPT
-from games.belfry.state import Adjudicator, Grimoire, deal
+from games.belfry.state import (Adjudicator, Grimoire, deal,
+                                _record_adjudicator_events)
 
 
 class Phase(Enum):
@@ -162,6 +163,13 @@ class BelfryReferee:
 
     knowledge: dict[int, list[Reveal]] = field(default_factory=dict)
     entitled: dict[int, set[int]] = field(default_factory=dict)
+    #: Kept past the deal for PLAY-TIME discretion (RULES §Discretion names it
+    #: a variant axis). ``None`` is the seeded referee throughout.
+    adjudicator: Adjudicator | None = None
+    #: Every count the gauge was told, per seat, in order - truthful or not, and
+    #: over which living neighbours. Referee-side and transcript-only; the
+    #: night-coherence scorer reads this one field on BOTH arms.
+    gauge_told: dict[int, list[dict]] = field(default_factory=dict)
     public_events: list[tuple[str, str]] = field(default_factory=list)
     referee_log: list[str] = field(default_factory=list)
 
@@ -205,8 +213,9 @@ class BelfryReferee:
         rng = random.Random(seed)
         grim = deal(n, script, rng, adjudicator)
         ref = cls(grim=grim, rng=rng, discussion_rounds=discussion_rounds,
-                  max_days=max_days)
+                  max_days=max_days, adjudicator=adjudicator)
         ref.knowledge = {s: [] for s in range(n)}
+        ref.gauge_told = {s: [] for s in range(n)}
         # A seat is entitled to its own role - except the one seat that is wrong
         # about itself, which must never read its own truth. Same belief/truth
         # split `changeling` is built on, arriving here through a different door.
@@ -323,7 +332,7 @@ class BelfryReferee:
         elif key == "tally":
             self._reveal(seat, nightinfo.tally(grim, rng, seat, day))
         elif key == "gauge":
-            self._reveal(seat, nightinfo.gauge(grim, rng, seat, day))
+            self._reveal(seat, self._gauge(seat, day))
         elif key == "mimic":
             for r in nightinfo.watch_the_board(grim, rng, seat, day):
                 self._reveal(seat, r)
@@ -334,6 +343,38 @@ class BelfryReferee:
                 self._reveal(seat, nightinfo.name_role(
                     grim, rng, seat, day, self.executed_today,
                     "Yesterday's execution: seat {seat} is the {role}."))
+
+    def _gauge(self, seat: int, day: int) -> Reveal:
+        """The gauge's count, with the false one routed through the adjudicator
+        when there is one. The prior tellings ride in the board so a referee
+        can hold a lie across nights; they are referee-side and never reach a
+        seat. Provenance is read off the adjudicator's own event list, so the
+        row says whether the count was the model's, a fallback's, or the seeded
+        draw's without a second accounting."""
+        adj = self.adjudicator
+        told = self.gauge_told.setdefault(seat, [])
+        choose = None
+        before = len(getattr(adj, "events", ())) if adj is not None else 0
+        if adj is not None:
+            prior = [{"night": t["night"], "neighbours": t["neighbours"],
+                      "count": t["count"], "truthful": t["truthful"]}
+                     for t in told]
+
+            def choose(options, board):
+                return adj.gauge_false_count(options, self.rng,
+                                             {**board, "prior": prior})
+        count, true, neighbours = nightinfo.gauge_count(
+            self.grim, self.rng, seat, day, choose)
+        source = "random"
+        if adj is not None and count != true:
+            events = getattr(adj, "events", [])
+            if len(events) > before:
+                _record_adjudicator_events(self.grim, adj)
+                source = "fallback" if events[-1].fallback else "model"
+        told.append({
+            "seat": seat, "night": day, "neighbours": list(neighbours),
+            "count": count, "truthful": count == true, "source": source})
+        return nightinfo.gauge_reveal(day, count, true)
 
     def _reveal(self, seat: int, r: Reveal) -> None:
         """Write one line into a seat's private knowledge, and grade it.

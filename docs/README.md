@@ -92,6 +92,10 @@ partly true is worse than none.
   finding that made it what it is: belfry's setup discretion has NO board-derived
   quality ordering to grade, so what it grades is whether that discretion follows
   a stated rule. Arithmetic `eval.belfry_steering_verdict --criterion s23`. Unrun.
+- `docs/belfry-night-coherence-criterion.md` - the first PLAY-TIME discretion
+  arm: the false count a switched-off gauge is told, chosen by the model with
+  its prior tellings in view, graded on whether the lie is held across nights.
+  Chance is exactly one half per pair. Arithmetic `eval.belfry_night_verdict`.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

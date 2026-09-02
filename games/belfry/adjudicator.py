@@ -24,6 +24,21 @@ HERRING_STEER_RULE = (
     "number.")
 
 
+#: The play-time rule sent with every false gauge count under ``night=True``.
+#: RULES §Discretion states the position in its own words - a seat told one
+#: thing on Tuesday and another on Wednesday is noise nobody can reason against
+#: - and this is that sentence made into an instruction. Its CONTENT is the
+#: rung's stated position, not a new claim; what the arm measures is whether
+#: the referee's discretion can carry it across nights.
+GAUGE_COHERENCE_RULE = (
+    "This seat's ability is off tonight and it must be told a false count; the "
+    "true count is not on offer. Its owner should be able to build one "
+    "consistent story on what it is told, so if it was told a false count "
+    "before over these same living neighbours, tell it that count again. If "
+    "every earlier telling was true, or its neighbours have changed, either "
+    "offered count will do.")
+
+
 def preferred_herring(seats: int, demon_seat: int, good_seats: list[int]) -> int:
     """The one seat `HERRING_STEER_RULE` names. Deterministic, board-derived, and
     the scorer's whole ground truth - so it lives beside the rule text rather
@@ -82,35 +97,43 @@ class ModelAdjudicator:
     #: order is reproducible by the scorer and unrelated to which option the rule
     #: prefers.
     ask_seed: int | None = None
+    #: Play-time discretion: the false neighbour count a switched-off gauge is
+    #: told, asked with the board, the seat's prior tellings and
+    #: ``GAUGE_COHERENCE_RULE``. Off by default, and off means the seeded draw
+    #: is consumed exactly as with no adjudicator at all - so every setup-only
+    #: arm is byte-identical without it.
+    night: bool = False
     #: Seconds after a TRANSPORT failure, doubling. Same reason as the seats':
     #: retrying instantly burns the budget against an endpoint still throttled,
     #: and lands the choice on random.
     backoff: float = 2.0
 
     def __post_init__(self) -> None:
-        if self.steer is not None and self.ask_seed is None:
-            raise ValueError("a steered adjudicator needs ask_seed: without it "
-                             "the offered order is fixed and a position prior "
-                             "scores against the rule for free")
+        if (self.steer is not None or self.night) and self.ask_seed is None:
+            raise ValueError("a steered or night adjudicator needs ask_seed: "
+                             "without it the offered order is fixed and a "
+                             "position prior scores against the rule for free")
 
-    def _offer(self, key: str, options: list[str]) -> list[str]:
+    def _offer(self, key: str, options: list[str], ruled: bool) -> list[str]:
         """The menu as it goes out. Sorted for the blind ask, seeded-shuffled for
-        the steered one."""
-        if self.steer is None:
+        a ruled one. The key carries the night for a play-time ask, so two asks
+        to the same seat are not offered in the same order."""
+        if not ruled:
             return options
         order = random.Random(f"belfry-ask:{self.ask_seed}:{key}")
         return order.sample(options, len(options))
 
     def choose(self, key: str, options: list[str],
-               board: dict | None = None) -> str:
-        options = self._offer(key, options)
+               board: dict | None = None, rule: str | None = None,
+               offer_key: str | None = None) -> str:
+        options = self._offer(offer_key or key, options, rule is not None)
         ask = {"choice_key": key, "options": options}
-        if self.steer is not None:
+        if rule is not None:
             # Referee-side facts only, and they stay referee-side: this payload
             # reaches no seat ask and neither public channel (RULES §Discretion),
             # which is what lets the referee be told the demon's seat at all.
             ask["board"] = dict(board or {})
-            ask["rule"] = self.steer
+            ask["rule"] = rule
         complaint, rule_refusals = "", 0
         for attempt in range(self.retries + 1):
             # The opening ask is byte-identical to the pre-retry one, so an arm's
@@ -150,7 +173,21 @@ class ModelAdjudicator:
                              board: dict | None = None) -> int:
         del rng
         return int(self.choose("herring_registration",
-                               [str(s) for s in good_seats], board))
+                               [str(s) for s in good_seats], board,
+                               rule=self.steer))
+
+    def gauge_false_count(self, options: list[int], rng: random.Random,
+                          board: dict) -> int:
+        """The false count a switched-off gauge is told. Without ``night`` this
+        is the seeded draw itself, same RNG call, so the record cannot tell an
+        adjudicator that was not asked from no adjudicator."""
+        if not self.night:
+            return rng.choice(options)
+        del rng
+        offer_key = f"gauge_false_count:{board.get('seat')}:{board.get('night')}"
+        return int(self.choose("gauge_false_count", [str(c) for c in options],
+                               board, rule=GAUGE_COHERENCE_RULE,
+                               offer_key=offer_key))
 
     def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
         del rng

@@ -277,6 +277,10 @@ appears only in the referee-side record.
 Each of these is a measured arm, not a convenience:
 
 - **Per-query discretion** for the ambiguous roles (§Discretion).
+- **Play-time discretion on one sentence** - `--adjudicator-night` hands the
+  model the false count a switched-off gauge is told, with the seat's prior
+  tellings, and grades whether it holds the lie across nights
+  (`docs/belfry-night-coherence-criterion.md`). Off, the RNG stream is untouched.
 - **A setup-only model referee** for bounded setup discretion. Its route is
   separate from every player route, its temperature is fixed at 0.0, and its
   private provenance is scored separately from player fallbacks. The paired arm

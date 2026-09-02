@@ -54,6 +54,18 @@ class Adjudicator(Protocol):
         """
         ...
 
+    def gauge_false_count(self, options: list[int], rng: random.Random,
+                          board: dict) -> int:
+        """Play-time: the false neighbour count a switched-off gauge is told.
+
+        ``board`` is referee-side - the seat, the night, its living neighbours,
+        the true count and every count it was told before. It reaches no seat
+        ask and neither public channel. An adjudicator that takes no play-time
+        discretion returns ``rng.choice(options)`` and nothing else, so the
+        seeded draw is consumed exactly as with no adjudicator.
+        """
+        ...
+
     def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
         """Determine if hermit registers as evil and what it appears as.
         

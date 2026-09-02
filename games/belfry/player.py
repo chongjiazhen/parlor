@@ -343,6 +343,11 @@ class GameRecord:
     #: on a table with nothing that switches an ability off, which is what makes it
     #: readable as a check that the stratum below has a sample at all.
     misled: dict[int, int] = field(default_factory=dict)
+    #: Every count the gauge was told, in night order across seats - truthful
+    #: or false, with the neighbours it was counted over and where the count
+    #: came from. Present on every arm, so the night-coherence scorer reads the
+    #: control and the model off one field. Empty on records written before it.
+    gauge_told: list[dict] = field(default_factory=list)
     error: str | None = None
 
 
@@ -456,6 +461,8 @@ def play_game(ref: BelfryReferee, policies: dict[int, object],
     rec.alive = tuple(ref.grim.alive_seats())
     rec.public_events = list(ref.public_events)
     rec.log = list(ref.referee_log)
+    told = getattr(ref, "gauge_told", {})
+    rec.gauge_told = [row for seat in sorted(told) for row in told[seat]]
 
     served: Counter = Counter()
     traces: list[str] = []

@@ -184,16 +184,44 @@ def tally(grim: Grimoire, rng: random.Random, viewer: int, night: int) -> Reveal
                   f"evil.", truthful=count == true)
 
 
-def gauge(grim: Grimoire, rng: random.Random, viewer: int, night: int) -> Reveal:
-    neighbours = grim.living_neighbours(viewer)
+def gauge_count(grim: Grimoire, rng: random.Random, viewer: int, night: int,
+                choose=None) -> tuple[int, int, tuple[int, ...]]:
+    """The count the gauge is told, the true count, and the neighbours it was
+    counted over.
+
+    ``choose(options, board)`` is the play-time discretion seam: given the false
+    counts on offer and the referee-side board, it returns the one to tell.
+    ``None`` keeps the seeded draw, consuming the RNG exactly as before, so an
+    arm built without a chooser is byte-for-byte the arm recorded before this
+    seam existed. The true count is never on the menu, whoever chooses.
+    """
+    neighbours = tuple(grim.living_neighbours(viewer))
     true = sum(1 for s in neighbours if grim.registers_evil(s))
     count = true
     if grim.droisoned(viewer):
-        count = rng.choice([c for c in range(0, 3) if c != true])
+        options = [c for c in range(0, 3) if c != true]
+        if choose is None:
+            count = rng.choice(options)
+        else:
+            count = choose(options, {"seat": viewer, "night": night,
+                                     "neighbours": list(neighbours),
+                                     "true_count": true})
+            if count not in options:
+                raise ValueError(f"the chooser returned {count!r}, not one of "
+                                 f"the offered false counts {options}")
+    return count, true, neighbours
+
+
+def gauge_reveal(night: int, count: int, true: int) -> Reveal:
     return Reveal(night,
                   f"{count} of your two nearest living neighbours "
                   f"{'is' if count == 1 else 'are'} evil.",
                   truthful=count == true)
+
+
+def gauge(grim: Grimoire, rng: random.Random, viewer: int, night: int) -> Reveal:
+    count, true, _ = gauge_count(grim, rng, viewer, night)
+    return gauge_reveal(night, count, true)
 
 
 def divine(grim: Grimoire, rng: random.Random, viewer: int, night: int,
