@@ -136,6 +136,9 @@ partly true is worse than none.
   (30.14%), the power (~272 blind votes at 200 games) and the exact flags; recipe
   `eval/runs/changeling-waker.cmd`. A NEW baseline - nothing on `SETUP_5`
   transfers. Unrun.
+- `docs/group-sequential-criterion.md` - 2026-09-02, S25. A criterion template
+  that may LOOK before the end: Lan-DeMets alpha spending, OBF-type by default,
+  worked for the next changeling campaign. `eval/sequential.py`. No old record is re-read under it.
 - `docs/gate3-modelling-review.md` - the 2026-08-26 review that sharpened the old
   blind gate, closed on all six items. **Read its header before its body** - its
   line citations are stale.
