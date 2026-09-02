@@ -517,6 +517,36 @@ establishes no choice quality, no referee quality, deduction, deception or wins,
 and the rule's content is a probe rather than a claim about good refereeing
 (`docs/decisions.md` §Belfry's setup discretion has no quality axis).
 
+## belfry night coherence - the first play-time discretion arm, READ 2026-09-02
+
+Rendered record: [`transcripts/belfry-night-coherence.md`](../transcripts/belfry-night-coherence.md).
+The frozen pair ran 1000 nine-seat compact random-player games on seeds
+12000..12999, model arm 3058 s on local `qwen36-35b-a3b-iq3` at temperature 0.0
+with `--adjudicator-night`; the seeded-random control ran the same recipe in
+35 s. Player fallback was 0/168234 (0.00%) on the control and 0/168786 (0.00%)
+on the model arm. Model-adjudicator fallback was 0/2403 (0.00%), recovered
+35/2403. Every non-fallback gauge choice was served by `qwen36-35b-a3b-iq3`.
+
+The unit is a pair: two consecutive false tellings to the same switched-off
+gauge over the same living neighbours. Chance per pair is exactly one half. The
+control produced 158 pairs and held the lie on 84 (**53.16%**, Wilson
+[45.40%, 60.78%]), an interval that contains one half, so the instrument control
+passes. The model arm produced 163 pairs and held the lie on 152 (**93.25%**,
+Wilson [88.32%, 96.19%], bootstrap-by-game 2.5th percentile 86.90%). Both floors
+clear one half: **COHERENT**. The counts were re-derived from the JSONL by a
+separate pass and matched the verdict tool exactly.
+
+**What it says, and the ceiling on it.** A bounded play-time choice can be held
+to a stated policy across calls when the referee hands the model its own prior
+tellings in the ask. It broke the lie on 11 of 163 pairs, so "oversees without
+micromanaging" is evidenced as a strong tendency, not as a rule the referee can
+be relied on never to break. The memory was supplied, not kept: nothing here
+says the model would hold a lie it had to remember unaided, and the arm that
+withholds `prior` is the one that would measure that. It is not a claim about
+referee quality, deduction, deception or wins; players were random on both sides,
+and the win split (control good 55.76%, model 54.05%) is the deal plus the
+model's setup choices, which this arm did not grade.
+
 ## Route: local IS the gate lane - corrected 2026-08-28
 
 This section read "local is for spot-checks, not for gates", priced when a game cost

@@ -102,9 +102,11 @@ against 3-4 discretion-heavy characters, not a whole roster, and not Secret
 Hitler, which is cabal's rung again. **Taken 2026-09-02 as belfry's first
 PLAY-TIME discretion arm** - the false count a switched-off gauge is told, held
 across nights - `docs/belfry-night-coherence-criterion.md`, recipe
-`eval/runs/belfry-night.cmd`, IN FLIGHT; the read lands in
-`docs/measurements.md`. Its follow-up, the arm that withholds `prior`, is named
-in the criterion's last section and becomes a row once this one is read.
+`eval/runs/belfry-night.cmd`, READ 2026-09-02 **COHERENT**: the model held the
+lie on 152/163 pairs (93.25%, Wilson floor 88.32%) against a control at 84/158
+(53.16%, containing one half), 0.00% fallback on every side -
+`docs/measurements.md` §belfry night coherence. Its follow-up, the arm that
+withholds `prior`, is a row below.
 **While a run is in flight**, the standing
 menu of what a session can still do is `docs/open-arms.md` §While the card is
 busy; its reusable half is that an instrument scored against records that already
@@ -124,6 +126,13 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
+- [ ] **Belfry night coherence with `prior` WITHHELD.** The 2026-09-02
+      COHERENT read had the referee hand the model its own earlier tellings in
+      every ask, so it measured compliance with supplied memory. The arm that
+      measures memory sends the same ask minus `prior`; reasoning is the last
+      section of `docs/belfry-night-coherence-criterion.md`. New criterion and
+      moved seeds before launch; the comparison is 93.25% with `prior` in view,
+      chance stays one half. **Entry condition: no arm in flight, GPU free.**
 - [ ] **A DURF fact's term is guarded only against OTHER facts' text.**
       Found building S24: `check_facts` refuses a term that appears in another
       fact's statement, but a fact whose own statement lacks its sentinel leaves
