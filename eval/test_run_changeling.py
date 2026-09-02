@@ -21,6 +21,7 @@ import unittest
 import eval.run_changeling
 import eval.run_cabal
 from core.runlog import record_paths
+from eval.gate3_bar import REFERENCE_CHANCE
 from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
 from games.changeling.referee import ChangelingReferee
@@ -145,17 +146,38 @@ class TestVerdicts(unittest.TestCase):
         self.assertIn("VOID", text)
         self.assertNotIn("gate #3 HOLDS", text)
 
-    def test_gate2_stays_unreadable_while_gate3_is_at_chance(self):
-        text = report(self.s, make_args(arm="llm"), 1.0)
-        self.assertIn("gate #3 not shown", text)
-        self.assertIn("Gate #2 is only readable once gate #3 holds", text)
+    def test_the_run_log_CALLS_NO_GATE_however_well_the_blind_stratum_did(self):
+        """2026-09-02: the log called gate #3 off a bar the criterion never gave
+        it. `_chance` is the run's OWN dawn-wolf mix and the criterion's bar is
+        the measured `--arm random` reference, and on the skin pair they were
+        36.47% against 35.84% - `greek-named`'s 35.90% floor HOLDS against one
+        and is NOT SHOWN against the other. The interval is wrong too: the log
+        publishes a BOOTSTRAP over games and the criterion's word is Wilson. A
+        run log has neither the bar nor the interval the gate is cut on, so it
+        reports and does not call."""
+        for blind, ci in ((0.9, (0.85, 0.95)), (0.2, (0.15, 0.25))):
+            g3 = dict(self.s["gate3_deduction"], blind_accuracy=blind,
+                      blind_accuracy_ci95=ci)
+            text = report(dict(self.s, gate3_deduction=g3),
+                          make_args(arm="llm"), 1.0)
+            for claim in ("gate #3 HOLDS", "gate #3 not shown", "gate #2 readable",
+                          "gate #2 not shown"):
+                self.assertNotIn(claim, text, f"blind={blind}: {claim!r}")
 
-    def test_gate3_holding_makes_gate2_readable(self):
-        g3 = dict(self.s["gate3_deduction"], blind_accuracy=0.9,
-                  blind_accuracy_ci95=(0.85, 0.95))
-        text = report(dict(self.s, gate3_deduction=g3), make_args(arm="llm"), 1.0)
-        self.assertIn("gate #3 HOLDS", text)
-        self.assertIn("gate #2 readable", text)
+    def test_the_log_prints_BOTH_bars_and_selects_neither(self):
+        """The discipline `eval.s5_verdict` already applies: every bar on the
+        table against the floor, none quietly selected."""
+        text = report(self.s, make_args(arm="llm"), 1.0)
+        self.assertIn(f"{REFERENCE_CHANCE:.2%}", text)
+        self.assertIn(f"{_chance(self.s):.2%}", text)
+        self.assertIn("eval.gate3_bar", text)
+
+    def test_gate2_is_still_named_as_conditional_on_gate3(self):
+        """The conditionality is a measured fact, not a verdict, so dropping the
+        verdict must not drop it: with voting at chance evil wins ~65% with no
+        deception at all."""
+        text = report(self.s, make_args(arm="llm"), 1.0)
+        self.assertIn("conditional on gate #3", text)
 
     def test_an_empty_blind_stratum_is_REFUSED_not_rendered_as_zero(self):
         g3 = dict(self.s["gate3_deduction"], blind_accuracy=None,

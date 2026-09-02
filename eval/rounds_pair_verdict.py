@@ -22,6 +22,7 @@ from pathlib import Path
 
 from core import integrity
 from core.stats import bootstrap_ci, wilson
+from eval.gate3_bar import own_bar
 from eval.skin_pair_verdict import (
     BLIND,
     Arm,
@@ -29,7 +30,6 @@ from eval.skin_pair_verdict import (
     _excludes_zero,
     accuracy,
     load,
-    own_bar,
     verdict,
 )
 

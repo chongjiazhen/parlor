@@ -40,6 +40,7 @@ from core import integrity
 from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
 from core.runlog import RunState, record_paths, run_with_marker
 from core.stats import bootstrap_ci, wilson
+from eval.gate3_bar import REFERENCE_CHANCE
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
 from games.changeling.referee import ChangelingReferee
@@ -315,23 +316,43 @@ def report(s: dict, args, elapsed: float) -> str:
         return "\n".join(out)
 
     ci = g3["blind_accuracy_ci95"]
-    blind_holds = bool(ci) and ci[0] > _chance(s)
     if args.arm == "random":
         out.append("gate #3 not shown - this IS the chance baseline, so its "
                    "accuracy is the number other runs are read against.")
         out.append("gate #2 not shown - the pack played at random too.")
         return "\n".join(out)
-    if blind_holds:
-        out.append(f"gate #3 HOLDS - blind villager accuracy beats chance "
-                   f"({_chance(s):.2%}) at the CI floor.")
-        out.append(f"gate #2 readable - pack win rate {g2['pack_win_rate']:.2%} "
-                   f"is deception against villagers who can deduce.")
+    # A RUN LOG CALLS NO GATE. It holds neither of the two things the arm-level
+    # gate is cut on: the criterion's bar - `eval.gate3_bar`, the measured
+    # `--arm random` reference with its own-arm clause - where this log has only
+    # its own deal's derived chance, and a WILSON floor where the interval
+    # published above is a bootstrap over games. Measured on the skin pair
+    # 2026-09-02, the two bars were 35.84% and 36.47% on seed-identical deals and
+    # a 35.90% floor landed between them, so the log's verdict and the
+    # criterion's disagreed on the same records. Both bars are printed against
+    # the floor and neither is selected, which is the discipline
+    # `eval.s5_verdict` already applies.
+    floor = ci[0] if ci else None
+    out.append("gate #3 - REPORTED, NOT CALLED. The arm-level verdict belongs to "
+               "the arm's own criterion, read from the record after the run.")
+    if floor is None:
+        out.append("  no blind interval, so there is nothing to read against a "
+                   "bar - see BLIND ACCURACY above.")
     else:
-        out.append(f"gate #3 not shown - blind villager accuracy does not beat "
-                   f"chance ({_chance(s):.2%}) at the CI floor.")
-        out.append("gate #2 not shown - villagers at chance hand the pack a win "
-                   "rate with no deception in it. Gate #2 is only readable once "
-                   "gate #3 holds.")
+        for bar, label in ((REFERENCE_CHANCE,
+                            "the criterion's bar - measured --arm random n=4000, "
+                            "with the own-arm clause (eval.gate3_bar)"),
+                           (_chance(s),
+                            "this run's OWN deal, derived from its dawn-wolf mix "
+                            "- a diagnostic, never the gate's bar")):
+            out.append(f"  {bar:.2%}  {label}")
+            out.append(f"          bootstrap floor {floor:.2%} "
+                       f"{'clears' if floor > bar else 'does NOT clear'} it")
+        out.append("  and the criterion's word is WILSON - the interval above is "
+                   "a bootstrap over games, so even the floor is the wrong one.")
+    out.append(f"gate #2 - REPORTED, NOT CALLED, and conditional on gate #3: with "
+               f"voting at chance the pack wins ~65% with no deception in it. "
+               f"Pack win rate {g2['pack_win_rate']:.2%}, a rate with no verdict "
+               f"in it.")
     return "\n".join(out)
 
 
