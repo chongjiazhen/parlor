@@ -82,15 +82,27 @@ class SolverPolicy:
     """
 
     fallback: RandomPolicy
+    #: How the most recent decision was made: ``"mechanical"`` when the hard
+    #: constraints proved the vote, ``"deferred"`` when the fallback drew it. The
+    #: driver reads this the way it reads ``LLMPolicy.last_fell_back`` - but it is
+    #: a different fact. A deferred draw is not a fallback: nothing failed, the
+    #: policy has no opinion outside a provable VOTE and never claimed one. Without
+    #: this field a solver run reported 0.00% fallback over decisions most of which
+    #: the random policy played, and "played at random" and "played mechanically"
+    #: were indistinguishable in the record.
+    last_solver_mode: str = ""
 
     def act(self, ref: CabalReferee, seat: int) -> dict:
+        self.last_solver_mode = "deferred"
         if ref.phase is not Phase.VOTE:
             return self.fallback.act(ref, seat)
         taint = team_taint(evidence_from_referee(ref, seat),
                            tuple(ref.proposal or ()))
         if taint == 0.0:
+            self.last_solver_mode = "mechanical"
             return {"vote": True}
         if taint == 1.0:
+            self.last_solver_mode = "mechanical"
             return {"vote": False}
         return self.fallback.act(ref, seat)
 

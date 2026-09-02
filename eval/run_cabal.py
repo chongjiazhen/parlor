@@ -516,6 +516,25 @@ def score(records: list[GameRecord]) -> dict:
         # how two runs come to void differently. Caused vs witnessed, the recovered
         # third outcome and the clean-game count all live there.
         "integrity": integrity.summarise(records, trace_lines=6),
+        # The solver arm's split (S26), beside the integrity block and never inside
+        # it: a deferred draw is a decision the policy handed to random because it
+        # had no proof, not one that failed. Cabal-only, because the solver is.
+        "solver": solver_split(records),
+    }
+
+
+def solver_split(records: list[GameRecord]) -> dict:
+    """Mechanical versus deferred decisions across a run, with the mechanical
+    share - or ``None`` for the share when no seat was a solver, the same refusal
+    ``wilson`` makes: "0.00% mechanical" reads as a solver that never proved a
+    vote, when what happened is that no solver sat."""
+    mechanical = sum(getattr(r, "solver_mechanical", 0) for r in records)
+    deferred = sum(getattr(r, "solver_deferred", 0) for r in records)
+    total = mechanical + deferred
+    return {
+        "mechanical": mechanical,
+        "deferred": deferred,
+        "mechanical_share": mechanical / total if total else None,
     }
 
 
@@ -560,6 +579,14 @@ def report(s: dict, args, elapsed: float) -> str:
         + ")",
         "",
     ] + integrity.report_lines(integ)
+    split = s.get("solver") or {}
+    solver_seated = split.get("mechanical_share") is not None
+    if solver_seated:
+        lines.append(
+            f"  solver     {split['mechanical']} decisions proved mechanically "
+            f"({split['mechanical_share']:.2%}), {split['deferred']} deferred to "
+            "random - a deferred draw is not a fallback, nothing failed; only a "
+            "provable VOTE is ever mechanical")
     if fr > integrity.VOID_BAR:
         lines.append("  WARNING: >10% of decisions were random. These numbers are "
                      "not a measurement of the model.")
@@ -625,7 +652,15 @@ def report(s: dict, args, elapsed: float) -> str:
            else f"{'beats' if n_3b else 'does not beat'} chance "
                 f"({baseline_3b:.2%}) at the CI floor"),
     ]
-    if not good_is_live:
+    if solver_seated:
+        # Not "at random": the split above says how much of it was. Still not a
+        # deduction claim - a proved vote reads the referee's own facts, and the
+        # policy sits on the evil seats too, so nothing here is a good side.
+        lines.append(f"  (the solver sat on every seat: {split['mechanical_share']:.2%} "
+                     "of decisions were proved votes and the rest were deferred to "
+                     "random, so the vote half is a control read, not a deduction "
+                     "claim)")
+    elif not good_is_live:
         lines.append("  (good played at random in this arm, so the vote half is the "
                      "chance baseline, not a deduction claim)")
     if not evil_is_live:

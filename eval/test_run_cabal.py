@@ -493,3 +493,47 @@ class TestHunterBaselineIsDerived(unittest.TestCase):
         self.assertIn("hunter baseline REFUSED", text)
         self.assertIn("chance UNRECORDED", text)
         self.assertNotIn("gate #3 PASS", text)
+
+
+class TestSolverSplitInTheSummary(unittest.TestCase):
+    """S26: the solver arm's summary carries the mechanical/deferred split beside
+    ``fallbacks``/``decisions``, never folded into them, and the report stops
+    calling an arm "played at random" when part of it provably was not."""
+
+    def records(self, arm: str) -> list:
+        out = []
+        for i in range(4):
+            args = make_args(arm=arm, backend=None, seed=100 + i)
+            ref = CabalReferee.new(5, seed=100 + i)
+            policies = build_policies(ref, args, random.Random(100 + i))
+            out.append(play_game(ref, policies))
+        return out
+
+    def test_the_summary_carries_the_split_and_its_share(self):
+        s = score(self.records("solver"))
+        block, integ = s["solver"], s["integrity"]
+        self.assertGreater(block["mechanical"], 0)
+        self.assertGreater(block["deferred"], 0)
+        self.assertEqual(block["mechanical"] + block["deferred"], integ["decisions"])
+        self.assertAlmostEqual(block["mechanical_share"],
+                               block["mechanical"] / integ["decisions"])
+        self.assertEqual(integ["fallbacks"], 0)     # a deferred draw is not a fallback
+
+    def test_a_run_with_no_solver_seat_refuses_a_share_rather_than_reporting_zero(self):
+        block = score(self.records("random"))["solver"]
+        self.assertEqual((block["mechanical"], block["deferred"]), (0, 0))
+        self.assertIsNone(block["mechanical_share"])
+
+    def test_the_solver_report_prints_the_split_and_not_the_random_disclaimer(self):
+        s = score(self.records("solver"))
+        t = report(s, make_args(arm="solver", backend=None), 1.0)
+        self.assertIn("mechanical", t)
+        self.assertIn("deferred", t)
+        self.assertNotIn("good played at random", t)
+        self.assertIn("gate #2 not shown", t)      # still no gate claim
+
+    def test_the_random_report_prints_no_split(self):
+        t = report(score(self.records("random")),
+                   make_args(arm="random", backend=None), 1.0)
+        self.assertNotIn("deferred", t)
+        self.assertIn("good played at random", t)
