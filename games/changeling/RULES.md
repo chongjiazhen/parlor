@@ -72,7 +72,7 @@ family and it is here to keep a tenth of every run from being noise.
    the deal an `identity`-class reveal and move the stratum the gate is cut on.
    Likewise every night act here is mandatory where the source says "may": a
    declined act is a no-op move, and the arena refuses those rather than model
-   them.
+   them. **Both are queued to be built to the source** (`queue.md`).
 2. `spotter` - looks.
 3. `swapper` - takes, and looks at what it took.
 4. `switcher` - swaps two other seats, blind.

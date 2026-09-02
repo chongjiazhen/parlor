@@ -150,6 +150,20 @@ all seven findings landed. Its rows are gone; git holds the record.
       evil briefings (the 49.2/47.5/3.3 split in its RULES.md). No GPU - the
       control is the random policy. Each lands in its RULES.md beside the old
       figure, dated.
+- [ ] **Build the two source rules the audit declared instead of fixing.**
+      Both are declared house rules today (2026-09-02) and both are to be
+      patched to the source. **changeling**: a lone `pack` views one centre card
+      (the source's lone-wolf option) - a seat decision at the MEET step, a reveal
+      about a centre card rather than a seat, and it hands the lone wolf an
+      `identity`-class reveal, so the strata and the chance baseline move with it;
+      also make `spotter`/`swapper`/`switcher` acts declinable where the source
+      says "may" (a `pass` action, refused for `deceived`, which is "must").
+      **cabal**: an evil-only conference before the hunt - the pair speaks on a
+      channel only the two evil seats receive, one round, before the hunter
+      names. That is a third channel for `render_context` and the gate #1 audit
+      to carry (entitled to the evil pair by the deal, leaked if it reaches a good
+      seat), so it lands with an audit test before a prompt. Each re-baselines
+      its rung; the RULES.md notes flip from "declared" to the rule when built.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
