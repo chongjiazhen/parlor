@@ -807,6 +807,20 @@ differently:
   every run's. One test pins the two drivers TOGETHER: the defect was that they
   disagreed, and a test beside either one cannot see that.
 
+## cabal grew a third channel - the evil conference before the hunt, 2026-09-02
+
+`games/cabal/RULES.md` step 5, merged at `7460953`. Before it, no evil-only channel
+existed and the hunt followed the third mission directly; now each evil seat the
+night introduced to a partner says one thing on a channel only the pair receives,
+and `audit.conference_audit` hunts every rendered line in every other seat's
+payload. **Every cabal number recorded before this sha was measured on a game
+where the pair could not coordinate before the strike** - gate #2's hunt figures
+most directly, and gate #1's corpus, which now carries a class of secret it did
+not. A pre-conference record stays quotable as what it is and is not comparable
+to anything run after it. The driver also logs one more decision per conferring
+seat per game, so an aggregate fallback rate over all decisions runs on a larger
+denominator than before; per-phase rates are unaffected.
+
 ## Quorum slice-9 control - the decoupled policy stream, measured 2026-08-29
 
 `eval/records/quorum-control-slice9.json`, 400 random games, seeds 7000..7399,

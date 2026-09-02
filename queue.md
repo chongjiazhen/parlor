@@ -143,20 +143,15 @@ all seven findings landed. Its rows are gone; git holds the record.
       `docs/changeling-gate2-pair-criterion.md` - `llm` vs `llm-village` on S22's
       seeds, one new arm (`eval/runs/changeling-gate2-arm.cmd`), unlaunched. The
       cabal half stays parked with cabal's GPU program.
-- [ ] **Build the two source rules the audit declared instead of fixing.**
-      Both are declared house rules today (2026-09-02) and both are to be
-      patched to the source. **changeling**: a lone `pack` views one centre card
-      (the source's lone-wolf option) - a seat decision at the MEET step, a reveal
-      about a centre card rather than a seat, and it hands the lone wolf an
-      `identity`-class reveal, so the strata and the chance baseline move with it;
-      also make `spotter`/`swapper`/`switcher` acts declinable where the source
-      says "may" (a `pass` action, refused for `deceived`, which is "must").
-      **cabal**: an evil-only conference before the hunt - the pair speaks on a
-      channel only the two evil seats receive, one round, before the hunter
-      names. That is a third channel for `render_context` and the gate #1 audit
-      to carry (entitled to the evil pair by the deal, leaked if it reaches a good
-      seat), so it lands with an audit test before a prompt. Each re-baselines
-      its rung; the RULES.md notes flip from "declared" to the rule when built.
+- [ ] **Merge the changeling source rules when the campaign chain has read.**
+      The cabal half (evil conference before the hunt) LANDED 2026-09-02,
+      `7460953`, and re-baselines cabal (`docs/measurements.md`). The changeling
+      half - a lone `pack` views one centre card at MEET, an `identity`-class
+      reveal that moves the strata and the chance baseline; `spotter`/`swapper`/
+      `switcher` declinable with `pass`, refused for `deceived` - is built on
+      branch `slice/changeling-source-rules` and MUST NOT merge while the skin
+      pair, S22 and the gate #2 arm are unread: their criteria froze under the
+      current rules. Merging re-baselines the rung; the RULES.md notes flip then.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
