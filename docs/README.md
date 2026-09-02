@@ -108,6 +108,10 @@ partly true is worse than none.
   on `folk`, same seeds as the name-form pair. Arithmetic
   `eval.rounds_pair_verdict`, which also pins every setting to the record's own
   `args`. Ready to launch, UNLAUNCHED.
+- `docs/changeling-gate2-pair-criterion.md` - gate #2 with a control at last:
+  the pack live vs the pack at random against the SAME live village, on S22's
+  two-round record plus one `--arm llm-village` arm. Arithmetic
+  `eval.gate2_pair_verdict`. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

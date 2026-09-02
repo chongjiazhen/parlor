@@ -139,6 +139,10 @@ all seven findings landed. Its rows are gone; git holds the record.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that already
       exist. Also: `rate_ok`'s 5% CI-floor bar is pre-declared nowhere.
+      **The changeling twin is FROZEN 2026-09-02**,
+      `docs/changeling-gate2-pair-criterion.md` - `llm` vs `llm-village` on S22's
+      seeds, one new arm (`eval/runs/changeling-gate2-arm.cmd`), unlaunched. The
+      cabal half stays parked with cabal's GPU program.
 - [ ] **Build the two source rules the audit declared instead of fixing.**
       Both are declared house rules today (2026-09-02) and both are to be
       patched to the source. **changeling**: a lone `pack` views one centre card
