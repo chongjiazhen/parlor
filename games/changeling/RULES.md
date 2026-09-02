@@ -65,7 +65,14 @@ family and it is here to keep a tenth of every run from being noise.
 
 ## Night order, and why it is the interesting part
 
-1. `pack` - the pack wakes together and sees its own members.
+1. `pack` - the pack wakes together and sees its own members. **A lone `pack` is
+   offered nothing**: the source's option that lets a single wolf view one
+   centre card is not built, and it is a house call rather than an omission
+   (2026-09-02) - it would hand the one seat whose knowledge class is `none` by
+   the deal an `identity`-class reveal and move the stratum the gate is cut on.
+   Likewise every night act here is mandatory where the source says "may": a
+   declined act is a no-op move, and the arena refuses those rather than model
+   them.
 2. `spotter` - looks.
 3. `swapper` - takes, and looks at what it took.
 4. `switcher` - swaps two other seats, blind.

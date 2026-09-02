@@ -94,7 +94,12 @@ Not written anywhere in the prompts; a strong player finds it.
    **Only the COUNT is public; who played which card never is.** Leadership
    advances, the reject streak resets.
 5. **Hunt.** Reached when good holds three missions. The hunter names one seat as
-   the seer. Right, evil takes the game; wrong, good keeps it.
+   the seer. Right, evil takes the game; wrong, good keeps it. **The source lets
+   the evil side confer before the name; here there is no evil-only channel, so
+   the hunt follows the third mission directly** - a declared house rule, not an
+   omission (2026-09-02). Everything the pair could say to each other is already
+   public record, and a private conference would be a third channel the audit
+   does not have.
 
 Mission team sizes at 5 seats: **2, 3, 2, 3, 3**. Fails required: **1** for all
 five. (At 7+ seats mission 4 requires 2 fails - `fails_required` is a per-mission
