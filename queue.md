@@ -349,15 +349,18 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       §0) is BUILT and says what un-random looks like here; it waits on the merge
       list, and the mixed arms read it against a live seat.
 
-- [ ] **A Paranoia-shaped rung, branding-free** - the rung that earns gate #1 on
-      multi-axis entitlement, called 2026-09-03 in `docs/decisions.md`. Functional
-      keys only (`faction`, `deviation`, `directive`, `clearance`); the setting,
-      its role names and its text stay out of the tree. **Entry condition: the
-      falsifier first** - sketch one seat's ask and count whether gate #1 has four
-      independent things to check or one assembly. Four, and the rung is an
-      instrument and the build proceeds from cabal's architecture; one, and the
-      call reverses to Lumen Ryder per the decision entry. Done when the sketch
-      answers it; the build is a separate row it does not pre-authorise.
+- [ ] **Build the Paranoia-shaped rung, branding-free** - called 2026-09-03 and
+      the pre-committed falsifier did NOT fire, `docs/decisions.md`. Gate #1 has
+      four independent checks, not one: `entitled` is a flat `set[int]` and
+      `secret_terms[s]` one undifferentiated list, so a viewer entitled to another
+      seat's `faction` is skipped on ALL that seat's terms and a leaked
+      `deviation` reports clean - the false-negative direction the `find_leaks`
+      invariant forbids. Per-axis keys need no `core/` change to start
+      (`games/durf/facts.py` numbers its keys and reuses the primitive), and that
+      file says the move on a SECOND asking game is to widen the key and delete
+      the adapter; this is that game. Functional keys only - the setting, its role
+      names and its text stay out of the tree. Done when a seat holds four
+      orthogonal secrets and the audit distinguishes them.
 
 Publishing:
 

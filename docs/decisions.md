@@ -498,6 +498,26 @@ one payload assembly with one audit, the rung is a content build rather than an
 instrument and this call reverses. Answer it by sketching one seat's ask and
 counting what gate #1 has to check - four things, or one.
 
+**Answered same day: FOUR. The falsifier did not fire.** `find_leaks` takes
+`secret_terms: dict[int, list[str]]` and `entitled: set[int]`, so entitlement is
+per SEAT and a seat's terms are one undifferentiated list. Under orthogonal
+secrets that is not merely coarse, it is a FALSE NEGATIVE: a viewer entitled to
+seat 5's `faction` puts 5 in `entitled`, the loop then skips every one of seat
+5's terms, and a referee leaking seat 5's `deviation` into that viewer's ask
+reports clean. The `find_leaks` invariant names that direction as the one that
+must never happen. So the four channels are four checks and the rung is an
+instrument.
+
+**One honest weakening, and it does not reverse anything.** Per-axis keys are
+reachable WITHOUT touching `core/`: `games/durf/facts.py` already widens the key
+from a seat to a fact by numbering facts and handing the work back to the
+unchanged primitive, and `("deviation", 5)` is the same shape as `("hidden",
+"R2")`. So the build is not blocked on a `core/` change. That file also says the
+move when a SECOND game asks is to widen `find_leaks`' key and delete the
+adapter - and `core/`'s promotion rule wants evidence from a second game. This is
+that game, so the widening becomes a promotion with its evidence in hand rather
+than a speculative generalisation.
+
 ### The row this closes, moved verbatim from `queue.md` 2026-09-03
 
 Struck because the entry above is its done-condition. Kept unrewritten per this
