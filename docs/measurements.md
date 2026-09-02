@@ -6,6 +6,15 @@ Moved out of `queue.md` 2026-08-28: these are readings, not queue. Verbatim.
 `games/changeling/RULES.md` §S2 read) is canonical for that gate; this file is the
 dated ladder underneath them.
 
+**Rules re-baseline, 2026-09-02.** An audit against the published rulebooks
+changed four rungs' rules that day: changeling's vote (a flat tally accuses
+nobody; records carry `vote_rule`), quorum's slot-3 power (peek, not inspect) and
+veto, belfry's evil briefings (seven seats and up only) and mimic cover, and the
+durf adjudicator digest. **Every number below dated before 2026-09-02 on those
+rungs was played under the earlier rules** and is comparable only to a run that
+pins them; each rung's `RULES.md` carries the dated note and the queue carries
+the controls owed.
+
 ## Measured, dated - numbers before opinions
 
 All local `rocinante-x-12b-heretic-q4`, seed 400, 8 games, 2 rounds, <1% fallback
