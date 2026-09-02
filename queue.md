@@ -129,12 +129,7 @@ all seven findings landed. Its rows are gone; git holds the record.
 **Merge queue behind the chain read, 2026-09-02.** Worktrees unfreeze the code
 half of this file: a branch cannot touch the checkout the chain imports from,
 so the entry condition "no changeling arm in flight" is met on a branch and the
-freeze binds only the MERGE. **One branch is free of the ordering below and can
-merge first:** `slice/fanout-skip` (`bf88a1d`), one line, test-only - the S2
-five-seat test called `load(S2)` past the `records_gate.demand` guard the rest
-of its own file already used, so every fresh worktree failed on a record
-`eval/records/` cannot carry. Nothing else in `eval/` or `games/` reads a record
-unguarded. Branches waiting: `slice/changeling-source-rules`,
+freeze binds only the MERGE. Branches waiting: `slice/changeling-source-rules`,
 `slice/changeling-heuristic`, and the off-by-default arm branches below
 (`slice/changeling-notebook`, `slice/fanout-*`). **Order is forced by the
 controls:** every prompt arm pairs against S22's `cl-rounds2.json`, so it must
@@ -341,8 +336,17 @@ Spikes and unbuilt arms:
       in doing it - no demo loop was needed, `play_game` already iterates
       `speaking_order()`, so a human seat is asked only on the clock and a bare
       `say` listens through the existing shorthand. Console furniture only.
-      Still unmeasured: cabal's `--simultaneous` and bidding; if either is ever
-      run on changeling it shares this criterion's shape, not a second one.
+      **A SECOND arm 2026-09-02 on `slice/fanout-simul` (`5ec5a92`), over S27:**
+      `--turns simultaneous` withholds a round until it closes, then publishes it
+      in seat order, so an agreement is one the seats reached apart. A different
+      axis, not a stronger random-active - the order is the shipped one and the
+      DISCUSS ask is byte-identical, pinned as literals over 20 seeds. The
+      criterion now reads TWO pairwise differences against `cl-rounds2` with no
+      arm-vs-arm and no multiplicity correction, stated before the runs; the
+      shared control means a void on `cl-rounds2` takes both. Named by the arm
+      itself: the effect can only live in round 1, so round-1 agreement is a
+      required free read. Cabal's own `--simultaneous` stays built and unmeasured
+      - two rungs, two criteria, never one.
 - [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
       the `action_prompt` if-chain, and `ACTION_KEYS`. `docs/action-channel.md`.
 
