@@ -821,6 +821,62 @@ to anything run after it. The driver also logs one more decision per conferring
 seat per game, so an aggregate fallback rate over all decisions runs on a larger
 denominator than before; per-phase rates are unaffected.
 
+## cabal 6- and 7-seat setups - RANDOM BASELINES ONLY, measured 2026-09-02
+
+`SETUP_6` and `SETUP_7` landed this day (`games/cabal/RULES.md` §The larger
+setups). **No model has been seated at either size**, and cabal has no GPU program
+left, so every figure below is the chance floor and nothing here is a gate claim.
+Three 1000-game random controls, same seed base, 0.00% fallback in all three:
+
+```
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 5 --out eval/records/cabal5-random.json
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 6 --out eval/records/cabal6-random.json
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 7 --out eval/records/cabal7-random.json
+```
+
+The 5-seat row is a REFERENCE, not the other arm of a pair: seats, evil count and
+the mission ladder all move together, so this is three separate chance floors and
+not one variable.
+
+| | 5 seats (2 evil) | 6 seats (2 evil) | 7 seats (3 evil) |
+|---|---|---|---|
+| evil win rate | 64.60% [61.59, 67.50] | 60.00% [56.93, 62.99] | 56.90% [53.81, 59.94] |
+| by path: missions failed / five rejects / hunt hit | 460 / 0 / 186 | 465 / 8 / 127 | 450 / 0 / 119 |
+| fail cards played | 2129 | 2178 | 2740 |
+| hunt chance, derived | 33.33% | 25.00% | **20.00%** |
+| hunter accuracy at random | 34.44% (186/540) | 24.10% (127/527) | 21.64% (119/550) |
+| blind taint sensitivity | +0.52% [-1.46, +2.60] | +0.06% [-1.28, +1.37] | -0.36% [-1.34, +0.64] |
+| blind clean / tainted votes | 837 / 3978 | 1968 / 8986 | 1599 / 12516 |
+| `aura` stratum | n=837/3978 | n=984/4493 | **n=0/0, REFUSED** |
+| decisions | 64795 | 85363 | 84737 |
+
+What the numbers say, and only this:
+
+- **The hunt bar falls with the table, and 7 seats does not fall as far as the
+  evil count suggests.** 1/5, not 1/4: three evil seats, but the `stray` is named
+  to nobody, so the hunter bars only itself and the `lurker`. A scorer deriving
+  chance from the evil count would grade a 7-seat hunt against 25% and read 21.6%
+  random play as below chance. The referee records the set each hunt faced, so
+  nothing here was assumed.
+- **The empty `aura` stratum prints as REFUSED, not as zero.** `SETUP_7` seats no
+  watcher, so gate #3a has two strata there rather than three. This is the
+  instrument check on the setup: an absent stratum rendered as 0.00% would have
+  been a gate reading over nothing.
+- **Evil's chance floor drops as the table grows** - 64.6% -> 60.0% -> 56.9%, with
+  the drop coming out of the hunt (186 -> 127 -> 119 wins) rather than out of the
+  missions, which hold near 460. Gate #2's floor is therefore setup-specific: the
+  ~65% figure the gate is conditional on is a 5-seat number and does not carry.
+- **The blind vote floor is flat at chance in all three**, as it must be with good
+  voting at random, and all three CIs straddle zero. The sampling half is
+  `docs/player-counts.md`'s point restated by measurement: clean teams are 17.4% of
+  blind votes at 5 seats, 18.0% at 6, and **11.3% at 7**. Per blind seat per game
+  that is 0.84 / 0.98 / **0.53** clean-team votes - 7 seats has three loyalists
+  instead of one and still collects fewer clean samples each. A bigger table is not
+  a sampling fix, and at three evil it is a sampling loss.
+- **Five-reject losses are not a 7-seat failure mode.** 0 of 1000 at 7 seats, 8 at
+  6, 0 at 5. Worth knowing before reading a live arm, since perfect good voting is
+  measured to convert certainty into five-reject losses at 5 seats.
+
 ## Quorum slice-9 control - the decoupled policy stream, measured 2026-08-29
 
 `eval/records/quorum-control-slice9.json`, 400 random games, seeds 7000..7399,
