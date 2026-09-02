@@ -306,10 +306,21 @@ Spikes and unbuilt arms:
       part.** Ticks are counted and the schedule derives from the game seed - a
       wall-clock actor voids the seed invariant. The silent gate #1 failure is
       audited against the entitlement snapshot taken when a render was BUILT.
-- [ ] **Seat the heuristic against the MODEL** - a table with heuristic and LLM
-      seats, the arm that does not exist. Read the artifact warning in
-      `docs/measurements.md` §Measured first: the all-heuristic arm's 99.5%
-      hunter is a deterministic twin reading its own tell.
+- [ ] **Seat the heuristic against the MODEL - BUILT 2026-09-02, unlaunched, on
+      `slice/changeling-mixed` (`b788121`)**, over the heuristic rung. Two arms,
+      `mixed-village` and `mixed-pack`, the suffix naming the LIVE side;
+      `docs/changeling-mixed-criterion.md`, recipe `eval/runs/changeling-mixed.cmd
+      <predecessor-log>`. Two calls inside it: the control is `cl-heuristic.json`
+      RESCORED over its own first 200 seeds, because the published 1000-game
+      figure is a superset and not the pair; and the void bar reads the LIVE
+      side's own fallback rate off the JSONL, because a run-level rate divides a
+      live seat's refusals by seats that cannot refuse. Found in doing it - the
+      no-backend guard tested `startswith("llm")`, which a `mixed-` arm passes,
+      so 200 games would have scored the random policy. Reads against the
+      artifact warning in `docs/measurements.md` §Measured first. Runs BEFORE the
+      source-rules merge or its twin figure comes from a different game.
+      **Operator call before launch:** arm 1 is `mixed-village` and arm 2 gates
+      on its marker, so a card with time for one runs the weaker arm.
 - [ ] **Gate #3 was never blocked on the table talk - that read was wrong.** It
       was model capability: identical prompts, -0.2% on the 12B against +66% on
       120B-class. `--simultaneous` is built and unmeasured; the salience line has
