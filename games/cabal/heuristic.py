@@ -64,6 +64,9 @@ class HeuristicPolicy:
         if p is Phase.MISSION:
             # good may not fail; evil always does - see the module docstring
             return {"card": ref.assignment[seat].team is Team.EVIL}
+        if p is Phase.CONFER:
+            # the same read the hunt would act on, spoken to the pair first
+            return {"say": f"Seat {self._hunt(ref, seat)} is my read."}
         if p is Phase.HUNT:
             return {"target": self._hunt(ref, seat)}
         raise IllegalAction(f"no action in phase {p.value}")

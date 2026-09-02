@@ -74,7 +74,7 @@ Not written anywhere in the prompts; a strong player finds it.
 
 ## Flow
 
-`PROPOSE -> DISCUSS -> VOTE -> (MISSION | back to PROPOSE) -> ... -> HUNT`
+`PROPOSE -> DISCUSS -> VOTE -> (MISSION | back to PROPOSE) -> ... -> CONFER -> HUNT`
 
 1. **Propose.** The leader names a team of exactly `team_sizes[mission]` distinct
    seats, and may include itself.
@@ -93,13 +93,32 @@ Not written anywhere in the prompts; a strong player finds it.
    `fails_required[mission]` or more fails are played (always 1 at 5 seats).
    **Only the COUNT is public; who played which card never is.** Leadership
    advances, the reject streak resets.
-5. **Hunt.** Reached when good holds three missions. The hunter names one seat as
-   the seer. Right, evil takes the game; wrong, good keeps it. **The source lets
-   the evil side confer before the name; here there is no evil-only channel, so
-   the hunt follows the third mission directly** - a declared house rule, not an
-   omission (2026-09-02). Everything the pair could say to each other is already
-   public record, and a private conference would be a third channel the audit
-   does not have. **Queued to be built** as an evil-only channel (`queue.md`).
+5. **Confer.** Reached when good holds three missions, before the name. Each evil
+   seat the night introduced to a partner says one thing, in seat order, on a
+   channel **only those seats receive**. Same shape as an utterance - one `say`
+   string, at most 280 characters, private `think` reaching no one - with a
+   different destination: it is never a public fact and never table talk.
+   **This is a THIRD channel, and the audit carries it** (`audit.conference_audit`):
+   each rendered line is a secret of its speaker, entitled to the pair by the deal,
+   so a byte of it in any other seat's payload is a gate #1 failure rather than a
+   rules quirk. `find_leaks` stays naive - the term is the whole rendered line, so a
+   good seat repeating the words out loud is gameplay and does not trip it.
+   - **The channel is derived from `known_allies`, not from `Team.EVIL`.** It exists
+     exactly between seats already introduced to each other, so under the blind-evil
+     variant (`stray`, `sees_fellow_evil=False`) no pair is named and the hunt
+     follows the third mission directly. That is the same one definition
+     `entitled_knowledge`, `legal_hunt_targets` and the decision audit read, so a
+     variant that changes what the night tells a seat moves the channel with it.
+6. **Hunt.** The hunter names one seat as the seer. Right, evil takes the game;
+   wrong, good keeps it.
+
+**The conference re-baselines cabal's rung** (built 2026-09-02). It was a declared
+house rule that no evil-only channel existed and the hunt followed the third
+mission directly; it now exists, so every seat in the pair receives bytes it did
+not receive before. Gate #1's corpus grew a class of secret, gate #3's deception
+surface grew a private one, and the gate #2 hunt figures were measured against a
+pair that could not coordinate. **A number recorded before this date was measured
+on a different game** - `docs/measurements.md` is the ledger of which.
 
 Mission team sizes at 5 seats: **2, 3, 2, 3, 3**. Fails required: **1** for all
 five. (At 7+ seats mission 4 requires 2 fails - `fails_required` is a per-mission
@@ -145,7 +164,14 @@ no such count is REFUSED rather than defaulted.
   the audit skips it (`render_context(seat, include_speech=False)`).
 - **Private reasoning reaches neither.** A seat's `think` is kept only in the
   referee-side transcript, which no model ever receives.
-- **The notebook is a third channel and it is nobody's but its author's.** With
+- **The conference is a channel with exactly two readers.** The pair's words
+  before the strike (step 5) are rendered to the pair and to nobody else. Unlike
+  speech, it does NOT leave the gate #1 view: it leaves the ROLE-name audit view
+  with speech, because a partner calling a seat the seer is a claim - and it is
+  then audited by `audit.conference_audit` in its own right, over the full payload
+  of every seat, as a secret of its speaker. Speech is checked for what the referee
+  said; the conference is checked for who received it.
+- **The notebook is a channel with exactly one reader, its author.** With
   `--notebook` on (off by default), a seat's `note` is filed under that seat and
   rendered back to that seat alone on every later call, bounded to its last 6 lines
   of 160 characters. It leaves the gate #1 audit view with speech, and for a

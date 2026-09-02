@@ -37,18 +37,23 @@ def drive_to(phase: Phase, theme, seed: int = 0) -> CabalReferee:
         return ref
     # three clean missions to reach the endgame strike
     ref.mission({s: False for s in ref.proposal})
-    while ref.phase is not Phase.HUNT:
+    while ref.phase is not Phase.CONFER:
         size = ref.setup.team_sizes[ref.mission_index]
         ref.propose(ref.leader, sorted(ref.assignment)[:size])
         for seat in ref.speaking_order():
             ref.speak(seat, "a word from me")
         ref.vote({s: True for s in ref.assignment})
         ref.mission({s: False for s in ref.proposal})
+    if phase is Phase.CONFER:
+        return ref
+    for seat in ref.conference_seats():
+        ref.confer(seat, "a word to my side")
     return ref
 
 
 class TestEveryPhaseInEverySkin(unittest.TestCase):
-    PHASES = [Phase.PROPOSE, Phase.DISCUSS, Phase.VOTE, Phase.MISSION, Phase.HUNT]
+    PHASES = [Phase.PROPOSE, Phase.DISCUSS, Phase.VOTE, Phase.MISSION,
+              Phase.CONFER, Phase.HUNT]
 
     def test_no_ask_or_view_names_a_foreign_role(self):
         for theme_name, theme in THEMES.items():

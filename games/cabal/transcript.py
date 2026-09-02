@@ -155,6 +155,15 @@ def _assignment_lines(rec: dict, theme) -> list[str]:
     return lines
 
 
+def _conference_lines(rec: dict) -> list[str]:
+    """The evil pair's channel, verbatim. Referee-side like the assignment above
+    it: two seats saw these bytes and the audit proves no third one did, so a
+    human reading the game is the only other reader they are meant to have."""
+    lines = [f'- seat {seat} confers: "{said}"'
+             for seat, said in rec.get("conference") or []]
+    return lines or ["*(No conference - the game ended before the hunt.)*"]
+
+
 def _decision_lines(rec: dict) -> list[str]:
     """Every decision in order, with the reasoning behind it and the plays the
     table never sees - who put the fail card in, who voted which way before the
@@ -271,6 +280,8 @@ def render(record, meta: dict | None = None) -> str:
     out += ["", "## Integrity", ""] + _integrity_lines(rec)
     out += ["", "## The secret assignment (referee-side, revealed)", ""]
     out += _assignment_lines(rec, theme)
+    out += ["", "## The conference before the strike (referee-side - only the "
+            "evil pair heard this)", ""] + _conference_lines(rec)
     out += ["", "## Every decision, and why (referee-side - no seat saw any of this)",
             ""] + _decision_lines(rec)
     out += [""]
@@ -284,6 +295,7 @@ def from_referee(ref, record=None, meta: dict | None = None) -> str:
     rec = dict(rec)
     rec["assignment"] = {s: r.key for s, r in ref.assignment.items()}
     rec["public_events"] = list(ref.public_events)
+    rec["conference"] = list(ref.conference)
     rec["log"] = list(ref.log)
     rec["theme"] = ref.theme.name
     rec.setdefault("missions", list(ref.results))

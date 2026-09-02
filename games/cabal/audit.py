@@ -18,7 +18,8 @@ from games.cabal.referee import CabalReferee
 
 
 class LeakDetected(AssertionError):
-    """A seat's outgoing payload named a role it is not entitled to know."""
+    """A seat's outgoing payload named a role it is not entitled to know, or
+    carried a line of the evil pair's conference to a seat outside the pair."""
 
 
 def secret_terms(ref: CabalReferee) -> dict[int, list[str]]:
@@ -83,6 +84,41 @@ def leak_audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
             else ref.render_context(viewer, include_speech=False)
         )
         payload = payload.replace(self_line(ref, viewer), "", 1)
+        for seat, term in find_leaks(payload, terms, entitled, viewer):
+            out.append((viewer, seat, term))
+    out += conference_audit(ref)
+    return out
+
+
+def conference_audit(ref: CabalReferee) -> list[tuple[int, int, str]]:
+    """The second class of secret: the evil pair's conference before the hunt.
+
+    Its bytes are entitled to the pair by the deal and to nobody else, so each
+    rendered line is treated as a secret TERM of its speaker and hunted for in
+    every other seat's payload with the same naive ``find_leaks``. The scan runs
+    over the FULL payload - speech and notebook included - because these are
+    player-authored bytes that the audit view above deliberately drops, and the
+    question here is not "did the referee name a role" but "did these bytes reach a
+    seat outside the pair" - which is exactly what the model would receive.
+
+    The term is the whole rendered line, ``seat N confers: "..."``, so a good seat
+    that happens to say the same words out loud does not trip it; only the
+    referee's own framing of the pair's words does. A pair member is entitled to
+    its partner's lines and skips its own, so a clean board audits clean.
+    """
+    lines = ref.conference_lines()
+    if not lines:
+        return []
+    terms: dict[int, list[str]] = {}
+    for speaker, rendered in lines:
+        terms.setdefault(speaker, []).append(rendered)
+    party = set(ref.conference_seats())
+    acting = set(ref.acting_seats())
+    out = []
+    for viewer in ref.assignment:
+        entitled = party if viewer in party else set()
+        payload = (ref.prompt_for(viewer) if viewer in acting
+                   else ref.render_context(viewer))
         for seat, term in find_leaks(payload, terms, entitled, viewer):
             out.append((viewer, seat, term))
     return out

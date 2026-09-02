@@ -42,6 +42,12 @@ def run_success(ref):
     ref.mission({s: False for s in team})
 
 
+def run_conference(ref):
+    """The pair's one round before the strike, so a test can reach the hunt."""
+    for seat in ref.conference_seats():
+        ref.confer(seat, "a word to my side")
+
+
 class TestSetup(unittest.TestCase):
     def test_team_composition(self):
         ref = fixed_ref()
@@ -65,6 +71,8 @@ class TestWinPaths(unittest.TestCase):
         ref = fixed_ref()
         for _ in range(3):
             run_success(ref)
+        self.assertIs(ref.phase, Phase.CONFER)
+        run_conference(ref)
         self.assertIs(ref.phase, Phase.HUNT)
         ref.hunt(hunter=4, target=2)     # seat 2 is loyalist, not the seer
         self.assertIs(ref.winner, Team.GOOD)
@@ -74,6 +82,7 @@ class TestWinPaths(unittest.TestCase):
         ref = fixed_ref()
         for _ in range(3):
             run_success(ref)
+        run_conference(ref)
         ref.hunt(hunter=4, target=0)     # seat 0 is the seer
         self.assertIs(ref.winner, Team.EVIL)
 
@@ -218,6 +227,7 @@ class TestPublicChannel(unittest.TestCase):
         ref = fixed_ref()
         for _ in range(3):
             run_success(ref)
+        run_conference(ref)
         ref.hunt(hunter=4, target=0)
         self.assertTrue(any("WINNER" in line for line in ref.log))
         # the reason names roles ("found the seer") - it must not reach any seat
@@ -421,6 +431,7 @@ class TestHuntCannotNameYourOwnSide(unittest.TestCase):
         ref = fixed_ref()                       # 3 mimic, 4 hunter, 0 seer
         for _ in range(3):
             run_success(ref)
+        run_conference(ref)
         self.assertIs(ref.phase, Phase.HUNT)
         return ref
 
