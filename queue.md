@@ -179,7 +179,10 @@ fallback rates, and landed between campaigns rather than into one:
 - [ ] **Candidate changeling skins - BUILT 2026-08-27, ALL UNRUN.** Design owns
       the arm ladder: `docs/moral-framing.md` §The changeling skin set. Open is
       which arm gets GPU first - the `greek`/`greek-named` pair is the cleanest
-      single-variable manipulation in the repo.
+      single-variable manipulation in the repo. **That pair LAUNCHED 2026-09-02**
+      under `docs/changeling-skin-pair-criterion.md`, recipe
+      `eval/runs/changeling-skin-pair.cmd`, 200 games/arm at seeds 5000..5199;
+      the other four faces stay unrun.
 - [ ] **The `1984-cn` language arm is less novel than it looked**, and prior work
       predicts its confound: non-English play surfaces here as a FALLBACK RATE,
       not as worse deduction. Read that arm fallback-first; a CN arm voiding on
