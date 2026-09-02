@@ -300,12 +300,15 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
 
 Spikes and unbuilt arms:
 
-- [ ] **Spike #2: off-map faction heartbeat - BUILT (S24, `games/heartbeat/`),
-      merged, never seated in a game.** `docs/faction-heartbeat.md`. **Not an
-      alternative to the adjudicator spike; the small version of its hardest
-      part.** Ticks are counted and the schedule derives from the game seed - a
-      wall-clock actor voids the seed invariant. The silent gate #1 failure is
-      audited against the entitlement snapshot taken when a render was BUILT.
+- [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
+      `slice/fanout-heartbeat` `0d6fa56`, unmeasured.** No Phase, turn kind or
+      ACTION_KEYS entry was needed: a tick is a night, taken at the top of
+      `_begin_night`. Gate #1 grew a third scan graded against the snapshot the
+      render was BUILT under; leaky renderer caught, honest clean over 50 seeds,
+      two mutants killed; flag off byte-identical over 20 seeds against a digest
+      taken before the change. Open, each its own row when taken: the rumour
+      rule is LINEAR on a circular table, and at 5 seats most scheduled beats
+      never fire. `docs/faction-heartbeat.md` §Seated. Merge queue above.
 - [ ] **Seat the heuristic against the MODEL - BUILT 2026-09-02, unlaunched, on
       `slice/changeling-mixed` (`b788121`)**, over the heuristic rung. Two arms,
       `mixed-village` and `mixed-pack`, the suffix naming the LIVE side;
