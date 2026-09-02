@@ -578,9 +578,10 @@ def play_game(
             seer = ref.seat_of("seer")
             # `legal_targets` is the hunt's own denominator, recorded per game
             # rather than assumed by the scorer: it is 3 at 5 seats with a hunter
-            # that sees its ally, 4 at 7p/3-evil, and 4 at 5 seats under the
-            # blind-evil variant. A scorer that reconstructs it from the seat
-            # count is one variant away from grading against the wrong chance.
+            # that sees its ally, and 5 on `SETUP_7`, where three evil seats leave
+            # the hunter barring only two because the `stray` is named to nobody. A
+            # scorer that reconstructs it from the seat count, or from the evil
+            # count, is one variant away from grading against the wrong chance.
             rec.hunt = {"hunter": hunter, "target": target, "seer": seer,
                         "hit": target == seer,
                         "legal_targets": len(ref.legal_hunt_targets(hunter))}

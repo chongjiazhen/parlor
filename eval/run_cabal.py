@@ -58,7 +58,7 @@ from games.cabal import transcript
 from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
                                 play_game)
 from games.cabal.referee import CabalReferee
-from games.cabal.roles import DEFAULT_THEME, THEMES, Team
+from games.cabal.roles import DEFAULT_THEME, SETUPS, THEMES, Team
 from games.cabal.solver import SolverPolicy
 
 
@@ -277,7 +277,8 @@ def one_game(index: int, args) -> GameRecord:
     theme = THEMES[args.theme] if args.theme else DEFAULT_THEME
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
-    ref = CabalReferee.new(5, seed=seed, theme=theme, discussion_rounds=args.rounds,
+    seats = getattr(args, "seats", 5)
+    ref = CabalReferee.new(seats, seed=seed, theme=theme, discussion_rounds=args.rounds,
                            simultaneous=getattr(args, "simultaneous", False),
                            notebook=getattr(args, "notebook", False))
     policies = build_policies(ref, args, rng, seed=seed)
@@ -472,8 +473,8 @@ def score(records: list[GameRecord]) -> dict:
 
     # gate #3b - does the hunter beat chance? Chance is DERIVED from the legal
     # target set each hunt actually faced, never hardcoded: `1/3` is right only at
-    # 5 seats with a hunter that sees its ally. At 7p/3-evil the set is 4, and under
-    # the blind-evil variant it is 4 at 5 seats too - and `RandomPolicy` and
+    # 5 seats with a hunter that sees its ally. On `SETUP_7` it is 5 of 7 - three
+    # evil, but the `stray` is named to nobody - and `RandomPolicy` and
     # `validate_hunt` both read that set from the referee, so they would silently
     # agree on the new denominator while a hardcoded bar kept grading against 1/3,
     # in the flattering direction.
@@ -739,6 +740,14 @@ def main() -> None:
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--max-turns", type=int, default=400)
     ap.add_argument("--theme", choices=list(THEMES))
+    ap.add_argument("--seats", type=int, default=5, choices=sorted(SETUPS),
+                    help="which registered setup to deal - 5 is the shipped "
+                         "SETUP_5 every recorded cabal number was played on, 6 is "
+                         "the same knowledge model on a bigger table, 7 is three "
+                         "evil and deals both information-degrading evils (no "
+                         "watcher; see games/cabal/RULES.md). Neither 6 nor 7 has "
+                         "been run against a model. A setup change re-baselines "
+                         "everything measured under it.")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     ap.add_argument("--transcript",
