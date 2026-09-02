@@ -39,7 +39,12 @@ def parse_action(reply: str, ref: ChangelingReferee, seat: int) -> dict:
     ``think`` is kept for the referee-side log and reaches no channel a seat can
     read. Only ``say`` is published.
     """
-    obj = read_reply(reply, ACTION_KEYS)
+    # The shared parser's complaints are model-facing too: the retry loop feeds
+    # one straight back into the next prompt. So they follow `--phrasing` like
+    # every other steering string, and the four games that pass no table keep
+    # `core.replies`' own default.
+    obj = read_reply(reply, ACTION_KEYS,
+                     complaints=ref.phrasing.complaints)
     out = {"think": str(obj.get("think", ""))[:400]}
     if ref.phase is Phase.DISCUSS:
         said = " ".join(str(obj.get("say", "")).split())
@@ -49,7 +54,8 @@ def parse_action(reply: str, ref: ChangelingReferee, seat: int) -> dict:
     elif ref.phase is Phase.VOTE:
         if "vote" not in obj:
             raise ParseError(ref.phrasing.missing_vote)
-        out["vote"] = parse_index(obj["vote"], ref.n, noun="seat")
+        out["vote"] = parse_index(obj["vote"], ref.n, noun="seat",
+                                  complaints=ref.phrasing.complaints)
     else:
         raise ParseError(f"nothing to parse in phase {ref.phase.value}")
     return out
@@ -111,8 +117,8 @@ class LLMPolicy:
         complaint = ""
         for attempt in range(self.retries + 1):
             prompt = base if not complaint else (
-                f"{base}\n\nYour previous reply was refused: {complaint}\n"
-                "Answer again, correctly, as one JSON object.")
+                f"{base}\n\n"
+                + ref.phrasing.retry.format(complaint=complaint))
             try:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1

@@ -24,6 +24,15 @@ itself an absence (a day on which the village accuses nobody), the ``positive``
 column states the CONDITION positively and lets the outcome be what it is; that
 is a fact about the rules, not steering.
 
+**The parser's complaints are here too, by reference.** ``core/replies.py``
+raises the text a seat reads back when its reply could not be parsed, and the
+retry loop feeds that straight into the next prompt - so an ``as-is`` complaint
+inside a ``positive`` retry wrapper would dilute the arm toward NOT SHOWN. Five
+games share that module, so it holds its own table and takes one as an argument;
+the ``complaints`` field below is which table this arm hands it, and only
+changeling passes one. ``AS_IS.complaints`` IS ``core.replies.AS_IS_COMPLAINTS``,
+by identity, so the four other games and this arm's control cannot drift apart.
+
 The night's factual negations in ``roles.py`` - "the other seat is not told",
 "sleeps through the night and does nothing" - are deliberately NOT here. They
 describe what a card does, they are per-skin text frozen against recorded runs,
@@ -33,6 +42,8 @@ and rewriting them would move the deck description rather than the steering.
 from __future__ import annotations
 
 from dataclasses import dataclass
+
+from core.replies import AS_IS_COMPLAINTS, Complaints
 
 
 @dataclass(frozen=True)
@@ -60,6 +71,10 @@ class Phrasing:
     #: Parser refusals for the two fields a seat is asked for.
     missing_say: str
     missing_vote: str
+    #: The shared parser's own complaints, handed to ``core.replies``. Held by
+    #: reference rather than restated, so the ``as-is`` arm is the four other
+    #: games' bytes by identity.
+    complaints: Complaints
 
 
 AS_IS = Phrasing(
@@ -77,6 +92,27 @@ AS_IS = Phrasing(
     self_vote="seat {seat} cannot point at itself; choose from {legal}",
     missing_say='missing "say" (an empty utterance is not a move)',
     missing_vote='missing "vote"',
+    complaints=AS_IS_COMPLAINTS,
+)
+
+#: The parser's complaints, rewritten to name the reply that WOULD parse. Each
+#: leads with the target and puts what arrived second, which is the doctrine's
+#: paired form: the seat needs the shape before it needs the diagnosis.
+POSITIVE_COMPLAINTS = Complaints(
+    name="positive",
+    no_json="reply as one JSON object; what arrived was {reply}",
+    nothing_salvageable=("write each key and its value into the reply; what "
+                         "arrived was {reply}"),
+    not_boolean="answer with yes or no; what arrived was {value}",
+    # The bool and the no-digits cases stay distinguishable - `eval.rule_errors`
+    # censuses complaints by text, and one wording over two causes would merge
+    # two rows of that census into one.
+    not_index=("a {noun} is a number 0..{last}; what arrived was the yes/no "
+               "{value}"),
+    no_index_number="a {noun} is a number 0..{last}; what arrived was {value}",
+    index_out_of_range="choose a {noun} in 0..{last}; you named {index}",
+    not_index_list="give a list of {noun} numbers; what arrived was {value}",
+    wrong_index_count="give {size} different {noun}s; you named {picked}",
 )
 
 POSITIVE = Phrasing(
@@ -103,6 +139,7 @@ POSITIVE = Phrasing(
     self_vote="seat {seat} points at another seat; choose from {legal}",
     missing_say='give "say" the words the table hears',
     missing_vote='give "vote" one seat number',
+    complaints=POSITIVE_COMPLAINTS,
 )
 
 #: What ``--phrasing`` accepts. ``as-is`` first, because it is the default and

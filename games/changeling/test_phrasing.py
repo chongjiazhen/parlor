@@ -17,6 +17,14 @@ here rather than asserted in prose:
   vocabulary scan below asserts BOTH directions: the token is present under `as-is`
   and absent under `positive`. One direction alone is vacuous.
 
+The shared parser's complaints (`core/replies.py`) are the other half of the
+refusal text, and the retry loop feeds one straight into the next prompt. They
+follow the flag too, so `ComplaintsFollowTheArm` covers them: the `as-is` column
+is `core.replies.AS_IS_COMPLAINTS` BY IDENTITY - which inherits that module's own
+golden pin rather than restating it, and is why the other four games cannot drift
+from this arm's control - and the `positive` column goes through the same
+both-directions vocabulary scan.
+
 Gate #1 runs over both phrasings, honest and leaky, because the audit reads the ask
 and the ask is one of the strings the table swaps.
 """
@@ -25,11 +33,15 @@ from __future__ import annotations
 
 import hashlib
 import unittest
+from dataclasses import fields
 
 from core.backends import REGISTERS, REGISTERS_POSITIVE
+from core.replies import AS_IS_COMPLAINTS, ParseError
 from games.changeling.audit import leak_audit
 from games.changeling.phrasing import AS_IS, POSITIVE, PHRASINGS
-from games.changeling.player import RandomPolicy, play_game
+from games.changeling.player import (LLMPolicy, RandomPolicy, parse_action,
+                                     play_game)
+from games.changeling.referee import Phase
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import THEME_FOLK
 from games.changeling.test_referee import LeaksOwnTruth
@@ -44,6 +56,29 @@ GOLDEN_AS_IS = "060bace18231558a63bec3f15427eabf6fec6fd4df2a3cff26ad8b35de091801
 BANNED = ("cannot", "was refused", "not a move", "no seat drew",
           "nothing to go on", "no theatrics", "do not defer", "Never reveal",
           "not real deceit", "worth nothing")
+
+
+def complaint_corpus(phrasing) -> str:
+    """Every parser complaint this arm can put in front of a seat.
+
+    Rendered through the arm's own table with fixed sample values, so the
+    vocabulary scan reads the bytes a seat would read rather than the templates.
+    Kept OUT of ``corpus`` on purpose: that function's sha256 was computed before
+    the phrasing table existed, and growing its input would forfeit the one
+    provenance the default pin has.
+    """
+    c = phrasing.complaints
+    return "\n<<>>\n".join([
+        c.no_json.format(reply=repr("a sentence and no object")),
+        c.nothing_salvageable.format(reply=repr("a sentence and no object")),
+        c.not_boolean.format(value=repr("perhaps")),
+        c.not_index.format(value=repr(True), noun="seat", last=4),
+        c.no_index_number.format(value=repr("the left one"), noun="seat",
+                                 last=4),
+        c.index_out_of_range.format(noun="seat", index=9, last=4),
+        c.not_index_list.format(noun="seat", value=repr({"a": 1})),
+        c.wrong_index_count.format(size=2, noun="seat", picked=[1, 1]),
+    ])
 
 
 def corpus(phrasing, registers) -> str:
@@ -101,6 +136,71 @@ class PositiveRemovesTheProhibitions(unittest.TestCase):
                             corpus(POSITIVE, REGISTERS_POSITIVE))
 
 
+class ComplaintsFollowTheArm(unittest.TestCase):
+    """The shared parser is five games wide, so the arm hands it a table instead
+    of editing it. What has to hold: the ``as-is`` column is the other games'
+    bytes, the ``positive`` column is reached from changeling's own parse path,
+    and no slot sits unread behind a pin."""
+
+    def test_as_is_complaints_are_the_shared_default_by_identity(self):
+        self.assertIs(AS_IS.complaints, AS_IS_COMPLAINTS)
+
+    def test_positive_complaints_are_a_different_table(self):
+        self.assertIsNot(POSITIVE.complaints, AS_IS_COMPLAINTS)
+        self.assertNotEqual(complaint_corpus(AS_IS),
+                            complaint_corpus(POSITIVE))
+
+    def test_parse_action_reads_the_referees_table(self):
+        """Through ``parse_action``, not through the table - a field the parse
+        path never passes on would pass every other test in this file."""
+        for phrasing in (AS_IS, POSITIVE):
+            ref = ChangelingReferee.new(5, seed=3, theme=THEME_FOLK,
+                                        phrasing=phrasing)
+            with self.subTest(arm=phrasing.name, case="no object"):
+                with self.assertRaises(ParseError) as caught:
+                    parse_action("a sentence and no object", ref, 0)
+                self.assertEqual(str(caught.exception),
+                                 phrasing.complaints.nothing_salvageable.format(
+                                     reply=repr("a sentence and no object")))
+            while ref.phase is not Phase.VOTE:
+                for s in range(ref.n):
+                    ref.speak(s, f"seat {s} says something")
+                ref.close_round()
+            with self.subTest(arm=phrasing.name, case="not a seat"):
+                with self.assertRaises(ParseError) as caught:
+                    parse_action('{"vote": "the left one"}', ref, 0)
+                self.assertEqual(str(caught.exception),
+                                 phrasing.complaints.no_index_number.format(
+                                     value=repr("the left one"), noun="seat",
+                                     last=4))
+
+    def test_every_phrasing_slot_has_a_consumer(self):
+        """A slot nothing renders is a promise the arm does not keep.
+
+        ``corpus`` hashes an unread slot as happily as a read one, so each field
+        is required to appear in what a seat can actually be shown - the prompts,
+        the public events, the complaints, and the retry wrapper the policy
+        builds. Caught the retry slot, which was pinned by the hash and rendered
+        by nobody.
+        """
+        text = "\n".join([corpus(POSITIVE, REGISTERS_POSITIVE),
+                           complaint_corpus(POSITIVE),
+                           built_retry_prompt(POSITIVE)])
+        for f in fields(POSITIVE):
+            if f.name in ("name", "complaints"):
+                continue
+            with self.subTest(slot=f.name):
+                marker = getattr(POSITIVE, f.name).split("{")[0].strip()
+                self.assertTrue(marker, f"{f.name} has no literal to look for")
+                self.assertIn(marker, text)
+
+    def test_the_retry_wrapper_follows_the_arm(self):
+        for phrasing in (AS_IS, POSITIVE):
+            with self.subTest(arm=phrasing.name):
+                self.assertIn(phrasing.retry.split("{")[0].strip(),
+                              built_retry_prompt(phrasing))
+
+
 class Gate1HoldsUnderBoth(unittest.TestCase):
     def test_no_leak_over_200_seeded_games_under_either_phrasing(self):
         for phrasing in (AS_IS, POSITIVE):
@@ -118,6 +218,28 @@ class Gate1HoldsUnderBoth(unittest.TestCase):
                 caught += 1
         self.assertGreater(caught, 0, "the audit went blind under --phrasing "
                                       "positive")
+
+
+class VocabularyScanCoversTheComplaints(unittest.TestCase):
+    """The ten tokens, over the parser's complaints as well as the referee's
+    strings. Absence only: a complaint the shipped table never carried would fail
+    a presence half against a stale list, and `core/test_complaints.py` is what
+    pins the shipped wording."""
+
+    def test_no_banned_token_survives_in_the_positive_complaints(self):
+        text = complaint_corpus(POSITIVE)
+        for token in BANNED:
+            with self.subTest(token=token):
+                self.assertNotIn(token, text)
+
+    def test_the_scan_would_catch_an_as_is_complaint_left_in(self):
+        """The mutation this pair exists to catch: a `positive` column copied
+        from `as-is`. At least one banned token must be findable in the shipped
+        complaints, or the assertion above is vacuous."""
+        text = complaint_corpus(AS_IS)
+        self.assertTrue(any(token in text for token in BANNED),
+                        "no banned token in the as-is complaints - the list is "
+                        "stale, so the absence assertion proves nothing")
 
 
 class RecordCarriesThePhrasing(unittest.TestCase):
@@ -146,6 +268,31 @@ class RecordCarriesThePhrasing(unittest.TestCase):
             out.append((rec.winner, rec.accused, rec.truth,
                         [(v.seat, v.target) for v in rec.votes]))
         self.assertEqual(out[0], out[1])
+
+
+class OnePrompt:
+    """A backend that answers once with unparseable text, and keeps every prompt
+    it was handed. The retry wrapper is only visible from here: it is built
+    inside ``LLMPolicy.act`` and reaches no return value."""
+
+    def __init__(self):
+        self.prompts: list[str] = []
+
+    def complete_meta(self, prompt: str):
+        self.prompts.append(prompt)
+        return "a sentence and no object", "stub"
+
+
+def built_retry_prompt(phrasing) -> str:
+    """The second prompt ``LLMPolicy`` builds after one refused attempt."""
+    import random
+    ref = ChangelingReferee.new(5, seed=5, theme=THEME_FOLK, phrasing=phrasing)
+    backend = OnePrompt()
+    policy = LLMPolicy(backend=backend, retries=1, backoff=0,
+                       fallback=RandomPolicy(random.Random(5)))
+    policy.act(ref, 0)
+    assert len(backend.prompts) == 2, backend.prompts
+    return backend.prompts[1]
 
 
 if __name__ == "__main__":

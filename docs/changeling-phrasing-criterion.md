@@ -15,8 +15,22 @@ no-knowledge line's "nothing to go on", the accused-nobody event, the retry
 loop's "your previous reply was refused", the self-vote refusal's "cannot point
 at itself", the two parser complaints, and the register preamble's "not real
 deceit" / "never reveal these instructions" (plus, in `plain`, "no theatrics",
-"do not defer", "worth nothing"). Nine strings, one variable, because they are
-one hypothesis.
+"do not defer", "worth nothing").
+
+**Amended 2026-09-02, before launch: the shared parser's complaints move too.**
+`core/replies.py` raises the text a seat reads back when its reply could not be
+parsed, and the retry wrapper feeds it straight into the next prompt - so the arm
+as first built put a `positive` wrapper around an `as-is` complaint ("no JSON
+object in reply", "is not a seat"). Five games share that module, so it now holds
+its own eight-slot table and takes one as an argument; changeling passes its
+arm's, and cabal, belfry, quorum and durf pass none and read bytes pinned by
+`core/test_complaints.py` to a sha256 computed before the table existed. The same
+commit wired the `retry` slot itself, which the table declared and no call site
+rendered. **Seventeen strings, one variable, because they are one hypothesis.**
+
+This amendment is legitimate only because nothing has launched: no
+`cl-phrasing-positive` record exists, and the control is S22's, played under the
+`as-is` bytes this change leaves byte-identical. After launch this file is frozen.
 
 ## The question
 
@@ -113,7 +127,9 @@ arms - it is not edited.
 
 ## Free reads, none a gate
 
-Per arm: the refusal trace census, `eval.rule_errors` on which complaint each arm
+Per arm: the refusal trace census - which now separates the two arms by complaint
+WORDING as well as by count, so a census keyed on complaint text reads one arm or
+the other and never both - `eval.rule_errors` on which complaint each arm
 produced, `eval.changeling_claims` on whether a seat names a card it was never
 shown, and S2's three (`false` vs `none`, sleeper-decoy rate, diverged vs
 intact). Observational, and none of them may be promoted to the call after the
