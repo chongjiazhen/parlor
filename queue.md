@@ -402,3 +402,19 @@ Publishing:
       against the published threshold the off-repo ledger records, with that
       citation. Gated outside the tree; it held up nothing and still does not.
       **Entry condition: no arm in flight.**
+
+Candidate rungs:
+
+- [ ] **Lumen Ryder Core is a candidate rung whose permission is settled and whose
+      fit is HALF.** The SRD grants a named derivative in its own text
+      (`babblegumsam.gitbook.io/lumen-ryder-core-1`, front page and
+      §Introduction: On Tokusatsu & Making This Game Your Own), so the cite is a
+      URL rather than an assertion and no further grant gates a named hack. Read
+      2026-09-03, all 117 pages: **no hidden information** - setup step 11 reads
+      every character sheet aloud and the Mystery dream forbids a prepared answer
+      - so it earns nothing for gate #1. What it does carry is a bounded
+      adversarial combat layer with no authority seat: adjudication without
+      entitlement, the inverse of every rung above. Cost it carries: Part 4 Combat
+      is a stub in the book and the resolution rules are a ~6 KB external cheat
+      sheet, so a `RULES.md` is authored, not transcribed. Done when it is taken
+      or declined in `docs/decisions.md`; it obliges no run.
