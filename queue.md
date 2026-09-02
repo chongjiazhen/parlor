@@ -186,13 +186,13 @@ Rules and setup changes, each of which re-baselines what runs under it:
       the measurement, which was always the cost. **Worth it for what they
       degrade about INFORMATION, never as a sampling fix** - a bigger table makes
       the thin denominator worse. Blocked only by cabal having no GPU program.
-- [ ] **Seat the changeling expansion cards, which means picking a deck.**
-      `kindred` and `waker` are implemented, skinned, resolved and tested;
-      `SETUP_5` deals neither. Deck design is `games/changeling/RULES.md` §The
-      decks that would seat them and is the source of record. **UNBLOCKED
-      2026-08-28** (S10). **Route call: `waker` is the one worth a run** - it is
-      told that the night moved it where every other seat must infer it, and its
-      deck seats it in 62% of games, so one run carries its own control.
+- [ ] **Seat `kindred` - deck B, and it is the half still on paper.** The waker
+      half of this row is DONE (S18/S19: `SETUP_6_WAKER` registered, run, read).
+      Deck B needs `require_seated_kin`, because on a free deal the pair fails to
+      form more often than it forms - lone 47.1% against pair 45.2%, and the
+      constraint lifts the pair to 86.0%. Design is `games/changeling/RULES.md`
+      §The decks that would seat them; the precedent is `require_seated_pack`.
+      A new deck is a NEW criterion and re-baselines everything under it.
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** Public-domain folk-game vocabulary (Mafia,
       Davidoff 1986), no branding question, on a rung already built. **This is
