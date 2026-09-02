@@ -49,7 +49,8 @@ https://docs.google.com/document/d/16mu9tmLyxPFvAsYonFaYU14btvYo_aK3JVr5HLWwKzk/
 ```
 
 Append `/export?format=txt` for the plain-text export this table and the fixture
-were verified against; the document's own first line reads `VERSION 2.2 - 2021`,
+were verified against; the document's version line reads `VERSION 2.2 - 2021`
+(about twelve lines in, after the title, licence and credits - not line one),
 which is the string to check before trusting a re-read. Boven links it from
 `emielboven.itch.io/durf` under the "Google Doc Source Text" devlog, so the id
 above is a convenience, not the authority - if it ever fails to resolve, the itch
@@ -85,6 +86,14 @@ The armour mechanic was inverted, the tie rules were merged into one that does n
 exist, and Breaks were described as adding. All three are corrected below; the
 episode is the argument for the pin.
 
+**A third pass, 2026-09-02, checked the whole table and the adjudicator digest
+against the source again** and found the digest, not the table, was the weaker
+artifact: per-weapon slot costs were wrong in both directions, no attribute was
+named for attacks anywhere in the model-facing text, and the full-turn casting
+rule (no roll, Stress still paid) was absent. All three are in the digest now,
+the combat-attribute row below is new, and every durf number scored before that
+date was scored against the shorter digest.
+
 **A second pass, 2026-08-27, added two rows this table was missing** - the
 per-item slot costs, and the once-per-day casting limit that binds NPC casters
 only. Both were read from the same source text. Neither was wrong here; both were
@@ -99,6 +108,7 @@ that cost.
 | attributes | STR / DEX / WIL, each d3 at creation, **max 8** by advancement |
 | action roll | d20 + attribute, **over 15 is a success**. Saves are action rolls |
 | opposed roll | both roll, **highest wins**; NPCs add **Skill** instead of an attribute |
+| combat attribute | close combat is an opposed **STR** roll, ranged an opposed **DEX** roll; a ranged **defender** who wins deals no damage (added 2026-09-02 - the one combat rule that names an attribute, and decision 2 turns on it) |
 | ties | **three different rules** - general opposed: GM decides; close combat: **attacker wins**; initiative: **PCs go first** |
 | buffs / breaks | cancel first, then roll a d6 each; **highest Buff added, highest Break subtracted**. **NPCs never roll them** |
 | pushing | pre-roll, needs an empty slot: take **Stress** to gain a **Buff**. Repeatable while slots last. NPCs cannot push |
@@ -108,7 +118,7 @@ that cost.
 | worn weapons | natural **1** on an attack drops that weapon to **1 dmg** until repaired |
 | critical | natural **20** on an attack deals **double** weapon damage even if the opposed roll is lost. Ranged **defenders** cannot crit |
 | wounds | on receiving Wounds, roll **all** HD (d6 each); **result <= accumulated Wounds means death**. 0 HD dies to any Wound |
-| inventory | slots = **10 + STR**. **Most items take one slot**; medium armour **+1**, heavy armour **+2**, two-handed weapons **+1 or +2**. Each Stress occupies one; **Wounds and GP occupy none**. "A PC cannot carry more items or Stress than they have inventory slots" |
+| inventory | slots = **10 + STR**. **Most items take one slot**; medium armour **+1**, heavy armour **+2**; sword/axe/flail and pistol **+1**, bow **+1**, greatsword/halberd/warhammer and crossbow **+2** (per-weapon, 2026-09-02 - "two-handed +1" understated the greatsword and crossbow and missed the one-handed +1s). Each Stress occupies one; **Wounds and GP occupy none**. "A PC cannot carry more items or Stress than they have inventory slots" |
 | morale | NPCs carry **ML**; roll **2d6**, **higher than ML** means flee or parley |
 | NPC stats | **Skill** (one value, max 14), HD, Armor, ML. NPCs take no Stress |
 | clock | round 10s, turn 10min, watch 4h. **d6 per turn and per watch; on a 1, a random encounter** |

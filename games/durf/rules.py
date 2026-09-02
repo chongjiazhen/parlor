@@ -4,7 +4,10 @@
 re-baselines every number scored against it, the same way a theme blurb does in
 ``games/cabal``. The digest below is length-stable on purpose: it is the whole
 rules surface the adjudicator gets, and a run that grew it is not comparable to a
-run that did not.
+run that did not. **It grew on 2026-09-02** - per-weapon slot costs corrected,
+the attack attributes (STR close, DEX ranged) and the full-turn cast added, all
+three found missing or wrong against the source - so every durf number scored
+before that date was scored against the shorter digest.
 
 **Version pin.** DURF 2.2 (2021). ``docs/durf-rung.md`` carries the fetchable
 source and the line to check on any re-read - the document is a living artifact
@@ -44,19 +47,23 @@ DURF 2.2 mechanics (the parts a ruling turns on):
 - Attributes are STR, DEX and WIL. An action roll is d20 + the governing
   attribute, and OVER 15 succeeds. Saves are action rolls.
 - An opposed roll is against an NPC: both roll, highest wins. NPCs add their
-  Skill instead of an attribute. Close-combat ties go to the attacker.
+  Skill instead of an attribute. Close combat is an opposed STR roll and
+  ranged combat an opposed DEX roll; a ranged defender who wins deals no
+  damage. Close-combat ties go to the attacker.
 - A roll is for an UNCERTAIN outcome under pressure or opposition. Something
   certain resolves without one; something impossible is refused, not rolled.
 - Pushing happens before a roll: take one Stress to gain a Buff. It needs at
   least one EMPTY inventory slot, and it is repeatable while slots last. NPCs
   cannot push and take no Stress.
-- Inventory slots are 10 + STR. Most items take one slot, medium armour two,
-  heavy armour three, a two-handed weapon one extra. Each Stress occupies a
-  slot. Wounds and GP occupy none. A character cannot carry more items or
-  Stress than they have slots.
+- Inventory slots are 10 + STR. Most items take one slot. Medium armour takes
+  two and heavy armour three. A sword, axe, flail or pistol takes two; a bow
+  takes two; a greatsword, halberd, warhammer or crossbow takes three. Each
+  Stress occupies a slot. Wounds and GP occupy none. A character cannot carry
+  more items or Stress than they have slots.
 - Casting a spell is a WIL roll. It requires an empty slot, a free hand, and the
-  ability to speak. Success costs one Stress; failure costs neither. A character
-  can only cast a spell they know.
+  ability to speak. Success costs one Stress; failure costs neither. A caster
+  who spends a full turn (10 minutes) on the spell casts it without a roll and
+  still takes the Stress. A character can only cast a spell they know.
 - Armour is a depleting pool, not flat reduction: damage drains Armor points
   first and the remainder lands as Wounds. Shields reduce damage by 1, never
   below 1.
