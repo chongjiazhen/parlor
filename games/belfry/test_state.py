@@ -108,6 +108,19 @@ class TestRegistration(unittest.TestCase):
                 self.assertIs(ROLES[grim.hermit_as].align, Align.EVIL)
                 self.assertIs(grim.registers_as(hermit), ROLES[grim.hermit_as])
 
+    def test_the_ambiguous_evil_seat_can_read_as_an_outsider(self):
+        """The source lets it register as a townsfolk OR an outsider. Until
+        2026-09-02 the pool held townsfolk only. Nine seats on the full script
+        always seat outsiders, so the pool is never empty of them."""
+        seen = set()
+        for seed in range(300):
+            grim = dealt(9, seed, FULL)
+            if grim.find("mimic") is None or not grim.mimic_good:
+                continue
+            seen.add(ROLES[grim.mimic_as].team)
+        self.assertIn(Team.OUTSIDER, seen)
+        self.assertIn(Team.TOWNSFOLK, seen)
+
     def test_the_ambiguous_evil_seat_can_read_as_a_townsfolk(self):
         seen = set()
         for seed in range(200):
@@ -117,7 +130,8 @@ class TestRegistration(unittest.TestCase):
                 continue
             seen.add(grim.registers_evil(mimic))
             if grim.mimic_good:
-                self.assertIs(grim.registers_as(mimic).team, Team.TOWNSFOLK)
+                self.assertIn(grim.registers_as(mimic).team,
+                              (Team.TOWNSFOLK, Team.OUTSIDER))
         self.assertEqual(seen, {True, False},
                          "the discretionary coin never came up both ways")
 

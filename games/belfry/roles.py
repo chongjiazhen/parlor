@@ -165,7 +165,7 @@ VENOM = Role(
 MIMIC = Role(
     "mimic", Team.MINION, first_night=11, other_night=12,
     power="each night, sees every seat's role. Might register as good, and as a "
-          "townsfolk, to anything that asks")
+          "townsfolk or an outsider, to anything that asks")
 HEIR = Role(
     "heir", Team.MINION,
     power="if the demon dies while five or more seats are alive, it becomes the "

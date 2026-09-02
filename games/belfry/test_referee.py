@@ -170,6 +170,71 @@ class TestTheNightKill(unittest.TestCase):
         self.assertFalse(ref.grim.seat(2).poisoned)
 
 
+class TestTheEvilBriefings(unittest.TestCase):
+    """The source gives the minions and the demon their first-night briefings
+    only at seven seats or more; a five- or six-seat table's evil side is not
+    introduced. Added 2026-09-02 against the rules audit."""
+
+    def test_below_seven_seats_the_evil_side_is_not_introduced(self):
+        ref = rigged(FIVE)                       # six seats
+        advance_to(ref, "poison", seat=1)
+        ref.submit(1, default_action(ref, ref.pending()))
+        texts = [r.text for r in ref.knowledge[1]]
+        self.assertFalse(any("Seat 0 is the" in t for t in texts), texts)
+        self.assertNotIn(0, ref.entitled[1])
+        self.assertNotIn(1, ref.entitled[0])
+        self.assertFalse(any("not in play" in r.text for r in ref.knowledge[0]))
+
+    def test_at_seven_seats_the_evil_side_is_introduced(self):
+        ref = rigged(FIVE + ["witness"])          # seven seats
+        advance_to(ref, "poison", seat=1)
+        ref.submit(1, default_action(ref, ref.pending()))
+        texts = [r.text for r in ref.knowledge[1]]
+        self.assertTrue(any("Seat 0 is the" in t for t in texts), texts)
+        self.assertIn(0, ref.entitled[1])
+        self.assertIn(1, ref.entitled[0])
+
+
+class _Rig:
+    """An rng whose coin always lands on the bounce and whose choice is fixed."""
+    def __init__(self, pick): self.pick = pick
+    def random(self): return 0.0
+    def choice(self, seq): return self.pick
+    def shuffle(self, seq): pass
+
+
+class TestTheDeflectedKill(unittest.TestCase):
+    """A kill deflected off the speaker lands on a seat that keeps its own
+    protection: the source says a protected bounce target survives, and so does
+    the speaker. Added 2026-09-02 against the rules audit."""
+
+    def test_a_bounce_onto_the_bulwark_kills_nobody(self):
+        ref = rigged(["fiend", "venom", "speaker", "gauge", "bulwark", "tally"])
+        advance_to(ref, "kill")
+        ref.rng = _Rig(pick=4)
+        ref.submit(0, {"target": 2})
+        self.assertTrue(ref.grim.seat(4).alive)
+        self.assertTrue(ref.grim.seat(2).alive)
+
+    def test_a_bounce_onto_a_warded_seat_kills_nobody(self):
+        ref = rigged(["fiend", "venom", "speaker", "warder", "gauge", "tally"])
+        advance_to(ref, "protect", seat=3)
+        ref.submit(3, {"target": 4})
+        advance_to(ref, "kill")
+        ref.rng = _Rig(pick=4)
+        ref.submit(0, {"target": 2})
+        self.assertTrue(ref.grim.seat(4).alive)
+        self.assertTrue(ref.grim.seat(2).alive)
+
+    def test_a_bounce_onto_an_unprotected_seat_kills_it(self):
+        ref = rigged(["fiend", "venom", "speaker", "gauge", "bulwark", "tally"])
+        advance_to(ref, "kill")
+        ref.rng = _Rig(pick=3)
+        ref.submit(0, {"target": 2})
+        self.assertFalse(ref.grim.seat(3).alive)
+        self.assertTrue(ref.grim.seat(2).alive)
+
+
 class TestTheDemonChangingHands(unittest.TestCase):
     def test_a_demon_that_kills_itself_passes_the_role_to_a_minion(self):
         ref = rigged(FIVE)

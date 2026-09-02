@@ -263,7 +263,12 @@ class BelfryReferee:
             seat.protected = False
         if first:
             order = [(r.first_night, r.key) for r in FIRST_NIGHT]
-            order += [(15, MINION_INFO), (16, DEMON_INFO)]
+            if self.grim.n >= 7:
+                # The source introduces the evil side to itself only at seven
+                # seats and up; a smaller table's minion and demon start the game
+                # as strangers (2026-09-02 - every belfry number before that
+                # date briefed them at every size).
+                order += [(15, MINION_INFO), (16, DEMON_INFO)]
         else:
             order = [(r.other_night, r.key) for r in OTHER_NIGHT]
         self._queue = [key for _, key in sorted(order)]
@@ -477,6 +482,15 @@ class BelfryReferee:
                 self.referee_log.append(
                     f"discretion: the kill on seat {target} lands on seat "
                     f"{bounced} instead")
+                brow = grim.seat(bounced)
+                if ((brow.role.key == "bulwark" and not grim.droisoned(bounced))
+                        or brow.protected):
+                    # The bounce target keeps its own protection, so nobody
+                    # dies - the source's reading, adopted 2026-09-02.
+                    self.referee_log.append(
+                        f"night {self.day}: seat {bounced} cannot be killed "
+                        f"tonight; the deflected kill lands on nobody")
+                    return
                 self._kill(bounced, "night", announce=False)
                 return
         self._kill(target, "night", announce=False)

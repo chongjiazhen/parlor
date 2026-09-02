@@ -394,13 +394,17 @@ def deal(n: int, script: Script, rng: random.Random,
     if grim.find("mimic") is not None:
         if adjudicator is not None:
             mimic_good, mimic_as = adjudicator.mimic_registration(
-                list(script.by_team(Team.TOWNSFOLK)), rng)
+                list(script.by_team(Team.TOWNSFOLK))
+                + list(script.by_team(Team.OUTSIDER)), rng)
             _record_adjudicator_events(grim, adjudicator)
             grim.mimic_good = mimic_good
             grim.mimic_as = mimic_as.key
         else:
             grim.mimic_good = rng.random() < 0.5
+            # townsfolk OR outsider, as the source has it (2026-09-02; the pool
+            # was townsfolk-only before, so an archivist could never be shown it)
             good_roles = [r.key for r in script.by_team(Team.TOWNSFOLK)]
+            good_roles += [r.key for r in script.by_team(Team.OUTSIDER)]
             grim.mimic_as = rng.choice(good_roles) if good_roles else "witness"
         grim.log.append(
             f"discretion: the mimic registers "

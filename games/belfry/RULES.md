@@ -96,7 +96,7 @@ counts only alongside its master's), `hermit` (may register as evil, and as a
 minion or the demon), `pilgrim` (executed, the evil side wins).
 
 **Minions.** `venom` (poisons a seat until dusk tomorrow), `mimic` (sees the whole
-board each night; may register as good and as a townsfolk), `heir` (becomes the
+board each night; may register as good and as a townsfolk or an outsider), `heir` (becomes the
 demon if the demon dies with five or more alive), `warp` (two extra outsiders are
 in play, in place of two townsfolk).
 
@@ -124,9 +124,12 @@ order is data (`roles.py`), and changing it changes what every information role 
 worth - protection resolved after the kill is worth nothing, and a poisoning
 resolved after its victim's step is worth nothing.
 
-**First night:** `venom` chooses; `mimic` reads the board; the minions are told
-each other and the demon; the demon is told its minions and three roles that are
-NOT in play; then `witness`, `archivist`, `tracker`, `tally`, `gauge`, `diviner`,
+**First night:** `venom` chooses; `mimic` reads the board; **at seven seats and
+up** the minions are told each other and the demon, and the demon is told its
+minions and three good roles that are NOT in play - at five and six seats the
+evil side starts as strangers, as the source has it (2026-09-02; every belfry
+number before that date briefed them at every size, so a 5-seat figure from
+before and after is not one arm); then `witness`, `archivist`, `tracker`, `tally`, `gauge`, `diviner`,
 `valet`. No kill.
 
 **Every night after:** `venom`; `warder`; `mimic`; `fiend` kills; the `oracle`
@@ -237,7 +240,7 @@ seat ask nor either public channel, and it is not an audit input.
 | which good seat reads as the demon to the hunter | at setup | uniform over good seats |
 | whether the ambiguous outsider reads evil, and as what | at setup | fair coin, then uniform |
 | whether the ambiguous minion reads good, and as what | at setup | fair coin, then uniform |
-| whether a kill on the deflecting role lands elsewhere | at the kill | fair coin, then uniform |
+| whether a kill on the deflecting role lands elsewhere | at the kill | fair coin, then uniform - and the seat it lands on keeps its own protection, so a bounce onto the unkillable or a warded seat kills nobody (2026-09-02) |
 | which minion inherits a self-killed demon | at the kill | the written role if alive, else uniform |
 
 The two setup choices are taken ONCE, not per query. Per-query re-rolling is a
