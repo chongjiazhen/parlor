@@ -23,6 +23,7 @@ it is the bar for promotion.
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 import traceback
@@ -47,7 +48,19 @@ def record_paths(out: str) -> tuple[str, str]:
     Verbatim won because it is what every record already on disk is named - cabal's
     ``hunt*.json`` beside ``hunt*.json.jsonl`` - so settling it here renames one run's
     files rather than every run's.
+
+    **It also CREATES the directory, 2026-09-03.** ``eval/records/`` is gitignored,
+    so a fresh worktree has no such directory and a driver invoked by hand died
+    ``FileNotFoundError`` at the first JSONL append - after the games had run,
+    which is the expensive place to find out. Every ``eval/runs/*.cmd`` carried
+    ``if not exist "%OUTDIR%" mkdir "%OUTDIR%"`` against exactly this, which is a
+    guarantee living in twenty copies of a launcher instead of in the one function
+    both drivers already route through. The launchers keep their line - it costs
+    nothing and a recipe is read by people - but it is no longer what holds.
     """
+    parent = os.path.dirname(out)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     return out, f"{out}.jsonl"
 
 

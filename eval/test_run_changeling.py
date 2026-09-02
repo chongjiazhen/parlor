@@ -14,6 +14,7 @@ import inspect
 import os
 import json
 import random
+import shutil
 import tempfile
 import unittest
 
@@ -243,6 +244,26 @@ class TestBothDriversAgreeOnWhatOutMeans(unittest.TestCase):
     def test_the_summary_path_is_verbatim_and_the_jsonl_is_its_sibling(self):
         self.assertEqual(record_paths("eval/records/s2.json"),
                          ("eval/records/s2.json", "eval/records/s2.json.jsonl"))
+
+    def test_asking_for_the_paths_CREATES_the_directory_they_are_in(self):
+        """`eval/records/` is gitignored, so a fresh worktree has none and a
+        driver invoked by hand died `FileNotFoundError` at the first JSONL
+        append - after the games had run. The launchers all carried a `mkdir`
+        against this; the guarantee belongs in the one function both drivers
+        route through, so it is here and the launchers are belt."""
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, True)
+        records = os.path.join(root, "eval", "records")
+        self.assertFalse(os.path.isdir(records))
+        summary, jsonl = record_paths(os.path.join(records, "s2.json"))
+        self.assertTrue(os.path.isdir(records))
+        for path in (summary, jsonl):
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("{}")
+
+    def test_a_bare_filename_has_no_directory_to_create_and_does_not_raise(self):
+        """`os.path.dirname("s2.json")` is empty, and `makedirs("")` raises."""
+        self.assertEqual(record_paths("s2.json"), ("s2.json", "s2.json.jsonl"))
 
     def test_neither_driver_composes_its_own_suffix(self):
         for module in (eval.run_changeling, eval.run_cabal):
