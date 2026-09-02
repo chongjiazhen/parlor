@@ -99,6 +99,9 @@ partly true is worse than none.
 - `docs/belfry-night-noprior-criterion.md` - its follow-up, the same ask with
   `prior` withheld: grades whether the false count is a content function of the
   board. `eval.belfry_night_verdict --criterion withheld`. READ 2026-09-02.
+- `docs/belfry-night-transcript-criterion.md` - the session-memory arm: the
+  withheld ask carrying the referee's own transcript of the game, graded
+  against both published reads. `--criterion transcript`. Frozen, unlaunched.
 - `docs/changeling-skin-pair-criterion.md` - the first GPU spend on the skin
   set: `greek` vs `greek-named`, eight card names and nothing else, read on blind
   villager accuracy. Direction not pre-committed. Arithmetic

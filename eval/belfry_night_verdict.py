@@ -51,7 +51,8 @@ CONTROL_ARGS = {**COMMON_ARGS, "adjudicator": "random",
 MODEL_ARGS = {**COMMON_ARGS, "adjudicator": "model",
               "adjudicator_model": ADJUDICATOR_MODEL,
               "adjudicator_night": True, "adjudicator_steer": False,
-              "adjudicator_night_no_prior": False}
+              "adjudicator_night_no_prior": False,
+              "adjudicator_night_transcript": False}
 
 #: The follow-up the first criterion names in its last section: the same ask
 #: with ``prior`` withheld, on its own seeds, against its own control. Bound by
@@ -67,12 +68,36 @@ NOPRIOR_CONTROL_ARGS = {**NOPRIOR_COMMON_ARGS, "adjudicator": "random",
 NOPRIOR_MODEL_ARGS = {**NOPRIOR_COMMON_ARGS, "adjudicator": "model",
                       "adjudicator_model": ADJUDICATOR_MODEL,
                       "adjudicator_night": True, "adjudicator_steer": False,
-                      "adjudicator_night_no_prior": True}
+                      "adjudicator_night_no_prior": True,
+                      "adjudicator_night_transcript": False}
 #: The supplied-memory read the withheld arm is held against, as published
 #: 2026-09-02 (`docs/measurements.md` §belfry night coherence). A comparison
 #: to a point estimate would read noise as a gap; the call is on intervals.
 SUPPLIED_COHERENT = 152
 SUPPLIED_PAIRS = 163
+
+#: The session-memory arm the withheld criterion's last section names: the
+#: withheld ask carrying the referee's own transcript of the game so far. Bound
+#: by ``docs/belfry-night-transcript-criterion.md``; held against BOTH
+#: published reads on intervals.
+TRANSCRIPT_CONTROL_CAMPAIGN = "eval/records/belfry-night-transcript-control.json"
+TRANSCRIPT_MODEL_CAMPAIGN = "eval/records/belfry-night-transcript-model.json"
+TRANSCRIPT_CRITERION_DOC = "docs/belfry-night-transcript-criterion.md"
+TRANSCRIPT_FIRST_SEED = 15000
+TRANSCRIPT_LAST_SEED = 15999
+TRANSCRIPT_COMMON_ARGS = {**COMMON_ARGS, "seed": TRANSCRIPT_FIRST_SEED}
+TRANSCRIPT_CONTROL_ARGS = {**TRANSCRIPT_COMMON_ARGS, "adjudicator": "random",
+                           "adjudicator_night": False}
+TRANSCRIPT_MODEL_ARGS = {**TRANSCRIPT_COMMON_ARGS, "adjudicator": "model",
+                         "adjudicator_model": ADJUDICATOR_MODEL,
+                         "adjudicator_night": True, "adjudicator_steer": False,
+                         "adjudicator_night_no_prior": True,
+                         "adjudicator_night_transcript": True}
+#: The withheld read, as published 2026-09-02 (`docs/measurements.md`
+#: §belfry night coherence, prior WITHHELD) - the floor the transcript arm
+#: has to clear to show the channel carried anything.
+WITHHELD_COHERENT = 94
+WITHHELD_PAIRS = 122
 
 ARMS = {
     "supplied": {
@@ -90,6 +115,19 @@ ARMS = {
         "doc": NOPRIOR_CRITERION_DOC,
         "first_seed": NOPRIOR_FIRST_SEED, "last_seed": NOPRIOR_LAST_SEED,
         "compare_to_supplied": True,
+        "supplied_labels": ("NEEDS MEMORY", "HOLDS UNAIDED"),
+    },
+    "transcript": {
+        "title": "play-time discretion arm, prior WITHHELD, own transcript",
+        "control": TRANSCRIPT_CONTROL_CAMPAIGN,
+        "model": TRANSCRIPT_MODEL_CAMPAIGN,
+        "control_args": TRANSCRIPT_CONTROL_ARGS,
+        "model_args": TRANSCRIPT_MODEL_ARGS,
+        "doc": TRANSCRIPT_CRITERION_DOC,
+        "first_seed": TRANSCRIPT_FIRST_SEED, "last_seed": TRANSCRIPT_LAST_SEED,
+        "compare_to_supplied": True,
+        "supplied_labels": ("BELOW SUPPLIED", "AS GOOD AS SUPPLIED"),
+        "compare_to_withheld": True,
     },
 }
 
@@ -279,16 +317,34 @@ def _adjudicator_voids(rows: list[dict]) -> tuple[list[str], dict]:
                    "upstreams": dict(upstreams)}
 
 
-def unaided_call(model: Read) -> str | None:
-    """The withheld arm against the published supplied-memory read, on
-    intervals. NEEDS MEMORY when the whole Wilson interval sits below the
-    supplied read's lower endpoint; HOLDS UNAIDED when the intervals touch or
-    the withheld arm sits above; None with no pair to grade."""
+def supplied_call(model: Read, arm: dict = ARMS["withheld"]) -> str | None:
+    """An arm against the published supplied-memory read, on intervals. The
+    arm's first label when the whole Wilson interval sits below the supplied
+    read's lower endpoint; its second when the intervals touch or the arm sits
+    above; None with no pair to grade."""
     if model.wilson is None:
         return None
+    below, other = arm["supplied_labels"]
     supplied_low, _ = wilson(SUPPLIED_COHERENT, SUPPLIED_PAIRS)
-    _, withheld_high = model.wilson
-    return "NEEDS MEMORY" if withheld_high < supplied_low else "HOLDS UNAIDED"
+    _, arm_high = model.wilson
+    return below if arm_high < supplied_low else other
+
+
+def unaided_call(model: Read) -> str | None:
+    """The withheld arm's line: NEEDS MEMORY or HOLDS UNAIDED."""
+    return supplied_call(model, ARMS["withheld"])
+
+
+def recall_call(model: Read) -> str | None:
+    """The transcript arm against the published withheld read, on intervals.
+    RECALLS when the whole Wilson interval sits above the withheld read's
+    upper endpoint - the channel carried something the model used; NO RECALL
+    when the intervals touch or the arm sits below; None with no pair."""
+    if model.wilson is None:
+        return None
+    _, withheld_high = wilson(WITHHELD_COHERENT, WITHHELD_PAIRS)
+    arm_low, _ = model.wilson
+    return "RECALLS" if arm_low > withheld_high else "NO RECALL"
 
 
 def _ci(ci) -> str:
@@ -331,12 +387,18 @@ def report(control_evidence, model_evidence,
             f"chance per pair: {CHANCE:.2%} exactly (two options, the previous "
             f"count always one of them)"]
     call = verdict(control, model)
+    if arm.get("compare_to_withheld"):
+        withheld = wilson(WITHHELD_COHERENT, WITHHELD_PAIRS)
+        out += ["", f"against the withheld read "
+                f"{WITHHELD_COHERENT}/{WITHHELD_PAIRS} = "
+                f"{WITHHELD_COHERENT / WITHHELD_PAIRS:.2%} {_ci(withheld)}: "
+                f"{recall_call(model) or 'no pair to compare'}"]
     if arm["compare_to_supplied"]:
         supplied = wilson(SUPPLIED_COHERENT, SUPPLIED_PAIRS)
         out += ["", f"against the supplied-memory read "
                 f"{SUPPLIED_COHERENT}/{SUPPLIED_PAIRS} = "
                 f"{SUPPLIED_COHERENT / SUPPLIED_PAIRS:.2%} {_ci(supplied)}: "
-                f"{unaided_call(model) or 'no pair to compare'}"]
+                f"{supplied_call(model, arm) or 'no pair to compare'}"]
     if voids:
         out += ["", "VOID - the record is refused:"] + [f"  {v}" for v in voids]
         out += ["", f"arithmetic below the refusal: {call}"]
@@ -349,7 +411,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--criterion", choices=sorted(ARMS), default="supplied",
                     help="which pre-committed arm to bind (default supplied, "
-                         "the 2026-09-02 read; withheld is the memory arm)")
+                         "the 2026-09-02 read; withheld is the memory arm; "
+                         "transcript is the session-memory arm)")
     ap.add_argument("control", nargs="?")
     ap.add_argument("model", nargs="?")
     args = ap.parse_args(argv)

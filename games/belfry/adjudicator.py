@@ -109,6 +109,17 @@ class ModelAdjudicator:
     #: (``docs/belfry-night-noprior-criterion.md``). Meaningless without
     #: ``night``, and refused there rather than silently ignored.
     night_prior: bool = True
+    #: The referee's own session as its memory. With it, the night ask carries
+    #: every accepted ask and reply of THIS game so far - setup choices
+    #: included, because that is what the referee has said - as earlier turns
+    #: of one conversation, with ``prior`` still withheld. The harness supplies
+    #: the channel and nothing of the content: what the model can recall is
+    #: what it wrote. A fallback is not the model's telling and enters nothing.
+    #: Setup asks feed the transcript and do not receive it, so they stay
+    #: byte-identical to the withheld arm's and one variable moves
+    #: (``docs/belfry-night-transcript-criterion.md``). Needs the withheld
+    #: night ask, and is refused on any other.
+    night_transcript: bool = False
     #: Seconds after a TRANSPORT failure, doubling. Same reason as the seats':
     #: retrying instantly burns the budget against an endpoint still throttled,
     #: and lands the choice on random.
@@ -122,6 +133,11 @@ class ModelAdjudicator:
         if not self.night_prior and not self.night:
             raise ValueError("night_prior=False withholds a field only the "
                              "night ask carries; it needs night=True")
+        if self.night_transcript and (self.night_prior or not self.night):
+            raise ValueError("night_transcript replaces the supplied prior "
+                             "with the referee's own session; it needs "
+                             "night=True and night_prior=False")
+        self.transcript: list[tuple[str, str]] = []
 
     def _offer(self, key: str, options: list[str], ruled: bool) -> list[str]:
         """The menu as it goes out. Sorted for the blind ask, seeded-shuffled for
@@ -134,7 +150,9 @@ class ModelAdjudicator:
 
     def choose(self, key: str, options: list[str],
                board: dict | None = None, rule: str | None = None,
-               offer_key: str | None = None) -> str:
+               offer_key: str | None = None, recall: bool = False) -> str:
+        """``recall`` sends the session transcript ahead of this ask. Every
+        accepted ask enters the transcript whether or not it was sent one."""
         options = self._offer(offer_key or key, options, rule is not None)
         ask = {"choice_key": key, "options": options}
         if rule is not None:
@@ -149,8 +167,13 @@ class ModelAdjudicator:
             # first call is still the question S8b measured. Only what happens
             # after a refusal is new.
             payload = ask if not complaint else {**ask, "refused": complaint}
+            context = json.dumps(payload)
             try:
-                reply, upstream = self.backend.complete_meta(json.dumps(payload))
+                if recall:
+                    reply, upstream = self.backend.complete_meta(
+                        context, history=list(self.transcript))
+                else:
+                    reply, upstream = self.backend.complete_meta(context)
             except Exception as exc:                      # transport, not rules
                 complaint = f"the call failed ({type(exc).__name__}: {exc})"
                 if self.backoff and attempt < self.retries:
@@ -168,6 +191,8 @@ class ModelAdjudicator:
             self.events.append(ChoiceEvent(
                 key, tuple(options), parsed["choice"], False,
                 rule_refusals > 0, upstream))
+            if self.night_transcript:
+                self.transcript.append((context, reply))
             return parsed["choice"]
         selected = self.rng.choice(options)
         self.events.append(ChoiceEvent(
@@ -201,7 +226,8 @@ class ModelAdjudicator:
         offer_key = f"gauge_false_count:{board.get('seat')}:{board.get('night')}"
         return int(self.choose("gauge_false_count", [str(c) for c in options],
                                board, rule=GAUGE_COHERENCE_RULE,
-                               offer_key=offer_key))
+                               offer_key=offer_key,
+                               recall=self.night_transcript))
 
     def hermit_registration(self, evil_roles: list[Role], rng: random.Random) -> tuple[bool, Role]:
         del rng

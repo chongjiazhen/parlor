@@ -239,8 +239,15 @@ class Backend:
         """One turn: system prompt + this seat's rendered context -> model reply."""
         return self.complete_meta(context)[0]
 
-    def complete_meta(self, context: str) -> tuple[str, str]:
+    def complete_meta(self, context: str,
+                      history: list[tuple[str, str]] | None = None
+                      ) -> tuple[str, str]:
         """The reply, and the id of the upstream that actually served it.
+
+        ``history`` is earlier (ask, reply) turns of the SAME session, sent
+        ahead of ``context`` as alternating user/assistant messages. ``None``
+        or empty sends the two-message shape every record so far was taken
+        under, byte for byte - a caller that never passes it changes nothing.
 
         The second half matters whenever ``model`` is a routing alias rather than a
         model: ``auto`` lets the gateway fail over across its keys, which is the
@@ -258,6 +265,9 @@ class Backend:
             "max_tokens": self.max_tokens,
             "messages": [
                 {"role": "system", "content": self.system_prompt},
+                *(m for ask, reply in (history or ())
+                  for m in ({"role": "user", "content": ask},
+                            {"role": "assistant", "content": reply})),
                 {"role": "user", "content": context},
             ],
         }

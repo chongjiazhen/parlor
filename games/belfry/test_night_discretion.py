@@ -223,3 +223,95 @@ class TestRefereeIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TranscriptBackend(RecordingBackend):
+    """Records the session history each ask arrived with, `None` when the
+    caller sent none - the withheld arm's shape."""
+
+    def __init__(self, choice: str | None = None):
+        super().__init__(choice)
+        self.histories: list[list | None] = []
+        self.replies: list[str] = []
+
+    def complete_meta(self, context: str, history=None) -> tuple[str, str]:
+        self.histories.append(None if history is None else list(history))
+        reply, upstream = super().complete_meta(context)
+        self.replies.append(reply)
+        return reply, upstream
+
+
+class TestTranscriptMemory(unittest.TestCase):
+    """The referee's own session as the memory: the night ask carries every
+    earlier accepted ask and reply of this game, `prior` still withheld."""
+
+    BOARD1 = {"seat": 1, "night": 1, "neighbours": [0, 2], "true_count": 2,
+              "prior": []}
+    BOARD2 = {"seat": 1, "night": 2, "neighbours": [0, 2], "true_count": 2,
+              "prior": [{"night": 1, "neighbours": [0, 2], "count": 1,
+                         "truthful": False}]}
+
+    def _adj(self, backend, **kw):
+        return ModelAdjudicator(backend, random.Random(1), night=True,
+                                night_prior=False, night_transcript=True,
+                                ask_seed=7, **kw)
+
+    def test_transcript_needs_the_withheld_night_ask(self):
+        with self.assertRaises(ValueError):
+            ModelAdjudicator(RecordingBackend(), random.Random(1), night=True,
+                             night_transcript=True, ask_seed=7)
+        with self.assertRaises(ValueError):
+            ModelAdjudicator(RecordingBackend(), random.Random(1),
+                             night_transcript=True, ask_seed=7)
+
+    def test_the_second_night_ask_carries_the_first_and_its_reply(self):
+        backend = TranscriptBackend(choice="1")
+        adj = self._adj(backend)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD1))
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD2))
+        self.assertEqual(backend.histories[0], [])
+        self.assertEqual(backend.histories[1],
+                         [(backend.contexts[0], backend.replies[0])])
+        for ctx in backend.contexts:
+            self.assertNotIn("prior", json.loads(ctx)["board"])
+
+    def test_setup_asks_enter_the_transcript_and_do_not_receive_it(self):
+        backend = TranscriptBackend()
+        adj = self._adj(backend)
+        adj.sot_belief([ROLES["gauge"], ROLES["warder"]], random.Random(0))
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD1))
+        self.assertIsNone(backend.histories[0])
+        self.assertEqual(backend.histories[1],
+                         [(backend.contexts[0], backend.replies[0])])
+
+    def test_a_fallback_leaves_no_memory(self):
+        backend = TranscriptBackend(choice="7")
+        adj = self._adj(backend, retries=0)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD1))
+        self.assertTrue(adj.events[-1].fallback)
+        backend.choice = "1"
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD2))
+        self.assertEqual(backend.histories[-1], [])
+
+    def test_without_the_flag_no_history_is_sent(self):
+        backend = TranscriptBackend(choice="1")
+        adj = ModelAdjudicator(backend, random.Random(1), night=True,
+                               night_prior=False, ask_seed=7)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD1))
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD2))
+        self.assertEqual(backend.histories, [None, None])
+
+    def test_a_retried_ask_enters_as_the_accepted_attempt(self):
+        class RefuseOnce(TranscriptBackend):
+            def complete_meta(self, context, history=None):
+                self.choice = "1" if self.contexts else "7"
+                return super().complete_meta(context, history)
+        backend = RefuseOnce()
+        adj = self._adj(backend, retries=1)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD1))
+        self.assertTrue(adj.events[-1].recovered)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD2))
+        self.assertEqual(backend.histories[-1],
+                         [(backend.contexts[1], backend.replies[1])])
+        self.assertIn("refused", json.loads(backend.contexts[1]))
+

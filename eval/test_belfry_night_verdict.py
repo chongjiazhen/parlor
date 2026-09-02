@@ -11,6 +11,7 @@ from __future__ import annotations
 import unittest
 
 from eval.belfry_night_verdict import (
+    WITHHELD_COHERENT, WITHHELD_PAIRS, recall_call, supplied_call,
     ARMS,
     CHANCE,
     SUPPLIED_COHERENT,
@@ -208,3 +209,73 @@ class TestVerdict(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTranscriptArm(unittest.TestCase):
+    """The session-memory arm: prior withheld, the referee's own transcript
+    supplied. Bound to its own seeds, paths and flags; read against both
+    published arms on intervals."""
+
+    def _summary(self, **args):
+        base = dict(games=1000, arm="random", seats=9, script="compact",
+                    backend=None, rounds=1, seed=15000, adjudicator="model",
+                    adjudicator_model="qwen36-35b-a3b-iq3",
+                    adjudicator_night=True, adjudicator_steer=False,
+                    adjudicator_night_no_prior=True)
+        base.update(args)
+        return {"args": base}
+
+    def _flag_voids(self, arm, summary):
+        voids = _recipe_voids(summary, [], arm["model_args"], "model", arm)
+        return [v for v in voids if "adjudicator_night_transcript" in v]
+
+    def test_binds_its_own_seeds_paths_and_flags(self):
+        arm = ARMS["transcript"]
+        self.assertEqual((arm["first_seed"], arm["last_seed"]), (15000, 15999))
+        for path in (arm["control"], arm["model"]):
+            self.assertIn("transcript", path)
+        self.assertNotIn(arm["doc"], (ARMS["supplied"]["doc"],
+                                      ARMS["withheld"]["doc"]))
+        self.assertTrue(arm["model_args"]["adjudicator_night_no_prior"])
+        self.assertTrue(arm["model_args"]["adjudicator_night_transcript"])
+
+    def test_refuses_a_record_without_the_transcript(self):
+        arm = ARMS["transcript"]
+        for summary in (self._summary(),
+                        self._summary(adjudicator_night_transcript=False)):
+            self.assertEqual(len(self._flag_voids(arm, summary)), 1)
+        self.assertEqual(self._flag_voids(
+            arm, self._summary(adjudicator_night_transcript=True)), [])
+
+    def test_the_earlier_arms_refuse_a_transcript_record(self):
+        for name, seed in (("withheld", 13000), ("supplied", 12000)):
+            summary = self._summary(seed=seed, adjudicator_night_transcript=True,
+                                    adjudicator_night_no_prior=name == "withheld")
+            self.assertEqual(len(self._flag_voids(ARMS[name], summary)), 1)
+
+    def _read(self, coherent, total):
+        return coherence_read([game([told(3, 1, (2, 4), 1, False),
+                                     told(3, 2, (2, 4), 1 if i < coherent else 0,
+                                          False)], i) for i in range(total)])
+
+    def test_the_withheld_comparison_is_the_published_read(self):
+        self.assertEqual((WITHHELD_COHERENT, WITHHELD_PAIRS), (94, 122))
+
+    def test_wholly_above_the_withheld_interval_recalls(self):
+        self.assertEqual(recall_call(self._read(150, 160)), "RECALLS")
+
+    def test_touching_the_withheld_interval_is_no_recall(self):
+        self.assertEqual(recall_call(self._read(125, 160)), "NO RECALL")
+
+    def test_no_pairs_is_no_recall_call(self):
+        self.assertIsNone(recall_call(coherence_read(
+            [game([told(3, 1, (2, 4), 2, True)])])))
+
+    def test_the_supplied_comparison_wears_the_arm_labels(self):
+        arm = ARMS["transcript"]
+        self.assertEqual(supplied_call(self._read(100, 160), arm),
+                         "BELOW SUPPLIED")
+        self.assertEqual(supplied_call(self._read(150, 160), arm),
+                         "AS GOOD AS SUPPLIED")
+        self.assertEqual(supplied_call(self._read(100, 160), ARMS["withheld"]),
+                         "NEEDS MEMORY")

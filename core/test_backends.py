@@ -9,6 +9,7 @@ nothing in the numbers to say the model was never asked.
 from __future__ import annotations
 
 import io
+import json
 import unittest
 import urllib.error
 from unittest import mock
@@ -269,3 +270,37 @@ class TestTheUsageOfTheMostRecentCall(unittest.TestCase):
         b.complete_meta("ctx")
         self.assertIsNone(b.last_usage, "a call reporting no usage inherited the "
                                         "previous call's token count")
+
+
+class TestHistory(unittest.TestCase):
+    """A call may carry earlier turns of the same session ahead of its own
+    context. Without any, the payload is byte-identical to the two-message
+    shape every record so far was taken under."""
+
+    def _capture(self):
+        b = Backend.named("local", "m")
+        seen = []
+
+        def post(req):
+            seen.append(json.loads(req.data.decode()))
+            return {"choices": [{"message": {"content": "ok"}}], "model": "m"}
+        b._post = post
+        return b, seen
+
+    def test_no_history_is_the_two_message_shape(self):
+        b, seen = self._capture()
+        b.complete_meta("ctx")
+        b.complete_meta("ctx", history=[])
+        for payload in seen:
+            self.assertEqual([m["role"] for m in payload["messages"]],
+                             ["system", "user"])
+
+    def test_history_rides_between_system_and_the_current_ask(self):
+        b, seen = self._capture()
+        b.complete_meta("ctx", history=[("u1", "a1"), ("u2", "a2")])
+        self.assertEqual(seen[0]["messages"][1:], [
+            {"role": "user", "content": "u1"},
+            {"role": "assistant", "content": "a1"},
+            {"role": "user", "content": "u2"},
+            {"role": "assistant", "content": "a2"},
+            {"role": "user", "content": "ctx"}])

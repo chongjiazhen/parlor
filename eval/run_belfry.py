@@ -86,11 +86,12 @@ def build_adjudicator(args, seed: int | None) -> ModelAdjudicator | None:
     steered = getattr(args, "adjudicator_steer", False)
     night = getattr(args, "adjudicator_night", False)
     no_prior = getattr(args, "adjudicator_night_no_prior", False)
+    transcript = getattr(args, "adjudicator_night_transcript", False)
     return ModelAdjudicator(
         build_adjudicator_backend(args, seed), random.Random(seed),
         steer=HERRING_STEER_RULE if steered else None,
         ask_seed=seed if (steered or night) else None,
-        night=night, night_prior=not no_prior)
+        night=night, night_prior=not no_prior, night_transcript=transcript)
 
 
 def recorded_args(args) -> dict:
@@ -457,6 +458,11 @@ def main() -> None:
                     help="the night ask without the seat's prior tellings - "
                          "the memory arm, one field moved (bound by "
                          "docs/belfry-night-noprior-criterion.md)")
+    ap.add_argument("--adjudicator-night-transcript", action="store_true",
+                    help="the withheld night ask carrying the referee's own "
+                         "session so far as earlier turns - the session-memory "
+                         "arm, one channel moved (bound by "
+                         "docs/belfry-night-transcript-criterion.md)")
     ap.add_argument("--adjudicator-steer", action="store_true",
                     help="send the board and one stated placement rule with each "
                          "setup choice, and offer the menu in a seeded order. "
@@ -473,6 +479,9 @@ def main() -> None:
         raise SystemExit("--adjudicator-night needs --adjudicator model")
     if args.adjudicator_night_no_prior and not args.adjudicator_night:
         raise SystemExit("--adjudicator-night-no-prior needs --adjudicator-night")
+    if args.adjudicator_night_transcript and not args.adjudicator_night_no_prior:
+        raise SystemExit("--adjudicator-night-transcript needs "
+                         "--adjudicator-night-no-prior")
     if args.adjudicator == "model":
         if not args.adjudicator_backend:
             raise SystemExit("--adjudicator model needs --adjudicator-backend")

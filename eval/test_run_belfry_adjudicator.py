@@ -112,3 +112,29 @@ class TestNightPriorFlag(unittest.TestCase):
         self.assertTrue(adj.night_prior)
         old = build_adjudicator(make_args(), 6100)
         self.assertTrue(old.night_prior)
+
+
+class TestNightTranscriptFlag(unittest.TestCase):
+    """`--adjudicator-night-transcript` is the session-memory arm's one
+    variable over the withheld arm."""
+
+    def test_the_flag_needs_the_withheld_arm(self):
+        argv = ["run_belfry.py", "--games", "0", "--adjudicator", "model",
+                "--adjudicator-backend", "local", "--adjudicator-model", "m",
+                "--adjudicator-night", "--adjudicator-night-transcript"]
+        with mock.patch("sys.argv", argv), \
+             self.assertRaisesRegex(SystemExit, "--adjudicator-night-no-prior"):
+            main()
+
+    def test_the_flag_builds_a_transcript_adjudicator(self):
+        adj = build_adjudicator(make_args(adjudicator_night=True,
+                                          adjudicator_night_no_prior=True,
+                                          adjudicator_night_transcript=True),
+                                15000)
+        self.assertTrue(adj.night_transcript)
+        self.assertFalse(adj.night_prior)
+
+    def test_without_the_flag_no_transcript(self):
+        for kw in ({}, dict(adjudicator_night=True),
+                   dict(adjudicator_night=True, adjudicator_night_no_prior=True)):
+            self.assertFalse(build_adjudicator(make_args(**kw), 1).night_transcript)
