@@ -150,13 +150,6 @@ behind each is `docs/open-arms.md`; read the entry before taking the row**, and
 the reference each names is indexed in `docs/README.md`. A second index here is
 the one that goes stale.
 
-- [ ] **`records_gate.demand` fails any fresh worktree that WRITES a record.** It
-      skips while `eval/records/` is empty and raises once the dir holds runs, so
-      its premise - a populated dir means the cited records should be here - is
-      false in a clone that never held them. Measured 2026-09-02: three new
-      control JSONs turned 8 skips into 6 failures and 3 errors, and moving them
-      aside restored the tail. Fix per-record, not per-directory. Done when a fresh
-      worktree can write a record and the suite tail stays green.
 - [ ] **Gate #3's bar is computed on two different deals and the arm-level
       verdict flips between them.** `eval.run_changeling._chance` weights the
       run's OWN deal by all villager votes; `skin_pair_verdict.REFERENCE_CHANCE`

@@ -33,6 +33,23 @@ opened the Claude one. The decision is unchanged; only the file holding it is.
   whole point, and nothing writes the marker for a process killed outright. The
   `.cmd` echo stays for the one case python cannot cover: a crash before the driver
   runs at all.
+- **A missing record is judged per RECORD, and the whole-rename case is a KNOWN
+  loss, 2026-09-03.** `eval/records_gate.py` drew the line between an excused
+  absence and a rotted citation on the DIRECTORY - empty means a slot, populated
+  means the cited record should be here. That premise is false in exactly the tree
+  the module exists for: a fresh worktree that runs one arm populates the
+  directory with runs of its own, and measured 2026-09-02, three new control JSONs
+  turned 8 skips into 6 failures and 3 errors. Reproduced 2026-09-03 in a
+  throwaway worktree, same shape to the count. The line is now the demanded
+  record's own run - one run writes `s2.json`, `s2.json.jsonl` and `s2.log`
+  together, so a surviving sibling says the run was here and the artifact has been
+  renamed or deleted. **What that costs, chosen rather than discovered: a run
+  removed or renamed WHOLE now skips where the directory rule failed it**, because
+  from inside a tree that never held the run the two are indistinguishable. The
+  skip names the file in the suite output, and a test pins the downgrade so a
+  later reader finds a decision instead of a hole. Restoring the old rule would
+  re-break every worktree; the way to catch a whole rename is a citation that
+  names two records, not a directory scan.
 - **`refused` is the fallback census; `note` is cabal's notebook.** Both games
   record the refusal that produced a fallback on the decision itself, so a run's
   refusal diagnosis is a census in the JSONL rather than a sampled trace (8/game)
