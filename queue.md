@@ -126,30 +126,16 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
-- [ ] **Belfry night coherence with `prior` WITHHELD - LAUNCHED 2026-09-02,
-      DIED at game 400/1000 on gate #1, VOID.** Criterion
+- [ ] **Belfry night coherence with `prior` WITHHELD - RELAUNCHED 2026-09-02
+      under the succession fix (`819963d`), IN FLIGHT.** Criterion
       `docs/belfry-night-noprior-criterion.md`, recipe
       `eval/runs/belfry-night-noprior.cmd`, verdict `eval.belfry_night_verdict
-      --criterion withheld`. The control finished 1000/1000; the model arm
-      raised `LeakDetected` at seed 13400 (the row below), so the bound model
-      paths hold 400 rows and no summary. Relaunch needs the leak row decided
-      first and the partial `belfry-night-noprior-model.json.jsonl` moved aside,
-      since the recipe refuses to run over it. The 400 clean games are not a
-      read. **Entry condition: the succession-lie row below is closed.**
-- [ ] **Gate #1 fires on a lie that succession later makes TRUE - belfry,
-      measured at seed 13400, reproduced deterministically.** The sot
-      (believing oracle) was told "Seat 2 is the Fiend." on night 3 as a lie -
-      `_other_role` picked it, seat 2 was the heir; on night 5 the heir became
-      the demon and the audit, grading every line against the CURRENT grimoire,
-      found the stale lie in seat 3's payload. 1 in 1400 model-adjudicator
-      games so far (0 in the 12000 arm, 0 in either control). Two fixes, pick
-      one: (a) the referee never lies with a role a seat can BECOME -
-      `_other_role` excludes `fiend` for a living heir - keeping the audit
-      naive, one seeded draw shorter at those sites only; (b) grade a reveal
-      against the grimoire at the moment it was written, which is the audit
-      trusting the referee's timestamp and is the weaker guarantee. Either
-      changes what a role learns (RULES §Discretion) and re-baselines belfry.
-      Recommended (a). Not implemented: it moves the knowledge model.
+      --criterion withheld`. The first launch died at game 400 on gate #1
+      (seed 13400: a night-3 lie named the heir as the Fiend, the heir
+      succeeded on night 5) and is VOID; the fix is the referee's, a minion is
+      never lied about as the demon, so both arms re-run and the 2026-09-02
+      supplied-prior read stays a dated read under the older lie space. The
+      read lands in `docs/measurements.md`.
 
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
