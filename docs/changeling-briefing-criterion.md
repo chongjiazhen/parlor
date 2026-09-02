@@ -68,7 +68,13 @@ Both live arms: `eval.run_changeling --games 200 --arm llm --backend local
   It is not re-run. Seeds 5000..5199 are chosen for that reason: the two-round
   `folk` record is the control this pair pairs against, exactly as the gate #2 arm
   does.
-- **Arm 2 adds `--briefing` and changes nothing else.**
+- **Arm 2 adds `--briefing` and changes nothing else.** Record
+  `eval/records/cl-briefing.json`.
+
+`eval.briefing_pair_verdict` pins every setting above against each record's own
+`args` and VOIDS the read on any disagreement, before the arithmetic. The control
+predates the flag and carries no `briefing` key; absence reads as off for the
+control only, and the arm must say `True`.
 
 Controls, CPU: `--arm random --games 1000 --seed 5000 --theme folk --rounds 2`.
 The random policy does not read a render, so one control serves both arms and the

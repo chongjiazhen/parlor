@@ -117,7 +117,8 @@ partly true is worse than none.
   `eval.gate2_pair_verdict`. UNLAUNCHED.
 - `docs/changeling-briefing-criterion.md` - S21: the ask's per-phase drip against
   the full standing frame in every render, `--briefing` off vs on, arm 1 being
-  S22's two-round record. Must run BEFORE the source-rules merge. UNLAUNCHED.
+  S22's two-round record. Arithmetic `eval.briefing_pair_verdict`. Must run
+  BEFORE the source-rules merge. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
