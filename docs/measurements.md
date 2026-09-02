@@ -143,6 +143,25 @@ words. The blind rows above score response to DERIVABLE taint; §Measured's
 something sharper than either: whatever the blind seats respond to, it is not the
 mechanically derivable part.
 
+**2026-09-02 (S26), the solver-seat control read** -
+`transcripts/cabal-solver-control.md`, `eval/runs/solver-control.cmd`,
+`py -3 -m eval.solver_control`. Backend `none`, no model, no GPU. `--arm solver`
+against `--arm random` on the same 400 seeds (20000..20399, unspent; N sized from a
+20-game pilot at 19000). **A control read of an instrument, not a gate result.**
+The gap it closes: `SolverPolicy` deferred most decisions to its random fallback and
+those draws routed around the fallback counter, so the arm read `0.00%` random when
+most of it was. The split is a record field now (`solver_mechanical` /
+`solver_deferred`, per decision `Decision.solver`), never folded into `fallbacks`.
+
+| what | result | what it decides |
+|---|---|---|
+| **the split**, solver arm | **10085/32586 = 30.95% proved**, 22501 deferred; seer, hunter, mimic proved all 2843 votes each, watcher 1032, loyalist 524 - all from the night and the seat's own role, none from mission arithmetic | the arm was 69% the random policy; "0.00% fell back" was true and said nothing |
+| fallback, both arms | solver 0/32586, random 0/26211 | expected: neither arm calls a model, so nothing can be refused. A deferred draw is not a fallback |
+| good wins, same seeds | solver **69/400 = 17.25% [13.86%, 21.26%]** vs random 136/400 = 34.00% [29.53%, 38.77%] | intervals disjoint, and NOT a good side vs a control - the solver sat on the evil seats too |
+| how evil won | solver: 295 `five_rejects`, 36 hunt hits, **0 missions failed, 0 fail cards** over 544 missions; random: 189 missions, 75 hunts, 0 rejects | seer + both evils reject every tainted team, so none passes and no mission fails; evil wins on the clock or at the random hunt (34.3%, chance 1/3) |
+| paired stratum, proved votes before divergence | 1274 paired / 8811 after; random on the same votes: clean 173/240 = 72.08% [66.09%, 77.38%], tainted 697/1034 = 67.41% [64.49%, 70.20%]; solver 240/240 and 0/1034 by definition | both random intervals hold `approve_rate = 0.7`: the pairing selects nothing, and the paired stratum is the first vote round of each game |
+| the tell warning | does NOT reach the hunt (deferred to random, at chance); DOES reach the outcome column (entitlement voting against itself, evil seats included) and the share itself (a table that never plays a fail card starves the mission constraint) | a solver-good / random-evil arm is where both artifacts stop; it does not exist |
+
 
 ## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it now PASSES
 
