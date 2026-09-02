@@ -312,6 +312,11 @@ Spikes and unbuilt arms:
       to, or the referee would say "seat 0 first" of a random floor; the test
       whitelists exactly that line. `docs/changeling-turns-criterion.md`,
       `eval.turns_pair_verdict`, one arm against `cl-rounds2`. Merge queue above.
+      **Playable at the console on `slice/fanout-s27-demo` (`5f57b77`)**, which
+      branches from the arm: `--turns` on `demo.py` plus one console note. Found
+      in doing it - no demo loop was needed, `play_game` already iterates
+      `speaking_order()`, so a human seat is asked only on the clock and a bare
+      `say` listens through the existing shorthand. Console furniture only.
       Still unmeasured: cabal's `--simultaneous` and bidding; if either is ever
       run on changeling it shares this criterion's shape, not a second one.
 - [ ] **Two shapes not to harden further before game #2** - cabal's `Phase` enum,
