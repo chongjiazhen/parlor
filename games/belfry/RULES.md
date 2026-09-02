@@ -301,5 +301,12 @@ Each of these is a measured arm, not a convenience:
   changes that source alone; it does not move player policy, payloads, or audit.
 - **Talk rounds** (`--rounds`), the largest single lever on cost.
 - **Script size**, which re-baselines every number.
+- **An off-map faction** (`--heartbeat`), which holds no seat, acts at the top of
+  a night on a seed-derived schedule, and lays facts that reach seats by place and
+  by rumour rather than by role. Its facts are audited against the entitlement
+  snapshot the render was built under, its decisions are tallied in their own
+  denominator with their own fallback rate, and it adds no phase and no turn kind.
+  Off by default: a faction lays facts no seat's role explains, so no belfry number
+  recorded without it is comparable to one recorded with it.
 - **Dead seats speaking**, currently on. Turning it off is a rules change and
   roughly a third of the day's calls.
