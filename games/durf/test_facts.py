@@ -159,3 +159,29 @@ def test_the_shipped_file_declares_the_scenario_it_belongs_to():
     scenario = json.loads(
         (facts.FACTS_FILE.parent / "scenario.json").read_text(encoding="utf-8"))
     assert raw["scenario_id"] == scenario["scenario_id"]
+
+
+def test_a_facts_own_text_missing_its_term_is_refused():
+    """The failure the pairwise and cross-text checks cannot see: a fact whose
+    own statement never contains its own sentinel. ``kernel.call_reveal``
+    publishes a fact's text verbatim and trusts the fixture to be well-formed -
+    the matcher only ever scans a RENDER for a term, never a fact's own text
+    against its own term, so this fact would go undeclared-and-unaudited
+    forever: declaring it writes prose that carries no sentinel at all, and no
+    later render check can see the fact "go" through its own reveal."""
+    led = texted(a=(["shallow cavity"], "A loose flagstone covers a hidden pit."))
+    with pytest.raises(facts.FactError, match="does not appear in its own text"):
+        facts.check_facts(led)
+
+
+def test_every_shipped_facts_own_text_contains_its_own_term():
+    """The measured answer to 'unmeasured: whether fixtures/facts.json satisfies
+    it' - checked directly against the raw fixture rather than only through
+    ``load()``'s call to ``check_facts``, so a future loosening of the loader's
+    checks cannot silently stop covering this fixture property."""
+    led = facts.load()
+    failures = [(fid, term, fact.text) for fid, fact in led.facts.items()
+                for term in fact.terms
+                if term.strip().lower() not in fact.text.lower()]
+    assert failures == [], (
+        f"facts whose own text lacks their own term: {failures}")
