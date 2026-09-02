@@ -101,8 +101,9 @@ partly true is worse than none.
   board. `eval.belfry_night_verdict --criterion withheld`. READ 2026-09-02.
 - `docs/changeling-skin-pair-criterion.md` - the first GPU spend on the skin
   set: `greek` vs `greek-named`, eight card names and nothing else, read on blind
-  villager accuracy. Direction not pre-committed. Arithmetic `eval.s5_verdict`
-  per arm. LAUNCHED 2026-09-02.
+  villager accuracy. Direction not pre-committed. Arithmetic
+  `eval.skin_pair_verdict` (Newcombe on the difference, paired game bootstrap
+  beside it). LAUNCHED 2026-09-02.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
