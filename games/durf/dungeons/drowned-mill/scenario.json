@@ -1,0 +1,444 @@
+{
+ "scenario_id": "drowned-mill",
+ "ruleset": "DURF 2.2 (2021), Emiel Boven, CC BY 4.0",
+ "note": "A play dungeon, not an instrument. Fixed state: no declaration may depend on standing state not written here. There is no labelled declaration set for this scenario and no number is scored against it - games/durf/fixtures/ holds the graded dungeon, this directory holds the played one.",
+ "slot_costs": {
+  "rule": "DURF 2.2: slots = 10 + STR. Most items take one slot. A character cannot carry more items or Stress than they have inventory slots.",
+  "most_items": 1,
+  "light_armor": 1,
+  "medium_armor": 2,
+  "heavy_armor": 3,
+  "two_handed_weapon": "+1 or +2 as the item states",
+  "stress": 1,
+  "wounds": 0,
+  "gp": 0,
+  "spell_known": 0,
+  "note": "Every slots_used above is derivable from the carried list plus Stress with these costs. Re-derive before trusting it."
+ },
+ "pcs": [
+  {
+   "seat": 0,
+   "name": "Halra",
+   "STR": 2,
+   "DEX": 1,
+   "WIL": 2,
+   "HD": 1,
+   "slots_total": 12,
+   "slots_used": 10,
+   "slots_free": 2,
+   "armor_worn": "Light",
+   "armor_points": 3,
+   "armor_points_max": 3,
+   "wounds": 0,
+   "stress": 0,
+   "carried": [
+    "sword (4 dmg, +1 slot)",
+    "shield",
+    "light armor (3 Armor)",
+    "2 Supply",
+    "rope",
+    "lantern",
+    "flask of oil",
+    "crowbar"
+   ],
+   "spells": [],
+   "slots_derivation": "sword 2 + shield 1 + light armor 1 + 2 Supply 2 + rope 1 + lantern 1 + flask of oil 1 + crowbar 1 = 10 items, + 0 Stress = 10 of 12.",
+   "note": "Two free slots, so Halra can push twice before running out of room."
+  },
+  {
+   "seat": 1,
+   "name": "Odd",
+   "STR": 1,
+   "DEX": 3,
+   "WIL": 1,
+   "HD": 1,
+   "slots_total": 11,
+   "slots_used": 8,
+   "slots_free": 3,
+   "armor_worn": null,
+   "armor_points": 0,
+   "armor_points_max": 0,
+   "wounds": 0,
+   "stress": 1,
+   "carried": [
+    "bow (3 dmg, two hands, +1 slot)",
+    "Ammo",
+    "dagger (3 dmg)",
+    "1 Supply",
+    "torch",
+    "chalk"
+   ],
+   "spells": [],
+   "slots_derivation": "bow 2 + Ammo 1 + dagger 1 + 1 Supply 1 + torch 1 + chalk 1 = 7 items, + 1 Stress = 8 of 11.",
+   "note": "Carries the party's only spare torch, unlit. No armour at all."
+  },
+  {
+   "seat": 2,
+   "name": "Sem",
+   "STR": 1,
+   "DEX": 1,
+   "WIL": 3,
+   "HD": 1,
+   "slots_total": 11,
+   "slots_used": 6,
+   "slots_free": 5,
+   "armor_worn": null,
+   "armor_points": 0,
+   "armor_points_max": 0,
+   "wounds": 0,
+   "stress": 0,
+   "carried": [
+    "staff (2 dmg)",
+    "2 Supply",
+    "tinderbox",
+    "waterskin",
+    "hand mirror"
+   ],
+   "spells": [
+    "Still Water: on a WIL roll, one body of water holds motionless for a turn"
+   ],
+   "slots_derivation": "staff 1 + 2 Supply 2 + tinderbox 1 + waterskin 1 + hand mirror 1 = 6 items, + 0 Stress = 6 of 11.",
+   "note": "Knows one spell and has the empty slots to cast it."
+  }
+ ],
+ "hireling": {
+  "name": "Wick",
+  "Skill": 1,
+  "HD": 1,
+  "armor_points": 0,
+  "ML": 6,
+  "attack": "sling, 2 dmg",
+  "slots_total": 10,
+  "note": "A pond-side boy hired for a share. NPCs cannot push and take no Stress."
+ },
+ "npcs": [
+  {
+   "group": "mill-rats",
+   "count": 4,
+   "Skill": 1,
+   "HD": 0,
+   "armor_points": 0,
+   "ML": 5,
+   "attack": "bite, 2 dmg",
+   "location": "R4",
+   "note": "0 HD: dies to any Wound. Low ML, so they break early."
+  },
+  {
+   "group": "cistern-eel",
+   "count": 1,
+   "Skill": 4,
+   "HD": 2,
+   "armor_points": 1,
+   "ML": 7,
+   "attack": "bite, 4 dmg",
+   "location": "R6",
+   "note": "Strikes only what enters the water."
+  },
+  {
+   "group": "the miller",
+   "count": 1,
+   "Skill": 3,
+   "HD": 2,
+   "armor_points": 1,
+   "ML": 8,
+   "attack": "hooked pole, 3 dmg",
+   "location": "R8",
+   "note": "Talks if he is talked to. Knows what the dials spell and will trade it."
+  },
+  {
+   "group": "the drowned",
+   "count": 3,
+   "Skill": 5,
+   "HD": 2,
+   "armor_points": 0,
+   "ML": 12,
+   "attack": "grasping hands, 3 dmg, and a held victim is pulled under",
+   "location": "R10",
+   "note": "ML 12: they never flee. They do not leave the weir."
+  }
+ ],
+ "rooms": [
+  {
+   "id": "R1",
+   "name": "Millyard",
+   "contents": "Open yard in daylight. A hay cart lies on a broken axle, picked over years ago. The mill door stands open on darkness. To one side a stone-lined overflow channel runs out of the hillside behind an iron grate that has rusted off its top hinge. The pond above is low and brown, and the race that fed the wheel is dry.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R2",
+     "via": "the open mill door",
+     "sight": false,
+     "basis": "'open on darkness' - the doorway shows nothing past the threshold."
+    },
+    {
+     "to": "R12",
+     "via": "the rusted grate over the overflow channel",
+     "sight": true,
+     "basis": "The grate is open ironwork and daylight reaches a few feet into the channel."
+    }
+   ]
+  },
+  {
+   "id": "R2",
+   "name": "Wheelhouse",
+   "contents": "The great wheel fills the room, canted over and jammed against its housing. A man's body is wedged between two paddles, long dead and dried. A brass key hangs on a thong at his neck. The axle runs through the wall into the mill.",
+   "hidden": [
+    "The wheel is held only by the paddle the body is wedged against. Freeing the body frees the wheel, which turns under its own weight and crushes whatever stands in the housing."
+   ],
+   "exits": [
+    {
+     "to": "R1",
+     "via": "the yard door",
+     "sight": true,
+     "basis": "The yard is lit and the door stands open behind the party."
+    },
+    {
+     "to": "R3",
+     "via": "a plank door, shut but not fastened",
+     "sight": false,
+     "basis": "A shut door blocks sight."
+    }
+   ]
+  },
+  {
+   "id": "R3",
+   "name": "Grinding floor",
+   "contents": "Two millstones on a raised floor, the upper one lifted on its crane. Flour dust hangs in the air thick enough to taste. A grain hopper stands half full of spoiled meal. A ladder goes down into the dark at the back.",
+   "hidden": [
+    "A leather purse holding 55 GP is pushed down out of sight into the spoiled meal."
+   ],
+   "exits": [
+    {
+     "to": "R2",
+     "via": "the plank door",
+     "sight": true,
+     "basis": "The plank door stands open once the party has come through it."
+    },
+    {
+     "to": "R4",
+     "via": "a low doorway hung with sacking",
+     "sight": false,
+     "basis": "Hanging sacking blocks sight."
+    },
+    {
+     "to": "R5",
+     "via": "the ladder down",
+     "sight": false,
+     "basis": "The ladder drops into unlit space below the floor."
+    }
+   ]
+  },
+  {
+   "id": "R4",
+   "name": "Sack store",
+   "contents": "Rotted grain sacks stacked to the ceiling, most of them burst. Four mill-rats the size of cats watch from the top of the stack and do not run. A crawlway at floor level runs on into the dark.",
+   "hidden": [
+    "A silver ring worth 30 GP is worked into the rats' bedding at the back of the stack."
+   ],
+   "exits": [
+    {
+     "to": "R3",
+     "via": "the sacking-hung doorway",
+     "sight": true,
+     "basis": "Sacking parts, and the lit grinding floor shows through it from here."
+    },
+    {
+     "to": "R6",
+     "via": "the crawlway at floor level",
+     "sight": false,
+     "basis": "A floor-level crawl shows nothing of the room beyond."
+    }
+   ]
+  },
+  {
+   "id": "R5",
+   "name": "Sluice room",
+   "contents": "Waist-deep water, cold and still. An iron lever stands in a slotted quadrant on the wall, set to OPEN. A tide line of black scum across the stonework shows where the water once stood four feet lower. Steps go down under the water on the far side.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R3",
+     "via": "the ladder up",
+     "sight": true,
+     "basis": "The hatch at the ladder top is open and the floor above shows through it."
+    },
+    {
+     "to": "R7",
+     "via": "the steps down, under water",
+     "sight": false,
+     "basis": "The steps pass below the waterline."
+    }
+   ]
+  },
+  {
+   "id": "R6",
+   "name": "Cistern",
+   "contents": "A round chamber of black water, deep enough that no floor shows. Something long moves beneath the surface and does not come up. A stone walkway runs around the wall at shoulder height, broken away in two places.",
+   "hidden": [
+    "A cistern-eel lies along the bottom, four feet of it, and strikes at anything that enters the water."
+   ],
+   "exits": [
+    {
+     "to": "R4",
+     "via": "the crawlway",
+     "sight": true,
+     "basis": "The crawl is short and straight and its far end shows from the walkway."
+    },
+    {
+     "to": "R7",
+     "via": "an arch off the walkway",
+     "sight": true,
+     "basis": "The arch is open and the landing beyond it stands in view."
+    },
+    {
+     "to": "R8",
+     "via": "a door off the walkway, swollen shut",
+     "sight": false,
+     "basis": "A shut door blocks sight."
+    }
+   ]
+  },
+  {
+   "id": "R7",
+   "name": "Sunken stair",
+   "contents": "A stair landing. Water stands chest-high and moves slightly, as though draining away somewhere out of sight. The steps continue down into it. Small bones lie caught in the angle of the wall, picked clean.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R5",
+     "via": "the steps up",
+     "sight": true,
+     "basis": "The steps rise clear of the water and the room above shows from them."
+    },
+    {
+     "to": "R6",
+     "via": "the arch",
+     "sight": true,
+     "basis": "The same open arch, read from the landing side."
+    },
+    {
+     "to": "R9",
+     "via": "a passage below the waterline",
+     "sight": false,
+     "basis": "The passage mouth lies under water."
+    }
+   ]
+  },
+  {
+   "id": "R8",
+   "name": "Miller's room",
+   "contents": "A dry room above the water, lived in. A hammock, a fire pit, a heap of fish bones. A thin old man in a flour-stiffened coat stands with a hooked pole levelled at the door. He does not look surprised to see anyone.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R6",
+     "via": "the swollen door",
+     "sight": true,
+     "basis": "Forced open, the door frames the walkway and the water beyond."
+    },
+    {
+     "to": "R9",
+     "via": "a curtained gap in the wall",
+     "sight": false,
+     "basis": "A hung curtain blocks sight."
+    }
+   ]
+  },
+  {
+   "id": "R9",
+   "name": "Shrine",
+   "contents": "A low vaulted room, dry underfoot. An altar with its carved face chiselled back to bare stone. A shallow basin on top of it holds rainwater. Set into the wall behind stands a door of grey metal with no handle, no keyhole and a hand-sized dish at its centre.",
+   "hidden": [
+    "The grey door swings open while anything of value rests in the basin, and shuts again the moment it is lifted out."
+   ],
+   "exits": [
+    {
+     "to": "R7",
+     "via": "the passage",
+     "sight": true,
+     "basis": "The passage rises clear of the water at this end and the landing shows."
+    },
+    {
+     "to": "R8",
+     "via": "the curtained gap",
+     "sight": true,
+     "basis": "The curtain hangs open from this side."
+    },
+    {
+     "to": "R10",
+     "via": "the grey door",
+     "sight": false,
+     "basis": "The grey door is shut."
+    }
+   ]
+  },
+  {
+   "id": "R10",
+   "name": "Bone weir",
+   "contents": "An overflow grate floor to ceiling, matted thick with bones and rags and hair pressed into it by years of current. Three drowned figures stand in the water on this side, facing the grate, not moving. Water pours steadily through it and away.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R9",
+     "via": "the grey door",
+     "sight": true,
+     "basis": "Propped open, the door frames the lit shrine behind it."
+    },
+    {
+     "to": "R11",
+     "via": "a low arch, half under water",
+     "sight": false,
+     "basis": "The arch is half submerged and shows nothing beyond."
+    },
+    {
+     "to": "R12",
+     "via": "the weir grate, once it is opened",
+     "sight": false,
+     "basis": "The mat of debris on the grate blocks sight through it."
+    }
+   ]
+  },
+  {
+   "id": "R11",
+   "name": "Vault",
+   "contents": "A dry stone cell above the waterline. An iron-bound chest, banded and locked, with three brass dials on its face lettered rather than numbered. Stacked beside it, a miller's tally-boards going back years.",
+   "hidden": [
+    "The chest holds 400 GP and a silver mill-mark. The dials spell the mill's own name, which is burned into the head of every tally-board in the stack."
+   ],
+   "exits": [
+    {
+     "to": "R10",
+     "via": "the low arch",
+     "sight": true,
+     "basis": "The arch stands behind the party and the weir shows through it."
+    }
+   ]
+  },
+  {
+   "id": "R12",
+   "name": "Overflow tunnel",
+   "contents": "A stone-lined channel running straight out towards daylight, knee-deep and quick underfoot. Small bones and scraps of cloth turn over in the current, coming down from somewhere upstream. The climb out at the yard end is a scramble. The far end is jammed part open where the ironwork has dropped off its hinge.",
+   "hidden": [],
+   "exits": [
+    {
+     "to": "R10",
+     "via": "the weir grate",
+     "sight": false,
+     "basis": "The mat of debris on the grate blocks sight through it."
+    },
+    {
+     "to": "R1",
+     "via": "the channel mouth",
+     "sight": true,
+     "basis": "Daylight at the mouth and the yard beyond it stand in plain view."
+    }
+   ]
+  }
+ ],
+ "clock": {
+  "unit": "turn (10 minutes)",
+  "elapsed_turns": 0,
+  "encounter_check": "d6 each turn; on a 1, roll the encounter table",
+  "light": "Halra's lantern is lit, 18 turns of oil, 18 remaining. Odd's torch is unlit."
+ }
+}

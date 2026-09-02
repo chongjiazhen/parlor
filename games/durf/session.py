@@ -258,9 +258,14 @@ class Session:
         return render.text
 
 
-def new(seed: int | None = None, audit: bool = True) -> Session:
-    """A session on the shipped fixed dungeon, seeded and audited."""
-    return Session(kernel=load_kernel(seed=seed), audit=audit)
+def new(seed: int | None = None, audit: bool = True, path=None) -> Session:
+    """A session on a dungeon directory, seeded and audited.
+
+    ``path`` defaults to the shipped GRADED dungeon. Anything else is a play
+    dungeon: the kernel reads its scenario AND its facts from that directory,
+    and refuses a directory whose two files name different scenarios.
+    """
+    return Session(kernel=load_kernel(seed=seed, path=path), audit=audit)
 
 
 @dataclass

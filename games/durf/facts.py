@@ -75,6 +75,10 @@ class FactLedger:
 
     facts: dict[FactId, WorldFact]
     revealed: set[FactId]
+    #: Which dungeon these facts describe. Defaulted so a hand-built ledger in a
+    #: test needs no id, and carried so ``kernel.load`` can refuse a pair of files
+    #: that describe two different dungeons.
+    scenario_id: str = ""
 
     def reveal(self, fact_id: FactId) -> WorldFact:
         """Declare a fact to the party. Raises on a fact that does not exist.
@@ -136,7 +140,8 @@ def load(path: Path | str | None = None) -> FactLedger:
         fid = tuple(entry["fact_id"])
         facts[fid] = WorldFact(fact_id=fid, label=entry["label"],
                                terms=tuple(entry["terms"]), text=entry["text"])
-    ledger = FactLedger(facts=facts, revealed=set())
+    ledger = FactLedger(facts=facts, revealed=set(),
+                        scenario_id=raw.get("scenario_id", ""))
     for fid in raw.get("public_at_start", []):
         ledger.reveal(tuple(fid))
     check_facts(ledger)

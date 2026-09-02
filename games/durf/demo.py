@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import random
 import sys
+from pathlib import Path
 
 from core.backends import (Backend, ENDPOINTS, api_key_from_env, require_key)
 from core.console import ConsoleBackend, human_seats
@@ -146,6 +147,30 @@ def build_adjudicator(args, rng: random.Random):
     return seats.LLMAdjudicator(backend=backend, retries=args.retries)
 
 
+DUNGEONS = Path(__file__).resolve().parent / "dungeons"
+
+
+def dungeon_dir(name):
+    """Resolve ``--dungeon`` to a directory, or None for the shipped one.
+
+    A bare name is looked up under ``dungeons/``; anything else is taken as a
+    path. Both are checked here rather than at load, so a typo names the
+    dungeons that DO exist instead of raising on a missing scenario.json.
+    """
+    if name is None:
+        return None
+    cand = DUNGEONS / name
+    root = cand if cand.is_dir() else Path(name)
+    if not (root / "scenario.json").is_file():
+        have = []
+        if DUNGEONS.is_dir():
+            have = sorted(d.name for d in DUNGEONS.iterdir() if d.is_dir())
+        raise SystemExit(
+            f"no dungeon at {root}: it holds no scenario.json. "
+            f"Dungeons that ship: {have or [chr(40)+chr(41)]}")
+    return root
+
+
 def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=None)
@@ -163,6 +188,10 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--max-tokens", type=int, default=1536)
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--no-thinking", action="store_true")
+    ap.add_argument("--dungeon", default=None, metavar="NAME|DIR",
+                    help="a dungeon under games/durf/dungeons/, or a path to a "
+                         "directory holding scenario.json and facts.json "
+                         "(default: the shipped graded dungeon)")
     ap.add_argument("--human", metavar="SEAT",
                     help="play ONE party seat yourself: a seat number, or "
                          "`random` to draw one from --seed (a terminal is one "
@@ -188,7 +217,7 @@ def main() -> None:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
 
     rng = random.Random(args.seed)
-    session = session_mod.new(seed=args.seed)
+    session = session_mod.new(seed=args.seed, path=dungeon_dir(args.dungeon))
     players = build_players(session, args, rng)
     adjudicator = build_adjudicator(args, rng)
     humans = human_seats(args.human, len(session.kernel.pcs), args.seed)
