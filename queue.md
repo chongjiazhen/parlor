@@ -92,8 +92,6 @@ should launch first and spend the wait on a CPU slice.
 | **S20** | **Changeling notebook arm.** Port or reject per-seat notes for this rung, with entitlement audit and paired-arm recipe. | judgment | codex | no changeling arm in flight | model-facing change is isolated, audit holds, recipe freezes comparison |
 | **S21** | **Changeling briefing arm.** Add full standing briefing only as an off-by-default paired arm. | judgment | codex | no changeling arm in flight | one-variable recipe, audit proof and both fallback-rate fields |
 | **S22** | **Changeling discussion-length arm.** Bind one extra discussion-round comparison without changing deck, wording or scorer. | judgment | codex | a post-S14 baseline/criterion exists | paired recipe and criterion, ready to launch |
-| **S24** | **Off-map faction heartbeat spike.** Build the typed-fact entitlement-snapshot probe scoped in `docs/faction-heartbeat.md`. | judgment | codex | no arm in flight | deterministic tick schedule, one audited render and explicit result |
-| **S25** | **Group-sequential campaign design.** Pre-commit alpha spending and stop boundaries for next campaign. | judgment | codex | target metric and candidate campaign named | criterion document and recomputation test; no old record re-read as sequential |
 | **S26** | **Solver-seat control read.** Measure SolverPolicy versus random only where its entitled VOTE evidence can differ; no model and no cabal gate reopening. **Blocked on an instrument gap:** `SolverPolicy` defers to its fallback for every non-VOTE phase and every mixed posterior, and those draws route around `LLMPolicy`'s counter - so `--arm solver` reports `0.00%` fell back over 429 decisions most of which WERE random, and the gate prose calls the arm "played at random". The mechanical-vs-deferred split has to be counted before the read means anything. | judgment | codex | `--arm solver` runs - **met**; deferred-decision count does not exist | control recipe, result, the mechanical/deferred split, and fallback rate, scoped as policy evidence |
 | **S27** | **Turn-taking active-seat design.** Specify random-active-seat plus non-advancing idle action as one isolated changeling arm. | judgment | codex | no changeling arm in flight | criterion, exact payload delta and audit tests |
 
@@ -102,7 +100,13 @@ should launch first and spend the wait on a CPU slice.
 the next checkpoint. Nothing built so far de-risks the product claim, "a referee
 that oversees without micromanaging" - so the next spike is the **adjudicator**
 against 3-4 discretion-heavy characters, not a whole roster, and not Secret
-Hitler, which is cabal's rung again. **While a run is in flight**, the standing
+Hitler, which is cabal's rung again. **Taken 2026-09-02 as belfry's first
+PLAY-TIME discretion arm** - the false count a switched-off gauge is told, held
+across nights - `docs/belfry-night-coherence-criterion.md`, recipe
+`eval/runs/belfry-night.cmd`, IN FLIGHT; the read lands in
+`docs/measurements.md`. Its follow-up, the arm that withholds `prior`, is named
+in the criterion's last section and becomes a row once this one is read.
+**While a run is in flight**, the standing
 menu of what a session can still do is `docs/open-arms.md` §While the card is
 busy; its reusable half is that an instrument scored against records that already
 exist costs nothing and can outrank the run it waits on.
@@ -121,6 +125,14 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
+- [ ] **A DURF fact's term is guarded only against OTHER facts' text.**
+      Found building S24: `check_facts` refuses a term that appears in another
+      fact's statement, but a fact whose own statement lacks its sentinel leaves
+      unaudited - the matcher cannot see it go. The heartbeat closed it
+      structurally (`World.add_fact` refuses such a fact); the durf kernel's
+      `call_reveal` publishes text verbatim and relies on the fixture being
+      well-formed. Unmeasured: whether `fixtures/facts.json` satisfies it. One
+      check over the fixture plus the same refusal in `FactLedger`.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
