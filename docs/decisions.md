@@ -438,3 +438,68 @@ the rung's own canonical rules file circumlocuted.
       from prose into a module, class, role or card key - and unlike the gate's
       other patterns these names are already public in the tree, so a literal
       check would ship nothing a clone does not already hold.
+
+## The next rung is Paranoia-shaped, not Lumen Ryder, 2026-09-03
+
+**This is the ONE tracked statement of what the next rung is and why**, which the
+queue asked for and no tracked line carried. The superseded plan is kept and
+dated, below.
+
+**Licence did not decide this, and that is the point.** Lumen Ryder Core's
+permission is settled and published in its own SRD, so it was the cheaper
+candidate on the axis that turned out not to be the bottleneck. What a rung earns
+is the bottleneck.
+
+- **Lumen Ryder earns nothing for gate #1.** Read at 117 pages 2026-09-03: setup
+  reads every character sheet aloud to the table, and the Mystery dream forbids a
+  prepared answer, so no seat holds what another may not. It carries real
+  adjudication with no authority seat - novel, and the adjudicator rung has
+  already been read. A variation on an answered question, charging a `RULES.md`
+  authored from a 6 KB external cheat sheet whose gaps only its author can close.
+- **A Paranoia-shaped rung is the first MULTI-AXIS entitlement.** `faction`,
+  `deviation`, `directive` and `clearance` are orthogonal secrets. Every rung so
+  far tested gate #1 against a single-axis role card; a briefing correct on three
+  axes and wrong on the fourth is a failure mode the existing rungs structurally
+  cannot produce. That is new information about the guarantee, not a re-run.
+- **It needs no permission and no transcription.** Mechanics are not
+  copyrightable, so it is built branding-free with functional keys, the way cabal
+  is Avalon-shaped without shipping Avalon. cabal's architecture already is hidden
+  role + private knowledge + vote + mission, and `core/` is what game #2 inherits,
+  so the widening is from one secret to four.
+- **Lumen Ryder is re-homed, not declined.** It goes to the play lane, unsequenced
+  against the rungs, and its permission cite survives there.
+
+**The superseded plan, kept.** The 2026-08-27 tracked call - gates #2 and #3
+measure a MODEL and decay, so the next spike is the adjudicator against 3-4
+discretion-heavy characters - was TAKEN as belfry's night arm and both reads
+landed 2026-09-02. It is not wrong; it is spent. An off-repo ladder ranked a
+different order over 2026-08-27/28 and was never visible to a cold session. This
+entry ends that split: neither of those is live, this is.
+
+**Pre-committed falsifier, before any build.** If the four channels collapse into
+one payload assembly with one audit, the rung is a content build rather than an
+instrument and this call reverses. Answer it by sketching one seat's ask and
+counting what gate #1 has to check - four things, or one.
+
+### The row this closes, moved verbatim from `queue.md` 2026-09-03
+
+Struck because the entry above is its done-condition. Kept unrewritten per this
+file's rule; its one deictic is resolved in brackets and nothing else is touched.
+
+> - [ ] **Two plans for "what rung comes next", and only one is visible to a cold
+>       session.** The tracked call is `docs/open-arms.md:578` and `queue.md:80`,
+>       2026-08-27: gates #2 and #3 measure a MODEL and decay, so the next spike is
+>       the adjudicator against 3-4 discretion-heavy characters. That was TAKEN as
+>       belfry's night arm and both reads landed 2026-09-02. The off-repo sweep then
+>       built a different ladder over 2026-08-27/28 - DURF, then a clue-economy rung
+>       whose RULES are about information entitlement, then Cairn, then a
+>       Paranoia-shaped rung - and ranked it against licence tiers the tracked tree
+>       never sees. Neither supersedes the other and no tracked line says which is
+>       live, so a cold session picking up "what next" reads the 08-27 call alone.
+>       **Done when ONE tracked statement says what the next rung is and why**, with
+>       the superseded plan kept and dated. Same class as the row above [the stale
+>       `docs/open-arms.md` recommendation against building quorum, which the tree
+>       had just built]: a position that outlived the work around it. Argument, not
+>       code; costs no card. The off-repo half stays off-repo - `CLAUDE.local.md`
+>       has the path, and naming it here is the signpost the hygiene invariant
+>       forbids.

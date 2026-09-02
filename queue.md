@@ -360,26 +360,21 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
       carries a live recommendation against building what it had just built.
 
-- [ ] **Two plans for "what rung comes next", and only one is visible to a cold
-      session.** The tracked call is `docs/open-arms.md:578` and `queue.md:80`,
-      2026-08-27: gates #2 and #3 measure a MODEL and decay, so the next spike is
-      the adjudicator against 3-4 discretion-heavy characters. That was TAKEN as
-      belfry's night arm and both reads landed 2026-09-02. The off-repo sweep then
-      built a different ladder over 2026-08-27/28 - DURF, then a clue-economy rung
-      whose RULES are about information entitlement, then Cairn, then a
-      Paranoia-shaped rung - and ranked it against licence tiers the tracked tree
-      never sees. Neither supersedes the other and no tracked line says which is
-      live, so a cold session picking up "what next" reads the 08-27 call alone.
-      **Done when ONE tracked statement says what the next rung is and why**, with
-      the superseded plan kept and dated. Same class as the row above: a position
-      that outlived the work around it. Argument, not code; costs no card. The
-      off-repo half stays off-repo - `CLAUDE.local.md` has the path, and naming it
-      here is the signpost the hygiene invariant forbids.
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`
       §0) is BUILT and says what un-random looks like here; it waits on the merge
       list, and the mixed arms read it against a live seat.
+
+- [ ] **A Paranoia-shaped rung, branding-free** - the rung that earns gate #1 on
+      multi-axis entitlement, called 2026-09-03 in `docs/decisions.md`. Functional
+      keys only (`faction`, `deviation`, `directive`, `clearance`); the setting,
+      its role names and its text stay out of the tree. **Entry condition: the
+      falsifier first** - sketch one seat's ask and count whether gate #1 has four
+      independent things to check or one assembly. Four, and the rung is an
+      instrument and the build proceeds from cabal's architecture; one, and the
+      call reverses to Lumen Ryder per the decision entry. Done when the sketch
+      answers it; the build is a separate row it does not pre-authorise.
 
 Publishing:
 
@@ -395,19 +390,3 @@ Publishing:
       against the published threshold the off-repo ledger records, with that
       citation. Gated outside the tree; it held up nothing and still does not.
       **Entry condition: no arm in flight.**
-
-Candidate rungs:
-
-- [ ] **Lumen Ryder Core is a candidate rung whose permission is settled and whose
-      fit is HALF.** The SRD grants a named derivative in its own text
-      (`babblegumsam.gitbook.io/lumen-ryder-core-1`, front page and
-      §Introduction: On Tokusatsu & Making This Game Your Own), so the cite is a
-      URL rather than an assertion and no further grant gates a named hack. Read
-      2026-09-03, all 117 pages: **no hidden information** - setup step 11 reads
-      every character sheet aloud and the Mystery dream forbids a prepared answer
-      - so it earns nothing for gate #1. What it does carry is a bounded
-      adversarial combat layer with no authority seat: adjudication without
-      entitlement, the inverse of every rung above. Cost it carries: Part 4 Combat
-      is a stub in the book and the resolution rules are a ~6 KB external cheat
-      sheet, so a `RULES.md` is authored, not transcribed. Done when it is taken
-      or declined in `docs/decisions.md`; it obliges no run.
