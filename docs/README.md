@@ -154,6 +154,10 @@ partly true is worse than none.
   the power arithmetic behind it. Written before the run; not to be edited.
 - `docs/changeling-gate3-criterion.md` - changeling's pre-commitment, verbatim and
   not to be edited; the outcome is `games/changeling/RULES.md` §S2 read.
+- `docs/changeling-kindred-criterion.md` - the `SETUP_7_KIN` deck's
+  pre-commitment, frozen 2026-09-02, unlaunched. Carries the measured bar
+  (25.39%, 4000 random games), the power (~269 blind votes at 200 games) and the
+  exact flags; recipe `eval/runs/changeling-kindred.cmd`. A NEW baseline.
 - `docs/changeling-waker-criterion.md` - **the operative changeling
   pre-commitment**, S18, for the `SETUP_6_WAKER` deck. Carries the measured bar
   (30.14%), the power (~272 blind votes at 200 games) and the exact flags; recipe

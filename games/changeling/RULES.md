@@ -337,14 +337,17 @@ the binding statement of its bar and flags, not this section.
 **Deck B is registered too, and has never been run.** `SETUP_7_KIN` is in
 `roles.py` with `require_seated_kin` built and mutation-checked,
 `eval.run_changeling --seats 7` deals it, and `eval.strata --deck SETUP_7_KIN`
-prices it. **It has no criterion, and that is deliberate rather than pending
-paperwork**: a criterion is binding on its bar, and this deck's accusation bar is
-not derivable from either shipped deck - wolf density is 2/7 - so the criterion
-cannot be written honestly until `--arm random --seats 7` has measured one under
-`plurality-min2`. Registering the deck and writing its criterion are two pieces of
-work, and doing the second on an unmeasured bar is how the belfry criterion went
-wrong. **Every deck B figure in this file is a prediction or a deal-only census
-until a live arm exists.**
+prices it. Its accusation bar is not derivable from either shipped deck - wolf
+density is 2/7 - so it was MEASURED before the criterion was written, not after:
+`--arm random --seats 7`, 4000 games, seed 910000, under `plurality-min2`, blind
+accuracy **25.39%** [24.22%, 26.57%] over 5376 votes, derived per-vote chance
+25.18%, random-arm village win 32.69%. **The binding statement of that bar, the
+power and the flags is `docs/changeling-kindred-criterion.md`**, frozen
+2026-09-02 with recipe `eval/runs/changeling-kindred.cmd`, unlaunched. Registering
+the deck and writing its criterion were two pieces of work, and doing the second
+on an unmeasured bar is how the belfry criterion went wrong. **Every OTHER deck B
+figure in this file is a prediction or a deal-only census until a live arm
+exists.**
 
 **Two figures below did not survive the instrument, and are left as written rather
 than retrofitted.** The `blind/game` column is a paper definition; measured with

@@ -211,12 +211,17 @@ Rules and setup changes, each of which re-baselines what runs under it:
       the measurement, which was always the cost. **Worth it for what they
       degrade about INFORMATION, never as a sampling fix** - a bigger table makes
       the thin denominator worse. Blocked only by cabal having no GPU program.
-- [ ] **Run `kindred` deck B - BUILT 2026-09-02, NEVER RUN.** `SETUP_7_KIN` with
-      `require_seated_kin` (both seated or both centre; pair 87.6%, 1.07 retries
-      a game, measured on the code), selectable as `--deck SETUP_7_KIN`. Shipped
-      decks deal byte-identically to before. What is left is the criterion: wolf
-      density is 2/7, so the accusation chance bar must be re-measured with
-      `--arm random --seats 7` first. A new deck re-baselines everything under it.
+- [ ] **Run `kindred` deck B - FROZEN 2026-09-02, NEVER RUN.** `SETUP_7_KIN`
+      with `require_seated_kin`, `--seats 7`. Bar measured (blind 25.39% over
+      5376 random votes, `eval/records/kin-chance.json`) and the criterion is
+      `docs/changeling-kindred-criterion.md`; recipe
+      `eval/runs/changeling-kindred.cmd kin1 200 14000 qwen36-35b-a3b-iq3`, ~7 h.
+      Entry condition: no changeling arm in flight - it queues behind the chain
+      in `queue.local.md`. A new deck re-baselines everything under it.
+- [ ] **The runner prints `SETUP_5`'s pre-`plurality-min2` pack reference
+      (60.49%) beside every deck.** Seen on the 7-seat bar run. A print, not a
+      score; both deck criteria already say not to read it. Fix after the chain
+      has read - `eval/run_changeling.py` is on the chained recipes' path.
 - [ ] **Ship a werewolf-vocabulary theme on changeling - and that is the WHOLE
       answer to public legibility.** Public-domain folk-game vocabulary (Mafia,
       Davidoff 1986), no branding question, on a rung already built. **This is
