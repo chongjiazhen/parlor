@@ -769,6 +769,12 @@ construction, `vote_rule` recorded on every game:
 | dawn wolves: 0 / 1 / 2 seats | 107 / 1908 / 1985 | 112 / 1908 / 1980 |
 | village wins by dawn-wolf count | 0.0% / 28.2% / 50.6% | 6.3% / 23.85% / 46.57% |
 
+The per-vote **35.84%** is the figure the arm-level gate #3 is called against, and
+`eval/gate3_bar.py` is the one place code holds it, with the criterion's own-arm
+clause beside it. A run log prints its own deal's derived chance next to it as a
+diagnostic and calls no gate: the two disagreed by 0.63 points on the skin pair's
+seed-identical deals, which was enough to flip an arm-level verdict.
+
 The pack now takes **64.58%** [63.07%, 66.07%] against villagers voting at random,
 up from 60.49%: the abstain rule removes the draws a flat tally used to hand the
 village, and both the tie share and the village share fall with it. Per-vote

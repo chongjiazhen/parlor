@@ -33,6 +33,23 @@ opened the Claude one. The decision is unchanged; only the file holding it is.
   whole point, and nothing writes the marker for a process killed outright. The
   `.cmd` echo stays for the one case python cannot cover: a crash before the driver
   runs at all.
+- **The arm-level gate #3 is called against the MEASURED reference, and a run log
+  calls nothing, 2026-09-03.** Two estimators of one quantity, both honest:
+  `eval.run_changeling._chance` derives a per-vote chance from the run's own
+  dawn-wolf mix, and `eval/gate3_bar.py` holds the same estimator frozen off an
+  `--arm random` sweep at n=4000. The reference wins because
+  `docs/changeling-gate3-criterion.md` names it and a criterion is not editable
+  after launch. **What it cost to find:** on the skin pair's seed-identical deals
+  the two read 36.47% and 35.84%, and `greek-named`'s 35.90% Wilson floor lands
+  between them - HOLDS against the criterion, NOT SHOWN against the log, by 0.06
+  points. **A run log now reports and does not call**, because it holds neither
+  the bar nor the interval the gate is cut on - what it publishes is a bootstrap
+  over games where the criterion's word is Wilson. It prints both bars against
+  the floor and selects neither, which is what `eval.s5_verdict` already did.
+  `blind_chance` stays a diagnostic and is not promotable - `s5_verdict` refuses
+  it as choosing the statistic with the numbers in view. `s5_verdict`'s 35.95%
+  and `waker_verdict`'s 30.14% are NOT this bar and keep their own homes: a
+  criterion frozen against a figure keeps the figure it froze against.
 - **A missing record is judged per RECORD, and the whole-rename case is a KNOWN
   loss, 2026-09-03.** `eval/records_gate.py` drew the line between an excused
   absence and a rotted citation on the DIRECTORY - empty means a slot, populated

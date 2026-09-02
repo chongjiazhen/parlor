@@ -150,23 +150,6 @@ behind each is `docs/open-arms.md`; read the entry before taking the row**, and
 the reference each names is indexed in `docs/README.md`. A second index here is
 the one that goes stale.
 
-- [ ] **Gate #3's bar is computed on two different deals and the arm-level
-      verdict flips between them.** `eval.run_changeling._chance` weights the
-      run's OWN deal by all villager votes; `skin_pair_verdict.REFERENCE_CHANCE`
-      is 35.84%, the same estimator frozen off the n=4000 sweep. Measured on the
-      skin pair 2026-09-02: both llm arms and the control's first 200 games are
-      seed-identical (251 blind votes, dawn mix 4/92/104), so the only reason the
-      in-run log printed 36.47% and the tool 35.84% is that the control pooled
-      1000 games. On those 200 deals `s5_verdict.blind_chance` - the gate's own
-      stratum - is 35.46%, and the seed-matched random control MEASURED 34.26%
-      [28.67%, 40.33%]. `greek-named`'s Wilson floor is 35.90%: HOLDS against the
-      criterion's bar, NOT SHOWN against the log's, by 0.06%. The pair figure is
-      untouched - identical deals, the bar cancels - so nothing published moves.
-      Do NOT promote `blind_chance`: s5_verdict already refuses it as choosing
-      the statistic with the numbers in view. Done when one bar is named for the
-      arm-level gate and `_chance`'s printed line stops claiming a verdict the
-      criterion never gave it. `rounds_pair_verdict` imports `own_bar` and reads
-      the live chain, so it inherits this.
 - [ ] **The skin pair's effect landed on the PACK, and its primary statistic
       could not see it.** Free read, `eval.changeling_audit`, both arms 2026-09-02:
       a pack seat voted the fellow it was told 49/198 = 24.75% under `greek`,
