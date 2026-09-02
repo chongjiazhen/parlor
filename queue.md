@@ -296,6 +296,21 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       escalation, vote discrimination -0.2% at chance (`docs/measurements.md`
       2026-08-25 and §Backend notes). One point, on the other rung and under the
       superseded vote rule, so it sharpens the prior and does not spend the bench.
+      **Two corrections to the candidate list, 2026-09-02.** "Untuned gemma" is not
+      on this box: `gemma`/`gemma-6` both alias an abliterated E4B, ~4B active, so
+      against q36 they measure SCALE wearing a tune label. The armable comparator
+      is `ablx` (`gemma-4-26B-A4B-it-abliterix-V6`, IQ4_XS), configured identically
+      to q36 in `llm-serve/models.json` - same ctx, kv quant, batch, ngl, backend -
+      and MoE A4B against A3B, so it swaps one variable where the dense RP tunes
+      swap three. It is instruct, not a reasoning distill, so its per-game cost
+      must be re-timed rather than inherited from q36's 91 s. And **each tune is
+      TWO arms, not one**: gate #2 is conditional on gate #3, so a tune's evil win
+      rate is unreadable without that tune's own good-side control. The 12B is the
+      worked example - evil 62.5% (5/8, CI 30.6-86.3%) beside good discrimination
+      -0.2%, which is the ~65% no-deception baseline hit exactly, so the run is
+      consistent with the tune buying no deception at all. Its hunter, 3/6 against
+      a 33.3% chance floor, is the only evil-side signal and sits inside q36's own
+      33/55/56% range. **"An RP tune bought deception" is UNMEASURED, not shown.**
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`
