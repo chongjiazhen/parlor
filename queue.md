@@ -134,6 +134,14 @@ all seven findings landed. Its rows are gone; git holds the record.
       later with the index intact. An unattended run that commits its own records
       would have died on it silently. Cheap probe: log the lock's ctime against
       the tool-call transcript next time.
+- [ ] **A chained recipe REFUSES early, it does not queue - track the waiter.**
+      Every `[after-log]` recipe exits the moment its predecessor's log lacks the
+      marker, so "launch early, costs nothing" launched nothing. 2026-09-02 the
+      changeling tail (rounds pair, gate2 arm, belfry transcript) was carried by
+      an untracked poll-then-call payload under `%LOCALAPPDATA%\parlor\`, 30 s
+      polls, 24 h bound, `PARLOR TAIL DONE` marker. Done when
+      `eval/runs/chain-tail.cmd` holds that waiter as a tracked recipe taking
+      `<log> <recipe>...`, and the two rows below stop saying "launch early".
 - [ ] **Two behaviours the auditor prices, neither of them bugs** - a good seat
       approving a known-tainted team (7/76) and evil over-sabotaging. The
       consequence that matters is for gate #3a's metric, not for the seats.
@@ -227,7 +235,7 @@ Rules and setup changes, each of which re-baselines what runs under it:
       transcript`: RECALLS or NO RECALL against the withheld 94/122, and BELOW or
       AS GOOD AS the supplied 152/163, on intervals. Entry condition: the card -
       it refuses until the log it is handed carries a PARLOR done marker, so
-      hand it the changeling chain's last log and launch early.
+      hand it the changeling chain's last log, behind a waiter (row above).
 - [ ] **The runner prints `SETUP_5`'s pre-`plurality-min2` pack reference
       (60.49%) beside every deck.** Seen on the 7-seat bar run. A print, not a
       score; both deck criteria already say not to read it. Fix after the chain
