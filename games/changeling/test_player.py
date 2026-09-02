@@ -71,10 +71,17 @@ class TestRandomArmPlaysCleanly(unittest.TestCase):
 
 class TestOutcomeIsReadFromTruth(unittest.TestCase):
     def test_village_wins_exactly_when_an_accused_seat_holds_pack(self):
+        """Or, since 2026-09-02, when nobody was accused and no seat holds pack -
+        the abstain rule's other half. The record names the rule it was played
+        under so an instrument can tell the two eras apart."""
         for seed in range(200):
             rec = one_game(seed)
+            self.assertEqual(rec.vote_rule, "plurality-min2")
             caught = any(rec.truth[a] == "pack" for a in rec.accused)
-            self.assertEqual(rec.winner == "village", caught, f"seed {seed}")
+            nobody_and_no_wolf = (not rec.accused
+                                  and "pack" not in rec.truth.values())
+            self.assertEqual(rec.winner == "village",
+                             caught or nobody_and_no_wolf, f"seed {seed}")
 
     def test_belief_never_decides_the_winner(self):
         """Mutation bait: scoring on belief would agree with truth most of the

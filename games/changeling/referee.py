@@ -343,7 +343,8 @@ class ChangelingReferee:
         if self.phase is Phase.VOTE:
             legal = ", ".join(str(s) for s in self.legal_votes(seat))
             return ("Point at one seat. Everyone points at once, and the seat with "
-                    "the most fingers is accused. Reply as one JSON object: "
+                    "the most fingers is accused - if it has more than one. A vote "
+                    "where no seat draws two accuses nobody. Reply as one JSON object: "
                     '{"think": "your private reasoning", "vote": <seat number>}. '
                     f"Choose from: {legal}.")
         raise IllegalAction(f"nothing to ask in phase {self.phase.value}")
@@ -409,18 +410,34 @@ class ChangelingReferee:
         for target in self.votes.values():
             tally[target] = tally.get(target, 0) + 1
         top = max(tally.values())
-        self.accused = tuple(sorted(s for s, c in tally.items() if c == top))
+        # The source's abstain rule (2026-09-02): a seat is accused only when it
+        # collects MORE than one finger. A flat tally accuses nobody. Taking the
+        # max alone accused every seat in a 1-1-1-1-1 vote, which handed the
+        # village five draws at the wolf and inverted the outcome the rule exists
+        # to produce - every changeling number before this date was played that way.
+        self.accused = (tuple(sorted(s for s, c in tally.items() if c == top))
+                        if top > 1 else ())
 
         self.public_events.append(
             ("event", "Votes: " + ", ".join(
                 f"seat {s} -> seat {t}" for s, t in sorted(self.votes.items()))))
         self.public_events.append(
-            ("event", "Accused: " + ", ".join(f"seat {s}" for s in self.accused)
-                      + (" (tied, so all of them)" if len(self.accused) > 1
-                         else "")))
+            ("event", ("Accused: " + ", ".join(f"seat {s}" for s in self.accused)
+                       + (" (tied, so all of them)" if len(self.accused) > 1
+                          else ""))
+                      if self.accused else
+                      "Accused: nobody (no seat drew more than one vote)"))
 
         caught = [s for s in self.accused if self.holds(s).side is Side.PACK]
-        if caught:
+        wolves_seated = any(self.holds(s).side is Side.PACK for s in range(self.n))
+        if not self.accused and not wolves_seated:
+            # Nobody died and no wolf sits at the table: the village's other win.
+            self.winner = Side.VILLAGE.value
+            self.reason = (
+                f"WINNER: {self.theme.side_names[Side.VILLAGE]} "
+                f"(nobody was accused and no seat held the "
+                f"{self.theme.card_names['pack']} at dawn)")
+        elif caught:
             self.winner = Side.VILLAGE.value
             self.reason = (
                 f"WINNER: {self.theme.side_names[Side.VILLAGE]} "

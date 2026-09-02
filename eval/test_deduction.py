@@ -37,7 +37,10 @@ class TestTheRuleMatchesTheReferee(unittest.TestCase):
             if len(votes) != len(game["truth"]):
                 continue
             with self.subTest(game=game.get("game")):
-                self.assertEqual(winner_from(votes, game["truth"]), game["winner"])
+                self.assertEqual(
+                    winner_from(votes, game["truth"],
+                                game.get("vote_rule", "plurality")),
+                    game["winner"])
 
     def test_a_tie_accuses_everyone_tied_so_one_wolf_in_it_wins_the_village(self):
         truth = {"0": PACK, "1": "spotter", "2": "switcher"}
@@ -47,6 +50,20 @@ class TestTheRuleMatchesTheReferee(unittest.TestCase):
         # accused, the wolf among them, and the village takes it on the tie rule
         # alone. This is the branch a plurality-only reading would get wrong.
         self.assertEqual(winner_from({0: 1, 1: 2, 2: 0}, truth), "village")
+
+    def test_under_the_min2_rule_a_flat_tally_accuses_nobody(self):
+        """The referee since 2026-09-02. A record naming ``plurality-min2`` is
+        replayed under it: one finger each kills nobody, so the pack wins while a
+        wolf is seated and the village wins when none is."""
+        truth = {"0": PACK, "1": "spotter", "2": "switcher"}
+        self.assertEqual(winner_from({0: 1, 1: 2, 2: 0}, truth, "plurality-min2"),
+                         "pack")
+        no_wolf = {"0": "bystander", "1": "spotter", "2": "switcher"}
+        self.assertEqual(winner_from({0: 1, 1: 2, 2: 0}, no_wolf, "plurality-min2"),
+                         "village")
+        # a real plurality is unchanged by the rule
+        self.assertEqual(winner_from({0: 1, 1: 0, 2: 0}, truth, "plurality-min2"),
+                         "village")
 
 
 class TestDecisiveness(unittest.TestCase):

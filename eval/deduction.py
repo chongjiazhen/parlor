@@ -45,13 +45,23 @@ from eval.s5_verdict import dawn_wolves, load, villager_votes, winnable
 PACK = "pack"
 
 
-def winner_from(votes: dict[int, int], truth: dict[int, str]) -> str:
-    """The referee's rule, applied to a vote map. Plurality accuses; a tie accuses
-    every seat tied; the village wins if any accused seat held a pack card."""
+def winner_from(votes: dict[int, int], truth: dict[int, str],
+                rule: str = "plurality") -> str:
+    """The referee's rule, applied to a vote map, under the rule the RECORD names.
+
+    ``plurality`` (every record before 2026-09-02, and the default because those
+    records carry no ``vote_rule`` key): the top count accuses, a tie accuses every
+    seat tied, the village wins if any accused seat held a pack card.
+    ``plurality-min2`` (the referee since 2026-09-02): the same, except a top
+    count of one accuses nobody, and then the village wins only if no seat holds a
+    pack card at dawn.
+    """
     tally: dict[int, int] = {}
     for target in votes.values():
         tally[target] = tally.get(target, 0) + 1
     top = max(tally.values())
+    if rule == "plurality-min2" and top <= 1:
+        return "pack" if any(c == PACK for c in truth.values()) else "village"
     accused = [s for s, c in tally.items() if c == top]
     return "village" if any(truth[str(s)] == PACK for s in accused) else "pack"
 
@@ -67,13 +77,14 @@ def min_flips(game: dict, cap: int = 2) -> int | None:
     votes = {v["seat"]: v["target"] for v in game["votes"]}
     if len(votes) != len(seats):
         return None                      # an incomplete vote map decides nothing
-    now = winner_from(votes, truth)
+    rule = game.get("vote_rule", "plurality")
+    now = winner_from(votes, truth, rule)
 
     def flipped(changes) -> bool:
         trial = dict(votes)
         for seat, target in changes:
             trial[seat] = target
-        return winner_from(trial, truth) != now
+        return winner_from(trial, truth, rule) != now
 
     for seat in votes:
         for target in seats:

@@ -220,6 +220,10 @@ class GameRecord:
     winner: str | None = None
     reason: str = ""
     accused: tuple[int, ...] = ()
+    #: The vote rule the game was resolved under. Records without this key were
+    #: played before 2026-09-02 under ``plurality`` - a flat tally accused every
+    #: seat - and any instrument replaying votes must read it, never assume it.
+    vote_rule: str = "plurality-min2"
     #: Dawn holdings and beliefs, side by side. Both, because a record that kept
     #: only one of them could not answer the question this game exists to ask.
     truth: dict[int, str] = field(default_factory=dict)

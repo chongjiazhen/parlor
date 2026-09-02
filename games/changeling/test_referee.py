@@ -441,6 +441,39 @@ class TestOutcomeReadsTruth(unittest.TestCase):
             ref.cast(seat, target)
         self.assertEqual(ref.accused, (0, 1))
 
+    def test_no_seat_above_one_vote_accuses_nobody_and_the_pack_wins(self):
+        """The source's abstain rule, added 2026-09-02: a vote where no seat
+        collects more than one finger kills nobody. With a wolf seated at dawn
+        that is a pack win - not five accusations and a near-certain village
+        win, which is what taking the max of a flat tally produced."""
+        for seed in range(200):
+            ref = ChangelingReferee.new(5, seed=seed, discussion_rounds=1)
+            if not any(ref.holds(s).side is Side.PACK for s in range(5)):
+                continue
+            ref.close_round()
+            for seat in range(5):
+                ref.cast(seat, (seat + 1) % 5)
+            self.assertEqual(ref.accused, ())
+            self.assertEqual(ref.winner, Side.PACK.value)
+            return
+        self.fail("no seed in range seated a wolf at dawn")
+
+    def test_no_seat_above_one_vote_with_no_dawn_wolf_is_a_village_win(self):
+        """The other half of the same rule: when the night moved every wolf
+        into the centre, the village wins by killing nobody. Before 2026-09-02
+        these 2.7% of games were unwinnable and excluded from the denominator."""
+        for seed in range(4000):
+            ref = ChangelingReferee.new(5, seed=seed, discussion_rounds=1)
+            if any(ref.holds(s).side is Side.PACK for s in range(5)):
+                continue
+            ref.close_round()
+            for seat in range(5):
+                ref.cast(seat, (seat + 1) % 5)
+            self.assertEqual(ref.accused, ())
+            self.assertEqual(ref.winner, Side.VILLAGE.value)
+            return
+        self.fail("no seed in range left the centre holding both wolves")
+
     def test_the_reveal_lands_referee_side_only(self):
         ref = ChangelingReferee.new(5, seed=4, discussion_rounds=1)
         wolf = next(s for s in range(5) if ref.holds(s).side is Side.PACK)

@@ -449,15 +449,23 @@ data-only. In rough order of value per unit of engine surgery:
    published; a seat's private `think` reaches no one.
 2. **Vote.** Every seat names exactly one OTHER seat. Simultaneous - no seat sees
    another's vote before casting. Naming yourself is refused, not coerced.
-3. **Accusation.** The seat with the most votes is accused. **On a tie, every tied
-   seat is accused.**
+3. **Accusation.** The seat with the most votes is accused, **if it drew more than
+   one**. On a tie at two or more, every tied seat is accused. **A vote in which no
+   seat draws two accuses nobody** - the source's abstain rule, adopted 2026-09-02.
+   Until then the referee took the top count whatever it was, so a one-finger-each
+   vote accused all five seats and handed the village five draws at the wolf;
+   **every changeling number recorded before 2026-09-02 was played under that
+   rule**, and each record names the rule it was resolved under (`vote_rule`:
+   `plurality` when the key is absent, `plurality-min2` since).
 
 ## Win conditions
 
 Evaluated on **dawn truth**, never on belief or on the deal.
 
-- **Village wins** if any accused seat holds `pack` at dawn.
-- **Pack wins** otherwise.
+- **Village wins** if any accused seat holds `pack` at dawn - or if nobody was
+  accused and no seat holds `pack` at dawn (2026-09-02; before that the no-wolf
+  dawn was unwinnable, see §The deal constraint).
+- **Pack wins** otherwise, which includes a flat vote while a wolf is seated.
 
 A seat wins with the side of the card it HOLDS. A seat dealt `pack` and robbed
 before dawn wins with the village, having spent the day lying for the wolves. A
@@ -689,7 +697,13 @@ point estimate leans the right way throughout. A deck that seated two waker-clas
 cards, or a longer arm, is what would settle it - and either is a NEW criterion,
 never a re-read of these records.
 
-## The chance baseline, MEASURED (2026-08-26)
+## The chance baseline, MEASURED (2026-08-26) - under the pre-2026-09-02 vote rule
+
+**Every figure in this section and the S2 / waker-deck reads above was played
+under `plurality`**: a flat tally accused everyone. Under `plurality-min2` a flat
+tally accuses nobody, so the tie share, the village share and the 2.7% unwinnable
+residual all move, and the first `--arm random` sweep on the new rule re-baselines
+this table rather than extends it.
 
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set
 is a closed derivation. This game's accusation baseline is not derivable that way -
@@ -858,7 +872,12 @@ unconstrained deal would give. Those games are unwinnable by the village however
 well it plays, so they belong in a deduction denominator the way a fallback belongs
 in a gate number: **excluded, and reported.** Do not quietly average them in.
 
-The honest options are to accept and exclude (current), or to make `DRINK` refuse to
+**Since 2026-09-02 these games are winnable**: under the abstain rule a vote in
+which no seat draws two accuses nobody, and with no wolf seated that is a village
+win. `eval.s5_verdict.winnable` still excludes them, correctly for the records it
+was written against; an instrument for post-change records must not.
+
+The honest options were to accept and exclude (the state until then), or to make `DRINK` refuse to
 send a `pack` to the centre - which is a rule the seat could not know it was
 following, so it changes the game rather than fixing it. Left as is, on the record,
 until a measurement says the 2.8% matters.
