@@ -12,7 +12,7 @@ from core.replies import ParseError
 from games.quorum.audit import LeakDetected
 from games.quorum.demo import opening_view
 from games.quorum.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
-                                 parse_action, play_game)
+                                 parse_action, play_game, played_summary)
 from games.quorum.referee import IllegalAction, Phase, QuorumReferee
 from games.quorum.roles import ADVANCES, Card, Side
 
@@ -41,7 +41,29 @@ def at(phase: Phase, seed: int = 3) -> QuorumReferee:
             ref.enactor_discard(seat, pol.act(ref, seat)["discard"])
         elif ref.phase is Phase.POWER:
             ref.use_power(seat, pol.act(ref, seat)["target"])
+        elif ref.phase is Phase.VETO_PROPOSE:
+            ref.propose_veto(seat, pol.act(ref, seat)["veto"])
+        elif ref.phase is Phase.VETO_DECIDE:
+            ref.decide_veto(seat, pol.act(ref, seat)["veto"])
     raise AssertionError(f"never reached {phase}")
+
+
+def at_veto(phase: Phase, seed: int = 3) -> QuorumReferee:
+    """A referee parked at one of the two veto phases. Random play rarely gets
+    five writs down before a win, so the board is set by hand and the nominee is
+    never `principal`, which keeps the install win out of the way."""
+    ref = QuorumReferee.new(5, seed=seed, discussion_rounds=0)
+    ref.writs = ref.setup.veto_threshold
+    nominee = next(s for s in ref.eligible_nominees()
+                   if not ref.assignment[s].is_principal)
+    ref.nominate(ref.proposer, nominee)
+    ref.vote({s: True for s in ref.living()})
+    ref.proposer_discard(ref.proposer, 0)
+    assert ref.phase is Phase.VETO_PROPOSE
+    if phase is Phase.VETO_DECIDE:
+        ref.propose_veto(ref.enactor, True)
+    assert ref.phase is phase
+    return ref
 
 
 class TestParsing(unittest.TestCase):
@@ -95,6 +117,53 @@ class TestParsing(unittest.TestCase):
             ask = ref.action_prompt(seat)
             with self.subTest(phase=phase.value):
                 self.assertTrue(any(f'"{k}"' in ask for k in ACTION_KEYS))
+
+
+class TestVetoChannel(unittest.TestCase):
+    """Both veto decisions travel the same JSON envelope as every other move:
+    one key, parsed as a bool, asked for by name, summarised without a card."""
+
+    def test_both_veto_phases_read_the_veto_key(self):
+        ref = at_veto(Phase.VETO_PROPOSE)
+        self.assertTrue(parse_action('{"veto": "yes"}', ref, ref.enactor)["veto"])
+        with self.assertRaises(ParseError):
+            parse_action('{"discard": 0}', ref, ref.enactor)
+        ref = at_veto(Phase.VETO_DECIDE)
+        self.assertFalse(parse_action('{"veto": false}', ref, ref.proposer)["veto"])
+
+    def test_the_veto_asks_name_the_key_and_the_summary_names_no_card(self):
+        for phase in (Phase.VETO_PROPOSE, Phase.VETO_DECIDE):
+            ref = at_veto(phase)
+            seat = ref.on_clock()[0]
+            with self.subTest(phase=phase.value):
+                self.assertIn('"veto"', ref.action_prompt(seat))
+                self.assertIn("veto", ACTION_KEYS)
+                for answer in (True, False):
+                    line = played_summary(phase, {"veto": answer}).lower()
+                    self.assertNotIn("writ", line)
+                    self.assertNotIn("charter", line)
+                    self.assertIn("veto", line)
+
+    def test_the_random_policy_answers_both_veto_phases(self):
+        for phase in (Phase.VETO_PROPOSE, Phase.VETO_DECIDE):
+            ref = at_veto(phase)
+            action = RandomPolicy(rng=random.Random(0)).act(ref, ref.on_clock()[0])
+            self.assertIn(action["veto"], (True, False))
+
+    def test_the_driver_plays_a_veto_through_and_counts_it(self):
+        ref = at_veto(Phase.VETO_PROPOSE)
+        policies = {s: RandomPolicy(rng=random.Random(s), veto_rate=1.0)
+                    for s in ref.assignment}
+        rec = play_game(ref, policies)
+        self.assertEqual(rec.error, "")
+        self.assertGreaterEqual(rec.vetoes, 1)
+        self.assertEqual(rec.fallbacks, 0)
+        # a vetoed agenda enacted nothing, so it is not a draw on the record
+        for d in rec.draws:
+            self.assertIn(d.enacted, ("writ", "charter"))
+        phases = {d.phase for d in rec.decision_log}
+        self.assertIn("veto_propose", phases)
+        self.assertIn("veto_decide", phases)
 
 
 class TestRandomPlay(unittest.TestCase):

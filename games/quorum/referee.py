@@ -76,6 +76,10 @@ class Phase(Enum):
     DISCUSS = "discuss"
     VOTE = "vote"
     PROPOSER_DISCARD = "proposer_discard"
+    #: the enactor holds its pair and may propose a veto (only past the threshold)
+    VETO_PROPOSE = "veto_propose"
+    #: the proposer agrees to the veto or refuses it
+    VETO_DECIDE = "veto_decide"
     ENACTOR_DISCARD = "enactor_discard"
     POWER = "power"
     DONE = "done"
@@ -95,6 +99,14 @@ MAX_UTTERANCE_CHARS = 280
 #: Trimming is safe for gate #1: what scrolls off the render leaves the payload
 #: too, so it cannot leak what it no longer contains.
 MAX_RECORD_LINES = 60
+
+#: The phases in which the enactor holds its pair: its own discard step, and the
+#: two veto steps, because the cards are in its hand while it proposes a veto and
+#: while the proposer decides on one. ONE name, read by the entitlement accessor
+#: and by the audit's counterfactual, so the two cannot disagree about when the
+#: pair is entitled.
+ENACTOR_HOLDS = frozenset({Phase.ENACTOR_DISCARD, Phase.VETO_PROPOSE,
+                           Phase.VETO_DECIDE})
 
 
 @dataclass
@@ -135,6 +147,13 @@ class QuorumReferee:
     #: inspector seat -> {subject seat -> side}. A private fact created mid-game,
     #: held by exactly one seat, about a seat that is never told it was inspected.
     inspections: dict[int, dict[int, Side]] = field(default_factory=dict)
+    #: peeking seat -> the top three cards of the deck as it saw them, in order.
+    #: The other mid-game secret a power creates, and a sharper one than an
+    #: inspection: the cards stay where they are, so the next three draws ARE
+    #: these unless a chaos enactment consumes one. Stored by VALUE, never as a
+    #: view onto the deck - the deck is nobody's entitlement and flips in every
+    #: counterfactual, while this is the seat's own observation and must not.
+    peeks: dict[int, tuple[Card, ...]] = field(default_factory=dict)
 
     #: Formal statements about the last completed draw. Seat-authored data the
     #: referee reads back verbatim; it is never derived from a hand, which is what
@@ -154,6 +173,11 @@ class QuorumReferee:
     #: for standing without the caller restating the flow. Both are cleared when an
     #: enactment happened with nobody holding cards.
     last_proposer: int | None = None
+    #: the enactor of the last COMPLETED draw, for claim standing. Kept apart
+    #: from ``last_enactor`` because the two part ways on a veto: the enactor
+    #: was seated, so the term limit still bars it, but nothing was enacted, so
+    #: there is no completed draw for it to claim about.
+    claim_enactor: int | None = None
 
     #: how many office-held draws have completed; the index of the last one is
     #: ``events_completed - 1``. The unseen failure-track enactment dealt to
@@ -281,7 +305,7 @@ class QuorumReferee:
         """
         if self.phase is Phase.PROPOSER_DISCARD and seat == self.proposer:
             return list(self.proposer_hand)
-        if self.phase is Phase.ENACTOR_DISCARD and seat == self.enactor:
+        if self.phase in ENACTOR_HOLDS and seat == self.enactor:
             return list(self.enactor_hand)
         return None
 
@@ -336,7 +360,8 @@ class QuorumReferee:
             f"You are seat {v.seat}. Your role: {v.own_role} ({v.own_team}).",
             f"Players: {self.n} seats, numbered 0..{self.n - 1}.",
         ]
-        if v.knowledge:
+        peeked = self.peeks.get(seat)
+        if v.knowledge or peeked:
             lines.append("What you know privately:")
             for k in v.knowledge:
                 if k.label == "fellow-minority":
@@ -345,6 +370,10 @@ class QuorumReferee:
                     side = Side(k.label.split("-", 1)[1])
                     lines.append(f"  - you looked at seat {k.seat}: "
                                  f"{t.side_names[side]}.")
+            if peeked:
+                shown = ", ".join(t.card_names[c] for c in peeked)
+                lines.append(f"  - you looked at the top of the deck: {shown}, "
+                             "in that order.")
         else:
             lines.append("You were told nothing. You must reason from play alone.")
         p = v.public
@@ -411,9 +440,9 @@ class QuorumReferee:
             return self.living()
         if self.phase is Phase.PROPOSER_DISCARD:
             return [self.proposer]
-        if self.phase is Phase.ENACTOR_DISCARD:
+        if self.phase in (Phase.ENACTOR_DISCARD, Phase.VETO_PROPOSE):
             return [] if self.enactor is None else [self.enactor]
-        if self.phase is Phase.POWER:
+        if self.phase in (Phase.POWER, Phase.VETO_DECIDE):
             return [self.proposer]
         return []
 
@@ -495,6 +524,26 @@ class QuorumReferee:
                 "down; the other is enacted in front of the table.\n"
                 f'Format: {{{scratch}, "discard": <index 0..{len(hand) - 1}>}}'
             )
+        if p is Phase.VETO_PROPOSE:
+            hand = self.entitled_hand(seat) or []
+            return (
+                f"{head}\nSeat {self.proposer} passed you these {len(hand)} cards. "
+                f"With {self.writs} {t.card_names[Card.WRIT]}s enacted you may "
+                "propose a veto: if seat "
+                f"{self.proposer} agrees, both cards are discarded face down, "
+                "nothing is enacted, and the failed-vote track advances by one. "
+                "If it refuses, you enact one of the two as usual. Propose the "
+                "veto, or keep the agenda and enact.\n"
+                f'Format: {{{scratch}, "veto": true or false}}'
+            )
+        if p is Phase.VETO_DECIDE:
+            return (
+                f"{head}\nSeat {self.enactor} proposes to veto the agenda you "
+                "passed it: both cards discarded face down, nothing enacted, "
+                "and the failed-vote track advances by one. Agree, or refuse "
+                f"and seat {self.enactor} enacts one of the two.\n"
+                f'Format: {{{scratch}, "veto": true or false}}'
+            )
         if p is Phase.POWER:
             legal = self.legal_power_targets(seat)
             if self.pending_power == "inspect":
@@ -525,7 +574,7 @@ class QuorumReferee:
         """
         if self.last_proposer is not None and seat == self.last_proposer:
             office = "proposer"
-        elif self.last_enactor is not None and seat == self.last_enactor:
+        elif self.claim_enactor is not None and seat == self.claim_enactor:
             office = "enactor"
         else:
             return None
@@ -547,7 +596,7 @@ class QuorumReferee:
         if office is None:
             held_office = (
                 (self.last_proposer is not None and seat == self.last_proposer)
-                or (self.last_enactor is not None and seat == self.last_enactor))
+                or (self.claim_enactor is not None and seat == self.claim_enactor))
             if held_office:
                 raise IllegalAction(
                     f"seat {seat} already claimed about event "
@@ -704,13 +753,21 @@ class QuorumReferee:
         return True
 
     def _fail_vote(self) -> None:
-        self.failure_track += 1
         self.enactor = None
         self.nominee = None
+        self._advance_failure_track(
+            f"{self.failure_track + 1} votes failed in a row.")
+
+    def _advance_failure_track(self, why: str) -> None:
+        """One step on the failure track, from a failed vote or a vetoed agenda.
+        At the limit the top card is enacted with nobody seeing it and the track
+        resets; otherwise the office moves on. ONE path for both causes, so the
+        chaos rule cannot come to differ between them. ``why`` is the public
+        line's opening, written by the caller that knows what happened."""
+        self.failure_track += 1
         if self.failure_track >= self.setup.failure_limit:
             card = self._draw(1)[0]
-            self._event(f"{self.failure_track} votes failed in a row. The top card "
-                        f"is enacted unseen.")
+            self._event(f"{why} The top card is enacted unseen.")
             self.failure_track = 0
             self._enact(card, seen_by_nobody=True)
             return
@@ -738,7 +795,60 @@ class QuorumReferee:
         self.log.append(f"proposer discarded {dropped.value}; passed "
                         f"{[c.value for c in hand]}")
         self._event(f"Seat {seat} passes two cards to seat {self.enactor}.")
-        self.phase = Phase.ENACTOR_DISCARD
+        # Past the threshold the enactor is asked about a veto before it is asked
+        # to discard; below it the pair goes straight to the discard step.
+        self.phase = (Phase.VETO_PROPOSE
+                      if self.writs >= self.setup.veto_threshold
+                      else Phase.ENACTOR_DISCARD)
+
+    def propose_veto(self, seat: int, wants: bool) -> None:
+        """The enactor, holding its pair, proposes a veto or keeps the agenda.
+        Only reachable past ``veto_threshold`` - the phase is never entered below
+        it - so a call below the threshold is out of phase, not a rules check."""
+        if self.phase is not Phase.VETO_PROPOSE:
+            raise IllegalAction(f"veto out of phase ({self.phase.value})")
+        if seat != self.enactor:
+            raise IllegalAction(f"seat {seat} does not hold the office")
+        if not wants:
+            self.log.append(f"seat {seat} keeps the agenda")
+            self.phase = Phase.ENACTOR_DISCARD
+            return
+        self.log.append(f"seat {seat} proposes a veto")
+        self._event(f"Seat {seat} proposes to veto the agenda.")
+        self.phase = Phase.VETO_DECIDE
+
+    def decide_veto(self, seat: int, agrees: bool) -> None:
+        """The proposer agrees to the veto or refuses it.
+
+        Agreed: both cards go to the discards face down, nothing is enacted, and
+        the failure track takes one step - the same path a failed vote takes, so
+        the chaos enactment fires here on exactly the same terms. Refused: the
+        enactor discards as usual.
+        """
+        if self.phase is not Phase.VETO_DECIDE:
+            raise IllegalAction(f"veto out of phase ({self.phase.value})")
+        if seat != self.proposer:
+            raise IllegalAction(f"seat {seat} does not hold the office")
+        if not agrees:
+            self.log.append(f"seat {seat} refuses the veto")
+            self._event(f"Seat {seat} refuses the veto.")
+            self.phase = Phase.ENACTOR_DISCARD
+            return
+        self.discards += self.enactor_hand
+        self.enactor_hand = []
+        # Both offices saw cards and both remember them - perfect recall covers a
+        # vetoed agenda as it covers an enacted one.
+        self.recall[self.enactor] = tuple(self.enactor_saw)
+        self.log.append(f"seat {seat} agrees to the veto; both cards discarded")
+        self._event("The agenda was vetoed. Nothing is enacted.")
+        # The enactor was seated, so the term limit bars it next round; but no
+        # draw completed, so neither office has anything to claim about.
+        self.last_enactor = self.enactor
+        self.last_proposer = None
+        self.claim_enactor = None
+        self.enactor = None
+        self.nominee = None
+        self._advance_failure_track("The agenda was vetoed.")
 
     def enactor_discard(self, seat: int, index: int) -> None:
         if self.phase is not Phase.ENACTOR_DISCARD:
@@ -768,6 +878,7 @@ class QuorumReferee:
         # round's proposer claiming about a card no one drew.
         self.last_proposer = None if seen_by_nobody else self.proposer
         self.last_enactor = self.enactor
+        self.claim_enactor = None if seen_by_nobody else self.enactor
         if not seen_by_nobody:
             # only an office-held draw is a claimable event; the unseen top card
             # dealt to nobody, so it neither confers standing nor moves the index
@@ -792,7 +903,20 @@ class QuorumReferee:
         advanced_minority = ADVANCES[card] is Side.MINORITY
         power = (self.setup.power_at(self.writs)
                  if advanced_minority and not seen_by_nobody else None)
-        if power:
+        if power == "peek":
+            # No target, so no POWER phase and nothing to ask: the proposer is
+            # shown the top three cards where they lie. Refilled first if fewer
+            # remain, exactly as a draw would be, and NOT shuffled afterwards -
+            # the knowledge is that the next three draws are these cards.
+            if len(self.deck) < 3:
+                self._refill_deck()
+            seen = tuple(self.deck[:3])
+            self.peeks[self.proposer] = seen
+            self.log.append(f"seat {self.proposer} peeked: "
+                            f"{[c.value for c in seen]}")
+            self._event(f"Seat {self.proposer} looked at the top of the deck. "
+                        "What it saw is private.")
+        elif power:
             self.pending_power = power
             self._event(f"Seat {self.proposer} may now {power}.")
             self.phase = Phase.POWER

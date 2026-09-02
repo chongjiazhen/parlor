@@ -114,9 +114,16 @@ class Setup:
     install_threshold: int = 3
     #: writs enacted -> the power the proposer then exercises. Kept as data so a
     #: seat count that fires powers on different counts is a row, not a branch.
-    powers: tuple[tuple[int, str], ...] = ((3, "inspect"), (4, "remove"), (5, "remove"))
+    #: The published 5-6 seat board grants a look at the deck on the third writ
+    #: and no investigation at all; `inspect` is the 7+ board's power and stays
+    #: implemented, dealt by nothing here - the same standing `agent` has.
+    powers: tuple[tuple[int, str], ...] = ((3, "peek"), (4, "remove"), (5, "remove"))
     #: Consecutive failed votes before the top card is enacted with nobody seeing it.
     failure_limit: int = 3
+    #: Writs enacted before the enactor may propose to veto an agenda - both cards
+    #: discarded and nothing enacted, if the proposer agrees, at the price of one
+    #: step on the failure track.
+    veto_threshold: int = 5
 
     @property
     def deck_size(self) -> int:

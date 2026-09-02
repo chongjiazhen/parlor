@@ -244,6 +244,15 @@ One event, repeated until a win condition fires.
    down and the remaining card is enacted publicly. Discards go to a discard pile,
    never revealed; the deck reshuffles from the discard pile when it holds fewer
    than 3.
+   - **The veto, once five writs are enacted** (`Setup.veto_threshold`). Holding
+     its two cards, the enactor may propose that the agenda be vetoed. If the
+     proposer agrees, both cards go to the discard pile face down, nothing is
+     enacted, and the failure track advances by one - reaching the limit fires
+     the unseen enactment exactly as three failed votes do, on the same code
+     path. If the proposer refuses, the enactor discards as usual. Both offices
+     saw cards and both keep their recall, but no draw completed, so neither
+     has standing to claim and the event is not a row in the draw record. The
+     enactor was seated, so the term limit still bars it next round.
 6. **Claims.** The proposer and the enactor each make a public statement about what
    they saw. Both are optional and neither is verified by any rule.
 7. **Power, if the enactment triggers one.** Below.
@@ -371,15 +380,31 @@ fresh secret with its own entitlement. At five seats:
 
 | after minority card | power | secret created | who is entitled |
 |---|---|---|---|
-| 3 | `inspect` - the proposer learns one named seat's SIDE | that seat's side | the proposer only |
+| 3 | `peek` - the proposer looks at the top three cards of the deck, in order; they stay where they are | the next three draws | the proposer only |
 | 4 | `remove` - the proposer removes one seat from play | none; the removal is public | everyone |
 | 5 | `remove` again | none | everyone |
 
-`inspect` is the second cascade in the game and the shorter one: a private fact
-delivered to exactly one seat, about a seat that is not told it was inspected, with
-a public claim attached that nothing verifies. It is a one-step chain against the
-draw's two-step, and it gives gate #1 a sentinel of a different shape - an identity
-rather than a card.
+`peek` names no target, so it is resolved inline - the record says the seat looked
+and that what it saw is private, and no seat is asked anything. The knowledge is
+real rather than advisory: the deck is not shuffled afterwards, so the next three
+draws ARE those cards unless an unseen failure-track enactment consumes one first.
+It is a per-seat secret of the card shape, so the dependence audit flips every
+other seat's peek in the counterfactual, exactly as it does an inspection.
+
+`inspect` - the proposer learns one named seat's SIDE, that seat is not told, and
+the record says only that a look happened - stays fully implemented and is dealt
+by nothing at five seats: it is the power on the 7+ seat boards, the same standing
+`agent` has in the deal table above. It is the shorter cascade of the two: a
+private fact delivered to exactly one seat, with a public claim attached that
+nothing verifies, and it gives gate #1 a sentinel of a different shape - an
+identity rather than a card.
+
+**Corrected 2026-09-02 against the published 5-6 seat board**, which grants a
+policy peek on the third fascist policy and has no investigation, and which
+unlocks the veto at five. Before this the third writ fired `inspect` and no veto
+existed. The random-control figures in Â§What the deck does were measured before
+both fixes; the deck arithmetic they check does not move, but a re-run under the
+corrected rules is the honest baseline for anything that reads them.
 
 **A removed seat stops acting and its role is not revealed.** Revealing it would
 hand the table a free identity read and collapse the deduction the rung is for. The
@@ -417,6 +442,8 @@ repo:
    inference; it must never be TOLD it.
 4. **The inspect result** - a seat's side, to anyone but the inspecting seat, and
    the fact of the inspection to its subject.
+5. **The peek** - the top three cards, to anyone but the seat that looked. Card
+   shape, so it is the dependence audit's, not the substring scan's.
 
 **Sentinels are the card and role vocabulary of the shipped skin, and a colliding
 term gets RENAMED**, per the repo invariant. This is a live risk here in a way it

@@ -48,7 +48,8 @@ from games.quorum.roles import ADVANCES, Card, Side
 # this game: which key each phase asks for, and what a legal value means.
 
 #: every key the referee ever asks for, for the salvage path
-ACTION_KEYS = ("nominate", "say", "vote", "discard", "target", "claim", "think")
+ACTION_KEYS = ("nominate", "say", "vote", "discard", "target", "claim", "veto",
+               "think")
 
 
 def parse_claim(value, ref: QuorumReferee, seat: int) -> list[Card]:
@@ -133,6 +134,10 @@ def parse_action(reply: str, ref: QuorumReferee, seat: int) -> dict:
         if "target" not in obj:
             raise ParseError('missing "target"')
         out["target"] = parse_index(obj["target"], ref.n, noun="seat")
+    elif p in (Phase.VETO_PROPOSE, Phase.VETO_DECIDE):
+        if "veto" not in obj:
+            raise ParseError('missing "veto"')
+        out["veto"] = parse_bool(obj["veto"])
     else:
         raise ParseError(f"nothing to parse in phase {p.value}")
     return out
@@ -157,6 +162,10 @@ def played_summary(phase: Phase, action: dict) -> str:
         return f"discard card {action['discard']} of the hand"
     if phase is Phase.POWER:
         return f"target seat {action['target']}"
+    if phase is Phase.VETO_PROPOSE:
+        return "propose a veto" if action["veto"] else "keep the agenda (no veto)"
+    if phase is Phase.VETO_DECIDE:
+        return "agree to the veto" if action["veto"] else "refuse the veto"
     return "-"
 
 
@@ -172,6 +181,10 @@ class RandomPolicy:
     #: how often a seat with standing makes a formal claim at all. Half, so the
     #: control populates both the claim rate and the silence rate.
     claim_rate: float = 0.5
+    #: how often the control proposes a veto, and how often it agrees to one.
+    #: Below a half, so a veto stays the exception in the control and the deck
+    #: keeps getting drawn.
+    veto_rate: float = 0.3
 
     def act(self, ref: QuorumReferee, seat: int) -> dict:
         p = ref.phase
@@ -210,6 +223,8 @@ class RandomPolicy:
             return {"discard": self.rng.randrange(len(hand))}
         if p is Phase.POWER:
             return {"target": self.rng.choice(ref.legal_power_targets(seat))}
+        if p in (Phase.VETO_PROPOSE, Phase.VETO_DECIDE):
+            return {"veto": self.rng.random() < self.veto_rate}
         raise IllegalAction(f"no action in phase {p.value}")
 
 
@@ -301,6 +316,8 @@ class LLMPolicy:
             ref.validate_discard(seat, action["discard"])
         elif ref.phase is Phase.POWER:
             ref.validate_power_target(seat, action["target"])
+        # The two veto phases carry a bool and nothing to validate beyond the
+        # office, which the ask already pinned to the seat being asked.
 
 
 # ---- records --------------------------------------------------------------
@@ -408,6 +425,9 @@ class GameRecord:
     win_reason: str = ""
     charters: int = 0
     writs: int = 0
+    #: agendas vetoed - both cards discarded with nothing enacted. Not a draw on
+    #: ``draws``, because there is no enacted card to score a claim against.
+    vetoes: int = 0
     error: str = ""
     decision_log: list[Decision] = field(default_factory=list)
     draws: list[DrawRecord] = field(default_factory=list)
@@ -562,6 +582,16 @@ def play_game(
                 pending = None
         elif p is Phase.POWER:
             ref.use_power(ref.proposer, decide(ref.proposer)["target"])
+        elif p is Phase.VETO_PROPOSE:
+            ref.propose_veto(ref.enactor, decide(ref.enactor)["veto"])
+        elif p is Phase.VETO_DECIDE:
+            ref.decide_veto(ref.proposer, decide(ref.proposer)["veto"])
+            if ref.phase is not Phase.ENACTOR_DISCARD:
+                # agreed: nothing was enacted, so the half-built draw is not a
+                # record - a DrawRecord with no enacted card would be scored
+                # against as if the table had watched one come out
+                rec.vetoes += 1
+                pending = None
 
     rec.winner = ref.winner.value if ref.winner else ""
     rec.win_reason = ref.win_reason

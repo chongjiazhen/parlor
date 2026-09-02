@@ -14,7 +14,7 @@ import unittest
 from games.quorum.audit import (LeakDetected, assert_no_leak, dependence_leaks,
                                 identity_leaks, self_line)
 from games.quorum.referee import Phase, QuorumReferee
-from games.quorum.roles import THEMES, Side
+from games.quorum.roles import THEMES, Card, Side
 
 
 def drive(ref: QuorumReferee, rng: random.Random, steps: int = 400,
@@ -39,7 +39,28 @@ def drive(ref: QuorumReferee, rng: random.Random, steps: int = 400,
         elif ref.phase is Phase.POWER:
             ref.use_power(clock[0],
                           rng.choice([s for s in ref.living() if s != clock[0]]))
+        elif ref.phase is Phase.VETO_PROPOSE:
+            ref.propose_veto(clock[0], rng.random() < 0.3)
+        elif ref.phase is Phase.VETO_DECIDE:
+            ref.decide_veto(clock[0], rng.random() < 0.3)
     raise AssertionError("game did not terminate inside the bound")
+
+
+def peeked(cls, seed: int = 3) -> QuorumReferee:
+    """A referee just past the third writ, so the proposer of that event holds a
+    peek. The drawn hand is forced to three writs so the enactment is a writ."""
+    ref = cls.new(5, seed=seed, discussion_rounds=0)
+    ref.writs = 2
+    nominee = next(s for s in ref.eligible_nominees()
+                   if not ref.assignment[s].is_principal)
+    ref.nominate(ref.proposer, nominee)
+    ref.vote({s: True for s in ref.living()})
+    ref.proposer_hand = [Card.WRIT] * 3
+    ref.proposer_saw = [Card.WRIT] * 3
+    ref.proposer_discard(ref.proposer, 0)
+    ref.enactor_discard(ref.enactor, 0)
+    assert ref.peeks, "the third writ did not grant a peek"
+    return ref
 
 
 class TestCleanGames(unittest.TestCase):
@@ -174,6 +195,35 @@ class TestDependenceMutants(unittest.TestCase):
         found = dependence_leaks(ref)
         self.assertTrue([v for v, _ in found if v != ref.proposer],
                         "another seat's inspection result was not caught")
+
+    def test_leaking_another_seats_peek_is_caught(self):
+        class Leaky(QuorumReferee):
+            def render_context(self, seat, include_speech=True):
+                base = super().render_context(seat, include_speech)
+                for who, cards in sorted(self.peeks.items()):
+                    shown = ", ".join(self.theme.card_names[c] for c in cards)
+                    base += f"\nSeat {who} saw the deck run: {shown}."
+                return base
+
+        ref = peeked(Leaky)
+        (peeker,) = ref.peeks
+        found = dependence_leaks(ref)
+        others = [(v, f) for v, f in found if v != peeker]
+        self.assertTrue(others, "another seat's peek was not caught")
+        self.assertTrue(all(f == "peeks" for _, f in others),
+                        f"blamed the wrong field: {found}")
+        with self.assertRaises(LeakDetected):
+            assert_no_leak(ref)
+
+    def test_a_peek_is_not_reported_against_its_own_holder(self):
+        """The holder's render legitimately depends on what it saw, and the
+        deck under the peek flips in every counterfactual - so a peek stored by
+        reference to the deck, rather than by value, would fail here."""
+        ref = peeked(QuorumReferee)
+        (peeker,) = ref.peeks
+        self.assertIn("top of the deck", ref.render_context(peeker))
+        self.assertEqual(dependence_leaks(ref), [])
+        assert_no_leak(ref)
 
     def test_the_public_counts_survive_the_flip(self):
         """The check has to be falsifiable in the other direction too. Deck size

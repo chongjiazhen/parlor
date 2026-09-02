@@ -43,7 +43,7 @@ from __future__ import annotations
 import copy
 
 from core.observability import find_leaks
-from games.quorum.referee import Phase, QuorumReferee
+from games.quorum.referee import ENACTOR_HOLDS, Phase, QuorumReferee
 from games.quorum.roles import Card, Side
 
 
@@ -66,7 +66,8 @@ _OTHER_SIDE = {Side.MAJORITY: Side.MINORITY, Side.MINORITY: Side.MAJORITY}
 #: nothing rather than crashing or leaking silently.
 _ASK_PHASES = frozenset({
     Phase.NOMINATE, Phase.DISCUSS, Phase.VOTE,
-    Phase.PROPOSER_DISCARD, Phase.ENACTOR_DISCARD, Phase.POWER,
+    Phase.PROPOSER_DISCARD, Phase.VETO_PROPOSE, Phase.VETO_DECIDE,
+    Phase.ENACTOR_DISCARD, Phase.POWER,
 })
 
 
@@ -147,7 +148,7 @@ def _counterfactual(ref: QuorumReferee, viewer: int) -> QuorumReferee:
     # never from a second copy of the rule.
     sees_now = ref.entitled_hand(viewer) is not None
     keeps_proposer_hand = sees_now and ref.phase is Phase.PROPOSER_DISCARD
-    keeps_enactor_hand = sees_now and ref.phase is Phase.ENACTOR_DISCARD
+    keeps_enactor_hand = sees_now and ref.phase in ENACTOR_HOLDS
     if not keeps_proposer_hand:
         alt.proposer_hand = [_OTHER_CARD[c] for c in ref.proposer_hand]
     if not keeps_enactor_hand:
@@ -169,6 +170,11 @@ def _counterfactual(ref: QuorumReferee, viewer: int) -> QuorumReferee:
         if inspector != viewer:
             alt.inspections[inspector] = {s: _OTHER_SIDE[side]
                                           for s, side in found.items()}
+
+    # A peek is the same shape with a card for a value: the peeking seat keeps
+    # what it saw, every other seat's peek flips.
+    alt.peeks = {s: (cards if s == viewer else tuple(_OTHER_CARD[c] for c in cards))
+                 for s, cards in ref.peeks.items()}
     return alt
 
 
@@ -201,7 +207,7 @@ def _blame(ref: QuorumReferee, viewer: int) -> str:
     """
     base = ref.prompt_for(viewer, include_speech=False)
     for field in ("proposer_hand", "enactor_hand", "deck", "discards",
-                  "inspections", "recall"):
+                  "inspections", "recall", "peeks"):
         alt = copy.copy(ref)
         alt.inspections = {k: dict(v) for k, v in ref.inspections.items()}
         full = _counterfactual(ref, viewer)
