@@ -228,3 +228,34 @@ class TestTheBoardWatcher(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestALieNeverNamesWhatASeatCanBecome(unittest.TestCase):
+    """Gate #1 fired at seed 13400 (2026-09-02): a night-3 lie named the heir as
+    the Fiend, the heir succeeded on night 5, and the audit - which grades every
+    line against the CURRENT grimoire - found the stale lie true. The referee's
+    rule is "excluding every true answer", and a role a seat can BECOME is an
+    answer that can come true, so the lie space excludes it. Any minion can
+    succeed (the heir by the town's kill, any minion by the demon's own)."""
+
+    def test_the_forbidden_names_of_a_minion_include_the_demon(self):
+        grim = board(["fiend", "heir", "venom", "witness", "sot"])
+        self.assertIn("fiend", nightinfo._names(grim, 1))
+        self.assertIn("fiend", nightinfo._names(grim, 2))
+        self.assertNotIn("fiend", nightinfo._names(grim, 3))
+
+    def test_a_lie_about_a_minion_never_names_the_demon(self):
+        grim = board(["fiend", "heir", "venom", "witness", "sot"])
+        for seat in (1, 2):
+            picked = {nightinfo._other_role(grim, random.Random(i), seat).key
+                      for i in range(300)}
+            self.assertNotIn("fiend", picked)
+            self.assertTrue(picked)
+
+    def test_a_lie_about_a_good_seat_may_still_name_the_demon(self):
+        """The control on the test itself: the exclusion is the minion's, not a
+        script-wide ban that would tell every seat what a Fiend-lie means."""
+        grim = board(["fiend", "heir", "venom", "witness", "sot"])
+        picked = {nightinfo._other_role(grim, random.Random(i), 3).key
+                  for i in range(300)}
+        self.assertIn("fiend", picked)

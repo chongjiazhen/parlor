@@ -77,10 +77,18 @@ class Reveal:
 
 def _names(grim: Grimoire, seat: int) -> set[str]:
     """Every role key a truthful sentence about this seat could carry - what it
-    holds, and what it registers as. A lie has to miss BOTH: missing only the
-    second lands on the first, which is a true association handed to a seat with
-    no entitlement to it."""
-    return {grim.role_of(seat).key, grim.registers_as(seat).key}
+    holds, what it registers as, and what it can BECOME. A lie has to miss all
+    three: missing only the second lands on the first, which is a true
+    association handed to a seat with no entitlement to it; missing only the
+    third is a lie that succession later makes true, and the audit grades every
+    line against the current grimoire (seed 13400, 2026-09-02: the heir named as
+    the Fiend on night 3, the demon by night 5). Any minion can succeed - the heir
+    when the town kills the demon, any of them when the demon kills itself - so
+    the demon's role is off the table for every minion."""
+    names = {grim.role_of(seat).key, grim.registers_as(seat).key}
+    if grim.role_of(seat).team is Team.MINION:
+        names.add("fiend")
+    return names
 
 
 def _other_role(grim: Grimoire, rng: random.Random, seat: int) -> Role:

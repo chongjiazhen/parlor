@@ -233,7 +233,7 @@ seat ask nor either public channel, and it is not an audit input.
 | Choice | When | How |
 |---|---|---|
 | which seat a pointing reveal points at, and its decoy | at the reveal | uniform over legal candidates |
-| the false answer given to a switched-off seat | at the reveal | uniform, excluding every true answer |
+| the false answer given to a switched-off seat | at the reveal | uniform, excluding every true answer - and, for a seat that can become the demon, that answer too, since a lie succession later makes true is a true association in the seat's payload (2026-09-02) |
 | which good seat reads as the demon to the hunter | at setup | uniform over good seats |
 | whether the ambiguous outsider reads evil, and as what | at setup | fair coin, then uniform |
 | whether the ambiguous minion reads good, and as what | at setup | fair coin, then uniform |
