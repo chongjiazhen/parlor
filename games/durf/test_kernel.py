@@ -321,3 +321,58 @@ def test_the_shipped_dungeon_states_a_topology_and_it_is_walkable():
     assert forward == [("R3", "R4")]
     for e in rooms["R2"]["exits"]:
         assert e["basis"], "every sightline states the room text it was read from"
+
+
+def test_loading_another_dungeon_binds_that_dungeon_s_facts():
+    """A ``path`` names a dungeon DIRECTORY, and its fact ledger comes from it too.
+
+    The failure this guards is silent and total. ``load`` reads ``scenario.json``
+    from ``path`` but built the ledger from the SHIPPED ``facts.json`` whenever the
+    caller passed no ledger, so a second dungeon would be audited against the first
+    one's sentinels: every one of its own world facts unaudited, and gate #1 green
+    over a render that leaked all of them. Nothing about the run would look wrong -
+    the audit reports a hold, because it is holding the wrong corpus.
+    """
+    root = kernel.FIXTURE_DIR.parent / "dungeons" / "drowned-mill"
+    k = kernel.load(seed=0, path=root)
+    assert ("room", "R12") in k.ledger.facts, (
+        "the ledger is the shipped barrow's, not this dungeon's")
+    assert k.ledger.facts[("room", "R12")].text.startswith("R12")
+
+
+def test_a_dungeon_whose_two_files_disagree_is_refused():
+    """``scenario.json`` and ``facts.json`` in one directory describe one dungeon.
+
+    A mismatched pair is the same silent-wrong-corpus failure arriving by hand
+    rather than by default, so it is refused at load with both ids named.
+    """
+    with pytest.raises(kernel.FixtureMismatch, match="drowned-mill"):
+        kernel.load(seed=0, path=kernel.FIXTURE_DIR,
+                    ledger=facts.load(
+                        kernel.FIXTURE_DIR.parent / "dungeons" / "drowned-mill" / "facts.json"))
+
+
+def test_the_drowned_mill_is_a_loop_and_the_shortcut_is_telegraphed():
+    """The play dungeon's design claims, held against its own file.
+
+    Two properties the graded corridor cannot have, and both are load-bearing.
+    A LOOP means fixture order and graph distance disagree - the comment on
+    ``distance`` says they would, and until this dungeon nothing in the tree
+    exercised it. And the loop's short arm reaches the deadliest room two moves
+    from the entrance, so R12 has to carry its own warning in the text a party
+    standing in it is shown; a shortcut nobody can read is a gotcha.
+    """
+    root = kernel.FIXTURE_DIR.parent / "dungeons" / "drowned-mill"
+    k = kernel.load(seed=0, path=root)
+    assert len(k.rooms) == 12
+    by_door = kernel.distance(k.rooms, "R1", "R10")
+    assert by_door == 2, "the channel is the short way to the weir"
+    assert kernel.distance(k.rooms, "R1", "R2") == 1
+    order = list(k.rooms)
+    assert order.index("R10") - order.index("R1") == 9, (
+        "fixture ORDER puts the weir nine along; the GRAPH puts it two. A "
+        "corridor cannot show this disagreement and this dungeon must.")
+    assert "upstream" in k.rooms["R12"]["contents"], (
+        "the short arm states its own warning")
+    assert not any(e["sight"] for e in kernel.exits_of(k.rooms, "R12")
+                   if e["to"] == "R10"), "and does not show what is waiting"

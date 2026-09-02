@@ -1,0 +1,280 @@
+{
+ "fixture_version": "1",
+ "scenario_id": "drowned-mill",
+ "ruleset": "DURF 2.2 (2021), Emiel Boven, CC BY 4.0",
+ "note": "The world facts the session engine audits gate #1 against, for the drowned-mill PLAY dungeon. Derived from scenario.json's rooms, hidden entries and NPC stat blocks, but a SEPARATE file for the same reason the graded set keeps them apart: scenario.json's rendering is what a seat is shown, and a field added to it changes what the referee reads. No declaration set accompanies this scenario and no number is scored against it.",
+ "terms_note": "Naive sentinels, held by games/durf/facts.check_facts to four properties: non-blank, pairwise disjoint, absent from every other fact's text, and present in their own. The remedy for any collision is to rename the TERM, never to weaken the matcher.",
+ "public_at_start": [
+  [
+   "room",
+   "R1"
+  ]
+ ],
+ "facts": [
+  {
+   "fact_id": [
+    "room",
+    "R1"
+   ],
+   "label": "what the millyard holds",
+   "terms": [
+    "hay cart",
+    "picked over years ago"
+   ],
+   "text": "R1 Millyard: open yard in daylight. A hay cart lies on a broken axle, picked over years ago. The mill door stands open on darkness. To one side a stone-lined overflow channel runs out of the hillside behind an iron grate that has rusted off its top hinge. The pond above is low and brown, and the race that fed the wheel is dry."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R2"
+   ],
+   "label": "what is in the wheelhouse",
+   "terms": [
+    "canted over and jammed",
+    "brass key hangs"
+   ],
+   "text": "R2 Wheelhouse: the great wheel fills the room, canted over and jammed against its housing. A man's body is wedged between two paddles, long dead and dried. A brass key hangs on a thong at his neck. The axle runs through the wall into the mill."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R3"
+   ],
+   "label": "what is on the grinding floor",
+   "terms": [
+    "lifted on its crane",
+    "thick enough to taste"
+   ],
+   "text": "R3 Grinding floor: two millstones on a raised floor, the upper one lifted on its crane. Flour dust hangs in the air thick enough to taste. A grain hopper stands half full of spoiled meal. A ladder goes down into the dark at the back."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R4"
+   ],
+   "label": "what is in the sack store",
+   "terms": [
+    "stacked to the ceiling",
+    "the size of cats"
+   ],
+   "text": "R4 Sack store: rotted grain sacks stacked to the ceiling, most of them burst. Four mill-rats the size of cats watch from the top of the stack and do not run. A crawlway at floor level runs on into the dark."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R5"
+   ],
+   "label": "what is in the sluice room",
+   "terms": [
+    "slotted quadrant",
+    "tide line of black scum"
+   ],
+   "text": "R5 Sluice room: waist-deep water, cold and still. An iron lever stands in a slotted quadrant on the wall, set to OPEN. A tide line of black scum across the stonework shows where the water once stood four feet lower. Steps go down under the water on the far side."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R6"
+   ],
+   "label": "what the cistern holds",
+   "terms": [
+    "no floor shows",
+    "broken away in two places"
+   ],
+   "text": "R6 Cistern: a round chamber of black water, deep enough that no floor shows. Something long moves beneath the surface and does not come up. A stone walkway runs around the wall at shoulder height, broken away in two places."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R7"
+   ],
+   "label": "what is on the sunken stair",
+   "terms": [
+    "draining away",
+    "picked clean"
+   ],
+   "text": "R7 Sunken stair: a stair landing. Water stands chest-high and moves slightly, as though draining away somewhere out of sight. The steps continue down into it. Small bones lie caught in the angle of the wall, picked clean."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R8"
+   ],
+   "label": "what is in the miller's room",
+   "terms": [
+    "flour-stiffened coat",
+    "a heap of fish bones"
+   ],
+   "text": "R8 Miller's room: a dry room above the water, lived in. A hammock, a fire pit, a heap of fish bones. A thin old man in a flour-stiffened coat stands with a hooked pole levelled at the door. He does not look surprised to see anyone."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R9"
+   ],
+   "label": "what is in the shrine",
+   "terms": [
+    "chiselled back to bare stone",
+    "hand-sized dish"
+   ],
+   "text": "R9 Shrine: a low vaulted room, dry underfoot. An altar with its carved face chiselled back to bare stone. A shallow basin on top of it holds rainwater. Set into the wall behind stands a door of grey metal with no handle, no keyhole and a hand-sized dish at its centre."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R10"
+   ],
+   "label": "what is at the bone weir",
+   "terms": [
+    "matted thick",
+    "pours steadily through"
+   ],
+   "text": "R10 Bone weir: an overflow grate floor to ceiling, matted thick with bones and rags and hair pressed into it by years of current. Three drowned figures stand in the water on this side, facing the grate, not moving. Water pours steadily through it and away."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R11"
+   ],
+   "label": "what is in the vault",
+   "terms": [
+    "lettered rather than numbered",
+    "going back years"
+   ],
+   "text": "R11 Vault: a dry stone cell above the waterline. An iron-bound chest, banded and locked, with three brass dials on its face lettered rather than numbered. Stacked beside it, a miller's tally-boards going back years."
+  },
+  {
+   "fact_id": [
+    "room",
+    "R12"
+   ],
+   "label": "what is in the overflow tunnel",
+   "terms": [
+    "knee-deep and quick",
+    "dropped off its hinge"
+   ],
+   "text": "R12 Overflow tunnel: a stone-lined channel running straight out towards daylight, knee-deep and quick underfoot. Small bones and scraps of cloth turn over in the current, coming down from somewhere upstream. The climb out at the yard end is a scramble. The far end is jammed part open where the ironwork has dropped off its hinge."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R2"
+   ],
+   "label": "what freeing the body does",
+   "terms": [
+    "turns under its own weight",
+    "crushes whatever stands"
+   ],
+   "text": "The wheel is held only by the paddle the body is wedged against. Freeing the body frees the wheel, which turns under its own weight and crushes whatever stands in the housing."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R3"
+   ],
+   "label": "the purse in the hopper",
+   "terms": [
+    "leather purse",
+    "55 GP"
+   ],
+   "text": "A leather purse holding 55 GP is pushed down out of sight into the spoiled meal."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R4"
+   ],
+   "label": "the ring in the rats' bedding",
+   "terms": [
+    "silver ring",
+    "30 GP"
+   ],
+   "text": "A silver ring worth 30 GP is worked into the rats' bedding at the back of the stack."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R6"
+   ],
+   "label": "what lies on the cistern floor",
+   "terms": [
+    "four feet of it",
+    "strikes at anything"
+   ],
+   "text": "A cistern-eel lies along the bottom, four feet of it, and strikes at anything that enters the water."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R9"
+   ],
+   "label": "how the grey door opens",
+   "terms": [
+    "swings open while anything of value",
+    "lifted out"
+   ],
+   "text": "The grey door swings open while anything of value rests in the basin, and shuts again the moment it is lifted out."
+  },
+  {
+   "fact_id": [
+    "hidden",
+    "R11"
+   ],
+   "label": "what the chest holds and what the dials spell",
+   "terms": [
+    "400 GP",
+    "burned into the head"
+   ],
+   "text": "The chest holds 400 GP and a silver mill-mark. The dials spell the mill's own name, which is burned into the head of every tally-board in the stack."
+  },
+  {
+   "fact_id": [
+    "npc",
+    "mill-rats"
+   ],
+   "label": "the mill-rats' statistics",
+   "terms": [
+    "ML 5",
+    "bite, 2 dmg"
+   ],
+   "text": "Four mill-rats: Skill 1, 0 HD, no Armor, ML 5, bite, 2 dmg. 0 HD dies to any Wound."
+  },
+  {
+   "fact_id": [
+    "npc",
+    "cistern-eel"
+   ],
+   "label": "the cistern-eel's statistics",
+   "terms": [
+    "ML 7",
+    "bite, 4 dmg"
+   ],
+   "text": "The cistern-eel: Skill 4, 2 HD, 1 Armor, ML 7, bite, 4 dmg. It strikes only what enters the water."
+  },
+  {
+   "fact_id": [
+    "npc",
+    "the miller"
+   ],
+   "label": "the miller's statistics",
+   "terms": [
+    "ML 8",
+    "Skill 3"
+   ],
+   "text": "The miller: Skill 3, 2 HD, 1 Armor, ML 8, hooked pole for 3 dmg. He answers if he is spoken to, and he knows what the dials spell."
+  },
+  {
+   "fact_id": [
+    "npc",
+    "the drowned"
+   ],
+   "label": "the drowned's statistics",
+   "terms": [
+    "ML 12",
+    "grasping hands",
+    "pulled under"
+   ],
+   "text": "The drowned, three of them: Skill 5, 2 HD, no Armor, ML 12, grasping hands for 3 dmg, and a held victim is pulled under. ML 12 means they never flee, and they do not leave the weir."
+  }
+ ]
+}
