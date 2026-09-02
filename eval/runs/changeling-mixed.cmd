@@ -1,7 +1,7 @@
 @echo off
 setlocal
 rem Changeling mixed cells - the hand-written rung seated against LIVE seats.
-rem Two arms, serial, on the one card: --arm mixed-village then --arm mixed-pack.
+rem Two arms, serial, on the one card: --arm mixed-pack then --arm mixed-village.
 rem Bound by docs\changeling-mixed-criterion.md; every value below is a copy of
 rem that file's and nothing here may be tuned without editing it, which the
 rem criterion forbids after launch.
@@ -53,11 +53,11 @@ if %ERRORLEVEL% NEQ 0 (
   exit /b 1
 )
 
-rem ---- arm 1: live village against the rung's pack --------------------------
-echo [arm1] mixed-village starting %DATE% %TIME%>>"%LOG%"
-py -3 -m eval.run_changeling --games %GAMES% --arm mixed-village --backend local ^
+rem ---- arm 1: live pack against the rung's village ---------------------------
+echo [arm1] mixed-pack starting %DATE% %TIME%>>"%LOG%"
+py -3 -m eval.run_changeling --games %GAMES% --arm mixed-pack --backend local ^
   --model "%MODEL%" --no-thinking --seats 5 --theme folk --rounds 2 --seed %SEED% --timeout 240 ^
-  --out "%OUTDIR%\cl-mixed-village.json" >>"%LOG%" 2>&1
+  --out "%OUTDIR%\cl-mixed-pack.json" >>"%LOG%" 2>&1
 echo [arm1] wrapper rc=%ERRORLEVEL%>>"%LOG%"
 
 rem Arm 2 is judged on arm 1's OWN marker, not on the wrapper's exit code. A
@@ -69,10 +69,10 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem ---- arm 2: live pack against the rung's village --------------------------
-echo [arm2] mixed-pack starting %DATE% %TIME%>>"%LOG%"
-py -3 -m eval.run_changeling --games %GAMES% --arm mixed-pack --backend local ^
+rem ---- arm 2: live village against the rung's pack ---------------------------
+echo [arm2] mixed-village starting %DATE% %TIME%>>"%LOG%"
+py -3 -m eval.run_changeling --games %GAMES% --arm mixed-village --backend local ^
   --model "%MODEL%" --no-thinking --seats 5 --theme folk --rounds 2 --seed %SEED% --timeout 240 ^
-  --out "%OUTDIR%\cl-mixed-pack.json" >>"%LOG%" 2>&1
+  --out "%OUTDIR%\cl-mixed-village.json" >>"%LOG%" 2>&1
 echo [arm2] wrapper rc=%ERRORLEVEL%>>"%LOG%"
 echo PARLOR MIXED DONE %DATE% %TIME%>>"%LOG%"

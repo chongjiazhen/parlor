@@ -95,7 +95,7 @@ Both arms: `eval.run_changeling --games 200 --backend local --model
 qwen36-35b-a3b-iq3 --no-thinking --seats 5 --theme folk --rounds 2 --seed 5000
 --timeout 240`, driver defaults otherwise (`--register character`,
 `--temperature 0.8`, `--max-tokens 1536`, `--retries 2`). Arm 1
-`--arm mixed-village`, arm 2 `--arm mixed-pack`. Seeds 5000..5199, the same seeds
+`--arm mixed-pack`, arm 2 `--arm mixed-village`. Seeds 5000..5199, the same seeds
 every changeling live arm on this box plays.
 
 Records `eval/records/cl-mixed-{village,pack}.json`. Recipe
@@ -115,6 +115,12 @@ control is pre-merge, therefore these arms must run pre-merge**, and they join t
 skin pair, S22 and the gate #2 arm in the set the merge waits on. Running them
 after the merge does not produce a weaker result, it produces an unpaired one: the
 rung's twin figure would come from a different game.
+
+2026-09-02T13:05:29Z: order swapped before launch, `mixed-pack` runs first.
+`mixed-pack` carries the artifact read (§The statistic, "Secondary, `mixed-pack`
+only"), is the cheaper arm (2 live seats vs 3), and a single landed arm is a
+valid read under this criterion, so ordering decides which read exists if the
+card runs out.
 
 ## What voids it, decided in advance
 
