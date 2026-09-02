@@ -219,6 +219,15 @@ Rules and setup changes, each of which re-baselines what runs under it:
       `eval/runs/changeling-kindred.cmd kin1 200 14000 qwen36-35b-a3b-iq3`, ~7 h.
       Entry condition: no changeling arm in flight - it queues behind the chain
       in `queue.local.md`. A new deck re-baselines everything under it.
+- [ ] **Run the belfry session-memory night arm - FROZEN 2026-09-02, NEVER RUN.**
+      The withheld night ask carrying the referee's own transcript of the game,
+      `prior` still dropped; criterion `docs/belfry-night-transcript-criterion.md`,
+      recipe `eval/runs/belfry-night-transcript.cmd <last-chain-log>`, seeds
+      15000..15999, ~1 h. Read `py -3 -m eval.belfry_night_verdict --criterion
+      transcript`: RECALLS or NO RECALL against the withheld 94/122, and BELOW or
+      AS GOOD AS the supplied 152/163, on intervals. Entry condition: the card -
+      it refuses until the log it is handed carries a PARLOR done marker, so
+      hand it the changeling chain's last log and launch early.
 - [ ] **The runner prints `SETUP_5`'s pre-`plurality-min2` pack reference
       (60.49%) beside every deck.** Seen on the 7-seat bar run. A print, not a
       score; both deck criteria already say not to read it. Fix after the chain
