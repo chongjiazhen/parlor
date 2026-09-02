@@ -148,6 +148,20 @@ all seven findings landed. Its rows are gone; git holds the record.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that already
       exist. Also: `rate_ok`'s 5% CI-floor bar is pre-declared nowhere.
+- [ ] **Rules audit 2026-09-02 against the published rulebooks - eight undeclared
+      deviations, none yet a row of its own.** Tables in `.scratch/rules-audit-
+      2026-09-02/`. Each is either declared in `RULES.md` as a house rule or
+      fixed and re-baselined; a fix moves a recorded number. changeling: a vote
+      with no seat above one accuses ALL tied seats where the source kills nobody
+      (`games/changeling/referee.py:411`, inflates the 38.5% baseline); lone-pack centre peek
+      absent. quorum: 5-seat slot-3 power is `inspect` where the source board has
+      a deck peek; no veto after 5 writs. belfry: evil briefings fire at 5-6 seats
+      where the source withholds them below 7 (`games/belfry/referee.py:264`);
+      `mimic` never
+      registers as an outsider. durf digest: weapon slot costs wrong (+2 great-
+      sword/crossbow, +1 sword-class/pistol); no attribute named for attacks (STR
+      close, DEX ranged - decision 2); full-turn casting needs no roll. cabal is
+      clean but for no evil conference before the hunt.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
