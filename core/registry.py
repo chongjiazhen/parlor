@@ -24,12 +24,17 @@ a second game needs it, so the factory lands when something asks for it.
 **What is registered is a rung a PERSON can sit at**, not a genre. The line is
 mechanical: a rung appears here when it has a console seat, because a name in
 ``--list`` that answers ``--human`` with an error is worse than an absent one.
-That is why ``durf`` is not below - its session engine has seats and an
-entitlement audit but no ``ConsoleBackend`` anywhere in it, so there is nothing
-for a person to sit in yet. When it grows one it registers here beside the
-others, and the fact that it is an RPG rather than a hidden-role game is not what
+``durf`` was absent on exactly that test until it grew one - its session engine
+had seats and an entitlement audit and no ``ConsoleBackend`` anywhere in it - and
+it registers below now that ``games/durf/demo.py`` seats a person in a party
+seat. The fact that it is an RPG rather than a hidden-role game is not what
 decides it. The endgame rung is an RPG; a CLI that had ruled out the genre would
 have to be renamed the day it arrives.
+
+**A rung registers on the seat a person can take, not on every seat it has.**
+durf's referee seat holds the whole world, so there is no entitlement boundary
+around it and nothing to audit - a human adjudicator is a different measurement
+rather than a flag, and its absence does not keep the rung out of this table.
 """
 
 from __future__ import annotations
@@ -82,6 +87,10 @@ _RUNGS = (
          "5-12 seat town square over many days and nights. The referee is allowed "
          "to lie: a seat whose ability has been switched off is told something "
          "false in the same words, and is not told that."),
+    Rung("durf", "games.durf.demo",
+         "3-seat dungeon session under a rules kernel and a referee with "
+         "discretion. What is secret belongs to the WORLD, not to a seat: every "
+         "seat is equally un-entitled to it until the referee declares it."),
 )
 
 RUNGS: dict[str, Rung] = {r.name: r for r in _RUNGS}

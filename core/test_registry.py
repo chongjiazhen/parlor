@@ -34,9 +34,10 @@ def test_every_registered_rung_seats_a_person():
     """The registration line, asserted rather than described.
 
     A rung belongs here when it has a console seat - not when it is the right
-    genre. ``durf`` is absent for exactly this reason and would pass any test
-    that only asked whether it was a game; it fails this one, because nothing in
-    it imports a console. When it grows one it registers beside the others.
+    genre. ``durf`` was absent for exactly this reason and would have passed any
+    test that only asked whether it was a game: nothing in it imported a console.
+    It registers here now that ``games/durf/demo.py`` seats a person in a party
+    seat, and this assertion is what decided when it was allowed to.
     """
     for name, rung in RUNGS.items():
         mod = import_module(rung.module)
