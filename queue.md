@@ -138,6 +138,13 @@ void. Which of those arms earns its ~7 h of card first is the operator's ranking
 the criteria are frozen and wait.
 
 
+- [ ] **`records_gate.demand` fails any fresh worktree that WRITES a record.** It
+      skips while `eval/records/` is empty and raises once the dir holds runs, so
+      its premise - a populated dir means the cited records should be here - is
+      false in a clone that never held them. Measured 2026-09-02 on
+      `slice/cabal-setups`: three new control JSONs turned 8 skips into 6 failures
+      and 3 errors, with nothing in the diff causing it, and moving them aside
+      restored the tail. The fix is per-record, not per-directory.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
@@ -238,12 +245,19 @@ Rules and setup changes, each of which re-baselines what runs under it:
       is a HINT and the one measurement on this exact move says it HURTS on q36.
       This is also a confound in gate #3a: expect discrimination to DROP, and
       that drop is a truer number.
-- [ ] **Larger setups (6/7p) + the two information-degrading evils.** Package
-      them - both only make sense at 3 evil seats. The roles landed 2026-08-27 as
-      `LURKER` and `STRAY`; nothing deals them, so what is left is the setups and
-      the measurement, which was always the cost. **Worth it for what they
-      degrade about INFORMATION, never as a sampling fix** - a bigger table makes
-      the thin denominator worse. Blocked only by cabal having no GPU program.
+- [ ] **Larger setups (6/7p) + the two information-degrading evils - BUILT
+      2026-09-02 on `slice/cabal-setups` (`12997e5`).** `SETUP_6` and `SETUP_7` on
+      the folk ladder, both variant evils dealt, `--seats` in the eval lane; three
+      1000-game RANDOM baselines at 0.00% fallback in `docs/measurements.md`, no
+      model seated and no criterion, because cabal has no GPU program. Two
+      readings that correct the tree: the 7p hunt bar is **1/5, not 1/4** - the
+      `stray` is named to nobody, so four comments claiming a 4-way set were
+      wrong - and a bigger table is a sampling LOSS as predicted, 0.53 clean-team
+      votes per blind seat per game against 5p's 0.84. `SETUP_7` seats no watcher
+      (the aura is a pair, and four evil roles do not fit three seats), so gate
+      #3a's `aura` stratum is empty there and prints REFUSED. That is the
+      reversible half. Found in doing it: the solver read `SETUP_5` by default and
+      enumerated a different game at 7 seats. What is left is a model.
 - [ ] **Run `kindred` deck B - FROZEN 2026-09-02, NEVER RUN.** `SETUP_7_KIN`
       with `require_seated_kin`, `--seats 7`. Bar measured (blind 25.39% over
       5376 random votes, `eval/records/kin-chance.json`) and the criterion is
