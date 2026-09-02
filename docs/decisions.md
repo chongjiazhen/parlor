@@ -336,3 +336,15 @@ position strategy sits at exactly 1/3. Mutation-checked - sorting the menu turns
 position-prior fixture from NOT SHOWN into STEERED. The cost is that the steered arm is
 NOT a one-variable delta from S8b, so it is not read against S8b: it is read against
 its own chance baseline, with S8b's blind 0/20 quoted only as the cost-of-steering line.
+
+
+## 2026-09-02 - moved from queue.md
+
+Found in building the changeling source rules on `slice/changeling-source-rules`
+and struck from the queue row in the cull of the same day, because it is a fact
+about the new baseline rather than an ask:
+
+- **On `SETUP_5` a random arm under the new night rules has NO S10 gap** - every
+  lone wolf peeks - so the blind stratum on the re-baselined chance floor is
+  SMALLER, not larger. A scorer expecting the old stratum size would read the
+  first post-merge control as short.

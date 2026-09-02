@@ -582,3 +582,39 @@ on 120B-class. Nothing built so far de-risks the actual product claim, "a refere
 that oversees without micromanaging". So after S6 and the S5 read, the next spike
 is the **adjudicator** against 3-4 discretion-heavy characters - not a whole
 game's roster, and not Secret Hitler, which is cabal's rung again.
+
+
+## 2026-09-02 - moved from queue.md
+
+Struck from the queue in the cull of 2026-09-02 because its trigger has never
+been met, verbatim, so the ask survives the row:
+
+- [ ] **Mini-personas** as per-seat judgment biases, assigned from the seed and
+      recorded so the scorer can split by persona. Trigger: only if a table that
+      argues from evidence still votes identically. Re-homed to changeling (S1);
+      its trigger was never met on cabal.
+
+The three DURF questions, moved out of `queue.md` the same day. They are argument
+and reference, not asks a session takes; the queue keeps one row pointing here.
+Verbatim:
+
+- **`hidden catch`, camp1's term**, colliding with ordinary searching prose
+  exactly as `loose flagstone` did - the model chose the words. Deliberately
+  unfixed, and the argument is `docs/durf-rung.md`: scoring it as a hold moves no
+  verdict, and the edit voids its own read. camp2's structural pair is CLOSED.
+  **Deciding it does NOT oblige a re-run** - the 91/100 is a dated read under its
+  own term set and stays quotable as that. Change the term, mark the read as
+  scored under the old set, and run again only when something else needs it.
+- **Movement is deliberately still unconstrained by the exit graph.** `call_move`
+  accepts any room, so the party can go R1 to R4 in one call. Making it respect
+  adjacency is a RULES change - it moves what is legal and therefore what the
+  fallback rate counts - and it would be a second variable in the same campaign.
+  Separate arm.
+- **The tell question is a SEPARATE instrument and must not be folded back in.**
+  Substring matching cannot see a referee that names the object of its own
+  undeclared secret without naming the secret (`docs/action-channel.md`).
+  Reveal-ahead is a COUNT, not a gate, and gate #1 must not be changed to catch it
+  - declaring is the referee's authority, so the audit is correctly silent.
+  Instrument `py -3 -m eval.durf_reveal_order <record>.json`, no GPU. There is
+  still **no rubric for whether a refereed session was any GOOD**, and the
+  reveal-ahead count must not be promoted into one.
