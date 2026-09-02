@@ -129,7 +129,12 @@ all seven findings landed. Its rows are gone; git holds the record.
 **Merge queue behind the chain read, 2026-09-02.** Worktrees unfreeze the code
 half of this file: a branch cannot touch the checkout the chain imports from,
 so the entry condition "no changeling arm in flight" is met on a branch and the
-freeze binds only the MERGE. Branches waiting: `slice/changeling-source-rules`,
+freeze binds only the MERGE. **One branch is free of the ordering below and can
+merge first:** `slice/fanout-skip` (`bf88a1d`), one line, test-only - the S2
+five-seat test called `load(S2)` past the `records_gate.demand` guard the rest
+of its own file already used, so every fresh worktree failed on a record
+`eval/records/` cannot carry. Nothing else in `eval/` or `games/` reads a record
+unguarded. Branches waiting: `slice/changeling-source-rules`,
 `slice/changeling-heuristic`, and the off-by-default arm branches below
 (`slice/changeling-notebook`, `slice/fanout-*`). **Order is forced by the
 controls:** every prompt arm pairs against S22's `cl-rounds2.json`, so it must
