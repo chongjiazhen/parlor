@@ -365,6 +365,11 @@ class Decision(callcost.CallCost):
     #: Served upstreams for every attempt. ``served_by`` is empty on a fallback
     #: that crossed upstreams, because no one upstream owns random's final move.
     attempted_upstreams: list[str] = field(default_factory=list)
+    #: ``"mechanical"`` | ``"deferred"`` on a solver seat, ``""`` on any other.
+    #: Per decision, because the run-level split cannot say WHICH votes the
+    #: solver proved - and those are the only decisions on which it can differ
+    #: from the random control it is read against (S26).
+    solver: str = ""
 
 
 def played_summary(phase: Phase, action: dict) -> str:
@@ -407,6 +412,13 @@ class GameRecord:
     refused_attempts: int = 0
     rule_refused_attempts: int = 0
     decisions: int = 0
+    #: the solver arm's split (S26): decisions a ``SolverPolicy`` PROVED versus
+    #: decisions it handed to its random fallback. A deferred draw is not a
+    #: fallback - nothing failed - so it is never folded into ``fallbacks``; the
+    #: two pairs answer different questions and a reader needs both. Zero on any
+    #: seat that is not a solver, which says "no split", not "nothing deferred".
+    solver_mechanical: int = 0
+    solver_deferred: int = 0
     utterances: list[str] = field(default_factory=list)
     #: every decision in order, with the private reasoning behind it. Referee-side
     #: only - this is what a post-game read needs and no seat ever sees.
@@ -460,6 +472,11 @@ def play_game(
             rec.recovered += 1
         rec.refused_attempts += refusals
         rec.rule_refused_attempts += rule_refusals
+        solver_mode = str(getattr(policies[seat], "last_solver_mode", "") or "")
+        if solver_mode == "mechanical":
+            rec.solver_mechanical += 1
+        elif solver_mode == "deferred":
+            rec.solver_deferred += 1
         # filed before the move is applied, so a note written about THIS board is
         # dated to this board. It is a no-op when the notebook is off.
         stored = ref.note(seat, action.get("note", ""))
@@ -481,6 +498,7 @@ def play_game(
             # Dropping it makes that upstream's fallback rate unmeasurable.
             served_by=served_by,
             attempted_upstreams=attempted_upstreams,
+            solver=solver_mode,
             **callcost.spent(policies[seat]),
         ))
         return action
