@@ -37,7 +37,8 @@ from games.changeling.audit import leak_audit
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                      play_game)
 from games.changeling.night import deal
-from games.changeling.referee import ChangelingReferee
+from games.changeling.referee import (TURN_MODES, TURNS_FIXED,
+                                      TURNS_RANDOM_ACTIVE, ChangelingReferee)
 from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES, Side
 
 #: See ``games.cabal.demo.BRIEFING`` - console furniture, never the payload.
@@ -60,6 +61,18 @@ face down in the centre. Two of the eight are pack (evil).
              centre. That is a public rule, so every seat may reason from it.
 
 'rules' prints the full rules.
+"""
+
+#: Printed only under ``--turns random-active``, appended to ``BRIEFING``. The
+#: referee's own ask already tells the seat on the clock that an empty `say`
+#: listens - that text is payload, audited, and unconditional. This is console
+#: furniture for the same fact, spelled out once up front rather than left for a
+#: person to infer from the ask alone: type ``say`` with nothing after it (the
+#: existing shorthand already turns that into an empty ``say``) to pass.
+LISTEN_NOTE = """
+This game is using random-active turns: each turn the floor goes to one seat,
+drawn at random, not round-robin - you may hold the floor twice in a round or not
+at all. Type `say` with nothing after it to listen and pass the turn.
 """
 
 RULES_PATH = str(Path(__file__).with_name("RULES.md"))
@@ -108,10 +121,14 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
             enable_thinking=(False if args.no_thinking else None),
         )
 
+    briefing = BRIEFING
+    if getattr(ref, "turn_mode", TURNS_FIXED) == TURNS_RANDOM_ACTIVE:
+        briefing = BRIEFING + LISTEN_NOTE
+
     def policy(seat: int):
         if seat in humans:
             return LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
-                                                   briefing=BRIEFING,
+                                                   briefing=briefing,
                                                    rules_path=RULES_PATH,
                                                    other_model=args.model if args.backend else None),
                              retries=args.human_retries,
@@ -173,6 +190,12 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--theme", choices=list(THEMES), help="card skin (default: folk)")
     ap.add_argument("--rounds", type=int, default=2, help="discussion rounds")
+    ap.add_argument("--turns", choices=list(TURN_MODES), default=TURNS_FIXED,
+                    help="`fixed` (default) asks every seat once a round, in "
+                         "seat order. `random-active` makes a round a budget "
+                         "of n turns; each turn the floor goes to one seat, "
+                         "drawn at random, and that seat may listen instead "
+                         "of speaking.")
     ap.add_argument("--backend", choices=["local", "clean", "gray"],
                     help="run live players (default: random policy, no model)")
     ap.add_argument("--model", default="auto")
@@ -219,6 +242,7 @@ def main() -> None:
     ref = ChangelingReferee.new(5, seed=args.seed, theme=theme,
                                 discussion_rounds=args.rounds,
                                 dealt=dealt, centre=centre,
+                                turn_mode=args.turns,
                                 transcript_path=args.referee_transcript)
     policies = build_policies(ref, args, rng)
 
