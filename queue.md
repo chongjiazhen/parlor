@@ -174,6 +174,18 @@ the one that goes stale.
       arm-level gate and `_chance`'s printed line stops claiming a verdict the
       criterion never gave it. `rounds_pair_verdict` imports `own_bar` and reads
       the live chain, so it inherits this.
+- [ ] **The skin pair's effect landed on the PACK, and its primary statistic
+      could not see it.** Free read, `eval.changeling_audit`, both arms 2026-09-02:
+      a pack seat voted the fellow it was told 49/198 = 24.75% under `greek`,
+      27/198 = 13.64% under `greek-named`, diff -11.11% Newcombe [-18.75%,
+      -3.35%]. `greek` sits ON its control's 25.69%; `greek-named` is below it,
+      so proper names read as the pack PROTECTING its partner. The village-side
+      shown-village count moved +2.70% [-7.31%, +12.65%] - nothing. The pair's
+      primary is blind villager accuracy, a VILLAGE statistic, so the one thing
+      that moved is structurally outside it. **Not promotable**: the criterion
+      declares the audit a free read and forbids a bar after the fact, and this
+      is one of ~6 such reads, so the interval is unadjusted. Settling it needs a
+      new criterion with the pack statistic PRIMARY on fresh seeds, not a re-read.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
