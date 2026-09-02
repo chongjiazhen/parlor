@@ -62,6 +62,14 @@ class ChangelingReferee:
     night: NightResult
     theme: Theme = DEFAULT_THEME
     discussion_rounds: int = 2
+    #: The `--briefing` arm, OFF by default. On, every render carries the full
+    #: standing frame - the day's procedure, the accusation rule and what each
+    #: side wins on - once, byte-identical for every seat. Off, the render is
+    #: byte-identical to what it was before the flag existed, which is what keeps
+    #: every number taken under the per-phase drip comparable. The drip is a
+    #: position (`AGENTS.md`, "the ask carries what THIS phase needs"), and this
+    #: field is what lets a measurement argue with it instead of a rewrite.
+    briefing: bool = False
     phase: Phase = Phase.DISCUSS
     round_index: int = 0
     votes: dict[int, int] = field(default_factory=dict)
@@ -112,6 +120,7 @@ class ChangelingReferee:
     @classmethod
     def new(cls, n: int = 5, seed: int | None = None,
             theme: Theme = DEFAULT_THEME, discussion_rounds: int = 2,
+            briefing: bool = False,
             choose=None, dealt=None, centre=None,
             transcript_path: str | Path | None = None) -> "ChangelingReferee":
         """``dealt``/``centre`` pin the deal, forwarded to ``resolve_night``. They
@@ -122,7 +131,7 @@ class ChangelingReferee:
         rng = random.Random(seed)
         night = resolve_night(setup, rng, choose, dealt=dealt, centre=centre)
         ref = cls(setup=setup, night=night, theme=theme,
-                  discussion_rounds=discussion_rounds,
+                  discussion_rounds=discussion_rounds, briefing=briefing,
                   transcript_path=transcript_path)
         for line in night.log:
             ref._log(line)
@@ -273,6 +282,48 @@ class ChangelingReferee:
                          f"to a seat.")
         return "\n".join(lines)
 
+    def briefing_text(self) -> str:
+        """The full standing frame, or `""` when the arm is off.
+
+        Three things the per-phase ask withholds by design, gathered into one
+        block a seat holds from its first turn: how the day runs, how an
+        accusation is settled, and what each side wins on. Today a seat meets
+        the accusation rule only at VOTE, in `ask`, and meets the win condition
+        nowhere in the payload at all - it can play a whole discussion without
+        being told what it is arguing towards.
+
+        **Rendered inside `seat_lines`, not inside `preamble`, and that is the
+        load-bearing choice here.** The preamble is excluded from the gate #1
+        scan on the argument that it is byte-identical for every seat and so
+        cannot be the vehicle of a per-seat leak; putting new bytes there buys
+        that exclusion for free and on nothing but this method staying honest.
+        In `seat_lines` the frame is audited like every other byte the referee
+        writes to a seat, so a briefing that grows a worked example naming a
+        real seat's card is CAUGHT rather than argued about. `test_referee`
+        drives exactly that mutant. The invariance is still asserted, because
+        it is worth having twice.
+
+        Phrased positively per `docs/model-facing-text.md` - it states what the
+        day does and what wins, and never what a seat should avoid.
+        """
+        if not self.briefing:
+            return ""
+        wolf = self.theme.card_names["pack"]
+        return "\n".join([
+            "How the day runs, start to finish:",
+            f"  - The table talks for {self.discussion_rounds} round(s), one "
+            f"turn each, in seat order.",
+            "  - Then everyone points at once, each at one other seat. The seat "
+            "with the most fingers is accused, and only when it drew more than "
+            "one; on a tie every tied seat is accused, and a round where no seat "
+            "draws two accuses nobody.",
+            f"  - {self.theme.side_names[Side.VILLAGE]} wins when an accused "
+            f"seat holds the {wolf} at dawn, and also when nobody is accused and "
+            f"no seat holds the {wolf}. Otherwise the game goes to "
+            f"{self.theme.side_names[Side.PACK]}. The card in front of you at "
+            "dawn is what decides it.",
+        ])
+
     def self_line(self, seat: int) -> str:
         """What the referee asserts about this seat TO this seat. One line, so the
         self-leak has exactly one place it can live and the audit has exactly one
@@ -285,7 +336,10 @@ class ChangelingReferee:
     def seat_lines(self, seat: int, include_speech: bool = True) -> str:
         """Everything the referee put in front of THIS seat and not the others: its
         own line, its night, and the public record."""
-        lines = [self.self_line(seat)]
+        lines = []
+        if self.briefing:
+            lines += [self.briefing_text(), ""]
+        lines.append(self.self_line(seat))
         knowledge = self.entitled_knowledge(seat)
         if knowledge:
             lines.append("What your night gave you:")

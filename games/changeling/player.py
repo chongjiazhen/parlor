@@ -247,6 +247,12 @@ class GameRecord:
     trace_sample: list[str] = field(default_factory=list)
     error: str | None = None
     theme: str = ""
+    #: Whether the render carried the full standing frame (`--briefing`). On the
+    #: record rather than only in the run's `args` because a JSONL reader scores
+    #: per GAME, and the pair's two arms differ in exactly this field - a reader
+    #: that had to go back to the run header to tell them apart would silently
+    #: pool them the first time two arms landed in one file.
+    briefing: bool = False
     #: True when the deal was CONSTRAINED (``--human-role``), None otherwise. A
     #: constrained deal is not a sample: the record says so in a field, because a
     #: habit of remembering which runs were UAT is not a property of the record.
@@ -288,7 +294,7 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
     by default and stays that way: the property this arena exists to prove must not
     be something a caller can forget to switch on.
     """
-    rec = GameRecord(theme=ref.theme.name, uat=uat)
+    rec = GameRecord(theme=ref.theme.name, uat=uat, briefing=ref.briefing)
     turn = 0
     try:
         if audit:
