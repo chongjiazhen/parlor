@@ -115,6 +115,13 @@ partly true is worse than none.
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
   `eval.gate2_pair_verdict`. UNLAUNCHED.
+- `docs/changeling-phrasing-criterion.md` - the negation pass as an arm:
+  `--phrasing positive` against S22's two-round record as the `as-is` control,
+  same seeds, one new run. The PRIMARY statistic is the refusal read - fallback
+  rate and rule-refused attempts - because the hypothesis is that a prohibition
+  produces the behaviour it forbids; blind accuracy is secondary. Arithmetic
+  `eval.phrasing_pair_verdict`. UNLAUNCHED, and it expires if
+  `slice/changeling-source-rules` merges first.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
