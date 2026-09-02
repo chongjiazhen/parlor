@@ -137,6 +137,14 @@ all seven findings landed. Its rows are gone; git holds the record.
 - [ ] **Two behaviours the auditor prices, neither of them bugs** - a good seat
       approving a known-tainted team (7/76) and evil over-sabotaging. The
       consequence that matters is for gate #3a's metric, not for the seats.
+- [ ] **A changeling twin of `eval/audit_decisions.py`** - the cabal auditor's
+      class, moves provably wrong GIVEN WHAT THE SEAT KNEW, not a judgement
+      grader (its docstring says why). Two counts: a villager voting for a seat
+      its own peek or swap showed as village, and a pack seat voting for its
+      partner where it was told the pack. Scored against records already on disk
+      (S2, the waker arm, the 2026-09-02 random control as the chance reference
+      for each count), no GPU. Unchecked whether the S26 solver read already
+      covers the vote half; read `eval/solver_control.py` before building.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that already
       exist. Also: `rate_ok`'s 5% CI-floor bar is pre-declared nowhere.
