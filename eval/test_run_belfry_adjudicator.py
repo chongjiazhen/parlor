@@ -88,3 +88,27 @@ class TestRunBelfryAdjudicator(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestNightPriorFlag(unittest.TestCase):
+    """`--adjudicator-night-no-prior` is the memory arm's one variable."""
+
+    def test_the_flag_needs_the_night_arm(self):
+        argv = ["run_belfry.py", "--games", "0", "--adjudicator", "model",
+                "--adjudicator-backend", "local", "--adjudicator-model", "m",
+                "--adjudicator-night-no-prior"]
+        with mock.patch("sys.argv", argv), \
+             self.assertRaisesRegex(SystemExit, "--adjudicator-night"):
+            main()
+
+    def test_the_flag_builds_a_prior_withholding_adjudicator(self):
+        adj = build_adjudicator(make_args(adjudicator_night=True,
+                                          adjudicator_night_no_prior=True), 13000)
+        self.assertTrue(adj.night)
+        self.assertFalse(adj.night_prior)
+
+    def test_without_the_flag_prior_is_supplied(self):
+        adj = build_adjudicator(make_args(adjudicator_night=True), 12000)
+        self.assertTrue(adj.night_prior)
+        old = build_adjudicator(make_args(), 6100)
+        self.assertTrue(old.night_prior)

@@ -126,13 +126,15 @@ is maintained as an index. A second list here is the one that goes stale.
 Instrument and integrity: the 2026-09-01 review of `2d28e60..HEAD` is CLOSED -
 all seven findings landed. Its rows are gone; git holds the record.
 
-- [ ] **Belfry night coherence with `prior` WITHHELD.** The 2026-09-02
-      COHERENT read had the referee hand the model its own earlier tellings in
-      every ask, so it measured compliance with supplied memory. The arm that
-      measures memory sends the same ask minus `prior`; reasoning is the last
-      section of `docs/belfry-night-coherence-criterion.md`. New criterion and
-      moved seeds before launch; the comparison is 93.25% with `prior` in view,
-      chance stays one half. **Entry condition: no arm in flight, GPU free.**
+- [ ] **Belfry night coherence with `prior` WITHHELD - built, unrun.**
+      Criterion `docs/belfry-night-noprior-criterion.md` (read its first
+      section: a stateless call cannot remember, so this grades whether the
+      false count is a content function of the board), recipe
+      `eval/runs/belfry-night-noprior.cmd`, seeds 13000..13999, verdict
+      `eval.belfry_night_verdict --criterion withheld`. Two pre-committed
+      lines: COHERENT against one half, and NEEDS MEMORY / HOLDS UNAIDED
+      against the published 152/163 by interval. Smoked 3 games clean.
+      **Entry condition: no arm in flight, `qwen36-35b-a3b-iq3` armed.**
 - [ ] **A DURF fact's term is guarded only against OTHER facts' text.**
       Found building S24: `check_facts` refuses a term that appears in another
       fact's statement, but a fact whose own statement lacks its sentinel leaves

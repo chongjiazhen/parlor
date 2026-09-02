@@ -85,11 +85,12 @@ def build_adjudicator(args, seed: int | None) -> ModelAdjudicator | None:
         return None
     steered = getattr(args, "adjudicator_steer", False)
     night = getattr(args, "adjudicator_night", False)
+    no_prior = getattr(args, "adjudicator_night_no_prior", False)
     return ModelAdjudicator(
         build_adjudicator_backend(args, seed), random.Random(seed),
         steer=HERRING_STEER_RULE if steered else None,
         ask_seed=seed if (steered or night) else None,
-        night=night)
+        night=night, night_prior=not no_prior)
 
 
 def recorded_args(args) -> dict:
@@ -452,6 +453,10 @@ def main() -> None:
                          "the false count a switched-off gauge is told, asked "
                          "with its prior tellings (bound by "
                          "docs/belfry-night-coherence-criterion.md)")
+    ap.add_argument("--adjudicator-night-no-prior", action="store_true",
+                    help="the night ask without the seat's prior tellings - "
+                         "the memory arm, one field moved (bound by "
+                         "docs/belfry-night-noprior-criterion.md)")
     ap.add_argument("--adjudicator-steer", action="store_true",
                     help="send the board and one stated placement rule with each "
                          "setup choice, and offer the menu in a seeded order. "
@@ -466,6 +471,8 @@ def main() -> None:
         raise SystemExit("--adjudicator-steer needs --adjudicator model")
     if args.adjudicator_night and args.adjudicator != "model":
         raise SystemExit("--adjudicator-night needs --adjudicator model")
+    if args.adjudicator_night_no_prior and not args.adjudicator_night:
+        raise SystemExit("--adjudicator-night-no-prior needs --adjudicator-night")
     if args.adjudicator == "model":
         if not args.adjudicator_backend:
             raise SystemExit("--adjudicator model needs --adjudicator-backend")

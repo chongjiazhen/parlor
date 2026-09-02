@@ -103,6 +103,12 @@ class ModelAdjudicator:
     #: is consumed exactly as with no adjudicator at all - so every setup-only
     #: arm is byte-identical without it.
     night: bool = False
+    #: Whether the night ask carries the seat's prior tellings. True is the
+    #: supplied-memory arm read 2026-09-02; False is its follow-up, the same
+    #: ask with ``prior`` withheld and nothing else moved
+    #: (``docs/belfry-night-noprior-criterion.md``). Meaningless without
+    #: ``night``, and refused there rather than silently ignored.
+    night_prior: bool = True
     #: Seconds after a TRANSPORT failure, doubling. Same reason as the seats':
     #: retrying instantly burns the budget against an endpoint still throttled,
     #: and lands the choice on random.
@@ -113,6 +119,9 @@ class ModelAdjudicator:
             raise ValueError("a steered or night adjudicator needs ask_seed: "
                              "without it the offered order is fixed and a "
                              "position prior scores against the rule for free")
+        if not self.night_prior and not self.night:
+            raise ValueError("night_prior=False withholds a field only the "
+                             "night ask carries; it needs night=True")
 
     def _offer(self, key: str, options: list[str], ruled: bool) -> list[str]:
         """The menu as it goes out. Sorted for the blind ask, seeded-shuffled for
@@ -184,6 +193,11 @@ class ModelAdjudicator:
         if not self.night:
             return rng.choice(options)
         del rng
+        if not self.night_prior:
+            # The referee still builds and records the prior list; this arm
+            # drops it at the door, so the record reads the same on both arms
+            # and the ask differs by exactly one field.
+            board = {k: v for k, v in board.items() if k != "prior"}
         offer_key = f"gauge_false_count:{board.get('seat')}:{board.get('night')}"
         return int(self.choose("gauge_false_count", [str(c) for c in options],
                                board, rule=GAUGE_COHERENCE_RULE,

@@ -50,7 +50,48 @@ CONTROL_ARGS = {**COMMON_ARGS, "adjudicator": "random",
                 "adjudicator_night": False}
 MODEL_ARGS = {**COMMON_ARGS, "adjudicator": "model",
               "adjudicator_model": ADJUDICATOR_MODEL,
-              "adjudicator_night": True, "adjudicator_steer": False}
+              "adjudicator_night": True, "adjudicator_steer": False,
+              "adjudicator_night_no_prior": False}
+
+#: The follow-up the first criterion names in its last section: the same ask
+#: with ``prior`` withheld, on its own seeds, against its own control. Bound by
+#: ``docs/belfry-night-noprior-criterion.md``.
+NOPRIOR_CONTROL_CAMPAIGN = "eval/records/belfry-night-noprior-control.json"
+NOPRIOR_MODEL_CAMPAIGN = "eval/records/belfry-night-noprior-model.json"
+NOPRIOR_CRITERION_DOC = "docs/belfry-night-noprior-criterion.md"
+NOPRIOR_FIRST_SEED = 13000
+NOPRIOR_LAST_SEED = 13999
+NOPRIOR_COMMON_ARGS = {**COMMON_ARGS, "seed": NOPRIOR_FIRST_SEED}
+NOPRIOR_CONTROL_ARGS = {**NOPRIOR_COMMON_ARGS, "adjudicator": "random",
+                        "adjudicator_night": False}
+NOPRIOR_MODEL_ARGS = {**NOPRIOR_COMMON_ARGS, "adjudicator": "model",
+                      "adjudicator_model": ADJUDICATOR_MODEL,
+                      "adjudicator_night": True, "adjudicator_steer": False,
+                      "adjudicator_night_no_prior": True}
+#: The supplied-memory read the withheld arm is held against, as published
+#: 2026-09-02 (`docs/measurements.md` §belfry night coherence). A comparison
+#: to a point estimate would read noise as a gap; the call is on intervals.
+SUPPLIED_COHERENT = 152
+SUPPLIED_PAIRS = 163
+
+ARMS = {
+    "supplied": {
+        "title": "play-time discretion arm, prior supplied",
+        "control": CONTROL_CAMPAIGN, "model": MODEL_CAMPAIGN,
+        "control_args": CONTROL_ARGS, "model_args": MODEL_ARGS,
+        "doc": CRITERION_DOC,
+        "first_seed": FIRST_SEED, "last_seed": LAST_SEED,
+        "compare_to_supplied": False,
+    },
+    "withheld": {
+        "title": "play-time discretion arm, prior WITHHELD",
+        "control": NOPRIOR_CONTROL_CAMPAIGN, "model": NOPRIOR_MODEL_CAMPAIGN,
+        "control_args": NOPRIOR_CONTROL_ARGS, "model_args": NOPRIOR_MODEL_ARGS,
+        "doc": NOPRIOR_CRITERION_DOC,
+        "first_seed": NOPRIOR_FIRST_SEED, "last_seed": NOPRIOR_LAST_SEED,
+        "compare_to_supplied": True,
+    },
+}
 
 
 class EvidenceError(ValueError):
@@ -179,18 +220,24 @@ def load(path: Path) -> tuple[dict, list[dict]]:
 
 
 def _recipe_voids(summary: dict, rows: list[dict], expected: dict,
-                  label: str) -> list[str]:
+                  label: str, arm: dict) -> list[str]:
     voids = []
     args = summary.get("args", {})
     for key, want in expected.items():
-        got = args.get(key)
+        # A boolean flag absent from the recorded args is a flag that did not
+        # exist when the record was taken, and a flag that did not exist was
+        # off. The supplied-memory record predates the withholding flag; a
+        # binding that read its absence as a mismatch would void a published
+        # read over a setting that could not have been on.
+        got = args.get(key, False if want is False else None)
         if got != want:
             voids.append(f"{label}: launch setting {key}={got!r}, criterion "
                          f"promised {want!r}")
-    seeds = [FIRST_SEED + int(r["index"]) for r in rows]
-    if sorted(seeds) != list(range(FIRST_SEED, LAST_SEED + 1)):
+    first, last = arm["first_seed"], arm["last_seed"]
+    seeds = [first + int(r["index"]) for r in rows]
+    if sorted(seeds) != list(range(first, last + 1)):
         voids.append(f"{label}: {len(rows)} rows do not cover seeds "
-                     f"{FIRST_SEED}..{LAST_SEED} exactly once")
+                     f"{first}..{last} exactly once")
     if any(r.get("error") for r in rows):
         voids.append(f"{label}: carries an errored game")
     return voids
@@ -232,19 +279,32 @@ def _adjudicator_voids(rows: list[dict]) -> tuple[list[str], dict]:
                    "upstreams": dict(upstreams)}
 
 
+def unaided_call(model: Read) -> str | None:
+    """The withheld arm against the published supplied-memory read, on
+    intervals. NEEDS MEMORY when the whole Wilson interval sits below the
+    supplied read's lower endpoint; HOLDS UNAIDED when the intervals touch or
+    the withheld arm sits above; None with no pair to grade."""
+    if model.wilson is None:
+        return None
+    supplied_low, _ = wilson(SUPPLIED_COHERENT, SUPPLIED_PAIRS)
+    _, withheld_high = model.wilson
+    return "NEEDS MEMORY" if withheld_high < supplied_low else "HOLDS UNAIDED"
+
+
 def _ci(ci) -> str:
     return "n/a" if ci is None else f"[{ci[0]:.2%}, {ci[1]:.2%}]"
 
 
-def report(control_evidence, model_evidence) -> tuple[list[str], int]:
+def report(control_evidence, model_evidence,
+           arm: dict = ARMS["supplied"]) -> tuple[list[str], int]:
     """The paired read and its exit code: 0 read, 3 refused or void. A refused
     record is still audited - the arithmetic prints below the refusal."""
-    out = ["belfry night coherence - play-time discretion arm",
-           f"criterion: {CRITERION_DOC} (pre-committed, not editable)"]
+    out = [f"belfry night coherence - {arm['title']}",
+           f"criterion: {arm['doc']} (pre-committed, not editable)"]
     c_summary, c_rows = control_evidence
     m_summary, m_rows = model_evidence
-    voids = _recipe_voids(c_summary, c_rows, CONTROL_ARGS, "control")
-    voids += _recipe_voids(m_summary, m_rows, MODEL_ARGS, "model")
+    voids = _recipe_voids(c_summary, c_rows, arm["control_args"], "control", arm)
+    voids += _recipe_voids(m_summary, m_rows, arm["model_args"], "model", arm)
     adj_voids, adj = _adjudicator_voids(m_rows)
     voids += adj_voids
     control = coherence_read(c_rows)
@@ -271,6 +331,12 @@ def report(control_evidence, model_evidence) -> tuple[list[str], int]:
             f"chance per pair: {CHANCE:.2%} exactly (two options, the previous "
             f"count always one of them)"]
     call = verdict(control, model)
+    if arm["compare_to_supplied"]:
+        supplied = wilson(SUPPLIED_COHERENT, SUPPLIED_PAIRS)
+        out += ["", f"against the supplied-memory read "
+                f"{SUPPLIED_COHERENT}/{SUPPLIED_PAIRS} = "
+                f"{SUPPLIED_COHERENT / SUPPLIED_PAIRS:.2%} {_ci(supplied)}: "
+                f"{unaided_call(model) or 'no pair to compare'}"]
     if voids:
         out += ["", "VOID - the record is refused:"] + [f"  {v}" for v in voids]
         out += ["", f"arithmetic below the refusal: {call}"]
@@ -281,11 +347,17 @@ def report(control_evidence, model_evidence) -> tuple[list[str], int]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("control", nargs="?", default=CONTROL_CAMPAIGN)
-    ap.add_argument("model", nargs="?", default=MODEL_CAMPAIGN)
+    ap.add_argument("--criterion", choices=sorted(ARMS), default="supplied",
+                    help="which pre-committed arm to bind (default supplied, "
+                         "the 2026-09-02 read; withheld is the memory arm)")
+    ap.add_argument("control", nargs="?")
+    ap.add_argument("model", nargs="?")
     args = ap.parse_args(argv)
+    arm = ARMS[args.criterion]
+    control_path = Path(args.control or arm["control"])
+    model_path = Path(args.model or arm["model"])
     try:
-        lines, rc = report(load(Path(args.control)), load(Path(args.model)))
+        lines, rc = report(load(control_path), load(model_path), arm)
     except (OSError, ValueError) as exc:
         print(f"refused: {exc}")
         return 3

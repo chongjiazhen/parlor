@@ -11,9 +11,14 @@ from __future__ import annotations
 import unittest
 
 from eval.belfry_night_verdict import (
+    ARMS,
     CHANCE,
+    SUPPLIED_COHERENT,
+    SUPPLIED_PAIRS,
+    _recipe_voids,
     coherence_pairs,
     coherence_read,
+    unaided_call,
     verdict,
 )
 
@@ -96,6 +101,79 @@ class TestRead(unittest.TestCase):
     def test_a_row_without_the_field_is_refused(self):
         with self.assertRaises(ValueError):
             coherence_read([{"index": 0, "decisions": 1, "fallbacks": 0}])
+
+
+class TestCriterionBinding(unittest.TestCase):
+    """Two criteria, one instrument. The supplied-memory record was taken before
+    the withholding flag existed, so its summary has no such key at all; a
+    binding that read the absent key as a mismatch would void a published read
+    for a setting that could not have been on."""
+
+    def _summary(self, **args):
+        base = dict(games=1000, arm="random", seats=9, script="compact",
+                    backend=None, rounds=1, seed=12000, adjudicator="model",
+                    adjudicator_model="qwen36-35b-a3b-iq3",
+                    adjudicator_night=True, adjudicator_steer=False)
+        base.update(args)
+        return {"args": base}
+
+    def _flag_voids(self, arm, summary):
+        voids = _recipe_voids(summary, [], arm["model_args"], "model", arm)
+        return [v for v in voids if "adjudicator_night_no_prior" in v]
+
+    def test_the_supplied_arm_reads_a_record_without_the_flag_key(self):
+        self.assertEqual(self._flag_voids(ARMS["supplied"], self._summary()), [])
+
+    def test_the_supplied_arm_refuses_a_record_that_withheld_prior(self):
+        voids = self._flag_voids(ARMS["supplied"],
+                                 self._summary(adjudicator_night_no_prior=True))
+        self.assertEqual(len(voids), 1)
+
+    def test_the_withheld_arm_refuses_prior_supplied_or_unstated(self):
+        arm = ARMS["withheld"]
+        for summary in (self._summary(seed=13000),
+                        self._summary(seed=13000, adjudicator_night_no_prior=False)):
+            self.assertEqual(len(self._flag_voids(arm, summary)), 1)
+        self.assertEqual(self._flag_voids(
+            arm, self._summary(seed=13000, adjudicator_night_no_prior=True)), [])
+
+    def test_the_withheld_arm_binds_its_own_seeds_and_paths(self):
+        arm = ARMS["withheld"]
+        self.assertEqual((arm["first_seed"], arm["last_seed"]), (13000, 13999))
+        self.assertEqual(arm["model_args"]["seed"], 13000)
+        self.assertEqual(arm["control_args"]["seed"], 13000)
+        for path in (arm["control"], arm["model"]):
+            self.assertIn("noprior", path)
+        self.assertNotEqual(arm["doc"], ARMS["supplied"]["doc"])
+
+    def test_the_supplied_arm_is_the_published_one(self):
+        arm = ARMS["supplied"]
+        self.assertEqual((arm["first_seed"], arm["last_seed"]), (12000, 12999))
+        self.assertEqual(arm["doc"], "docs/belfry-night-coherence-criterion.md")
+
+
+class TestUnaidedCall(unittest.TestCase):
+    """The withheld arm's second, pre-committed line: is it below the read that
+    had `prior` in view? Graded on interval separation against the published
+    152/163, never on a point estimate."""
+
+    def _read(self, coherent, total):
+        return coherence_read([game([told(3, 1, (2, 4), 1, False),
+                                     told(3, 2, (2, 4), 1 if i < coherent else 0,
+                                          False)], i) for i in range(total)])
+
+    def test_the_comparison_is_the_published_read(self):
+        self.assertEqual((SUPPLIED_COHERENT, SUPPLIED_PAIRS), (152, 163))
+
+    def test_well_below_the_supplied_interval_needs_memory(self):
+        self.assertEqual(unaided_call(self._read(100, 160)), "NEEDS MEMORY")
+
+    def test_overlapping_the_supplied_interval_holds_unaided(self):
+        self.assertEqual(unaided_call(self._read(150, 160)), "HOLDS UNAIDED")
+
+    def test_no_pairs_is_no_call(self):
+        self.assertIsNone(unaided_call(coherence_read(
+            [game([told(3, 1, (2, 4), 2, True)])])))
 
 
 class TestVerdict(unittest.TestCase):

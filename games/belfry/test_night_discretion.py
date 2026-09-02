@@ -129,6 +129,44 @@ class TestModelAdjudicatorNight(unittest.TestCase):
         self.assertTrue(adj.events[-1].fallback)
 
 
+
+class TestWithheldPrior(unittest.TestCase):
+    """The memory arm: the same ask with `prior` withheld and nothing else moved.
+
+    The referee still records every telling and still builds the prior list; the
+    adjudicator drops it at the door. A test that stubbed the referee's board
+    would test the stub."""
+
+    BOARD = {"seat": 1, "night": 2, "neighbours": [0, 2], "true_count": 2,
+             "prior": [{"night": 1, "neighbours": [0, 2], "count": 1,
+                        "truthful": False}]}
+
+    def test_withholding_prior_strips_only_prior(self):
+        backend = RecordingBackend(choice="1")
+        adj = ModelAdjudicator(backend, random.Random(1), night=True,
+                               night_prior=False, ask_seed=7)
+        got = adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD))
+        self.assertEqual(got, 1)
+        ask = json.loads(backend.contexts[0])
+        self.assertNotIn("prior", ask["board"])
+        self.assertEqual(ask["board"], {k: v for k, v in self.BOARD.items()
+                                        if k != "prior"})
+        self.assertEqual(ask["rule"], GAUGE_COHERENCE_RULE)
+        self.assertEqual(sorted(ask["options"]), ["0", "1"])
+
+    def test_the_default_still_sends_prior(self):
+        backend = RecordingBackend(choice="1")
+        adj = ModelAdjudicator(backend, random.Random(1), night=True, ask_seed=7)
+        adj.gauge_false_count([0, 1], random.Random(0), dict(self.BOARD))
+        self.assertEqual(json.loads(backend.contexts[0])["board"]["prior"],
+                         self.BOARD["prior"])
+
+    def test_withholding_prior_without_night_is_refused(self):
+        with self.assertRaises(ValueError):
+            ModelAdjudicator(RecordingBackend(), random.Random(1),
+                             night_prior=False, ask_seed=7)
+
+
 def _first_poisoned_gauge_seed(seats: int, model: bool, limit: int = 400):
     """A seed whose game tells a switched-off gauge something. Found by playing,
     because rigging a live referee's poison from outside would test the rig."""
