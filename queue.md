@@ -152,6 +152,12 @@ all seven findings landed. Its rows are gone; git holds the record.
       branch `slice/changeling-source-rules` and MUST NOT merge while the skin
       pair, S22 and the gate #2 arm are unread: their criteria froze under the
       current rules. Merging re-baselines the rung; the RULES.md notes flip then.
+      **Review finding, read from the code:** every arm's night is chosen by
+      `random_chooser` (`games/changeling/player.py:13`: a model-chosen night is a variant axis),
+      so on this branch `pass` is drawn at random at a fixed rate and the refused
+      `deceived` pass is unreachable. **Merge condition:** the control never
+      declines - `random_chooser` skips `PASS`, and a decline exists only once a
+      model chooses its night. The lone-wolf peek's SLOT may stay random.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
