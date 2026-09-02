@@ -336,6 +336,38 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
       carries a live recommendation against building what it had just built.
 
+- [ ] **Two plans for "what rung comes next", and only one is visible to a cold
+      session.** The tracked call is `docs/open-arms.md:578` and `queue.md:80`,
+      2026-08-27: gates #2 and #3 measure a MODEL and decay, so the next spike is
+      the adjudicator against 3-4 discretion-heavy characters. That was TAKEN as
+      belfry's night arm and both reads landed 2026-09-02. The off-repo sweep then
+      built a different ladder over 2026-08-27/28 - DURF, then a clue-economy rung
+      whose RULES are about information entitlement, then Cairn, then a
+      Paranoia-shaped rung - and ranked it against licence tiers the tracked tree
+      never sees. Neither supersedes the other and no tracked line says which is
+      live, so a cold session picking up "what next" reads the 08-27 call alone.
+      **Done when ONE tracked statement says what the next rung is and why**, with
+      the superseded plan kept and dated. Same class as the row above: a position
+      that outlived the work around it. Argument, not code; costs no card. The
+      off-repo half stays off-repo - `CLAUDE.local.md` has the path, and naming it
+      here is the signpost the hygiene invariant forbids.
+- [ ] **Belfry is the only rung that does not name the game it is modelled on,
+      and nothing says why.** `games/cabal/RULES.md:14`, `games/changeling/RULES.md:10`
+      and `games/quorum/RULES.md:11` each open "Modelled on <title>. Nominative
+      reference only", the form the tree-describes-parlor invariant licenses.
+      `games/belfry/RULES.md:11` instead describes a "town-square family" - a
+      circumlocution that identifies the same game to any reader who knows it,
+      while `docs/` names that game outright in five places. So the caution buys
+      nothing and the asymmetry reads as an unstated policy. Decide it either way
+      and write it down: name it like the other three, or state the rule that
+      exempts it. **Checked 2026-09-02 and NOT a finding: no brand reaches a
+      canonical key.** The one code hit, `games/changeling/roles.py:331` mapping
+      `pack` to a folklore word, is a SKIN value on the werewolf face and the key
+      stays functional. That line is the one worth guarding - a brand migrating
+      from prose into a module, class, role or card key - and unlike the gate's
+      other patterns these names are already public in the tree, so a literal
+      check would ship nothing a clone does not already hold.
+
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`
