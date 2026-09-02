@@ -103,6 +103,26 @@ class TestPairing(unittest.TestCase):
         with self.assertRaises(SystemExit):
             read_pair(solver, control)
 
+    def test_the_solver_good_arm_is_read_and_named_as_a_good_side(self):
+        """solver-good seats the solver on good only, so its outcome line IS a
+        good side against a control - the disclaimer S26 printed must not be
+        copied onto it, and the arm name must reach the render."""
+        solver = {"args": {"arm": "solver-good", "seed": 5}, "games": []}
+        control = {"args": {"arm": "random", "seed": 5}, "games": []}
+        r = read_pair(solver, control)
+        self.assertEqual(r["arm"], "solver-good")
+        text = render(r)
+        self.assertIn("solver-good", text)
+        self.assertNotIn("sits on every seat", text)
+        self.assertIn("GOOD seats only", text)
+
+    def test_the_all_seat_solver_keeps_its_disclaimer(self):
+        solver = {"args": {"arm": "solver", "seed": 5}, "games": []}
+        control = {"args": {"arm": "random", "seed": 5}, "games": []}
+        r = read_pair(solver, control)
+        self.assertEqual(r["arm"], "solver")
+        self.assertIn("sits on every seat", render(r))
+
 
 if __name__ == "__main__":
     unittest.main()

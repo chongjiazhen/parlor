@@ -228,6 +228,11 @@ LIVE_TEAMS: dict[str, set] = {
     "llm-good": {Team.GOOD},
     "llm-evil": {Team.EVIL},
     "solver": set(),
+    #: The control S26 pointed at: the solver on GOOD seats, evil on the random
+    #: policy. S26 seated it everywhere and evil voted mechanically against its
+    #: own team, so no tainted team ever passed - an artefact of the seating,
+    #: not a reading of the solver. Still no backend: neither side calls a model.
+    "solver-good": set(),
 }
 
 
@@ -245,6 +250,10 @@ def build_policies(ref: CabalReferee, args, rng: random.Random,
     fallback = RandomPolicy(rng=rng)
     if args.arm == "solver":
         return {s: SolverPolicy(fallback=fallback) for s in ref.assignment}
+    if args.arm == "solver-good":
+        return {s: (SolverPolicy(fallback=fallback)
+                    if ref.assignment[s].team is Team.GOOD else fallback)
+                for s in ref.assignment}
     live = LIVE_TEAMS[args.arm] if args.backend else set()
     if not live:
         return {s: fallback for s in ref.assignment}
@@ -742,8 +751,8 @@ def main() -> None:
     args = ap.parse_args()
     RUN_STATE.requested = args.games
 
-    if args.arm == "solver" and args.backend:
-        sys.exit("--arm solver does not use a backend (run without --backend)")
+    if args.arm in ("solver", "solver-good") and args.backend:
+        sys.exit(f"--arm {args.arm} does not use a backend (run without --backend)")
 
     if LIVE_TEAMS[args.arm] and not args.backend:
         sys.exit(f"--arm {args.arm} needs --backend "

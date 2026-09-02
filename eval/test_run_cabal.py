@@ -69,8 +69,19 @@ class TestArms(unittest.TestCase):
         self.assertEqual({s for s, pol in p.items() if isinstance(pol, SolverPolicy)},
                          set(self.ref.assignment))
 
+    def test_solver_good_seats_the_solver_on_good_seats_only(self):
+        """The arm S26 pointed at: evil plays the random control, so the
+        entitlement-votes-against-itself artefact cannot arise."""
+        p = build_policies(self.ref, make_args(arm="solver-good", backend=None), self.rng)
+        solver_seats = {s for s, pol in p.items() if isinstance(pol, SolverPolicy)}
+        self.assertEqual(solver_seats, self.seats_of(Team.GOOD))
+        self.assertTrue(solver_seats)
+        self.assertTrue(all(isinstance(p[s], RandomPolicy)
+                            for s in self.seats_of(Team.EVIL)))
+
     def test_every_arm_is_wired(self):
-        self.assertEqual(set(LIVE_TEAMS), {"random", "llm", "llm-good", "llm-evil", "solver"})
+        self.assertEqual(set(LIVE_TEAMS), {"random", "llm", "llm-good", "llm-evil",
+                                           "solver", "solver-good"})
 
 
 class TestGameSeedReachesTheModel(unittest.TestCase):

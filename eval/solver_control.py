@@ -40,6 +40,17 @@ from core.stats import wilson
 
 REFUSED = 3
 
+#: The two solver seatings this instrument reads against random, and what each
+#: outcome line is allowed to be called. ``solver`` sits on every seat, evil
+#: included, so its win rate is a whole table of one policy and not a side
+#: against a control; ``solver-good`` seats the solver on good only, evil on the
+#: random policy, and IS a good side against a control (S26's queue row).
+SOLVER_ARMS = {
+    "solver": "NOT a gate: the solver sits on every seat",
+    "solver-good": "the solver on GOOD seats only, evil on random - a good side "
+                   "against a control, on the same deals",
+}
+
 
 def load(path: str) -> dict:
     with open(path, encoding="utf-8") as fh:
@@ -90,9 +101,10 @@ def read_pair(solver: dict, control: dict) -> dict:
     """Everything the report prints, as numbers. Both arguments are the ``.json``
     summaries ``run_cabal`` writes (``args`` + ``games``)."""
     s_args, r_args = solver["args"], control["args"]
-    if s_args.get("arm") != "solver" or r_args.get("arm") != "random":
+    if s_args.get("arm") not in SOLVER_ARMS or r_args.get("arm") != "random":
         raise SystemExit(f"REFUSED: arms are {s_args.get('arm')!r} and "
-                         f"{r_args.get('arm')!r}; this reads solver against random")
+                         f"{r_args.get('arm')!r}; this reads a solver arm "
+                         f"({', '.join(sorted(SOLVER_ARMS))}) against random")
     if s_args.get("seed") is None or s_args.get("seed") != r_args.get("seed"):
         raise SystemExit(f"REFUSED: seeds differ or are unpinned "
                          f"({s_args.get('seed')} vs {r_args.get('seed')}) - "
@@ -102,7 +114,8 @@ def read_pair(solver: dict, control: dict) -> dict:
         raise SystemExit(f"REFUSED: {len(s_games)} solver games against "
                          f"{len(r_games)} random games")
 
-    out: dict = {"seed": s_args["seed"], "games": len(s_games)}
+    out: dict = {"seed": s_args["seed"], "games": len(s_games),
+                 "arm": s_args["arm"]}
 
     # 1. the split, and the fallback rate beside it, per arm
     for name, games in (("solver", s_games), ("random", r_games)):
@@ -196,9 +209,10 @@ def read_pair(solver: dict, control: dict) -> dict:
 
 def render(r: dict) -> str:
     s, c, st = r["solver"], r["random"], r["stratum"]
+    arm = r.get("arm", "solver")
     lines = [
-        f"solver control read - seed {r['seed']}, {r['games']} games per arm, "
-        f"backend none",
+        f"solver control read - arm {arm} vs random, seed {r['seed']}, "
+        f"{r['games']} games per arm, backend none",
         "",
         "split (solver arm)",
         f"  {s['mechanical']}/{s['decisions']} decisions proved mechanically "
@@ -214,7 +228,7 @@ def render(r: dict) -> str:
         f"= {c['fallback_rate']:.2%}" if c["fallback_rate"] is not None else
         "  fallback, random arm   no decisions",
         "",
-        "outcome on the same seeds (NOT a gate: the solver sits on every seat)",
+        f"outcome on the same seeds ({SOLVER_ARMS[arm]})",
         f"  good wins, solver arm  {_ci(s['good_wins'], s['played'])}",
         f"  good wins, random arm  {_ci(c['good_wins'], c['played'])}",
         f"  evil by path, solver   {s['evil_by_path']}",

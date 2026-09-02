@@ -160,7 +160,22 @@ most of it was. The split is a record field now (`solver_mechanical` /
 | good wins, same seeds | solver **69/400 = 17.25% [13.86%, 21.26%]** vs random 136/400 = 34.00% [29.53%, 38.77%] | intervals disjoint, and NOT a good side vs a control - the solver sat on the evil seats too |
 | how evil won | solver: 295 `five_rejects`, 36 hunt hits, **0 missions failed, 0 fail cards** over 544 missions; random: 189 missions, 75 hunts, 0 rejects | seer + both evils reject every tainted team, so none passes and no mission fails; evil wins on the clock or at the random hunt (34.3%, chance 1/3) |
 | paired stratum, proved votes before divergence | 1274 paired / 8811 after; random on the same votes: clean 173/240 = 72.08% [66.09%, 77.38%], tainted 697/1034 = 67.41% [64.49%, 70.20%]; solver 240/240 and 0/1034 by definition | both random intervals hold `approve_rate = 0.7`: the pairing selects nothing, and the paired stratum is the first vote round of each game |
-| the tell warning | does NOT reach the hunt (deferred to random, at chance); DOES reach the outcome column (entitlement voting against itself, evil seats included) and the share itself (a table that never plays a fail card starves the mission constraint) | a solver-good / random-evil arm is where both artifacts stop; it does not exist |
+| the tell warning | does NOT reach the hunt (deferred to random, at chance); DOES reach the outcome column (entitlement voting against itself, evil seats included) and the share itself (a table that never plays a fail card starves the mission constraint) | a solver-good / random-evil arm is where both artifacts stop; READ below, 2026-09-02 |
+
+**2026-09-02, the solver on GOOD seats only - the control S26 pointed at** -
+`transcripts/cabal-solver-good-control.md`, `eval/runs/solver-control.cmd
+solver-good-control 400 21000 solver-good`, `py -3 -m eval.solver_control`.
+Backend `none`, no model, no GPU. `--arm solver-good` (solver on the three good
+seats, evil on the random policy) against `--arm random` on the same 400 seeds
+(21000..21399, unspent). Fallback 0/39468 and 0/25778. **Still a control read of
+an instrument, not a gate result.**
+
+| what | result | what it decides |
+|---|---|---|
+| **the S26 artefact** | proved roles are seer 3266, watcher 1788, loyalist 1306 and no evil role; fail cards 524 over 1360 missions (S26: 0 over 544); 43 evil wins by failed missions | the entitlement-against-itself artefact stops with the seating, as the S26 row said it would |
+| good wins, same seeds | solver-good **155/400 = 38.75% [34.10%, 43.61%]** vs random 143/400 = 35.75% [31.21%, 40.56%] | intervals overlap: a good side that votes its entitled proof perfectly gains about three points over voting at 0.7 approve, at five seats and one round |
+| how evil won | solver-good: **144 `five_rejects`**, 58 hunt hits, 43 missions; random: 0, 77, 180 | the second artefact is the RULE's: three proving good seats reject every tainted proposal, two evils approve, 2/5 fails, and a run of tainted proposers hands evil the clock. Perfect good voting converts certainty into five-reject losses; this caps what "good votes well" is worth on this rung before any model is seated |
+| paired stratum | 473 paired / 5887 after; random on the same votes: clean 68/88 = 77.27% [67.49%, 84.78%], tainted 283/385 = 73.51% [68.88%, 77.67%] | both hold 0.7 approve; the pairing selects nothing, as in S26 |
 
 
 ## belfry's control arm, RE-RUN 2026-08-29 - and the instrument check it now PASSES

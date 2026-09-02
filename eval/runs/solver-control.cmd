@@ -3,9 +3,13 @@ setlocal
 rem The S26 solver control pair - `--arm solver` and `--arm random` on the SAME
 rem seeds, then the paired read. CPU only: neither arm calls a model.
 rem
-rem Usage:  eval\runs\solver-control.cmd [tag] [games] [seed]
+rem Usage:  eval\runs\solver-control.cmd [tag] [games] [seed] [arm]
 rem
 rem   eval\runs\solver-control.cmd solver-control 400 20000
+rem   eval\runs\solver-control.cmd solver-good-control 400 21000 solver-good
+rem
+rem The fourth argument is the solver seating: `solver` (every seat, S26) or
+rem `solver-good` (good seats only, evil on random - the control S26 pointed at).
 rem
 rem WHY A PAIR SCRIPT. The solver differs from the random control only on the
 rem votes it can PROVE from a seat's entitled evidence; every other decision is
@@ -32,6 +36,8 @@ set "GAMES=%~2"
 if "%GAMES%"=="" set "GAMES=400"
 set "SEED=%~3"
 if "%SEED%"=="" set "SEED=20000"
+set "ARM=%~4"
+if "%ARM%"=="" set "ARM=solver"
 
 set "OUTDIR=eval\records"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
@@ -39,7 +45,7 @@ set "LOG=%OUTDIR%\%TAG%.log"
 
 echo [pair] started %DATE% %TIME% - %GAMES% games/arm, seed %SEED%>>"%LOG%"
 
-for %%A in (solver random) do (
+for %%A in (%ARM% random) do (
   echo [pair] arm %%A - log %OUTDIR%\%TAG%-%%A.log>>"%LOG%"
   rem One log per arm, so the marker check below reads THIS arm's marker and
   rem cannot pass on the one the previous arm (or a previous run) wrote.
@@ -55,7 +61,7 @@ for %%A in (solver random) do (
 )
 
 echo [pair] both arms down %DATE% %TIME% - reading the pair>>"%LOG%"
-python -m eval.solver_control "%OUTDIR%\%TAG%-solver.json" "%OUTDIR%\%TAG%-random.json" ^
+python -m eval.solver_control "%OUTDIR%\%TAG%-%ARM%.json" "%OUTDIR%\%TAG%-random.json" ^
   > "%OUTDIR%\%TAG%.read" 2>>"%LOG%"
 if errorlevel 1 (
   echo [pair] the read REFUSED the pair - see %OUTDIR%\%TAG%.read and this log.>>"%LOG%"

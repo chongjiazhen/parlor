@@ -154,10 +154,6 @@ all seven findings landed. Its rows are gone; git holds the record.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that already
       exist. Also: `rate_ok`'s 5% CI-floor bar is pre-declared nowhere.
-- [ ] **Group-sequential design instead of a pre-committed fixed N.** Alpha
-      spending, not "don't look". **It must be designed BEFORE the next
-      campaign**, never retrofitted to S6's records - that would be the peeking
-      it exists to prevent.
 Measured prompt arms - each is same seeds, one variable, reported beside both
 fallback rates, and landed between campaigns rather than into one:
 
@@ -250,14 +246,6 @@ Spikes and unbuilt arms:
       derives from the game seed - a wall-clock actor voids the seed invariant.
       One new gate #1 failure and it is silent: audit a render against the
       entitlement snapshot taken when it was BUILT.
-- [ ] **The solver on GOOD seats only, random evil - the control S26 points at
-      and does not exist.** S26 read `--arm solver` with the solver on every
-      seat: 30.95% of votes proved, good wins 17.25% against random's 34.00%,
-      because evil seats vote mechanically AGAINST their own team and every
-      tainted team is rejected, so no mission ever fails. `LIVE_TEAMS` and
-      `build_policies` seat the solver everywhere; the arm that seats it on good
-      alone is where that artefact stops. `docs/measurements.md` §2026-09-02
-      (S26), `transcripts/cabal-solver-control.md`. CPU only, seeds fresh.
 - [ ] **Seat the heuristic against the MODEL** - a table with heuristic and LLM
       seats, the arm that does not exist. Read the artifact warning in
       `docs/measurements.md` §Measured first: the all-heuristic arm's 99.5%
