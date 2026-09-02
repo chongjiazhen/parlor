@@ -59,6 +59,22 @@ from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 MEASURED_RANDOM_VILLAGE_WINS = 0.3951
 MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES = 0.3845
 
+#: The deck and vote rule MEASURED_RANDOM_VILLAGE_WINS was measured under
+#: (RULES.md "The chance baseline, MEASURED (2026-08-26) - under the
+#: pre-2026-09-02 vote rule"). Every record this runner produces carries
+#: ``vote_rule="plurality-min2"`` (``games/changeling/player.py``
+#: ``GameRecord.vote_rule`` default, no CLI knob to change it) - re-measured
+#: 2026-09-02, RULES.md's own table shows the pack's take against random
+#: villagers MOVES between the two rules (60.49% -> 64.58%), so the two never
+#: match under this code and the reference is not printable against a live
+#: run until a paired ``plurality-min2`` figure exists. Both deck criteria
+#: (`docs/changeling-kindred-criterion.md`, `docs/changeling-waker-criterion.md`)
+#: already say this figure is not to be read against a run; this is the print
+#: side of that same rule.
+REFERENCE_SEATS = 5
+REFERENCE_VOTE_RULE = "plurality"
+CURRENT_VOTE_RULE = GameRecord.__dataclass_fields__["vote_rule"].default
+
 ARMS = ("random", "llm", "llm-village", "llm-pack")
 
 
@@ -248,6 +264,25 @@ def _band(ci) -> str:
     return f"  95% CI [{ci[0]:.2%}, {ci[1]:.2%}]" if ci else "  (CI unavailable)"
 
 
+def _pack_reference_line(g2: dict, seats: int) -> str:
+    """The pack-take reference prints only for the deck and vote rule it was
+    measured under - both deck criteria say it is not to be read otherwise.
+
+    A print, not a score (`score()` stays untouched): ``reference_random_
+    village_wins`` still ships in the scored dict unconditionally, and this
+    is the only place that decides whether the derived number reaches the
+    report."""
+    if seats == REFERENCE_SEATS and CURRENT_VOTE_RULE == REFERENCE_VOTE_RULE:
+        return ("random reference   pack takes "
+                f"{1 - g2['reference_random_village_wins']:.2%} against "
+                "villagers voting at random (n=4000, RULES.md)")
+    if seats == REFERENCE_SEATS:
+        return ("random reference   unmeasured under the current vote rule "
+                f"({CURRENT_VOTE_RULE}) - the recorded reference was played "
+                f"under {REFERENCE_VOTE_RULE} and does not apply")
+    return "random reference   no pack reference measured for this deck"
+
+
 def report(s: dict, args, elapsed: float) -> str:
     g2, g3, b, i = (s["gate2_deception"], s["gate3_deduction"], s["belief"],
                     s["integrity"])
@@ -264,9 +299,7 @@ def report(s: dict, args, elapsed: float) -> str:
     out += ["gate #2  deception",
             f"  pack win rate      {g2['pack_win_rate']:.2%}"
             f"{_band(g2['ci95'])}",
-            f"  random reference   pack takes "
-            f"{1 - g2['reference_random_village_wins']:.2%} against villagers "
-            f"voting at random (n=4000, RULES.md)", ""]
+            f"  {_pack_reference_line(g2, s.get('seats', 5))}", ""]
 
     out += ["gate #3  deduction",
             f"  village win rate   {g3['village_win_rate']:.2%}"
