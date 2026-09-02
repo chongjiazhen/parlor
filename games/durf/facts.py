@@ -167,6 +167,14 @@ def check_facts(ledger: FactLedger) -> None:
       as a run-time leak attributed to a model that obeyed the rules. The remedy
       is the same rename, and it belongs on the TERM - a fact's text is what the
       party is told, and moving it moves a model-facing byte.
+    - **Every fact's term appears in its OWN text.** The mirror image of the
+      cross-text check, and the one the pairwise check cannot see either: a
+      fact's own statement is what ``kernel.call_reveal`` publishes when it is
+      legally declared, so a term missing from its own text means declaring the
+      fact writes prose that carries no sentinel at all - not another fact's,
+      not its own. The fact then goes undeclared-and-unaudited by construction:
+      no render check can ever see it "go" through its own reveal, because there
+      is nothing in the text for a sentinel to catch.
     """
     seen: dict[str, FactId] = {}
     for fid, fact in ledger.facts.items():
@@ -185,6 +193,15 @@ def check_facts(ledger: FactLedger) -> None:
                         f"term owned by {owner!r}. Rename one - a shared sentinel "
                         f"makes a legal render read as a leak.")
             seen[low] = fid
+    for fid, fact in ledger.facts.items():
+        for term in fact.terms:
+            low = term.strip().lower()
+            if low not in fact.text.lower():
+                raise FactError(
+                    f"the term {term!r} ({fid!r}) does not appear in its own "
+                    f"text. Declaring {fid!r} publishes that text verbatim, so a "
+                    f"term missing from it means the fact carries no sentinel at "
+                    f"all when revealed. Fix the term or the text so they match.")
     for fid, fact in ledger.facts.items():
         for term in fact.terms:
             low = term.strip().lower()
