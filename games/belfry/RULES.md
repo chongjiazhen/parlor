@@ -263,6 +263,17 @@ the RULES rather than a prediction about models, which is why it is recorded her
 and not in `docs/measurements.md`: no model has played this rung yet, and the
 number to put there is the first one that does.
 
+**Re-measured 2026-09-02 at 5 seats, after the evil briefings moved to seven
+seats and up** (the split above was played with a 5-seat evil side briefed). Same
+recipe, `--rounds 1`, seeds 0-39, both scripts: compact good 17 / evil 23, full
+good 17 / evil 23 - **good 42.50%** [32.26%, 53.43%] over 80 games, no winner 0.
+Tightened on seeds 1000-1999, 1000 games per script: compact good 472 / evil 528,
+full good 484 / evil 516 - **good 47.80%** [45.62%, 49.99%] / evil 52.20% / no
+winner 0.00% over 2000 games, 0 fallback by construction. A 5-seat random control
+does not reach the day bound, so the "no winner" share above is a property of the
+larger tables. **A 5-seat model run is read against this line**, not the pooled
+split above, which mixes sizes the briefing rule now treats differently.
+
 ## What is public, what is secret
 
 **Public** - everything said, every nomination, every vote count and the seats

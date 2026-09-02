@@ -332,6 +332,14 @@ rate 0% by construction because no model is called:
 | enactor handed a matching pair | **51.1236%** [49.16%, 53.08%] |
 | drift, realized minus exact | **+0.4827%** |
 
+**Re-measured 2026-09-02 under the corrected slot-3 peek and the veto** (same
+recipe: 400 games, seed 0, `--rounds 0`, no model, the control proposing and
+agreeing a veto at `veto_rate` 0.3), 2486 events: proposer forced **27.5141%**
+[25.79%, 29.30%] (620 toward the minority, 64 toward the majority), enactor handed
+a matching pair **50.3620%** [48.40%, 52.33%], drift **+0.3082%**, within the 3%
+tolerance. The deck arithmetic did not move, as the correction note below says it
+would not; the six fewer events are the vetoes that discarded a draw.
+
 **The exact figure is the instrument control for the sweep, and it passed.** Cards
 leave play when they are enacted and the pile is rebuilt from the discards, so the
 composition drifts as a game runs and the realized rate need not equal the
@@ -342,7 +350,10 @@ arithmetic. **So the fresh-deck figure is a fair denominator for a whole game**,
 and a later run may quote it rather than carrying its own.
 
 **The random control wins for the minority about four games in five** - majority
-82/400, **20.50%**. That is the chance baseline any later win rate is read against
+82/400, **20.50%** [16.83%, 24.73%] before the 2026-09-02 correction, and
+**23.00%** [19.14%, 27.37%], 92/400, re-measured under peek and veto the same day
+on the same seeds - the two intervals overlap and the veto is the only lever that
+could have moved it. That is the chance baseline any later win rate is read against
 and is not a claim about either side; it is the deck showing through, exactly as
 cabal's measured "evil wins ~65% with no deception at all" is. It also says
 something about a gate this rung has not yet written: a minority win rate is
@@ -403,8 +414,9 @@ identity rather than a card.
 policy peek on the third fascist policy and has no investigation, and which
 unlocks the veto at five. Before this the third writ fired `inspect` and no veto
 existed. The random-control figures in Â§What the deck does were measured before
-both fixes; the deck arithmetic they check does not move, but a re-run under the
-corrected rules is the honest baseline for anything that reads them.
+both fixes; the deck arithmetic they check does not move, and the re-run under the
+corrected rules landed the same day beside them - that is the baseline for
+anything that reads them.
 
 **A removed seat stops acting and its role is not revealed.** Revealing it would
 hand the table a free identity read and collapse the deduction the rung is for. The

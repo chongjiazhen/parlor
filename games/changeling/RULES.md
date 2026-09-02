@@ -712,6 +712,31 @@ tally accuses nobody, so the tie share, the village share and the 2.7% unwinnabl
 residual all move, and the first `--arm random` sweep on the new rule re-baselines
 this table rather than extends it.
 
+**Re-measured 2026-09-02 under `plurality-min2`** - `--arm random`, 5 seats, 1
+round, n=4000, `--seed 0` (game i deals with seed i), fallback 0/40000 by
+construction, `vote_rule` recorded on every game:
+
+| | under `plurality` (above) | under `plurality-min2` |
+|---|---|---|
+| **village wins, scored denominator** | 39.51% | **35.42%** [33.93%, 36.93%], 1377/3888 |
+| village wins, all games | 38.45% | 34.60% (1384/4000; NOT comparable to a run figure) |
+| villager accuracy (per vote) | 35.95% | **35.84%** [34.99%, 36.71%], pooled per vote |
+| multi-seat accusations (ties) | 32.4% | **28.18%** [26.80%, 29.59%] |
+| nobody accused (flat tally) | 0 by construction | **4.25%** [3.67%, 4.92%], 170 games |
+| dawn wolves: 0 / 1 / 2 seats | 107 / 1908 / 1985 | 112 / 1908 / 1980 |
+| village wins by dawn-wolf count | 0.0% / 28.2% / 50.6% | 6.3% / 23.85% / 46.57% |
+
+The pack now takes **64.58%** [63.07%, 66.07%] against villagers voting at random,
+up from 60.49%: the abstain rule removes the draws a flat tally used to hand the
+village, and both the tie share and the village share fall with it. Per-vote
+accuracy does not move, which is the arithmetic - a random vote hits a wolf at the
+same rate whatever the tally does with it afterwards. The 0-wolf column is no
+longer zero because a flat tally with no wolf seated is the source's village win
+(nobody dies, no wolf), 7 of 112 games here; the scorer still excludes those 112
+from the denominator, which is why the two "all games" figures differ from the
+scored ones by different amounts. **Every S2 / waker-deck read above stands as a
+read under the old rule; a new run is compared to THIS column.**
+
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set
 is a closed derivation. This game's accusation baseline is not derivable that way -
 it depends on the tie rule, on how many seats hold `pack` at dawn, and on the vote

@@ -12,8 +12,9 @@ nobody; records carry `vote_rule`), quorum's slot-3 power (peek, not inspect) an
 veto, belfry's evil briefings (seven seats and up only) and mimic cover, and the
 durf adjudicator digest. **Every number below dated before 2026-09-02 on those
 rungs was played under the earlier rules** and is comparable only to a run that
-pins them; each rung's `RULES.md` carries the dated note and the queue carries
-the controls owed.
+pins them; each rung's `RULES.md` carries the dated note and, since the same
+day, the random control re-measured under the corrected rule beside the old figure
+(changeling §The chance baseline, quorum §What the deck does, belfry §Cost).
 
 ## Measured, dated - numbers before opinions
 

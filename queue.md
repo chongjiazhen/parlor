@@ -140,16 +140,6 @@ all seven findings landed. Its rows are gone; git holds the record.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3.**
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that already
       exist. Also: `rate_ok`'s 5% CI-floor bar is pre-declared nowhere.
-- [ ] **Three controls owed by the 2026-09-02 rules audit.** All eight
-      deviations against the published rulebooks are closed - six fixed, two
-      declared in their `RULES.md` (tables in `.scratch/rules-audit-2026-09-02/`).
-      Every fix moved a recorded number, and each file says so; what is owed is
-      the control that re-baselines it: changeling `--arm random` on
-      `plurality-min2` (the 39.51% table); the quorum deck control under peek and
-      veto (RULES.md §What the deck does); a belfry 5-seat random control without
-      evil briefings (the 49.2/47.5/3.3 split in its RULES.md). No GPU - the
-      control is the random policy. Each lands in its RULES.md beside the old
-      figure, dated.
 - [ ] **Build the two source rules the audit declared instead of fixing.**
       Both are declared house rules today (2026-09-02) and both are to be
       patched to the source. **changeling**: a lone `pack` views one centre card
@@ -250,12 +240,12 @@ of them may be handed to a worker is S12 and `docs/worklane.md`.
 
 Spikes and unbuilt arms:
 
-- [ ] **Spike #2: off-map faction heartbeat - SCOPED 2026-08-27,**
-      `docs/faction-heartbeat.md`. **Not an alternative to the adjudicator spike;
-      the small version of its hardest part.** Ticks are counted and the schedule
-      derives from the game seed - a wall-clock actor voids the seed invariant.
-      One new gate #1 failure and it is silent: audit a render against the
-      entitlement snapshot taken when it was BUILT.
+- [ ] **Spike #2: off-map faction heartbeat - BUILT (S24, `games/heartbeat/`),
+      merged, never seated in a game.** `docs/faction-heartbeat.md`. **Not an
+      alternative to the adjudicator spike; the small version of its hardest
+      part.** Ticks are counted and the schedule derives from the game seed - a
+      wall-clock actor voids the seed invariant. The silent gate #1 failure is
+      audited against the entitlement snapshot taken when a render was BUILT.
 - [ ] **Seat the heuristic against the MODEL** - a table with heuristic and LLM
       seats, the arm that does not exist. Read the artifact warning in
       `docs/measurements.md` §Measured first: the all-heuristic arm's 99.5%
