@@ -616,6 +616,57 @@ banked. The two rule-error counts were re-measured with a tracked instrument the
 same day (`eval/rule_errors.py`) and the four old figures are retired - see §The two
 rule-error counts, and note that the fall those figures asserted is not established.
 
+## Waker-deck read - gate #3 HOLDS on six seats (2026-09-02, post-S14)
+
+**The first post-S14 changeling evidence**, and the first on a deck other than
+`SETUP_5`. `docs/changeling-waker-criterion.md` is the promise; this is the outcome,
+clause by clause. Arithmetic `py -3 -m eval.waker_verdict`, transcript
+`transcripts/changeling-waker1.md`, numbers `docs/measurements.md`. **Nothing here
+is comparable to the S2 read below it** - different deck, different wolf density,
+different bar, and S2 is pre-S14 wording besides.
+
+**The run.** `waker1`, `--arm llm --seats 6 --seed 12000`, 200/200 games,
+`PARLOR DONE rc=0 elapsed=20183s`, `qwen36-35b-a3b-iq3` local. Five games seated no
+pack at dawn, excluded and reported; 195 scored. Fallback 0.31% of 3600, recovered
+6.83%. No void fired.
+
+Clause by clause, including the two that needed care:
+
+- **The statistic held as pre-specified.** Blind villager accuracy on the `none`
+  stratum, S10's told-based rule: **120/262 = 45.80%**.
+- **BOTH floors were required in advance and both cleared.** Wilson 39.87%,
+  game bootstrap 38.87%, against 30.14%. This is the clause S5 could not apply
+  cleanly - it said Wilson where the scorer published a bootstrap - and stating
+  both in advance is what stopped the same recording happening twice.
+- **The own-arm clause came within 0.02 points of firing.** The criterion said "if
+  that arm disagrees with 30.14% by more than a point, the run's own arm is the
+  bar". The paired control read **31.12%** derived: a gap of 0.98% against a 1.00%
+  tolerance. The bar therefore stayed the criterion's. It would not have mattered -
+  both floors sit ~8 points above either candidate - but a clause that nearly fires
+  is worth recording, because next time the coin lands the other way and the reader
+  should already know the tolerance is tight.
+- **Power reproduced at the landed N.** 262 blind votes against a predicted ~272;
+  clears from a true 36% up, not from 35%, exactly as promised.
+- **Gate #2 read, no verdict**, because the criterion declared no bar: pack win rate
+  54.36% [47.35%, 61.20%].
+- **The waker split reads as nothing, and the deck is not thereby refuted.** Seated
+  45.68% over 162 blind votes, centre 46.00% over 100. **The waker seat is not in
+  this denominator**: the gate counts villagers the night told NOTHING, and the
+  waker is told what it holds. So this split was never where the card would show up,
+  and reading it as "the waker changes nothing" would be reading the wrong stratum.
+  What the deck bought is in the criterion's table - a lower chance bar, fewer
+  unwinnable games, and 10.3% `identity`-told-nothing contamination against
+  `SETUP_5`'s 18.7%. **Whether the waker seat itself votes better than the table is
+  the question this deck was built to ask, and it is still unasked.**
+
+**One interim look is disclosed.** At game 50 the blind stratum was inspected to
+check the criterion's power assumption; the gate statistic was printed in the same
+pass. Nothing was acted on and the arm ran its full 200, so the fixed-N analysis
+stands - but this criterion spends no alpha, so the interim figure has no standing
+and is cited nowhere. Recorded rather than omitted, because an undisclosed look is
+exactly what group-sequential design exists to prevent, and the queue carries an
+open row saying that design must be built BEFORE a campaign rather than retrofitted.
+
 ## The chance baseline, MEASURED (2026-08-26)
 
 `cabal` can state its hunt baseline as 1-in-3 because the hunter's legal target set

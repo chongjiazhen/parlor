@@ -305,6 +305,62 @@ games, temperature 0.0 and no `--no-thinking`; this arm ran 100, 0.8 and
 checks its full launch binding and rejects this record with exit 3 rather than
 printing a criterion verdict.
 
+## changeling waker deck - gate #3 HOLDS on six seats, READ 2026-09-02
+
+The first arm on `SETUP_6_WAKER`, and the first changeling evidence after S14
+changed the model-facing self-line. Scored with `py -3 -m eval.waker_verdict`,
+exit 0; rendered evidence `transcripts/changeling-waker1.md`, written by that same
+command with `--transcript` so the artifact cannot disagree with the tool.
+
+**The run.** 200/200 local `qwen36-35b-a3b-iq3` games in 20183 s (5.61 h),
+`--arm llm --seats 6 --seed 12000 --rounds 2 --temperature 0.8 --no-thinking`,
+exactly as `docs/changeling-waker-criterion.md` promised - the verdict's own
+instrument control checks every one of those against the criterion and prints a
+DISAGREES line for any that miss. Recipe `eval/runs/changeling-waker.cmd`, records
+`eval/records/waker1.json(.jsonl)` plus its paired control `waker1-random`. Five
+games seated no pack at dawn and are excluded and reported; **195 scored**.
+Fallback **11/3600 = 0.31%**, worst seat-game 6.67%, none over the 10% bar;
+recovered 246/3600 = 6.83%, under the 25% warn bar. No void fired.
+
+**Gate #3 HOLDS.** Blind villager accuracy - votes by villager seats the night told
+NOTHING, `none` stratum on S10's told-based rule - **120/262 = 45.80%**, Wilson
+floor **39.87%** and game-bootstrap floor **38.87%**, both clearing the
+pre-committed **30.14%**. The criterion required BOTH floors in advance, which is
+the clause S5 could only record after the fact; here it was settled before the
+data and both cleared, so the call turns on neither choice.
+
+**The own-arm clause nearly fired.** The paired random control on the same seeds
+read **31.12%** derived against the criterion's 30.14% - a gap of 0.98% against a
+1.00% tolerance, two hundredths of a point from the control becoming the bar. It
+would not have moved the call: both floors sit ~8 points above either candidate.
+Recorded because a reader should not have to notice it.
+
+**Power reproduced.** 262 blind votes against a predicted ~272; the floor clears
+from a true 36% upward and not from 35%, exactly as written before the run.
+
+**Gate #2 is read and given NO VERDICT**, per the criterion, which declared no bar
+for it: pack win rate 54.36% [47.35%, 61.20%] over 195 scored games.
+
+**The waker split reads as nothing, and that is not a failure of the card.** Waker
+seated 125 games / 162 blind votes / 45.68% [38.20%, 53.36%]; in the centre 70
+games / 100 votes / 46.00% [36.56%, 55.74%]. The stratum is BLIND villagers and the
+waker is not blind - it is told what it holds - so its own vote leaves this
+denominator by construction. The split was pre-registered as an observation with no
+bar and stays one.
+
+**One interim look is disclosed.** At game 50 the blind stratum was inspected to
+check the criterion's power assumption (1.354 blind votes/game against the priced
+1.383); the gate statistic was printed in the same pass. Nothing was acted on, no
+arm stopped early, the statistic was pre-specified and the run went its full 200,
+so the fixed-N analysis stands. But this criterion spends no alpha, so **the
+interim figure has no standing and is not cited anywhere.** Recorded rather than
+omitted: an undisclosed look is the thing group-sequential design exists to
+prevent.
+
+**A dated snapshot of one model on one deck, never a claim about models.** Nothing
+here transfers from `SETUP_5`: wolf density moves 2/5 to 2/6, so the bar was
+re-measured rather than inherited.
+
 ## belfry live2 - the criterion-bound arm, READ 2026-09-01
 
 The first belfry live arm to execute its own criterion. Scored with
