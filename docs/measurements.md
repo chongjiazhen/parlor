@@ -436,6 +436,36 @@ prevent.
 here transfers from `SETUP_5`: wolf density moves 2/5 to 2/6, so the bar was
 re-measured rather than inherited.
 
+## changeling dominated votes - S2 and waker records re-read, 2026-09-02
+
+`py -3 -m eval.changeling_audit <run>.jsonl --reference <random>.jsonl`, no GPU,
+records already on disk. The cabal decision auditor's class for this rung: a vote
+dominated GIVEN WHAT THE SEAT WAS SHOWN, read off the referee's night log, priced
+rather than blamed because the cards move after a seat looks. Two counts, never
+pooled, each beside the same count on a random control where every vote is
+uniform over the other seats. **Not a gate**; a reading of what the model does
+with its own reveal. `--control` refused nothing: both parsers fire on every
+record below.
+
+| record | shown-village: a village seat voted a seat it was shown as village | partner: a pack seat voted its told fellow |
+|---|---|---|
+| S2, q36, 5 seats (`plurality`) | **59/164 = 35.98% [29.03%, 43.56%]**, 2/59 held pack at dawn anyway | 40/150 = 26.67% [20.24%, 34.26%], 31/40 held pack |
+| random, 5 seats, 4000 games (`plurality-min2`) | 834/3327 = 25.07% [23.62%, 26.57%] | 823/3224 = 25.53% [24.05%, 27.06%] |
+| waker1, q36, 6 seats | 32/175 = 18.29% [13.26%, 24.67%] | 40/220 = 18.18% [13.65%, 23.81%], 33/40 held pack |
+| waker1-random, same seeds | 39/175 = 22.29% [16.75%, 29.01%] | 38/220 = 17.27% [12.85%, 22.82%] |
+
+**What it says.** On five seats the model votes a seat it was itself shown as
+village MORE often than a random voter would - the intervals do not overlap - and
+57 of those 59 votes were wasted on a seat that did hold a village card at dawn.
+The examples are mostly the swapper voting its own victim, the seat it KNOWS now
+holds the swapper card; that is the rules-error family RULES.md §The public rules
+text already names, seen from the vote rather than the speech. The pack votes its
+partner at exactly chance on both decks, so the evil side plays no protection
+either. On six seats both counts sit inside their control's interval: 175 and
+220 votes cannot separate them. The vote rule differs between S2 and the 5-seat
+control, and it does not matter to a per-vote count: the chance of naming one
+shown seat is k over n-1 whatever the tally does with it afterwards.
+
 ## belfry live2 - the criterion-bound arm, READ 2026-09-01
 
 The first belfry live arm to execute its own criterion. Scored with

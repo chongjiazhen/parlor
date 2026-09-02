@@ -126,6 +126,9 @@ partly true is worse than none.
 - `docs/gate3a-retired.md` / `docs/gate3b-verdict.md` - cabal's two gate #3
   verdicts, each recomputable (`eval.gate3_arithmetic`, `eval.s6_verdict`). Read
   before restarting any cabal run or quoting either half.
+- `eval/changeling_audit.py` - the cabal decision auditor's class for
+  changeling: votes dominated given what the seat was SHOWN, read off the night
+  log, priced against the dawn card and beside a random control. Not a gate.
 - `eval/durf_rescore.py` - re-audits a stored DURF session against any term set,
   no GPU and no re-run: entitlement is reconstructible from the transcript because
   publishing a fact writes its own text as a referee entry. Prices a sentinel
