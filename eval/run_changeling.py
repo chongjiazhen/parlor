@@ -411,7 +411,8 @@ def main() -> None:
     ap.add_argument("--seats", type=int, default=5, choices=sorted(SETUPS),
                     help="which registered deck to deal - 5 is the shipped "
                          "SETUP_5 every recorded number was played on, 6 is the "
-                         "waker deck. A deck change re-baselines everything.")
+                         "waker deck, 7 is the kindred deck and has never been "
+                         "run. A deck change re-baselines everything.")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()

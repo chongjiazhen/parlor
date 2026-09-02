@@ -229,7 +229,9 @@ must survive every one, and each is decidable without play.
    deduction, so a plant implying a ninth card, a third `pack`, or a card the deck
    does not hold is refuted before anyone speaks.
 2. **The deal constraint.** `require_seated_pack` is public, so a plant may not
-   imply a deal that seats no `pack`.
+   imply a deal that seats no `pack`. On a deck carrying `require_seated_kin` there
+   is a second one, equally public and equally countable: a plant may not imply a
+   board with exactly one `kindred` seated.
 3. **Night order.** Public, and it does real work - a reveal's step position
    constrains what could have produced it. The `waker` derivation above is the
    worked example: a single self-reveal with no partner line is uniquely `waker`,
@@ -291,7 +293,9 @@ always owes.
 ## Expansion cards - defined, resolved, dealt by nothing
 
 Two cards exist outside `SETUP_5`, on the same footing as `cabal`'s `lurker` and
-`stray`: fully implemented and skinned, seated by no shipped setup, because every
+`stray`: fully implemented and skinned, and each now seated by one registered deck
+of its own rather than by none - `waker` by `SETUP_6_WAKER`, which has run, and
+`kindred` by `SETUP_7_KIN`, which has not. Neither is in `SETUP_5`, because every
 recorded changeling number was played on the eight-card deck above and changing it
 re-baselines all of them. Both are here for what they add to the MODEL, not for
 variety.
@@ -323,13 +327,24 @@ variety.
   single self-reveal with no partner line is `waker`, uniquely. The same reasoning
   the `swapper` already needs, one step shorter.
 
-### The decks that would seat them - designed 2026-08-27; deck A REGISTERED 2026-09-02
+### The decks that would seat them - designed 2026-08-27; BOTH REGISTERED 2026-09-02
 
-**Deck A is no longer paper.** `SETUP_6_WAKER` is registered in `roles.py`,
+**Neither deck is paper any more.** `SETUP_6_WAKER` is registered in `roles.py`,
 `eval.run_changeling --seats 6` deals it, `eval.strata --deck SETUP_6_WAKER` prices
 it, and its campaign is frozen in `docs/changeling-waker-criterion.md` - which is
-the binding statement of its bar and flags, not this section. Deck B (`kindred`)
-is still paper and still needs `require_seated_kin`.
+the binding statement of its bar and flags, not this section.
+
+**Deck B is registered too, and has never been run.** `SETUP_7_KIN` is in
+`roles.py` with `require_seated_kin` built and mutation-checked,
+`eval.run_changeling --seats 7` deals it, and `eval.strata --deck SETUP_7_KIN`
+prices it. **It has no criterion, and that is deliberate rather than pending
+paperwork**: a criterion is binding on its bar, and this deck's accusation bar is
+not derivable from either shipped deck - wolf density is 2/7 - so the criterion
+cannot be written honestly until `--arm random --seats 7` has measured one under
+`plurality-min2`. Registering the deck and writing its criterion are two pieces of
+work, and doing the second on an unmeasured bar is how the belfry criterion went
+wrong. **Every deck B figure in this file is a prediction or a deal-only census
+until a live arm exists.**
 
 **Two figures below did not survive the instrument, and are left as written rather
 than retrofitted.** The `blind/game` column is a paper definition; measured with
@@ -337,6 +352,25 @@ than retrofitted.** The `blind/game` column is a paper definition; measured with
 is 1.340 -> 1.416 (+5.7%), not 1.02 -> 1.18 (+16%). Direction agrees, magnitude
 does not. The criterion carries the binding table; the design is kept here so the
 gap between a predicted deck and a measured one stays visible.
+
+**Deck B's census, measured the same way 2026-09-02** (`py -3 -m eval.strata --deck
+SETUP_7_KIN --nights 4000 --seed 11`, plus the packless-dawn count over the same
+nights). Same instrument, same seed, all three decks, so these three rows are
+comparable to each other and to nothing in the design table above:
+
+| `--nights 4000 --seed 11` | blind/game | unwinnable | `identity` told nothing |
+|---|---|---|---|
+| `SETUP_5` | 1.339 | 2.85% | 18.7% |
+| `SETUP_6_WAKER` | 1.416 | 2.05% | 10.3% |
+| **`SETUP_7_KIN`** | **1.371** | **1.27%** | **5.3%** |
+
+The design predicted 1.21 / 1.0% / 5.1% for K-c. The contamination figure landed
+almost exactly, the unwinnable rate is the lowest of the three as predicted, and
+`blind/game` came in HIGH rather than low - the same direction the deck A
+prediction missed in, which is now two decks the paper `blind/game` definition
+under-read. The deal constraint itself prices out at **pair 87.6%, lone 0%, neither
+12.4%, 1.07 retries a game** over 4000 seeded deals, against the design's 86.0% /
+0% / 0.92. Both sets are deal-and-night arithmetic with no model in them.
 
 What follows is the design and the arithmetic behind it, so that work is a launch
 rather than a session.
@@ -404,7 +438,11 @@ one deck spends four and attributes nothing.
   the section above happening twice.
 - So the deck needs `require_seated_kin`: **both seated or both in the centre**, a
   deal retried otherwise. That is 0.92 retries per game against a
-  `MAX_DEAL_ATTEMPTS` of 200, and it lifts the pair to 86.0%.
+  `MAX_DEAL_ATTEMPTS` of 200, and it lifts the pair to 86.0%. **Built 2026-09-02**
+  as a `Setup` field defaulting OFF, so the two shipped decks deal what they always
+  dealt; `deal` applies it on top of `require_seated_pack` rather than instead of
+  it, and an unsatisfiable pair of constraints raises `ImpossibleDeal` on the same
+  structural bound. Measured on the built code: pair 87.6%, 1.07 retries a game.
 - The precedent is exact and already in this file: `require_seated_pack` is a
   deliberate deviation from the family, publicly stated so every seat may reason
   from it, justified by keeping a tenth of every run from being noise. This is the
@@ -420,6 +458,8 @@ one deck spends four and attributes nothing.
 **Neither deck may be run before the class-assignment question above is settled**,
 because both of them change how much of the `identity` stratum is blind seats, and
 a deck comparison across that change measures the scorer rather than the deck.
+**Settled by S10 and both decks are unblocked**; deck A has since run, and deck B
+is registered and waiting on a measured bar rather than on this question.
 
 ### Notable expansions NOT built, and what each would cost
 

@@ -177,6 +177,13 @@ class Setup:
     #: this size, and every one of them is a game no accusation can win - the day
     #: is unmeasurable, not merely hard. Public, so every seat may reason from it.
     require_seated_pack: bool = True
+    #: Refuse a deal that seats exactly ONE ``kindred`` - both seated or both in
+    #: the centre. Off by default, because it only means anything on a deck that
+    #: holds the card, and the shipped decks hold none: `SETUP_5` and
+    #: `SETUP_6_WAKER` deal byte-for-byte what they dealt before this field existed.
+    #: Public like the pack constraint, so every seat may reason from it. Why it
+    #: exists is `SETUP_7_KIN` below and RULES.md §Deck B.
+    require_seated_kin: bool = False
 
     def __post_init__(self) -> None:
         if len(self.deck) != self.n + self.centre:
@@ -216,7 +223,42 @@ SETUP_6_WAKER = Setup(
     centre=3,
 )
 
-SETUPS: dict[int, Setup] = {5: SETUP_5, 6: SETUP_6_WAKER}
+#: **Deck B, the `kindred` deck** - designed 2026-08-27 (RULES.md §The decks that
+#: would seat them, candidate K-c), registered 2026-09-02. **Never run.**
+#:
+#: Seven seats and three centre, ten cards: `SETUP_5`'s eight plus `kindred` x2.
+#: Growing the table rather than cutting a `bystander`, for the same reason deck
+#: A did - the `none` class IS the gate and the shipped deck has no slack to cut.
+#:
+#: The deal constraint is what makes the card worth dealing. Priced over 4000
+#: nights: on a FREE deal the pair fails to form more often than it forms (lone
+#: 47.1%, pair 45.2%), and a lone `kindred` wakes, sees nobody, and is a blind
+#: villager wearing the `identity` label - the S10 mislabelling happening twice
+#: per game. `require_seated_kin` refuses the lone deal and lifts the pair to
+#: 86.0%. The remaining 14% seat neither and are the deck's own control, on the
+#: same terms as deck A's centre `waker`. `kindred` x3 unconstrained was tried and
+#: is worse.
+#:
+#: **Measured on the built code, 4000 seeded deals**: pair 87.6%, lone 0%, neither
+#: 12.4%, at 1.07 retries a game against `MAX_DEAL_ATTEMPTS` of 200. The design
+#: predicted 86.0% and 0.92. The census is `eval.strata --deck SETUP_7_KIN`:
+#: blind/game 1.371, unwinnable 1.27%, `identity`-told-nothing 5.3% against
+#: `SETUP_5`'s 18.7%.
+#:
+#: **This is a NEW BASELINE.** Wolf density moves to 2/7, so the accusation chance
+#: bar is not derivable from either shipped deck and must be re-measured with
+#: `--arm random --seats 7` before any deduction claim rests on it. Every deck B
+#: figure in RULES.md is a paper prediction until `eval.strata --deck SETUP_7_KIN`
+#: says otherwise.
+SETUP_7_KIN = Setup(
+    n=7,
+    deck=(PACK, PACK, KINDRED, KINDRED, SPOTTER, SWAPPER, SWITCHER, DECEIVED,
+          BYSTANDER, BYSTANDER),
+    centre=3,
+    require_seated_kin=True,
+)
+
+SETUPS: dict[int, Setup] = {5: SETUP_5, 6: SETUP_6_WAKER, 7: SETUP_7_KIN}
 
 #: Every card the game defines, dealt by a shipped setup or not. A skin must name
 #: all of them - the referee looks a display name up by key, so a theme missing one
