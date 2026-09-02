@@ -11,6 +11,7 @@ holds - which is a claim you can only really feel from inside a seat.
     python -m games.changeling.demo --rounds 2
     python -m games.changeling.demo --human 0        # you play seat 0
     python -m games.changeling.demo --human 0 --backend local --model qwen36-35b-a3b-iq3
+    python -m games.changeling.demo --human 0 --briefing   # the standing-frame arm
 
 ``--human`` hands that seat the exact bytes its model would receive and nothing
 else. ONE seat and ONE game: this module plays a single game and stops, and a
@@ -110,8 +111,15 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random) -> dict:
 
     def policy(seat: int):
         if seat in humans:
+            # BRIEFING is console furniture covering the same ground - the day's
+            # procedure, the accusation rule, what each side wins on - that
+            # ref.briefing_text() now puts IN the payload when --briefing is on.
+            # A human seat prints its own payload (ConsoleBackend._say(context)),
+            # so with the arm on the frame already reaches the console once per
+            # render; the furniture text is dropped rather than said twice.
             return LLMPolicy(backend=ConsoleBackend(keys=ACTION_KEYS,
-                                                   briefing=BRIEFING,
+                                                   briefing=("" if args.briefing
+                                                            else BRIEFING),
                                                    rules_path=RULES_PATH,
                                                    other_model=args.model if args.backend else None),
                              retries=args.human_retries,
@@ -193,6 +201,17 @@ def main() -> None:
     ap.add_argument("--human-retries", type=int, default=99,
                     help="mistyped answers a human seat may make before its move "
                          "falls back to random (default: effectively unlimited)")
+    ap.add_argument("--briefing", action="store_true",
+                    help="carry the full standing frame - the day's procedure, "
+                         "the accusation rule and what each side wins on - in "
+                         "every render, byte-identical for every seat. Off by "
+                         "default: the ask is incremental by design and the "
+                         "default payload stays byte-identical to every run "
+                         "recorded before this flag. A MEASURED change, bound "
+                         "by docs/changeling-briefing-criterion.md. A human "
+                         "seat's own console furniture (see BRIEFING above) "
+                         "yields to this frame when it is on, so the day's "
+                         "procedure is not printed twice.")
     args = ap.parse_args()
 
     # Refuse at the DOOR, never at game 200. An off-box route with no key does
@@ -219,7 +238,8 @@ def main() -> None:
     ref = ChangelingReferee.new(5, seed=args.seed, theme=theme,
                                 discussion_rounds=args.rounds,
                                 dealt=dealt, centre=centre,
-                                transcript_path=args.referee_transcript)
+                                transcript_path=args.referee_transcript,
+                                briefing=args.briefing)
     policies = build_policies(ref, args, rng)
 
     print(f"=== 5-seat changeling, theme='{theme.name}' ===\n")
