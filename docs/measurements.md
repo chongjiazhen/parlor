@@ -1068,3 +1068,76 @@ round is spent making more self-claims, not better ones, and the village side
 carries the whole decline. Consistent with `AGENTS.md`'s standing position that
 more context is not monotonically good, and it is the second dated instance of it
 on this box after `_night_against_the_table`.
+## changeling heuristic rung - the ladder's middle rung, measured 2026-09-02
+
+`games/changeling/heuristic.py`, the changeling twin of cabal's hand-written
+rung, on branch `slice/changeling-heuristic` (merges after the changeling chain
+has read, because it touches `eval/run_changeling.py`). Backend none, CPU, ~23 s
+per 1000 games. Seeds 5000..5999, `--theme folk --seats 5`, two rounds, 977 of
+1000 games scored (23 seated no pack at dawn). Records `eval/records/cl-heuristic*.json`,
+untracked; the command reproduces them exactly:
+
+```
+py -3 -m eval.run_changeling --games 1000 --arm heuristic --theme folk --seats 5 --seed 5000 --out eval/records/cl-heuristic.json
+```
+
+The rules are in the module docstring. A seat plays the card it BELIEVES; a
+village seat states its deal, its belief and every reveal truthfully in the
+claim grammar `eval.audit_decisions` reads; a pack seat claims the bystander card
+as its deal and accuses one village seat, and a fellow that reads the accusation
+repeats and votes it; a village seat votes down a ladder - night-named pack,
+refuted DEAL claim, a card claimed as a deal by more seats than the deck holds, a
+seat that claimed no deal, random. Present-tense claims are never refuted: the
+card may have moved. Gate #1 by construction and by test - the dawn-truth table is
+replaced with one that raises and every decision still lands.
+
+| arm, seeds 5000..5999 | village wins | BLIND accuracy (n=1281) | pack wins |
+|---|---|---|---|
+| `random` | 37.97% [34.98%, 41.06%] | 35.44% [32.77%, 37.99%] | 62.03% |
+| `heuristic` (all five seats) | 43.91% [40.83%, 47.04%] | **49.26% [46.36%, 52.21%]** | 56.09% [52.96%, 59.17%] |
+| `heuristic-village` vs random pack | 88.43% [86.28%, 90.29%] | 77.36% [74.35%, 80.28%] | 11.57% |
+| `heuristic-pack` vs random village | 32.34% [29.48%, 35.34%] | 37.78% [35.17%, 40.60%] | 67.66% [64.66%, 70.52%] |
+
+Chance for a blind villager on this deal is 35.85%.
+
+**What un-random looks like here: the all-heuristic table clears the gate at
+49.26% against 35.85%, and the pack still wins 56% of the games.** That is the
+number the "changeling feels random" row asked for. It is a floor - sixty lines
+of tallies - that a model arm on the same seeds can now be read against. Not
+against S2: that read 44.53% [38.47%, 50.77%] on 247 blind votes, under the
+pre-2026-09-02 vote rule and other seeds, so the intervals overlap and the
+objects differ. The fair comparison is the seated arm in the queue row, and a
+model losing to sixty lines of tallies would be the AvalonBench finding again
+(`docs/reference-policies.md` §The control ladder).
+
+**Two artifacts, both the kind `docs/control-ladder.md` warns about, and both
+measured rather than assumed:**
+
+- **The `heuristic-village` cell is mostly the control's vocabulary.** The random
+  policy's four canned lines never make a deal claim, so the ladder's fourth tier
+  (a seat that has claimed no deal) points at a random wolf by its silence. With
+  that tier switched off the same cell reads 34.90% village wins and 31.62%
+  [29.00%, 34.33%] blind accuracy - at or below chance. The all-heuristic cell
+  does not move when the tier is switched off (49.26% either way), because every
+  heuristic seat claims a deal and the tier never fires. **The 77.36% is not a
+  deduction number.** It is the rung reading a twin's tell, exactly as cabal's
+  99.5% hunter is.
+- **In a mixed arm every liar is a sleeper, so every refutation lands on a
+  villager.** Seated by dawn truth, the real wolves in `heuristic-village` are
+  random and claim nothing; the only seats that lie are heuristic seats robbed
+  INTO the pack card who believe they are wolves and hold village at dawn. Tier
+  census over 600 games with the silence tier off: tier 1 (night-named pack) 44/57
+  = 77.2%, because a seen wolf can be robbed or switched afterwards; tier 3
+  (over-claimed card) 0/111 - every catch a sleeper; tier 2 fired 3 times. That
+  0/111 is the belief/truth divergence the rung was built to make observable, in
+  a control with no model in it. Any instrument that scores "caught a liar" on
+  this game has to decide whether a sleeper counts, and the vote scorer says no.
+
+**`heuristic-pack` is the clean cell.** Coordination alone - two fingers on one
+village seat, the whole of `plurality-min2` - buys the pack +5.6 points over
+random wolves against a random village (67.66% vs 62.03%, intervals touching),
+with nothing read from the control's vocabulary.
+
+What this does NOT show: anything about a model. The arm that puts this rung at a
+table with LLM seats is the queue's "seat the heuristic against the MODEL" row
+and is GPU work. The rung is a denominator, not a player.

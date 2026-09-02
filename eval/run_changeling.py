@@ -60,7 +60,8 @@ from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 MEASURED_RANDOM_VILLAGE_WINS = 0.3951
 MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES = 0.3845
 
-ARMS = ("random", "llm", "llm-village", "llm-pack")
+ARMS = ("random", "heuristic", "heuristic-village", "heuristic-pack",
+        "llm", "llm-village", "llm-pack")
 
 
 def build_backend(args, seed: int | None) -> Backend:
@@ -98,6 +99,18 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random,
     """
     if args.arm == "random":
         return {s: RandomPolicy(rng) for s in range(ref.n)}
+    if args.arm.startswith("heuristic"):
+        # The ladder's middle rung, no model: what un-random looks like on this
+        # game. One shared rng, so the game is reproducible from its seed. The
+        # mixed forms seat one side by DAWN TRUTH against the random control, the
+        # same way the llm- forms do below, so a number can be charged to a side.
+        from games.changeling.heuristic import HeuristicPolicy
+        from games.changeling.roles import Side
+        if args.arm == "heuristic":
+            return {s: HeuristicPolicy(rng) for s in range(ref.n)}
+        want = Side.PACK if args.arm == "heuristic-pack" else Side.VILLAGE
+        return {s: (HeuristicPolicy(rng) if ref.holds(s).side is want
+                    else RandomPolicy(rng)) for s in range(ref.n)}
     backend = build_backend(args, seed)
 
     # One LLMPolicy PER SEAT. Sharing one object across seats makes `upstreams` a
@@ -439,7 +452,7 @@ def main() -> None:
     args = ap.parse_args()
     RUN_STATE.requested = args.games
 
-    if args.arm != "random" and not args.backend:
+    if args.arm.startswith("llm") and not args.backend:
         ap.error("a live arm needs --backend")
 
     # Refuse at the DOOR, never at game 200. An off-box route with no key does
