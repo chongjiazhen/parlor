@@ -192,6 +192,18 @@ the one that goes stale.
       NOT SHOWN on the name-form axis. The general lesson is the row that matters -
       **an arm that doubles as a future control has a criterion deadline, and the
       deadline is the moment the arm's own report prints.**
+- [ ] **A CPU slice during a live arm is NOT free - measured 25% 2026-09-03.**
+      `cl-gate2-village`'s own log, 20-game buckets: 0.970, 0.995, 1.000, 0.975,
+      1.060, 1.035 min/game through game 121, then **1.275** across 121-141, the
+      window in which this session ran three pytest suites (102, then 1757, then
+      386 tests) for the mixed rebase. The arm is unharmed - fallback stayed 0/15
+      throughout and wall-clock is not one of its variables - but the standing
+      menu's premise, that an instrument scored against existing records "costs
+      nothing" while a run waits, is measured wrong by about a quarter on this
+      box. **It would VOID a timing measurement**, and `docs/measurements.md`
+      §Route prices arms in min/game. Cheapest fix is scheduling, not code: run
+      suites between legs, or accept and record the slowdown. Not measured:
+      whether it is CPU contention, IO, or the box's power budget.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
