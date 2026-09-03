@@ -199,15 +199,15 @@ the one that goes stale.
       `rate_ok`'s 5% CI-floor bar is pre-declared nowhere. **The changeling twin is
       FROZEN 2026-09-02**, `docs/changeling-gate2-pair-criterion.md` - `llm` vs
       `llm-village` on S22's seeds, one new arm
-      (`eval/runs/changeling-gate2-arm.cmd`), unlaunched. Entry condition: the
-      merge list. The cabal half is parked with cabal's GPU program.
+      (`eval/runs/changeling-gate2-arm.cmd`), LAUNCHED as the chain's last leg and
+      unread. The cabal half is parked with cabal's GPU program.
 - [ ] **Merge the changeling source rules when the campaign chain has read.**
       The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
       re-baselines cabal (`docs/measurements.md`). The changeling
       half - a lone `pack` views one centre card at MEET, an `identity`-class
       reveal that moves the strata and the chance baseline - MUST NOT merge while
-      the skin pair, S22 and the gate #2 arm are unread: their criteria froze under
-      the current rules. Merging re-baselines the rung and the RULES.md notes flip
+      the gate #2 arm is unread: its criterion froze under the current rules. The
+      skin pair and S22 are READ (`docs/measurements.md`). Merging re-baselines the rung and the RULES.md notes flip
       then. **Merge condition MET on the branch:** the control never declines and
       the guard is mutation-checked; what it does to the baseline is
       `docs/decisions.md`. What remains is the chain reading, then merge and

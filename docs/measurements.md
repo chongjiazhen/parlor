@@ -988,3 +988,83 @@ five, and three more runs spread across seven of the eight. Recorded here so the
 premature reading does not survive as folklore; the real read needs a pinned
 model, one program, and the timeouts fixed.
 
+
+## changeling discussion length - S22's `--rounds 2` vs `--rounds 3` pair, READ 2026-09-03
+
+**NOT SHOWN.** A third discussion round did not move blind villager deduction, and
+it cost 30% more card. Read with `py -3 -m eval.rounds_pair_verdict`, exit 0,
+against the pre-committed `docs/changeling-rounds-pair-criterion.md` (frozen
+2026-09-02T06:38Z, before either arm ran). Records `eval/records/cl-rounds{2,3}
+{,-random}.json`, recipe `eval/runs/changeling-rounds-pair.cmd`.
+
+**The runs.** 200/200 games each, local `qwen36-35b-a3b-iq3`, `--arm llm --seats 5
+--theme folk --seed 5000 --no-thinking --timeout 240`, driver defaults otherwise.
+rounds2 down 2026-09-03T05:38 local in 17900 s (4.97 h); rounds3 down 12:07 in
+23340 s (6.48 h) - **+30.4% GPU for a difference that spans zero**. The verdict's
+settings pin read each record's own `args` against the criterion and both MATCH.
+196 scored per arm, 251 blind votes per arm.
+
+**The pair's figure.** Blind villager accuracy, three rounds minus two:
+**-2.79%**, Newcombe 95% **[-11.41%, +5.89%]** - the interval the criterion names,
+and it includes zero. Paired game bootstrap [-11.89%, +7.03%] beside it, deciding
+nothing. The criterion priced a half-width near 8.5 points and said the pair
+cannot settle a gap smaller than nine; the observed gap is under three, so this is
+the "not shown" the power section wrote down in advance. **No second pair chases
+it**, and no bar may be added now.
+
+**Fallback did NOT rise on the longer arm**, which was the pre-registered payload
+worry: 0.43% (rounds2) against 0.50% (rounds3), both far under the 10% void bar;
+recovered 7.60% against 6.45%, both under the 25% warn. A third round at a fixed
+`--max-tokens 1536` costs no measurable legality.
+
+**Gate #3 HOLDS on both arms**, secondary per the criterion: rounds2 119/251 =
+**47.41%** Wilson [41.32%, 53.58%]; rounds3 112/251 = **44.62%** Wilson [38.60%,
+50.81%]. Both floors clear the 35.84% reference. Each arm's own random control
+agrees with that reference within the criterion's one-point tolerance (35.44% and
+36.14%), so the reference stays the bar and the own-arm clause does not fire.
+**Gate #2 is reported with no verdict**, as the criterion requires: pack win 50.51%
+and 52.04%.
+
+**An instrument control worth keeping: the two random controls share a deal
+exactly.** The criterion demanded the census agree, since random play does not
+speak - it does, to the vote: blind votes 1281 on both, strata `identity` 1103 /
+`positional` 582 / `false` 448 on both, dawn-wolf denominators 23/483/494 on both.
+Their ACCURACIES differ (35.44% vs 36.14%) because a third round advances the seed
+stream and the random seats draw different votes, which is the expected shape and
+not a census disagreement.
+
+### The free reads - unadjusted, none a gate, and one of them points somewhere
+
+Six reads below share the arms' seeds and carry no multiplicity correction. The
+criterion declares them free and forbids a bar after the fact, so **nothing here
+is promotable and none of it revises the NOT SHOWN above.** Intervals are
+Newcombe over independent proportions, three rounds minus two.
+
+| free read | rounds2 | rounds3 | diff | Newcombe 95% |
+|---|---|---|---|---|
+| pack voted the fellow it was told | 15.66% (31/198) | 24.75% (49/198) | **+9.09%** | [+1.17%, +16.90%] |
+| present claims true ("I am X") | 78.75% (467/593) | 74.12% (716/966) | **-4.63%** | [-8.85%, -0.26%] |
+| ...village seats only | 87.16% | 82.31% | **-4.85%** | [-9.09%, -0.34%] |
+| ...pack seats only | 60.64% | 55.85% | -4.79% | [-13.56%, +4.23%] |
+| dealt claims true | 82.24% | 78.21% | -4.04% | [-9.01%, +0.95%] |
+| village voted a seat shown village | 29.73% (44/148) | 26.35% (39/148) | -3.38% | [-13.49%, +6.83%] |
+
+**The one that matters is the first, and it is the SAME statistic the skin pair's
+effect landed on.** `eval.changeling_audit` against each arm's own random control:
+under two rounds a pack seat voted its fellow 15.66%, well below its control's
+25.69% - the pack PROTECTING its partner. Under three rounds it reads 24.75%,
+sitting on its own control's 26.82%, so **the protection is gone by the third
+round.** That is a pack statistic; the pair's primary is a village one, so an
+effect this size is structurally outside what the criterion could see. It does not
+settle anything by itself - two unadjusted reads on two different axes both
+landing on the partner vote is a pattern worth ONE properly-powered arm, not a
+claim - and the row that would spend it already exists: the skin pair's row asks
+for a new criterion with the pack statistic PRIMARY on fresh seeds. **This read
+raises that row's value; it does not add a row.**
+
+**A third round buys more talk and slightly worse talk.** Present claims went 2.97
+per game to 4.83 (+63%) while their truth rate fell 4.63 points - so the extra
+round is spent making more self-claims, not better ones, and the village side
+carries the whole decline. Consistent with `AGENTS.md`'s standing position that
+more context is not monotonically good, and it is the second dated instance of it
+on this box after `_night_against_the_table`.
