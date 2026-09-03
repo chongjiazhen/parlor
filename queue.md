@@ -338,17 +338,6 @@ Runs that are frozen and want card - and one that is already in the chain:
       also spent is the non-overlap: at the largest matched stratum the intervals
       touch, so an arm is the honest next move and the cheap CPU route is done.
       Not measured: any mechanism.
-- [ ] **The adjudicator's record carries no ask SIZE, and that is where the
-      transcript arm's mechanism lives.** Found 2026-09-03 in answering the row
-      above. `ChoiceEvent` holds key, options, selection, fallback, recovered and
-      upstream; player decisions have carried `prompt_size` and `reply_size`
-      through `core/callcost` all along. So "is the transcript arm's ask longer"
-      is answerable from the CODE - `choose(recall=True)` sends the whole
-      accumulated session transcript, setup asks included, growing within a game
-      - and from NO record, on either arm, past or future. Done when an
-      adjudicator event carries the two sizes the player path already records.
-      Cheap, `core/`-adjacent, and it is what would let the next transcript-class
-      arm price its own ask instead of arguing it.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
       unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
       a night, taken at the top of `_begin_night`. What seating found, and how the

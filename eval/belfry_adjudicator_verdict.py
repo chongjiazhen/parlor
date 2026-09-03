@@ -93,6 +93,12 @@ ARMS = {
 EVENT_FIELDS = {
     "key", "options", "selected", "fallback", "recovered", "upstream",
 }
+#: Fields an event MAY carry, checked for nothing. The extra-field check above is
+#: a leakage guard - an unknown key in a classifier's input is a channel nobody
+#: reviewed - so a new provenance field has to be named here or it voids the arm.
+#: ``ask_size`` is named rather than required because the records this tool reads
+#: were written before it existed, and requiring it would void the baseline.
+OPTIONAL_EVENT_FIELDS = {"ask_size"}
 CHOICE_KEY = "herring_registration"
 
 
@@ -389,7 +395,7 @@ def _model_trace(row: dict, seed: int, options: tuple[str, ...],
         voids.append(f"model seed {seed} does not carry exactly one choice event")
         return None, False
     event = events[0]
-    extra = set(event) - EVENT_FIELDS
+    extra = set(event) - EVENT_FIELDS - OPTIONAL_EVENT_FIELDS
     if extra:
         voids.append(
             f"classifier input leakage at model seed {seed}: extra event field(s) "

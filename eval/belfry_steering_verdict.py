@@ -26,6 +26,7 @@ from eval.belfry_adjudicator_verdict import (
     EVENT_FIELDS,
     EvidenceError,
     FALLBACK_CEILING,
+    OPTIONAL_EVENT_FIELDS,
     _duplicate_seeds,
     _fmt_rate,
     _herring_from_log,
@@ -148,7 +149,7 @@ def _steered_event(row: dict, seed: int, options: tuple[str, ...],
             f"steered seed {seed} does not carry exactly one choice event")
         return None, False
     event = events[0]
-    if set(event) != EVENT_FIELDS:
+    if set(event) - OPTIONAL_EVENT_FIELDS != EVENT_FIELDS:
         voids.append(f"steered seed {seed} provenance fields are not "
                      + ", ".join(sorted(EVENT_FIELDS)))
         return None, False

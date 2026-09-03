@@ -71,6 +71,20 @@ class ChoiceEvent:
     #: sums it publish a structural zero.
     recovered: bool
     upstream: str | None
+    #: characters in the ask that produced the landed reply - the payload itself
+    #: plus, when the referee's own session was sent ahead of it, every earlier
+    #: ask and reply in that session. The player-side twin is
+    #: ``core.callcost.prompt_size``, and it is read the same way: zero on an
+    #: event no model answered, because a fallback landed no ask. Not model-facing
+    #: and never becomes model-facing, so a number measured before this field
+    #: existed is still a number measured under the same payload. Defaulted for
+    #: the same reason the player fields are: an event dict written before
+    #: 2026-09-03 carries no such key.
+    #:
+    #: It counts the ASK, not the whole call: the reply's bytes are the
+    #: upstream's answer, not what this arm chose to send, and a transcript arm's
+    #: cost is what its recall put in front of the model.
+    ask_size: int = 0
 
 
 @dataclass
@@ -168,10 +182,16 @@ class ModelAdjudicator:
             # after a refusal is new.
             payload = ask if not complaint else {**ask, "refused": complaint}
             context = json.dumps(payload)
+            # priced on the attempt, not the ask: a recovered call's landed ask
+            # carries the refusal the referee sent back, and a recalled one
+            # carries however much session had accumulated by then.
+            sent = len(context)
             try:
                 if recall:
+                    history = list(self.transcript)
+                    sent += sum(len(a) + len(r) for a, r in history)
                     reply, upstream = self.backend.complete_meta(
-                        context, history=list(self.transcript))
+                        context, history=history)
                 else:
                     reply, upstream = self.backend.complete_meta(context)
             except Exception as exc:                      # transport, not rules
@@ -190,7 +210,7 @@ class ModelAdjudicator:
                 continue
             self.events.append(ChoiceEvent(
                 key, tuple(options), parsed["choice"], False,
-                rule_refusals > 0, upstream))
+                rule_refusals > 0, upstream, sent))
             if self.night_transcript:
                 self.transcript.append((context, reply))
             return parsed["choice"]

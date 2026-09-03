@@ -692,3 +692,32 @@ TIMING measurement absolutely** - `docs/measurements.md` §Route prices arms in
 min/game, so a min/game figure taken while a suite ran is void, not noisy.
 
 Not measured: whether the cause is CPU contention, IO, or the box's power budget.
+
+## The adjudicator's ask is priced with ONE field, 2026-09-03
+
+The queue row asked for "the two sizes the player path already records"
+(`prompt_size`, `reply_size`). What landed is one: `ChoiceEvent.ask_size`, the
+characters in the ask that produced the landed reply, plus every earlier ask and
+reply of the session when `night_transcript` sent one ahead of it.
+
+**The reply half buys nothing here.** A seat's reply size varies with what the
+model chose to say; an adjudicator reply is one `{"choice": ...}` object whose
+length is a function of the option string, so recording it would be a column of
+noise around 20 bytes. What a transcript-class arm needs priced is what IT sends,
+and that is the ask.
+
+**A fallback records 0**, the same reading `core/callcost` gives a decision no
+model answered: an ask that landed nothing is not a cost the arm bought
+anything with. A recovered call records the attempt that LANDED, refusal text
+included - the pre-retry ask is not what the model answered.
+
+**The verdict tools' event whitelist grew an OPTIONAL half.**
+`eval/belfry_adjudicator_verdict.EVENT_FIELDS` is a leakage guard: an unknown key
+in the classifier's input is a channel nobody reviewed, so it voids. Requiring
+`ask_size` would instead void every record written before today, which is the
+whole S8b/S23 baseline. So it is named in `OPTIONAL_EVENT_FIELDS` - allowed,
+never required, checked for nothing. `eval/belfry_steering_verdict` reads the
+same two sets.
+
+Not measured: any arm. The field is an instrument and is not model-facing, so no
+number moves and nothing re-baselines.

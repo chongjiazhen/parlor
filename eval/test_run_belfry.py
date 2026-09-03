@@ -310,7 +310,7 @@ class TestIntegrityAndRefusals(unittest.TestCase):
 
     def test_adjudicator_events_are_serialized_with_the_game_row(self):
         event = ChoiceEvent("sot_belief", ("witness",), "witness", False,
-                            False, "judge")
+                            False, "judge", 2802)
         ref = SimpleNamespace(
             n=0,
             grim=SimpleNamespace(script=SimpleNamespace(name="stub"), seats=[],
@@ -331,7 +331,7 @@ class TestIntegrityAndRefusals(unittest.TestCase):
         self.assertEqual(row["adjudicator"]["events"], [{
             "key": "sot_belief", "options": ("witness",),
             "selected": "witness", "fallback": False, "recovered": False,
-            "upstream": "judge",
+            "upstream": "judge", "ask_size": 2802,
         }])
 
     def test_a_run_above_the_bar_is_VOIDED_in_its_own_report(self):
