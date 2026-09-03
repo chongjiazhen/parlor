@@ -379,6 +379,25 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
       economy-compliance read, neither of which has a rubric yet. Still not
       sequenced against the Paranoia rung.
+- [ ] **A browser front-end for a human seat, so a person can play off the
+      terminal - phone included.** The seam is already right: `ConsoleBackend`
+      is a backend, and every game reaches it through one method,
+      `complete_meta(context) -> (reply, served_by)`. So this is a SECOND
+      implementation of that seam, not a rewrite - the blocking game loop runs
+      in a thread, `complete_meta` blocks on a queue an HTTP handler feeds, and
+      the browser is handed `context` verbatim. That is the whole safety
+      argument and it is also the trap: **rendering referee state into widgets
+      would be a second channel gate #1 does not audit.** v1 ships the audited
+      string and nothing else; tap targets are allowed only as a client-side
+      shorthand over the same tokens (`vote y`), derived from the game's own
+      `ACTION_KEYS`, never from the referee. Stdlib only - no build step.
+      **What it is actually worth is not mobile.** `--human` is capped at one
+      seat because a terminal is ONE channel; per-connection channels lift that
+      cap, and a table seating several people against models is a thing this
+      tree cannot do today. That needs a real seat-binding guard, since the
+      one-channel constraint is what currently makes the cap free. Unmeasured:
+      no number moves either way, so this is product work, not an arm.
+
 Publishing:
 
 - [ ] **Obtain the paywalled theory chapter before publishing anything about gate
