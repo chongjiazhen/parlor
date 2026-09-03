@@ -92,8 +92,8 @@ either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
 
 **One list, and rows do not carry branch names.** A branch cannot touch the
 checkout the chain imports from, so "no changeling arm in flight" is met on a
-branch and the freeze binds only the MERGE. **The chain READ 2026-09-03, so no
-freeze binds and every row below is merge-ready on its conflicts alone.**
+branch and the freeze binds only the MERGE. **Whether a freeze binds right now is
+`queue.local.md`**; every row below is merge-ready on its conflicts alone.
 
 No head sha: a copied sha is what goes stale, and a merge takes a name.
 
