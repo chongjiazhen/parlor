@@ -197,6 +197,24 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
+- [ ] **A recipe's flags are pinned to its criterion by a TEST, not by a reader.**
+      `eval/test_partner_verdict.py` reads the criterion `.md` and holds the
+      VERDICT tool equal to it, so criterion-vs-tool is mechanized. Nothing holds
+      the RECIPE equal to it, and recipe-vs-criterion is the belfry live1 failure -
+      11.5 h of GPU readable but never callable. One recipe of 27 has a launcher
+      test at all (`eval/test_belfry_adjudicator_launcher.py`, which reads its
+      `.cmd`), so the pattern exists and is unextended. Done when every
+      `eval/runs/*.cmd` naming a criterion is asserted equal to that file's
+      §Settings, and a drift is a red test rather than a reader's diligence.
+- [ ] **The merge freeze is prose, and the import graph is what it actually
+      means.** `queue.md` says a branch is free and a merge is not; what makes a
+      merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
+      2026-09-03 and it changed the plan - s21 touches `eval/run_changeling.py`
+      and `games/changeling/{referee,player,demo}.py`, so its merge waited and the
+      conflict work went to a worktree, where the 09-03 `durf-dungeon` merge went
+      ahead mid-chain on the same test. Nothing would have stopped a merge that
+      skipped the check. Done when the intersection of `git diff --name-only
+      main...<branch>` with the live arm's import graph is a command, not a habit.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
