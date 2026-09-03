@@ -278,14 +278,16 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **`mixed-village` is the unrun half - `mixed-pack` is READ 2026-09-03 and
-      INFORMS.** The rung's village win rate is +20.92% [+11.11, +30.16] against a
-      LIVE pack over its own twin, and the 77.36% silence artifact prices at 59.76%
-      against seats that talk (`docs/measurements.md`). What is open is the second
-      arm, ~3 h, `--arm mixed-village`, its figure the rung's PACK rate against
-      56.09% rescored: it is the direction the criterion says can disagree, and no
-      cross-arm claim may be made until it runs. Still pre-merge or its twin figure
-      comes from a different game.
+- [ ] **`mixed-village` is CHAINED behind partner, 2026-09-03T23:04 local -
+      `mixed-pack` is READ and INFORMS.** The rung's village win rate is +20.92%
+      [+11.11, +30.16] against a LIVE pack over its own twin, and the 77.36%
+      silence artifact prices at 59.76% against seats that talk
+      (`docs/measurements.md`). The second arm's figure is the rung's PACK rate
+      against 56.09% rescored - the direction the criterion says can disagree, and
+      no cross-arm claim may be made until it lands. Recipe
+      `eval/runs/changeling-mixed-village.cmd`, committed, a byte-mirror of
+      `changeling-mixed-pack.cmd` except `--arm mixed-village`; launch mechanics
+      in `queue.local.md`. Read both with `py -3 -m eval.mixed_verdict` once down.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
