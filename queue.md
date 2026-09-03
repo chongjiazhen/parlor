@@ -201,9 +201,11 @@ the one that goes stale.
       menu's premise, that an instrument scored against existing records "costs
       nothing" while a run waits, is measured wrong by about a quarter on this
       box. **It would VOID a timing measurement**, and `docs/measurements.md`
-      §Route prices arms in min/game. Cheapest fix is scheduling, not code: run
-      suites between legs, or accept and record the slowdown. Not measured:
-      whether it is CPU contention, IO, or the box's power budget.
+      §Route prices arms in min/game, so a min/game figure taken under a suite is
+      void rather than noisy. **DECIDED 2026-09-03** by the operator, argued in
+      `docs/decisions.md`: no suite runs while an arm is in flight, scheduling
+      rather than a gate. What is left open is only the cause - CPU contention,
+      IO, or the box's power budget - and nothing waits on it.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records

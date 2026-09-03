@@ -582,3 +582,32 @@ negative is a shipped leak. It is CPU, it needs no card, `games/durf/facts.py`
 already built the fact-keyed generalisation and says the move on a second asking
 game is to widen the key and delete the adapter. **It runs concurrently with the
 chain**, ahead of the GPU ranking rather than inside it.
+
+## No test suite runs while an arm is in flight, 2026-09-03
+
+Decided by the operator, against this session's own measurement. `cl-gate2-village`
+held ~1.00 min/game for 121 games and then ran 1.275 across games 121-141 - the
+window in which this session ran three pytest suites (102, 1757, then 386 tests)
+for the mixed rebase. About 25%, off the arm's own log, and it pushed the chain's
+finish from 15:25 to ~16:45 local.
+
+**The arm is not voided and no number moves.** Fallback held 0/15 throughout and
+wall-clock is not one of this arm's variables. What the reading costs is an
+assumption, not a result.
+
+**It corrects two places that priced concurrent CPU work at zero.**
+`docs/open-arms.md` §While the card is busy says an instrument scored against
+records that already exist "costs nothing and can outrank the run it waits on",
+and §The partner arm takes slot 3 above says the gate #1 per-axis key "runs
+concurrently with the chain". Both remain the right call on VALUE - a CPU slice
+still buys more than an idle session - but the price is a quarter of the running
+arm's throughput, not nothing, and that is now the number to argue against.
+
+**The rule is scheduling, and it is deliberately not a gate.** Suites run between
+legs or after the chain is down. A hook that refused pytest while a log lacked its
+marker would fire on every cold session that never launched anything, and the
+freeze it would enforce is already prose the operator applies. **It binds any
+TIMING measurement absolutely** - `docs/measurements.md` §Route prices arms in
+min/game, so a min/game figure taken while a suite ran is void, not noisy.
+
+Not measured: whether the cause is CPU contention, IO, or the box's power budget.
