@@ -154,3 +154,77 @@ def test_upstreams_is_present_even_when_nothing_reports_one(tmp_path):
     pack = Pack.load(p)
     rec = run_draft(pack, [ChoosingSeat(seat=0, backend=Canned(['{"pick": "A"}']))], seed=1)
     assert rec["upstreams"] == {0: None}
+
+
+class Stalls:
+    """A backend whose provider accepts the connection and then stops talking."""
+
+    def __init__(self, exc=None, then=None):
+        self.exc = exc or TimeoutError("timed out")
+        self.then = list(then or [])
+        self.calls = 0
+
+    def complete_meta(self, context, history=None):
+        self.calls += 1
+        if self.then:
+            return self.then.pop(0), "up"
+        raise self.exc
+
+
+def test_a_stalled_provider_costs_a_fallback_not_the_run():
+    back = Stalls()
+    seat = ChoosingSeat(seat=0, backend=back, retries=3)
+    assert seat.choose(MENU, taken=()) is None
+    assert back.calls == 3
+    assert seat.transport_errors == 3
+
+
+def test_a_transport_error_still_spends_only_its_own_budget():
+    """A stall that clears inside the budget is a normal decision, not a fallback."""
+    back = Stalls(then=[])
+    back.then = []
+    seat = ChoosingSeat(seat=0, backend=Stalls(then=[]), retries=1)
+    assert seat.choose(MENU, taken=()) is None
+
+
+def test_a_provider_that_recovers_inside_the_budget_answers():
+    class Flaky(Stalls):
+        def complete_meta(self, context, history=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise TimeoutError("timed out")
+            return '{"pick": "B"}', "up"
+    seat = ChoosingSeat(seat=0, backend=Flaky(), retries=3)
+    assert seat.choose(MENU, taken=()) == "B"
+    assert seat.transport_errors == 1
+
+
+def test_a_connection_refusal_is_transport_too():
+    import urllib.error
+    seat = ChoosingSeat(seat=0, backend=Stalls(exc=urllib.error.URLError("refused")),
+                        retries=2)
+    assert seat.choose(MENU, taken=()) is None
+    assert seat.transport_errors == 2
+
+
+def test_a_programming_error_is_NOT_swallowed():
+    """Only transport failures are absorbed. A bug must still crash the run."""
+    import pytest
+    seat = ChoosingSeat(seat=0, backend=Stalls(exc=ValueError("bug")), retries=2)
+    with pytest.raises(ValueError):
+        seat.choose(MENU, taken=())
+
+
+def test_the_record_counts_transport_errors_separately(tmp_path):
+    """A run at 100% fallback from a dead endpoint must not read like a bad model."""
+    import json
+    p = tmp_path / "p.json"
+    p.write_text(json.dumps({"pack": "t", "playbooks": [
+        {"name": n, "about": f"{n} line.", "questions": []} for n in "AB"]}), encoding="utf-8")
+    pack = Pack.load(p)
+    seats = [ChoosingSeat(seat=0, backend=Stalls(), retries=1),
+             ChoosingSeat(seat=1, backend=Meta(['{"pick": "B"}'])) ]
+    rec = run_draft(pack, seats, seed=1)
+    assert rec["transport_errors"] == 1
+    assert rec["fallbacks"] >= 1
+    assert len(set(rec["picks"].values())) == 2

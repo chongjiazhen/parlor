@@ -19,6 +19,14 @@ stay on the machine that plays them; nothing in this directory names one.
   plays it - a uniform draw from what is left - and it is **counted**. Every
   number this rung reports ships beside its fallback rate, and the scorer's 10%
   void applies unchanged.
+- **A transport failure costs the seat, never the run.** A provider that accepts
+  the connection and then stalls, or an endpoint that is gone, is absorbed after
+  the seat's retry budget and played as an illegal move like any other - and
+  counted twice over, once in the fallback rate and once in `transport_errors`,
+  which is reported beside it. The second count is the point: a dead endpoint
+  drives the fallback rate to 100% and would otherwise read as a model that could
+  not follow the rules. Only transport exceptions are absorbed; a bug in this repo
+  still crashes the run rather than being recorded as a decision nobody made.
 - A fallback plays a *real* pick, so it genuinely removes that playbook. A later
   seat asking for it is then making an illegal move of its own and is counted as
   one. This is the rate doing its job rather than double-counting: it measures

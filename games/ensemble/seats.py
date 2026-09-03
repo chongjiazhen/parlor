@@ -15,9 +15,19 @@ neither public channel.
 
 from __future__ import annotations
 
+import urllib.error
 from dataclasses import dataclass
 
 from core.replies import ParseError, extract_json, salvage
+
+#: Transport failures a seat absorbs. A provider that accepts the connection and
+#: then stalls raises ``TimeoutError`` from the socket, and a dead endpoint raises
+#: ``URLError``; ``Backend`` retries HTTP status codes and neither of these is one.
+#: Measured 2026-09-03 on the clean tier: 2 of 7 session-0 runs died mid-draft this
+#: way, invisibly in the numbers and totally in the run. Deliberately NOT bare
+#: ``Exception`` - a bug in this repo must still crash rather than be recorded as a
+#: model that could not decide.
+TRANSPORT_ERRORS = (TimeoutError, urllib.error.URLError, ConnectionError)
 
 #: What a choosing seat answers with.
 CHOICE_KEYS = ("think", "pick")
@@ -59,6 +69,10 @@ class ChoosingSeat:
     seat: int
     backend: object
     retries: int = 3
+    #: How many attempts this seat lost to a transport failure. Reported beside
+    #: the fallback rate so a dead endpoint cannot read as a model that could not
+    #: follow the rules - the failure mode ``core/backends.py`` records for 429s.
+    transport_errors: int = 0
     #: Which upstream served this seat's last call, when the backend reports one.
     #: On an ``auto:*`` model a different upstream may answer each seat, so a
     #: record that cannot name it cannot be compared with any later run.
@@ -68,10 +82,14 @@ class ChoosingSeat:
         ask = render_choice_ask(self.seat, menu, taken)
         for _ in range(max(1, self.retries)):
             meta = getattr(self.backend, "complete_meta", None)
-            if meta is None:
-                reply = self.backend.complete(ask)
-            else:
-                reply, self.upstream = meta(ask)
+            try:
+                if meta is None:
+                    reply = self.backend.complete(ask)
+                else:
+                    reply, self.upstream = meta(ask)
+            except TRANSPORT_ERRORS:
+                self.transport_errors += 1
+                continue
             try:
                 action = extract_json(reply)
             except ParseError:

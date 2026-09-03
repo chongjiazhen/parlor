@@ -107,7 +107,9 @@ def main(argv=None) -> int:
     if served:
         print("served by: " + ", ".join(sorted(served)))
     print(f"fell back: {rec['fallbacks']}/{rec['seats']} "
-          f"({rec['fallback_rate']:.0%})")
+          f"({rec['fallback_rate']:.0%})"
+          + (f"  transport errors: {rec['transport_errors']}"
+             if rec["transport_errors"] else ""))
     return 0
 
 

@@ -389,17 +389,6 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       names and its text stay out of the tree. Done when a seat holds four
       orthogonal secrets and the audit distinguishes them.
 
-- [ ] **A socket timeout kills a whole run; only HTTP codes are retried.**
-      `Backend.rate_retries` covers `RETRY_CODES` (429/5xx), so a provider that
-      accepts the connection then stalls raises `TimeoutError` out of `_post` and
-      takes the process with it. Measured 2026-09-03, ensemble session-0 on the
-      clean tier: **2 of 7 runs died this way**, each after other seats had been
-      served, and the five survivors recorded 0% fallback - so the failure is
-      invisible in the numbers and total in the run. A changeling arm is 5 h,
-      which is the expensive place to find out. Decide which it is: a transport
-      retry beside the rate ones, or a per-seat catch costing one fallback
-      instead of the run. Done when a stalled provider costs at most a seat.
-
 - [ ] **The play lane, after session 0.** The draft is BUILT and RUN
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
       economy-compliance read, neither of which has a rubric yet. Still not
