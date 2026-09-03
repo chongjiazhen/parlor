@@ -197,15 +197,23 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
-- [ ] **A recipe's flags are pinned to its criterion by a TEST, not by a reader.**
-      `eval/test_partner_verdict.py` reads the criterion `.md` and holds the
-      VERDICT tool equal to it, so criterion-vs-tool is mechanized. Nothing holds
-      the RECIPE equal to it, and recipe-vs-criterion is the belfry live1 failure -
-      11.5 h of GPU readable but never callable. One recipe of 27 has a launcher
-      test at all (`eval/test_belfry_adjudicator_launcher.py`, which reads its
-      `.cmd`), so the pattern exists and is unextended. Done when every
-      `eval/runs/*.cmd` naming a criterion is asserted equal to that file's
-      §Settings, and a drift is a red test rather than a reader's diligence.
+- [ ] **A recipe's flags are pinned to its criterion by a standalone SCRIPT,
+      2026-09-03 - not yet by the suite, which is the gap that remains.**
+      `scripts/check-recipe-settings.py` (mutation-checked: red on a seeded
+      drift, green restored) reads a `.cmd`'s actual `py -3 -m eval.` invocation,
+      joins its `^` continuations, substitutes its `set` vars, strips quotes, and
+      holds each `--flag value` against the criterion `.md`'s literal text -
+      collapsing the doc's own hand-wrap so `--model\nqwen...` still matches. Run
+      tonight against the three recipes that matter (`changeling-partner-arm`,
+      `-mixed-pack`, `-mixed-village`): all three agree, including the recipe
+      written an hour before the check. **Explicitly refuses to vacuous-pass**: a
+      recipe shape it cannot parse (a `for %%T` loop, a two-invocation
+      control/model pair - `changeling-rounds-pair.cmd` and `-skin-pair.cmd`,
+      confirmed) reports NOT CHECKED or fails loud, never a silent 0-pair
+      "agrees". Done when it is a pytest fixture over all ~15 criterion-bound
+      recipes instead of an explicit pair list, which needs the loop and
+      multi-invocation shapes read on their own and the suite ban lifted to add
+      it without contending with a live arm.
 - [ ] **The merge freeze is prose, and the import graph is what it actually
       means.** `queue.md` says a branch is free and a merge is not; what makes a
       merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
