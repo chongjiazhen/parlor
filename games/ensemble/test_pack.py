@@ -1,6 +1,7 @@
 """Pack loading, and the payload position the menu encodes."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -57,3 +58,36 @@ def test_sheet_of_an_unknown_name_raises(tmp_path):
     pack = Pack.load(_pack(tmp_path, [_pb("THE ONE")]))
     with pytest.raises(KeyError):
         pack.sheet("THE MISSING")
+
+
+EXAMPLE = Path(__file__).resolve().parent / "packs" / "example" / "playbooks.json"
+
+
+def test_the_shipped_example_pack_loads_and_satisfies_the_schema():
+    """Every rung owes one pack under terms that permit shipping it.
+
+    It is the fixture the loader is tested against and the executable half of
+    the schema documentation, so a change that breaks the format fails here
+    rather than in somebody's run. ``docs/content-packs.md`` §The example pack.
+    """
+    pack = Pack.load(EXAMPLE)
+    assert len(pack.names()) >= 5
+    assert len(set(pack.names())) == len(pack.names())
+    for entry in pack.menu():
+        assert entry["hook"], f"{entry['name']} has no menu hook"
+        assert entry["hook"].count(".") == 1, f"{entry['name']} hook is not one sentence"
+    for name in pack.names():
+        sheet = pack.sheet(name)
+        assert sheet["questions"], f"{name} has no questions"
+        for q in sheet["questions"]:
+            assert q["options"], f"{name}: {q['question']} has no options"
+
+
+def test_the_example_pack_seats_a_full_draft():
+    from games.ensemble.draft import Draft
+    pack = Pack.load(EXAMPLE)
+    d = Draft(pack.names(), seats=5, seed=1)
+    while not d.done:
+        d.offer()
+        d.take(d.remaining()[0])
+    assert len(set(d.picks.values())) == 5
