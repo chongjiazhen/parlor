@@ -5,7 +5,7 @@ rem
 rem This is `changeling-mixed.cmd`'s arm-1 block, byte-copied, with arm 2 left
 rem unrun. It exists because the pair is ~4 h of card and its two arms are read
 rem SEPARATELY, each against its own control (docs\changeling-mixed-criterion.md
-rem §The statistic), so a card with time for one gets the informative one - the
+rem The statistic), so a card with time for one gets the informative one - the
 rem queue's standing call. Nothing here is tuned: every value below is the frozen
 rem recipe's, and the criterion forbids an edit after launch.
 rem
