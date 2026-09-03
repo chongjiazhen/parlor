@@ -114,7 +114,9 @@ partly true is worse than none.
 - `docs/changeling-partner-criterion.md` - the pack statistic as PRIMARY at last:
   one arm on fresh seeds 17000.., the partner vote against its own random control,
   after two pairs moved it as a free read and neither could promote it. Arithmetic
-  `eval.partner_verdict` - OWED, with its recipe. UNLAUNCHED.
+  `eval.partner_verdict`, recipe `eval/runs/changeling-partner-arm.cmd`, both
+  written and pinned to the file by a test. UNLAUNCHED, and it must run BEFORE
+  the source-rules merge.
 - `docs/changeling-gate2-pair-criterion.md` - gate #2 with a control at last:
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic

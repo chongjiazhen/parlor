@@ -1,9 +1,10 @@
 # Changeling partner protection - the pack statistic as PRIMARY, pre-committed criterion
 
-Created: 2026-09-03T05:25:31Z. Not editable after launch. **Unlaunched** - this
-file is the deliverable; `eval/partner_verdict.py` and
-`eval/runs/changeling-partner-arm.cmd` are owed beside it and are named here so
-the criterion binds them rather than the other way round.
+Created: 2026-09-03T05:25:31Z. Not editable after launch. **Unlaunched.**
+Arithmetic `eval.partner_verdict`, recipe `eval/runs/changeling-partner-arm.cmd`,
+both written 2026-09-03 and both bound by this file - the verdict pins the
+record's own `args` back against §Settings and a test reads THIS file to hold the
+two equal, so a launcher default cannot quietly outvote the criterion again.
 
 Two pairs have now moved the same pack statistic as a FREE READ, on two unrelated
 axes, and neither could promote it: the skin pair's primary and the rounds pair's
@@ -100,6 +101,16 @@ already runs to 5999, so the neighbouring block was never as free as it looked.
 therefore a pre-registered REPLICATION of an unadjusted free read - which is the
 only honest thing to do with a finding of that provenance, and is why no new axis
 is introduced in the same file.
+
+## Entry condition - before the source-rules merge
+
+**This arm must run while the rung plays the rules `cl-rounds2` played.** The
+primary is a replication of that configuration, and the changeling source-rules
+merge adds an `identity`-class reveal that moves the strata. The control is this
+arm's OWN, so the merge would not VOID the difference - which is the trap. It
+would leave every number readable and quietly change what is being replicated.
+The card is otherwise free of it: the recipe refuses while
+`eval/records/cl-chain-tail.log` lacks `PARLOR TAIL DONE`.
 
 ## What voids it, decided in advance
 

@@ -164,8 +164,9 @@ the one that goes stale.
       moved the same statistic the same way** (2026-09-03, `docs/measurements.md`),
       so the criterion is WRITTEN - `docs/changeling-partner-criterion.md`, one arm
       on fresh seeds 17000.., ~5 h, primary the partner vote against its own
-      control. What it owes is `eval/partner_verdict.py` and its recipe, then the
-      card. The axis question - which of name form or round count causes it - is
+      control. Tool and recipe are WRITTEN; what it owes is the
+      card - and it must run BEFORE the source-rules merge, which would leave
+      every number readable while changing what is replicated. The axis question - which of name form or round count causes it - is
       deliberately NOT in it: four arms split 2-2 and no single variable separates
       them, so that is a later pair against this arm's record.
 - [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
