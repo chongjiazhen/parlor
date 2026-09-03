@@ -69,24 +69,21 @@ A slice is one session's worth, with an entry condition, ending in a thing that
 exists. **Take exactly one.** Slice numbers are IDs, not positions, and are never
 renumbered. **The live table is empty 2026-09-02** - every slice S1-S36 is struck and
 annotated in `docs/slices.md`. The next slice is cut from the rows below when one
-earns a session; a cold session picks up the merge list and the frozen prompt
-arms first. The split that matters is GPU-bound versus attention-bound: a run
+earns a session. The split that matters is GPU-bound versus attention-bound: a run
 needs a launch and a log tail, not a session watching it, so a slice with a run in
 it launches first and spends the wait on a CPU slice. **While a run is in
 flight**, the standing menu is `docs/open-arms.md` §While the card is busy - an
 instrument scored against records that already exist costs nothing and can
 outrank the run it waits on.
 
-**Direction, called 2026-08-27** and argued in `docs/open-arms.md`: gate #1
-measures parlor and is durable, gates #2 and #3 measure a MODEL and decay with the
-next checkpoint, and nothing built so far de-risks the product claim - so the next
-spike is the **adjudicator** against 3-4 discretion-heavy characters. **Taken
-2026-09-02 as belfry's first
-PLAY-TIME discretion arm** - the false count a switched-off gauge is told, held
-across nights. Both reads landed the same day, COHERENT supplied and COHERENT and
-NEEDS MEMORY with `prior` withheld (`docs/measurements.md`). **The third arm both
-reads end by naming is READ 2026-09-03** - NO RECALL, and the belfry row below
-carries what it left.
+**Direction, re-called 2026-09-03: tables a person plays at, ahead of arms that
+measure a model.** The 08-27 call (gate #1 is durable, gates #2/#3 decay with
+the checkpoint, so spike the adjudicator) stands and is spent - the belfry
+discretion arms are all READ. What ranks first now: **the play lane, the browser
+seat, and the Paranoia-shaped rung** - the three rows that end in a table. The
+frozen changeling arms keep their criteria and their card only where a run is
+already chained or a merge is already resolved; no new changeling criterion is
+cut ahead of a table row. Argument: `docs/decisions.md` §Tables ahead of arms.
 
 **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
 either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
@@ -158,8 +155,9 @@ the one that goes stale.
       later pair against this arm's record.
 - [ ] **The folk-vs-greek vocabulary read needs a criterion and fresh seeds,
       ~10 h.** Decide first whether it is worth 10 h at all, given the skin pair
-      showed NOT SHOWN on the name-form axis. Moved verbatim, with the general
-      lesson it carries, to `docs/open-arms.md` 2026-09-03.
+      showed NOT SHOWN on the name-form axis. Done when decided no (row deleted)
+      or a criterion exists. Argument and the general lesson: `docs/open-arms.md`
+      2026-09-03.
 - [ ] **`slice/transport-retry` is not on the merge list, and its keying
       question is now DECIDED.** Four commits, 971 insertions, named nowhere in
       this file until the 2026-09-03 triage. The `core/` collision is settled:
@@ -198,22 +196,14 @@ the one that goes stale.
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
 - [ ] **A recipe's flags are pinned to its criterion by a standalone SCRIPT,
-      2026-09-03 - not yet by the suite, which is the gap that remains.**
-      `scripts/check-recipe-settings.py` (mutation-checked: red on a seeded
-      drift, green restored) reads a `.cmd`'s actual `py -3 -m eval.` invocation,
-      joins its `^` continuations, substitutes its `set` vars, strips quotes, and
-      holds each `--flag value` against the criterion `.md`'s literal text -
-      collapsing the doc's own hand-wrap so `--model\nqwen...` still matches. Run
-      tonight against the three recipes that matter (`changeling-partner-arm`,
-      `-mixed-pack`, `-mixed-village`): all three agree, including the recipe
-      written an hour before the check. **Explicitly refuses to vacuous-pass**: a
-      recipe shape it cannot parse (a `for %%T` loop, a two-invocation
-      control/model pair - `changeling-rounds-pair.cmd` and `-skin-pair.cmd`,
-      confirmed) reports NOT CHECKED or fails loud, never a silent 0-pair
-      "agrees". Done when it is a pytest fixture over all ~15 criterion-bound
-      recipes instead of an explicit pair list, which needs the loop and
-      multi-invocation shapes read on their own and the suite ban lifted to add
-      it without contending with a live arm.
+      2026-09-03 - not yet by the suite.** `scripts/check-recipe-settings.py`,
+      mutation-checked, holds a `.cmd`'s `--flag value`s against its criterion's
+      text; how it parses is its own header. **It refuses to vacuous-pass**: a
+      shape it cannot read (a `for %%T` loop, a two-invocation pair -
+      `changeling-rounds-pair.cmd`, `-skin-pair.cmd`) reports NOT CHECKED, never
+      a silent 0-pair "agrees". Done when it is a pytest fixture over all ~15
+      criterion-bound recipes, which needs those two shapes read and the suite
+      ban lifted.
 - [ ] **The merge freeze is prose, and the import graph is what it actually
       means.** `queue.md` says a branch is free and a merge is not; what makes a
       merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
@@ -287,12 +277,10 @@ unlaunched, and waits on the merge list above:
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
 - [ ] **`mixed-village` is CHAINED behind partner, 2026-09-03T23:04 local -
-      `mixed-pack` is READ and INFORMS.** The rung's village win rate is +20.92%
-      [+11.11, +30.16] against a LIVE pack over its own twin, and the 77.36%
-      silence artifact prices at 59.76% against seats that talk
-      (`docs/measurements.md`). The second arm's figure is the rung's PACK rate
-      against 56.09% rescored - the direction the criterion says can disagree, and
-      no cross-arm claim may be made until it lands. Recipe
+      `mixed-pack` is READ and INFORMS** (`docs/measurements.md`). The second
+      arm's figure is the rung's PACK rate against the rescored control - the
+      direction the criterion says can disagree, and no cross-arm claim may be
+      made until it lands. Recipe
       `eval/runs/changeling-mixed-village.cmd`, committed, a byte-mirror of
       `changeling-mixed-pack.cmd` except `--arm mixed-village`; launch mechanics
       in `queue.local.md`. Read both with `py -3 -m eval.mixed_verdict` once down.

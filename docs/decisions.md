@@ -777,3 +777,14 @@ of, and `transcripts/` is for the rendered evidence of a claim, not a play log.
 
 The layout and the cadence are `local/README.md`, which is untracked with the
 rest - it is the contract for a dir a clone does not have.
+
+## Tables ahead of arms, 2026-09-03
+
+The 08-27 direction (spike the adjudicator, because gate #1 is durable and
+gates #2/#3 decay with the checkpoint) is spent - every belfry discretion arm is
+READ. What ranks first now is the three rows that end in a table a person sits
+at: the play lane, the browser seat, the Paranoia-shaped rung. The frozen
+changeling arms keep their criteria; they get card only where a run is already
+chained or a merge already resolved, and no new changeling criterion is cut
+ahead of a table row. The arms measure a model and the tables are what the
+model is for.
