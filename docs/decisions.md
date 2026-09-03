@@ -591,6 +591,15 @@ window in which this session ran three pytest suites (102, 1757, then 386 tests)
 for the mixed rebase. About 25%, off the arm's own log, and it pushed the chain's
 finish from 15:25 to ~16:45 local.
 
+**Confirmed on the completed arm, and it has an after as well as a before.**
+Games 1-121 ran 1.006 min/game, the suite window 121-151 ran 1.250 (**+24.3%**),
+and games 151-191, with nothing else on the box, ran **1.007 - +0.2% against the
+pre-suite rate.** The arm finished 200/200 at 12482s. So this is a before/during/
+after with the after landing on the before, not a drift or a thermal ramp that
+happened to coincide. Bucket noise is real - two 10-game buckets reached 1.16 and
+1.09 with nothing running - which is why the claim rests on the 30- and 40-game
+spans rather than on the 1.370 peak bucket.
+
 **The arm is not voided and no number moves.** Fallback held 0/15 throughout and
 wall-clock is not one of this arm's variables. What the reading costs is an
 assumption, not a result.
