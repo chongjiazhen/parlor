@@ -618,3 +618,28 @@ Verbatim:
   Instrument `py -3 -m eval.durf_reveal_order <record>.json`, no GPU. There is
   still **no rubric for whether a refereed session was any GOOD**, and the
   reveal-ahead count must not be promoted into one.
+
+## Session-0 is the play lane's first slice, 2026-09-03
+
+The argument behind the play-lane row in `queue.md`. A scene loop is the obvious
+first slice and the wrong one: it produces prose, and prose needs a rubric this
+tree does not have (the same gap `docs/durf-rung.md` leaves open for a refereed
+session). **A playbook draft produces a number on day one.**
+
+- **A taken pick is an illegal move**, so the existing fallback instrument reads
+  the draft unchanged - no new scorer, and the void rule applies as written.
+- **The pick distribution is the read.** Whether seats collapse onto the same few
+  playbooks is a diversity question with a free baseline: the operator ranked all
+  22 by preference 2026-09-03, so model picks have a human ordering to correlate
+  against rather than only a uniform null. Mode collapse here is the narrative
+  twin of the agreeableness the economy-compliance question chases.
+- **The payload is the design problem, and it is the standing-context invariant
+  in miniature.** 22 full sheets in the choose-phase ask is a large payload paid
+  by every seat, and the invariant says a rule reaches a seat at the phase where
+  it is actionable. So: names plus a one-line hook to choose from, the full sheet
+  only to the seat that took it. That is a position held for a reason, and it is
+  measurable - a run that sends all 22 is the arm against it.
+- **Local pack, all 22 entries; the tracked example pack is a different object.**
+  `docs/content-packs.md`'s four-or-five-entries limit governs what SHIPS. A
+  draft needs a real menu, and a menu of five is not a table's choice.
+

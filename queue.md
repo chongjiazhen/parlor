@@ -390,19 +390,17 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       orthogonal secrets and the audit distinguishes them.
 
 - [ ] **The play lane: a GM-less narrative rung whose pack is not in the tree.**
-      Wanted for playing, not for a gate - no hidden information and no
-      adjudication, so it earns nothing for gates #1-#3 and is NOT sequenced
-      against the Paranoia rung. What it does exercise is real: seat management,
-      the console's human seat, transcripts, and an economy-compliance read - does
-      a seat take narrative power it should have declined - which is
-      fallback-rate-shaped, so the existing instrument already measures it.
-      Architecture is decided and unbuilt (`docs/content-packs.md`): engine,
-      schema and loader tracked, `packs/<local>/` gitignored, one tracked example
-      pack under terms that permit it. Lumen Ryder Core is the example candidate -
-      its grant is published and the cite is in `docs/decisions.md`. **Route
-      local** - a pack outside the tree still reaches the backend, and that doc
-      says so in as many words. Done when one scene loop runs with a human seat
-      and model seats.
+      For playing, not a gate - no hidden information and no adjudication, so it
+      earns nothing for gates #1-#3 and is NOT sequenced against the Paranoia
+      rung. It still exercises seat management, the console's human seat,
+      transcripts, and an economy-compliance read the fallback instrument already
+      measures. Architecture decided and unbuilt (`docs/content-packs.md`):
+      engine, schema and loader tracked, `packs/<local>/` gitignored, one tracked
+      example pack - Lumen Ryder Core, whose grant is cited in
+      `docs/decisions.md`. Route local: a pack outside the tree still reaches the
+      backend. **First slice is session-0, a playbook draft, not a scene loop** -
+      `docs/open-arms.md`. Done when a draft completes with no duplicate seats
+      and the pick distribution is recorded.
 
 Publishing:
 
