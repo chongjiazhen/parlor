@@ -109,6 +109,11 @@ def dedupe_last(games: list[dict]) -> list[dict]:
     Last wins because append order is write order and the summary was written by
     the last run - and that recovery is then CHECKED, in `summary_voids`, rather
     than trusted.
+
+    **It stays, and is now about the PAST.** `core.runlog.claim_record` refuses an
+    occupied record path from 2026-09-03, so no run lands a second block again;
+    the records already carrying one are not going to rewrite themselves, and this
+    is what reads them.
     """
     by_index = {int(g["game"]): g for g in games}
     return [by_index[i] for i in sorted(by_index)]

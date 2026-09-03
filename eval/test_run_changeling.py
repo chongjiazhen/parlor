@@ -493,3 +493,34 @@ class TestTheMixedArmsSeatTheRungAgainstTheModel(unittest.TestCase):
                      "--seed", "1000", "--out", out])
             written = json.load(open(out, encoding="utf-8"))
         self.assertEqual(written["args"]["arm"], "mixed-pack")
+
+    def test_a_second_run_onto_the_same_record_path_is_REFUSED(self):
+        """The per-game JSONL is appended and the summary beside it is truncated,
+        so a re-run onto an occupied path stacked one run's games onto another's
+        and left the two files counting different populations. Three records
+        reached that state before the writer refused. The refusal has to land
+        before a game is played - the point is not to notice afterwards."""
+        canned = one_game(0, make_args(arm="random", seed=1000))
+        played = []
+
+        def count(i, a):
+            played.append(i)
+            return canned
+
+        argv = ["--arm", "mixed-pack", "--backend", "local", "--games", "1",
+                "--seed", "1000"]
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "mixed.json")
+            with mock.patch.object(eval.run_changeling, "one_game", count):
+                self.run_main([*argv, "--out", out])
+                self.assertEqual(len(played), 1)
+                with self.assertRaises(SystemExit) as caught:
+                    self.run_main([*argv, "--out", out])
+            self.assertEqual(len(played), 1,
+                             "the refused run played games before finding out "
+                             "its record path was occupied")
+            self.assertIn(out, str(caught.exception))
+            with open(out + ".jsonl", encoding="utf-8") as fh:
+                self.assertEqual(len(fh.read().splitlines()), 1,
+                                 "the second run stacked its games onto the "
+                                 "first, which is the whole failure")

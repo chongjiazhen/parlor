@@ -37,7 +37,8 @@ import time
 
 from core import integrity
 from core.backends import ENDPOINTS, Backend, api_key_from_env, require_key
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import wilson
 from games.durf import rules, seats, session as session_mod
 
@@ -237,6 +238,11 @@ def main() -> None:
                  "fall back on every turn and score the scripted referee")
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before a session is
+    # played, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     RUN_STATE.requested = args.sessions
     started = time.time()

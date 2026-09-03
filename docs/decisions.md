@@ -721,3 +721,34 @@ same two sets.
 
 Not measured: any arm. The field is an instrument and is not model-facing, so no
 number moves and nothing re-baselines.
+
+## A run REFUSES an occupied record path, 2026-09-03
+
+`core/runlog.py claim_record(out)` is called by all six drivers at the same door
+that refuses a keyless backend, and it raises `SystemExit` when either the summary
+or its `.jsonl` sibling already exists.
+
+**The hazard it closes.** The JSONL is appended per game and the summary beside it
+is truncated, so a second run onto an occupied path STACKED its games onto the
+first and REPLACED the summary: the two files then described different
+populations with nothing raising. `cl-heuristic`, `cl-mixed-pack` and
+`cl-mixed-village` are each 3000 lines for 1000 games, and the first block of
+`cl-heuristic.json.jsonl` is a stale play of the same seeds at 71.55% pack wins
+against the published 56.09% - blended naively, about 61%, plausible and five
+points wrong. No published number moves: every one reproduces from a deduped read.
+
+**It refuses; it does not truncate.** The occupied file holds a run that cost
+GPU-hours. Clearing it is the operator's call, and a launcher that deletes a
+record to make room is the one outcome worse than stacking.
+
+**The guard is a ratchet keyed on the APPEND, not on a list of drivers.**
+`core/test_runlog.py` finds every module that opens the JSONL in `"a"` and
+requires the claim in the same file, with a floor test so that renaming the
+append idiom cannot empty the set and pass vacuously. A seventh driver copied
+from a sixth is caught by its own append.
+
+**What it does NOT do.** `eval/mixed_verdict.dedupe_last` stays - the records that
+already carry a second block are not going to rewrite themselves. And five
+recipes still `del` a stale JSONL instead of refusing; that is a queue row.
+
+Not measured: whether any recipe was ever re-run onto its own path deliberately.

@@ -64,6 +64,46 @@ def record_paths(out: str) -> tuple[str, str]:
     return out, f"{out}.jsonl"
 
 
+def claim_record(out: str) -> tuple[str, str]:
+    """The run's claim on its two output paths, made ONCE before the first game.
+
+    Refuses when either file already exists, because the two are opened
+    differently and always were: ``land()`` appends the per-game JSONL while the
+    summary is written ``"w"``. A second run onto an occupied path therefore
+    STACKS a block of games into one file and REPLACES the other, and the pair
+    then describes two different populations with nothing raising. Three records
+    reached that state - ``cl-heuristic``, ``-pack`` and ``-village`` hold 3000
+    lines for 1000 games - and the first block of ``cl-heuristic.json.jsonl`` is a
+    stale play of the same seeds at 71.55% pack wins against the published 56.09%,
+    which a naive read of the file blends to about 61%: plausible, and five points
+    wrong. No published number is affected, because every one of them reproduces
+    from a deduped read, but that is a property of the two scorers that happen to
+    dedupe rather than of the writer.
+
+    **It refuses; it does not truncate.** The occupied path holds a run that cost
+    GPU-hours, and clearing it is the operator's call. Every launcher already
+    carries an ``if exist ... exit /b 1`` line against this, which is a guarantee
+    living in twenty copies of a recipe instead of in the one function all four
+    drivers route through - the same argument that moved ``makedirs`` here. The
+    recipes keep their line; it is no longer what holds.
+
+    Raises ``SystemExit`` rather than returning a flag, for the reason the drivers
+    already refuse that way: a run that cannot write its record has nothing to do,
+    and the marker still lands because ``run_with_marker`` maps every exit path.
+    """
+    summary, jsonl = record_paths(out)
+    occupied = [path for path in (summary, jsonl) if os.path.exists(path)]
+    if occupied:
+        raise SystemExit(
+            "refusing to run onto an occupied record path: "
+            + ", ".join(occupied)
+            + ". The JSONL is appended and the summary is truncated, so this run "
+              "would stack its games onto another run's and leave the two files "
+              "describing different populations. Move or delete those files, or "
+              "pass a different --out.")
+    return summary, jsonl
+
+
 @dataclass
 class RunState:
     """What a run knows about itself, readable from an exception handler.

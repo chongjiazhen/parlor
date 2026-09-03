@@ -52,7 +52,8 @@ from dataclasses import asdict
 
 from core import integrity
 from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import wilson
 from games.cabal import transcript
 from games.cabal.player import (GameRecord, LLMPolicy, RandomPolicy, VoteRecord,
@@ -772,6 +773,11 @@ def main() -> None:
     # reports a number the scorer then voids after the GPU is spent.
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before a game is
+    # played, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     workers = args.workers
     if not LIVE_TEAMS[args.arm] or not args.backend:
