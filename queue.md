@@ -350,17 +350,18 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       list, and the mixed arms read it against a live seat.
 
 - [ ] **Build the Paranoia-shaped rung, branding-free** - called 2026-09-03 and
-      the pre-committed falsifier did NOT fire, `docs/decisions.md`. Gate #1 has
-      four independent checks, not one: `entitled` is a flat `set[int]` and
-      `secret_terms[s]` one undifferentiated list, so a viewer entitled to another
-      seat's `faction` is skipped on ALL that seat's terms and a leaked
-      `deviation` reports clean - the false-negative direction the `find_leaks`
-      invariant forbids. Per-axis keys need no `core/` change to start
-      (`games/durf/facts.py` numbers its keys and reuses the primitive), and that
-      file says the move on a SECOND asking game is to widen the key and delete
-      the adapter; this is that game. Functional keys only - the setting, its role
-      names and its text stay out of the tree. Done when a seat holds four
-      orthogonal secrets and the audit distinguishes them.
+      the pre-committed falsifier did NOT fire, `docs/decisions.md`. **The gate #1
+      half is DONE, 2026-09-03**: `find_leaks` takes a `(seat, axis)` key, so one
+      seat's several secrets are entitled separately, and seat-level entitlement
+      still covers every axis (`core/test_observability.py`, both branches
+      mutation-checked). The rung inherits it and owes no `core/` change. What was
+      actually wrong is narrower than this row claimed - tuple keys already
+      discriminated; what they lacked was the self-skip and the seat-level grant,
+      whose absence reports the VIEWER'S OWN secrets at a game that adopts axes and
+      pushes it back to the flat seat key where the false negative lives.
+      Functional keys only - the setting, its role names and its text stay out of
+      the tree. Done when a seat holds four orthogonal secrets and the audit
+      distinguishes them.
 
 - [ ] **The play lane, after session 0.** The draft is BUILT and RUN
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the

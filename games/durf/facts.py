@@ -12,6 +12,14 @@ promotes on evidence that a SECOND game needs a thing, and one rung is not two.
 cabal and changeling are both seat-keyed and neither wants this. When a second
 game asks, the move is to widen ``find_leaks``' key and delete the adapter below.
 
+**2026-09-03: the primitive's key DID widen, and this adapter still stands.** It
+widened along the SEAT axis - a key may now be ``(seat, axis)`` so one seat's
+several secrets are entitled separately - which is not this rung's axis. A DURF
+fact belongs to no seat at all, so ``("hidden", "R2")`` is not a case of
+``(seat, axis)`` and the numbering below is still what carries it. Do not read
+the paragraph above as discharged: the adapter goes when the key becomes opaque,
+not when it merely grew a second seat-shaped form.
+
 **The matcher is not reimplemented here, and that is the whole design.**
 ``find_fact_leaks`` indexes the facts and hands the work to
 ``core.observability.find_leaks`` unchanged, so this rung inherits the audited
