@@ -162,6 +162,21 @@ the one that goes stale.
       declares the audit a free read and forbids a bar after the fact, and this
       is one of ~6 such reads, so the interval is unadjusted. Settling it needs a
       new criterion with the pack statistic PRIMARY on fresh seeds, not a re-read.
+- [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
+      needs fresh seeds now.** Two criteria built the door and neither walked
+      through it: the skin pair's §"What this does NOT compare" says a folk-vs-greek
+      read "needs its own folk arm on these seeds under HEAD - a separate row, a
+      separate criterion", and the rounds pair's §Settings put its two-round `folk`
+      arm on seeds 5000..5199 for exactly that, with one condition - the vocabulary
+      criterion "is written before that arm is read, never after." The greek arms
+      were read 09-02 and `cl-rounds2` printed its own blind accuracy at 05:38 on
+      09-03. No such criterion exists in `docs/`. **The seeds are spent**; the read
+      is still worth having, but it costs a fresh folk arm and a fresh greek arm on
+      new seeds, ~10 h, not the zero it was priced at. Cheaper alternative first:
+      decide whether vocabulary is worth 10 h at all, given the skin pair showed
+      NOT SHOWN on the name-form axis. The general lesson is the row that matters -
+      **an arm that doubles as a future control has a criterion deadline, and the
+      deadline is the moment the arm's own report prints.**
 - [ ] **Five `.cmd` recipes stamp a WRONG time on every per-arm line.** Measured
       2026-09-03: `cl-rounds-pair.log` reads `[pair] arm rounds2 down Thu
       03/09/2026  0:39:44` for an arm whose record was written at 05:38 - `%TIME%`
