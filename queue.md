@@ -208,6 +208,12 @@ the one that goes stale.
       read side by side and one is kept; **not** by merging and resolving, which
       would pick a winner by textual accident in the repo's most load-bearing
       primitive.
+- [ ] **No criterion states the effect it EXPECTS, only the one it could see.**
+      Every measured changeling pair is NOT SHOWN and each predicted it would be:
+      resolution ~9-10 points at 200 games, observed prompt effects 1-3. The only
+      arm that INFORMED swapped a whole policy. Argument, the real counter and
+      the one cheap fix: `docs/open-arms.md` §Is the changeling arm program
+      powered. Done when a criterion must name its expected effect before launch.
 - [ ] **`docs/README.md` is the merge list's standing collision point.** 195
       lines against its 150 advisory as of 2026-09-03, and it conflicts on seven
       of the nine unmerged branches, because each adds its criterion to one flat

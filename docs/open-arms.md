@@ -747,3 +747,42 @@ below, so nothing is rewritten on the way out.
       down a chain. Same day, hours apart: the rung's design landed 16:20, its
       referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
       carries a live recommendation against building what it had just built.
+
+## Is the changeling arm program powered for what it chases? - opened 2026-09-03
+
+The operator asked why so much card goes to changeling. The tree does not hold an
+answer, and two things in it argue the other way.
+
+**Every measured changeling pair so far is NOT SHOWN, and each said in advance
+that it would be.** The rounds pair priced a half-width near 8.5 points and wrote
+that it "cannot settle a gap smaller than nine"; the observed gap was under three
+(`docs/measurements.md`). The skin pair came back +1.20% [-7.37%, +9.73%]. The
+partner arm names an 8.7-point MDE. The gate #2 pair prices ~10 points. So the
+design resolves roughly nine-to-ten-point effects at 200 games, and the observed
+prompt-sized effects cluster at one to three.
+
+**The one arm that INFORMED was not a prompt change.** Gate #2's -17.86% came
+from replacing an entire pack policy, not from editing a string. That is the
+pattern worth naming: this design sees POLICY-sized changes and cannot see
+PROMPT-sized ones, and most of the frozen queue is prompt-sized.
+
+**The counter-argument, and it is real.** Prompt effects are not uniformly small
+here - `AGENTS.md` records `_night_against_the_table` moving +7% to +63% on a 12B
+and then INVERTING on q36. A line can be worth sixty points. So the program is
+not irrational; it is a lottery with cheap tickets, most of which read NOT SHOWN.
+
+**What is actually missing is one step, and it is cheap.** Every criterion states
+its MDE. None states the effect size it EXPECTS, or why that effect should exceed
+the MDE. An arm whose expected effect is three points against a nine-point
+resolution is a NOT SHOWN bought with GPU hours, and it is knowable before launch.
+
+**And the tree's own direction already says this axis decays.** `queue.md`
+§Direction, called 2026-08-27: gate #1 measures parlor and is durable, gates #2
+and #3 measure a MODEL and decay with the next checkpoint, and nothing built so
+far de-risks the product claim - so the next spike is the adjudicator. Every
+frozen changeling arm is gate #2/#3 work. This is the same shape as the two
+pre-measurement positions reconciled earlier today: a live recommendation in the
+tree against what the tree is doing.
+
+Not a call to stop. A call to make each arm state its expected effect before it
+takes the card, and to let that decide the ranking.
