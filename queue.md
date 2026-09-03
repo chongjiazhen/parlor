@@ -204,21 +204,19 @@ the one that goes stale.
       `llm-village` on S22's seeds, one new arm
       (`eval/runs/changeling-gate2-arm.cmd`), LAUNCHED as the chain's last leg and
       unread. The cabal half is parked with cabal's GPU program.
-- [ ] **The source-rules x KINDRED conflict, and what the merge probe measured.**
-      2026-09-03, `git merge-tree` against `b0dc0ff`, no checkout moved: 9 of 12
-      branches merged clean, and **slot 1 is now clean too** - `changeling-mixed`
-      and its parent `changeling-heuristic` were rebased onto main that day, so
-      the pair carries main's per-axis `find_leaks` rather than a 56-commit-old
-      core. What is LEFT is `slice/changeling-source-rules`, which conflicts in
-      `games/changeling/night.py`: its declinable-acts work against main's deck B
-      (`SETUP_7_KIN`, `require_seated_kin`). That is a THIRD pair beside the simul
-      and replies pairs above, and its order is not free - kindred's measured bar
-      (`eval/records/kin-chance.json`) sits under the pre-merge night, so a
-      source-rules merge re-bars deck B before it has ever run. **Not measured:
-      whether the night.py conflict is semantic or only textual.** Standing fact
-      the branches now hold: an arm pairs against `cl-rounds2`, recorded on main,
-      so the merge is on the launch path and a stale branch is not one variable
-      but fifty. Done when the kindred order is decided.
+- [ ] **The night.py conflict is TEXTUAL, measured 2026-09-03 - and the kindred
+      order was never open.** Trial merge of `slice/changeling-source-rules` into
+      main in a throwaway detached worktree, resolved and DISCARDED: one hunk, the
+      branch's `PASS` constant sitting adjacent to the `MAX_DEAL_ATTEMPTS` comment
+      main rewrote for deck B. The two changes edit different functions - main
+      `deal()` and `_kin_together`, the branch `legal_targets()` and
+      `random_chooser` - and 386 tests pass with both applied. Resolution is keep
+      the `PASS` block, keep main's comment over the branch's stale copy. **The
+      order question this row was filed on is ALREADY DECIDED**, 2026-09-02
+      `docs/decisions.md`: re-bar kindred AFTER the merge, since the deck's
+      question does not depend on which rules the control used and a fresh bar is
+      minutes of CPU. What the 09-02 call did not price is the merge itself, and
+      it is mechanical. Done when the merge lands; nothing here needs a decision.
 - [ ] **Merge the changeling source rules when the campaign chain has read.**
       The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
       re-baselines cabal (`docs/measurements.md`). The changeling
