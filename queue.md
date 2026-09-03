@@ -204,21 +204,21 @@ the one that goes stale.
       `llm-village` on S22's seeds, one new arm
       (`eval/runs/changeling-gate2-arm.cmd`), LAUNCHED as the chain's last leg and
       unread. The cabal half is parked with cabal's GPU program.
-- [ ] **A third conflict pair, and every arm branch is ~55 commits behind main.**
-      Measured 2026-09-03 with `git merge-tree` against `124ffa2`, no checkout
-      moved: 9 of 12 branches merge CLEAN. `slice/changeling-source-rules`
-      conflicts in `games/changeling/night.py` - its declinable-acts work against
-      main's deck B (`SETUP_7_KIN`, `require_seated_kin`) - so the third pair is
-      source-rules x KINDRED, and kindred's measured bar sits under the pre-merge
-      night. `slice/changeling-mixed` (GPU slot 1) and its parent
-      `slice/changeling-heuristic` conflict in `docs/measurements.md`, `queue.md`
-      and, the one that is code, `eval/test_run_changeling.py`. Arms sit 55-56
-      commits back and **merge AND RUN is what makes an arm comparable to
-      `cl-rounds2`**, so a merge is on the launch path, not after it - slot 1
-      cannot launch the moment the card frees. Slot 3, the partner arm, is
-      already on main and needs no merge. **Not measured: whether any conflict is
-      semantic rather than textual** - only `night.py` was read that far. Done
-      when slot 1 merges clean and the kindred order is decided.
+- [ ] **The source-rules x KINDRED conflict, and what the merge probe measured.**
+      2026-09-03, `git merge-tree` against `b0dc0ff`, no checkout moved: 9 of 12
+      branches merged clean, and **slot 1 is now clean too** - `changeling-mixed`
+      and its parent `changeling-heuristic` were rebased onto main that day, so
+      the pair carries main's per-axis `find_leaks` rather than a 56-commit-old
+      core. What is LEFT is `slice/changeling-source-rules`, which conflicts in
+      `games/changeling/night.py`: its declinable-acts work against main's deck B
+      (`SETUP_7_KIN`, `require_seated_kin`). That is a THIRD pair beside the simul
+      and replies pairs above, and its order is not free - kindred's measured bar
+      (`eval/records/kin-chance.json`) sits under the pre-merge night, so a
+      source-rules merge re-bars deck B before it has ever run. **Not measured:
+      whether the night.py conflict is semantic or only textual.** Standing fact
+      the branches now hold: an arm pairs against `cl-rounds2`, recorded on main,
+      so the merge is on the launch path and a stale branch is not one variable
+      but fifty. Done when the kindred order is decided.
 - [ ] **Merge the changeling source rules when the campaign chain has read.**
       The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
       re-baselines cabal (`docs/measurements.md`). The changeling
