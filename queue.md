@@ -145,25 +145,17 @@ behind each is `docs/open-arms.md`; read the entry before taking the row**, and
 the reference each names is indexed in `docs/README.md`. A second index here is
 the one that goes stale.
 
-- [ ] **The skin pair's effect landed on the PACK, and its primary statistic
-      could not see it.** Free read, `eval.changeling_audit`, both arms 2026-09-02:
-      a pack seat voted the fellow it was told 49/198 = 24.75% under `greek`,
-      27/198 = 13.64% under `greek-named`, diff -11.11% Newcombe [-18.75%,
-      -3.35%]. `greek` sits ON its control's 25.69%; `greek-named` is below it,
-      so proper names read as the pack PROTECTING its partner. The village-side
-      shown-village count moved +2.70% [-7.31%, +12.65%] - nothing. The pair's
-      primary is blind villager accuracy, a VILLAGE statistic, so the one thing
-      that moved is structurally outside it. **Not promotable**: the criterion
-      declares the audit a free read and forbids a bar after the fact, and this
-      is one of ~6 such reads, so the interval is unadjusted. **The rounds pair
-      moved the same statistic the same way** (2026-09-03, `docs/measurements.md`),
-      so the criterion is WRITTEN - `docs/changeling-partner-criterion.md`, one arm
-      on fresh seeds 17000.., ~5 h, primary the partner vote against its own
-      control. Tool and recipe are WRITTEN; what it owes is the
-      card - and it must run BEFORE the source-rules merge, which would leave
-      every number readable while changing what is replicated. The axis question - which of name form or round count causes it - is
-      deliberately NOT in it: four arms split 2-2 and no single variable separates
-      them, so that is a later pair against this arm's record.
+- [ ] **Run the partner arm - the pack statistic, PRIMARY, on fresh seeds.**
+      Two unadjusted free reads on two different axes both landed on the partner
+      vote and neither pair's primary could see it (`docs/measurements.md`: the
+      skin pair 2026-09-02, the rounds pair 2026-09-03). The criterion is
+      WRITTEN - `docs/changeling-partner-criterion.md`, one arm on fresh seeds
+      17000.., ~5 h - and the tool and recipe are written. What it owes is the
+      card, and it must run BEFORE the source-rules merge, which would leave
+      every number readable while changing what is replicated. The axis question
+      - which of name form or round count causes it - is deliberately NOT in it:
+      four arms split 2-2 and no single variable separates them, so that is a
+      later pair against this arm's record.
 - [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
       needs fresh seeds now.** Two criteria built the door and neither walked
       through it: the skin pair's §"What this does NOT compare" says a folk-vs-greek
@@ -179,20 +171,6 @@ the one that goes stale.
       NOT SHOWN on the name-form axis. The general lesson is the row that matters -
       **an arm that doubles as a future control has a criterion deadline, and the
       deadline is the moment the arm's own report prints.**
-- [ ] **A CPU slice during a live arm is NOT free - measured 25% 2026-09-03.**
-      `cl-gate2-village`'s own log, 20-game buckets: 0.970, 0.995, 1.000, 0.975,
-      1.060, 1.035 min/game through game 121, then **1.275** across 121-141, the
-      window in which this session ran three pytest suites (102, then 1757, then
-      386 tests) for the mixed rebase. The arm is unharmed - fallback stayed 0/15
-      throughout and wall-clock is not one of its variables - but the standing
-      menu's premise, that an instrument scored against existing records "costs
-      nothing" while a run waits, is measured wrong by about a quarter on this
-      box. **It would VOID a timing measurement**, and `docs/measurements.md`
-      §Route prices arms in min/game, so a min/game figure taken under a suite is
-      void rather than noisy. **DECIDED 2026-09-03** by the operator, argued in
-      `docs/decisions.md`: no suite runs while an arm is in flight, scheduling
-      rather than a gate. What is left open is only the cause - CPU contention,
-      IO, or the box's power budget - and nothing waits on it.
 - [ ] **`slice/transport-retry` is not on the merge list, and it re-solves a
       `core/` problem main solved a different way.** Found in the 2026-09-03
       triage; nothing in this file has ever named it. Four commits, 971
@@ -230,29 +208,14 @@ the one that goes stale.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3** -
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that exist, and
       `rate_ok`'s 5% CI-floor bar is pre-declared nowhere. **The changeling twin is
-      READ 2026-09-03 and INFORMS**, `docs/changeling-gate2-pair-criterion.md`:
-      the live pack wins 50.51% against the same live village where a RANDOM pack
-      wins 68.37%, difference -17.86% Newcombe [-27.10%, -8.15%]
-      (`docs/measurements.md`). Its named free read is the other half - blind
-      villager accuracy 47.41% against a live pack, 31.08% against a random one on
-      a 36.47% chance bar, so the village deduces worse when the pack is
-      unreadable. **The mechanism is untested and is what survives as a row**: the
-      arm moves the whole pack policy at once, so "speech is evidence" is a
-      reading, not a finding, and separating speech from votes is a new pair with
-      a criterion of its own. The cabal half is parked with cabal's GPU program.
-- [ ] **The night.py conflict is TEXTUAL, measured 2026-09-03 - and the kindred
-      order was never open.** Trial merge of `slice/changeling-source-rules` into
-      main in a throwaway detached worktree, resolved and DISCARDED: one hunk, the
-      branch's `PASS` constant sitting adjacent to the `MAX_DEAL_ATTEMPTS` comment
-      main rewrote for deck B. The two changes edit different functions - main
-      `deal()` and `_kin_together`, the branch `legal_targets()` and
-      `random_chooser` - and 386 tests pass with both applied. Resolution is keep
-      the `PASS` block, keep main's comment over the branch's stale copy. **The
-      order question this row was filed on is ALREADY DECIDED**, 2026-09-02
-      `docs/decisions.md`: re-bar kindred AFTER the merge, since the deck's
-      question does not depend on which rules the control used and a fresh bar is
-      minutes of CPU. What the 09-02 call did not price is the merge itself, and
-      it is mechanical. Done when the merge lands; nothing here needs a decision.
+      READ 2026-09-03 and INFORMS** (`docs/measurements.md`, criterion
+      `docs/changeling-gate2-pair-criterion.md`): the live pack costs itself 17.9
+      points against the same live village, and its named free read says the
+      village deduces WORSE against an unreadable pack. **The mechanism is
+      untested and is what survives as a row**: the arm moves the whole pack
+      policy at once, so "speech is evidence" is a reading, not a finding, and
+      separating speech from votes is a new pair with a criterion of its own. The
+      cabal half is parked with cabal's GPU program.
 - [ ] **Merge the changeling source rules when the campaign chain has read.**
       The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
       re-baselines cabal (`docs/measurements.md`). The changeling
@@ -263,8 +226,12 @@ the one that goes stale.
       branch - the control never declines and the guard is mutation-checked.
       Merging re-baselines the rung and the RULES.md notes flip then. What
       remains is the ranked arms that must run first, then the merge, then
-      re-measure the bar. Its one conflict is textual and its resolution is the
-      row above.
+      re-measure the bar. **Its one conflict is TEXTUAL and resolved in advance**
+      (trial merge 2026-09-03, discarded): one hunk in `night.py`, the branch's
+      `PASS` constant adjacent to the `MAX_DEAL_ATTEMPTS` comment main rewrote
+      for deck B; the two edit different functions and 386 tests pass with both.
+      Keep the `PASS` block, keep main's comment. Kindred re-bars AFTER the merge
+      (`docs/decisions.md` 2026-09-02); nothing here needs a decision.
 
 Measured prompt arms - same seeds, one variable, reported beside both fallback
 rates, landed between campaigns rather than into one. Every one is FROZEN and
@@ -344,17 +311,16 @@ Runs that are frozen and want card - and one that is already in the chain:
       deck re-baselines everything under it.
 - [ ] **The own-transcript arm sits BELOW the withheld arm, and no criterion has
       a verdict for that.** READ 2026-09-03 (`docs/measurements.md`): COHERENT,
-      NO RECALL, BELOW SUPPLIED, all three pre-committed and clean - control at
-      47.71% containing one half, 0.00% fallback everywhere. The unheld part is
-      the direction: 61.33% [54.07%, 68.12%] against the withheld arm's 77.05%
-      [68.83%, 83.62%], intervals NOT overlapping, so handing the referee its own
-      transcript looks worse than handing it nothing. The criterion licenses the
-      interval comparison and defines only RECALLS / NO RECALL, so this is an
-      observation, not a result. **Cheapest next step is not an arm**: the two
-      records exist, so ask first whether the transcript arm's asks are longer,
-      whether its false tellings sit later in a game, and whether its extra 59
-      pairs are a different population - all CPU against `.jsonl` already on
-      disk. An arm only if that turns up nothing. Not measured: any mechanism.
+      NO RECALL, BELOW SUPPLIED, all three pre-committed and clean. The unheld
+      part is the direction - handing the referee its own transcript looks worse
+      than handing it nothing, on non-overlapping intervals. The criterion
+      licenses the interval comparison and defines only RECALLS / NO RECALL, so
+      this is an observation, not a result. **Cheapest next step is not an arm**:
+      the two records exist, so ask first whether the transcript arm's asks are
+      longer, whether its false tellings sit later in a game, and whether its
+      extra 59 pairs are a different population - all CPU against `.jsonl`
+      already on disk. An arm only if that turns up nothing. Not measured: any
+      mechanism.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
       unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
       a night, taken at the top of `_begin_night`. What seating found, and how the

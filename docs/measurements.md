@@ -1121,6 +1121,22 @@ policy at once, not its speech. Nor does it say a live pack is worse at the game
 only that against THIS village, on this model, at these settings, its play is
 worth -17.9 points against playing at random.
 
+## changeling skin pair - the effect landed on the PACK, moved from `queue.md` 2026-09-03
+
+Free read, `eval.changeling_audit`, both arms 2026-09-02: a pack seat voted the
+fellow it was told 49/198 = 24.75% under `greek`, 27/198 = 13.64% under
+`greek-named`, diff -11.11% Newcombe [-18.75%, -3.35%]. `greek` sits ON its
+control's 25.69%; `greek-named` is below it, so proper names read as the pack
+PROTECTING its partner. The village-side shown-village count moved +2.70%
+[-7.31%, +12.65%] - nothing.
+
+The pair's primary is blind villager accuracy, a VILLAGE statistic, so the one
+thing that moved is structurally outside it. **Not promotable**: the criterion
+declares the audit a free read and forbids a bar after the fact, and this is one
+of ~6 such reads, so the interval is unadjusted. The rounds pair moved the same
+statistic the same way (§The free reads above), which is what the partner arm
+exists to spend properly.
+
 ## belfry night coherence, own TRANSCRIPT - NO RECALL, READ 2026-09-03
 
 `docs/belfry-night-transcript-criterion.md`, frozen 2026-09-02T10:16:52Z.
