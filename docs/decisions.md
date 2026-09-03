@@ -540,3 +540,45 @@ file's rule; its one deictic is resolved in brackets and nothing else is touched
 >       code; costs no card. The off-repo half stays off-repo - `CLAUDE.local.md`
 >       has the path, and naming it here is the signpost the hygiene invariant
 >       forbids.
+
+
+## The partner arm takes slot 3 and notebook slips, 2026-09-03
+
+The GPU order above predates `docs/changeling-partner-criterion.md`, written the
+next day. The operator asked where it lands. **It takes slot 3; notebook joins
+the deferred group with #4-#6.** Order before the merge: mixed-pack (~2 h),
+briefing (~5 h), partner (~5 h).
+
+**Why it beats notebook on the margin.** Every arm in that table, partner
+included, is a gate #2 or #3 arm - a measurement of a MODEL, which the direction
+called 2026-08-27 says decays with the next checkpoint. So the choice inside the
+set is not strategic; it is which arm most likely returns a number worth citing
+per hour of card. Partner's effect has been OBSERVED twice already, on two
+unrelated axes, at -10.03% and -12.05% against this arm's 8.7-point minimum
+detectable effect. Notebook has a recorded prediction and no observation. A
+pre-registered test of a twice-seen effect is a better bet than a first look.
+
+Second reason, and the one that would decide it alone: **it closes an honesty
+debt.** Two unadjusted free reads on the partner vote now sit published in
+`docs/measurements.md` with no pre-committed test behind either. The tree's rule
+is that a free read is not promotable; leaving two of them as the only evidence
+for a real-looking effect is the state that rule exists to prevent.
+
+**What it costs.** Notebook was slot 3 for pairing with briefing - two points on
+one axis, same control, same seeds. That pairing is lost and notebook now needs a
+criterion rewrite against the post-merge baseline, which is the cost this file
+already accepted for #4-#6. Briefing still runs, so the standing-context axis
+still gets its first point before the merge.
+
+**Not deferred, and not competing for the card at all: the gate #1 per-axis key.**
+The Paranoia row carries it and it reads as rung-building, which is why it has sat
+below seven GPU arms. It is a live FALSE NEGATIVE in the primitive the whole arena
+rests on, verified 2026-09-03 against `core/observability.py:76-79`: the scan is
+`for seat, terms in secret_terms.items(): if seat in entitled: continue`, so a
+viewer entitled to ONE of a seat's secrets is skipped on ALL of that seat's terms
+and a leak of the others reports clean. That is the direction `AGENTS.md`'s first
+invariant forbids by name - a false positive is a loud test failure, a false
+negative is a shipped leak. It is CPU, it needs no card, `games/durf/facts.py`
+already built the fact-keyed generalisation and says the move on a second asking
+game is to widen the key and delete the adapter. **It runs concurrently with the
+chain**, ahead of the GPU ranking rather than inside it.

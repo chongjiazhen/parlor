@@ -134,17 +134,13 @@ against the post-merge baseline, not an extra control run. mixed-village
 re-bars after the merge - its bar does not depend on the control's rules,
 a fresh one is minutes of CPU.
 
-**The partner arm (~5 h, `docs/changeling-partner-criterion.md`) was written
-2026-09-03 and is NOT in that order** - it postdates it, and where it lands is
-the operator's ranking, not a thing this file may decide. The case for the #3
-slot, displacing notebook: it is the only pre-merge arm whose effect has been
-observed twice already (-10.0% and -12.1% against an 8.7-point MDE), so it has
-much the highest chance per hour of returning a citable number, and it closes an
-honesty debt - two unadjusted free reads now sit in `docs/measurements.md` with
-no pre-registered test behind them. The case against: notebook is the second
-point on briefing's axis and loses that pairing if it slips. Either way the arm
-runs BEFORE the merge, which would leave its numbers readable while changing
-what they replicate.
+**Re-ranked 2026-09-03** (`docs/decisions.md`): the partner arm takes slot 3 and
+notebook slips to the deferred group, so the pre-merge set is mixed-pack, briefing,
+partner (~12 h). Partner's effect has been observed twice against an 8.7-point MDE
+where notebook has a prediction and no observation, and it closes the honesty debt
+of two unadjusted free reads published with no pre-committed test. It runs BEFORE
+the merge, which would leave its numbers readable while changing what they
+replicate.
 
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
