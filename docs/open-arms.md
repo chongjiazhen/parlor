@@ -643,3 +643,75 @@ session). **A playbook draft produces a number on day one.**
   `docs/content-packs.md`'s four-or-five-entries limit governs what SHIPS. A
   draft needs a real menu, and a menu of five is not a table's choice.
 
+
+
+## 2026-09-03 - moved from queue.md
+
+Two rows whose ASK is one sentence and whose body had grown into the argument
+behind it. The queue keeps a short row pointing here; the reasoning is verbatim
+below, so nothing is rewritten on the way out.
+
+### The RP-tune bench
+
+- [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
+      bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
+      Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
+      qwen3.8-27B and its MTP build. **Read the direction note first.** It earns
+      GPU on one parlor-shaped question only: whether fallback rate and deduction
+      move together or apart across tunes, which is what an RP tune buys.
+      Serial local lane; `--no-thinking` is a property of the rung, not the bench.
+      **Entry condition: no arm in flight** - it queues behind every frozen arm on
+      the merge list, all of which pair against a control that expires.
+      **The gate is the source-rules MERGE, not an idle card** (2026-09-02): every
+      frozen arm pairs against `cl-rounds2.json`, a control recorded on
+      `qwen36-35b-a3b-iq3`, so a re-arm before those run voids them - and the merge
+      re-baselines the rung anyway, so a second model's control is the only moment
+      it is marginal cost rather than a new debt. **One candidate is already
+      measured, and the row read as if none were:** `rocinante-x-12b-heretic-q4` is
+      Rocinante-X-12B, and its cabal reading is the bench's own question answered
+      apart - prose good enough to fabricate a prior conversation with no prompt
+      escalation, vote discrimination -0.2% at chance (`docs/measurements.md`
+      2026-08-25 and §Backend notes). One point, on the other rung and under the
+      superseded vote rule, so it sharpens the prior and does not spend the bench.
+      **Two corrections to the candidate list, 2026-09-02.** "Untuned gemma" is not
+      on this box: `gemma`/`gemma-6` both alias an abliterated E4B, ~4B active, so
+      against q36 they measure SCALE wearing a tune label. The armable comparator
+      is `ablx` (`gemma-4-26B-A4B-it-abliterix-V6`, IQ4_XS), configured identically
+      to q36 in `llm-serve/models.json` - same ctx, kv quant, batch, ngl, backend -
+      and MoE A4B against A3B, so it swaps one variable where the dense RP tunes
+      swap three. It is instruct, not a reasoning distill, so its per-game cost
+      must be re-timed rather than inherited from q36's 91 s. And **each tune is
+      TWO arms, not one**: gate #2 is conditional on gate #3, so a tune's evil win
+      rate is unreadable without that tune's own good-side control. The 12B is the
+      worked example - evil 62.5% (5/8, CI 30.6-86.3%) beside good discrimination
+      -0.2%, which is the ~65% no-deception baseline hit exactly, so the run is
+      consistent with the tune buying no deception at all. Its hunter, 3/6 against
+      a 33.3% chance floor, is the only evil-side signal and sits inside q36's own
+      33/55/56% range. **"An RP tune bought deception" is UNMEASURED, not shown.**
+
+### Two pre-measurement positions refuted by work built the same week
+
+- [ ] **Two pre-measurement positions in `docs/` were refuted by work built the
+      same week, and neither was reconciled.** One class, two instances, found
+      2026-09-02 by reading them against the rungs that landed after them. Done
+      when each doc states the position the measurement supports, with the
+      superseded reading kept and dated rather than deleted.
+      **(a) `docs/action-channel.md:82` says gate #1 "does not survive a model
+      DM"**, written 2026-08-25 from a design read, with "the innkeeper looks
+      nervous" as a leak carrying zero substring overlap. The DURF campaign then
+      measured it: gate #1 HELD 91/100, then 99/100 under the topology edits, and
+      `docs/durf-rung.md:811` decides the opposite call - a declared fact is entitled
+      by definition, the audit is correctly silent, and the forward-reveal
+      behaviour is a COUNT with no criterion. The innkeeper case is the one the
+      count covers, not a leak: a GM that infers a nervous novice and telegraphs
+      it is doing the job, and the residue is that **declaring sets its own bar**,
+      which is the real open question and is not what the 08-25 paragraph says.
+      **(b) `docs/open-arms.md` §While the card is busy rejects Secret Hitler as
+      "the same rung as cabal ... its policy deck is more rules, not a different
+      knowledge model."** `games/quorum/RULES.md:11` opens "Modelled on Secret
+      Hitler" and argues at length that it IS a different knowledge model -
+      entitlement cascades over an object created in play, keyed to a rotating
+      office, and the proposer's discard is an entitlement that EXPIRES one step
+      down a chain. Same day, hours apart: the rung's design landed 16:20, its
+      referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
+      carries a live recommendation against building what it had just built.

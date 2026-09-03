@@ -134,6 +134,18 @@ against the post-merge baseline, not an extra control run. mixed-village
 re-bars after the merge - its bar does not depend on the control's rules,
 a fresh one is minutes of CPU.
 
+**The partner arm (~5 h, `docs/changeling-partner-criterion.md`) was written
+2026-09-03 and is NOT in that order** - it postdates it, and where it lands is
+the operator's ranking, not a thing this file may decide. The case for the #3
+slot, displacing notebook: it is the only pre-merge arm whose effect has been
+observed twice already (-10.0% and -12.1% against an 8.7-point MDE), so it has
+much the highest chance per hour of returning a citable number, and it closes an
+honesty debt - two unadjusted free reads now sit in `docs/measurements.md` with
+no pre-registered test behind them. The case against: notebook is the second
+point on briefing's axis and loses that pairing if it slips. Either way the arm
+runs BEFORE the merge, which would leave its numbers readable while changing
+what they replicate.
+
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
 moves: merge source-rules FIRST, then rebase simul onto it and re-run its 20-seed
@@ -185,17 +197,15 @@ the one that goes stale.
       **an arm that doubles as a future control has a criterion deadline, and the
       deadline is the moment the arm's own report prints.**
 - [ ] **Five `.cmd` recipes stamp a WRONG time on every per-arm line.** Measured
-      2026-09-03: `cl-rounds-pair.log` reads `[pair] arm rounds2 down Thu
-      03/09/2026  0:39:44` for an arm whose record was written at 05:38 - `%TIME%`
-      inside a parenthesized `for` block expands when cmd PARSES the block, not
-      when the line prints, so every in-loop stamp is the loop's start time. Hits
-      `chain-after`, `changeling-{powers,rounds,skin}-pair`, `solver-control`;
-      `chain-tail.cmd` alone sets `enabledelayedexpansion` and is correct. Lines
-      OUTSIDE the loop (`[pair] started`, `both arms down`) are fine, which is why
-      it survived - the wrong stamps sit next to right ones. Cost so far is a
-      misread of when a leg came down; the arm logs and JSON mtimes are the
-      authority either way. Fix is `setlocal enabledelayedexpansion` + `!TIME!`,
-      one line per recipe, and it cannot be done while the chain holds those files.
+      2026-09-03 and REPRODUCED in isolation the same day: inside a parenthesised
+      block `%TIME%` prints the block's parse time on every iteration while
+      `!TIME!` prints the real one. Hits `chain-after`,
+      `changeling-{powers,rounds,skin}-pair`, `solver-control`; `chain-tail.cmd`
+      and `changeling-partner-arm.cmd` set `enabledelayedexpansion` and are
+      correct - the latter is the worked fix to copy. Lines outside the loop are
+      fine, which is why it survived. The arm logs and JSON mtimes are the
+      authority either way. One line per recipe, and it cannot be done while the
+      chain holds those files.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
@@ -286,7 +296,7 @@ unlaunched, and waits on the merge list above:
       FALLBACK-FIRST: non-English play surfaces as a fallback rate, not as worse
       deduction, so a CN arm voiding on the 10% rule is a finding.
 
-Runs that are frozen and want card:
+Runs that are frozen and want card - and one that is already in the chain:
 
 - [ ] **Run `kindred` deck B - FROZEN 2026-09-02, NEVER RUN.** `SETUP_7_KIN`
       with `require_seated_kin`, `--seats 7`. Bar measured (blind 25.39% over
@@ -295,87 +305,47 @@ Runs that are frozen and want card:
       `eval/runs/changeling-kindred.cmd kin1 200 14000 qwen36-35b-a3b-iq3`, ~7 h.
       Entry condition: no changeling arm in flight - it queues behind the chain
       in `queue.local.md`. A new deck re-baselines everything under it.
-- [ ] **Run the belfry session-memory night arm - FROZEN 2026-09-02, NEVER RUN.**
-      The withheld night ask carrying the referee's own transcript of the game,
+- [ ] **Read the belfry session-memory night arm - LAUNCHED, it is the chain's
+      last leg.** Not a row that wants card: `eval/runs/chain-tail.cmd` holds it
+      as recipe 3 of 3 and it starts when the gate #2 arm's log carries its
+      marker. The withheld night ask carrying the referee's own transcript,
       `prior` still dropped; criterion `docs/belfry-night-transcript-criterion.md`,
-      recipe `eval/runs/belfry-night-transcript.cmd <last-chain-log>`, seeds
-      15000..15999, ~1 h. Read `py -3 -m eval.belfry_night_verdict --criterion
-      transcript`: RECALLS or NO RECALL against the withheld arm, BELOW or AS GOOD
-      AS the supplied one, on intervals. Entry condition: the card - the recipe
-      refuses until its handed log carries a PARLOR done marker, so hand it the
-      chain's last log via `eval/runs/chain-tail.cmd`.
+      seeds 15000..15999, ~1 h. Read `py -3 -m eval.belfry_night_verdict
+      --criterion transcript`: RECALLS or NO RECALL against the withheld arm,
+      BELOW or AS GOOD AS the supplied one, on intervals.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
       unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
       a night, taken at the top of `_begin_night`. What seating found, and how the
       audit's third scan is graded, is `docs/faction-heartbeat.md` §Seated in
       belfry, on the branch. Open, each its own row when taken: the rumour rule is
       LINEAR on a circular table, and at 5 seats most scheduled beats never fire.
-      Entry condition was written as the merge list; it is in fact link 3 of
-      the launched chain and runs AHEAD of the ranked arms. The GPU order's
-      ~20 h chain estimate counts it, so the chain is not drift - this row was.
+      **Entry condition is the merge list, as first written.** The correction
+      that stood here - that heartbeat is link 3 of the launched chain and runs
+      ahead of the ranked arms - is FALSE, checked 2026-09-03 against
+      `eval/runs/chain-tail.cmd`'s own argument list: the three legs are the
+      rounds pair, the gate #2 arm and `belfry-night-transcript.cmd`, no recipe
+      in the tree passes `--heartbeat`, and the flag is not on main. It was the
+      belfry session-memory row's slot, read onto this one.
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
 measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
 
 - [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
-      bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
-      Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
-      qwen3.8-27B and its MTP build. **Read the direction note first.** It earns
-      GPU on one parlor-shaped question only: whether fallback rate and deduction
-      move together or apart across tunes, which is what an RP tune buys.
-      Serial local lane; `--no-thinking` is a property of the rung, not the bench.
-      **Entry condition: no arm in flight** - it queues behind every frozen arm on
-      the merge list, all of which pair against a control that expires.
-      **The gate is the source-rules MERGE, not an idle card** (2026-09-02): every
-      frozen arm pairs against `cl-rounds2.json`, a control recorded on
-      `qwen36-35b-a3b-iq3`, so a re-arm before those run voids them - and the merge
-      re-baselines the rung anyway, so a second model's control is the only moment
-      it is marginal cost rather than a new debt. **One candidate is already
-      measured, and the row read as if none were:** `rocinante-x-12b-heretic-q4` is
-      Rocinante-X-12B, and its cabal reading is the bench's own question answered
-      apart - prose good enough to fabricate a prior conversation with no prompt
-      escalation, vote discrimination -0.2% at chance (`docs/measurements.md`
-      2026-08-25 and §Backend notes). One point, on the other rung and under the
-      superseded vote rule, so it sharpens the prior and does not spend the bench.
-      **Two corrections to the candidate list, 2026-09-02.** "Untuned gemma" is not
-      on this box: `gemma`/`gemma-6` both alias an abliterated E4B, ~4B active, so
-      against q36 they measure SCALE wearing a tune label. The armable comparator
-      is `ablx` (`gemma-4-26B-A4B-it-abliterix-V6`, IQ4_XS), configured identically
-      to q36 in `llm-serve/models.json` - same ctx, kv quant, batch, ngl, backend -
-      and MoE A4B against A3B, so it swaps one variable where the dense RP tunes
-      swap three. It is instruct, not a reasoning distill, so its per-game cost
-      must be re-timed rather than inherited from q36's 91 s. And **each tune is
-      TWO arms, not one**: gate #2 is conditional on gate #3, so a tune's evil win
-      rate is unreadable without that tune's own good-side control. The 12B is the
-      worked example - evil 62.5% (5/8, CI 30.6-86.3%) beside good discrimination
-      -0.2%, which is the ~65% no-deception baseline hit exactly, so the run is
-      consistent with the tune buying no deception at all. Its hunter, 3/6 against
-      a 33.3% chance floor, is the only evil-side signal and sits inside q36's own
-      33/55/56% range. **"An RP tune bought deception" is UNMEASURED, not shown.**
+      bench.** RP tunes against `ablx` and q36, on ONE parlor-shaped question:
+      whether fallback rate and deduction move together or apart. **Each tune is
+      TWO arms** - gate #2 is unreadable without that tune's own gate #3 control.
+      Candidates, the two corrections to them and the one candidate already
+      measured: `docs/open-arms.md` §The RP-tune bench. **Entry condition: the
+      source-rules MERGE, not an idle card** - every frozen arm pairs against a
+      control recorded on q36, so a re-arm before those run voids them.
 - [ ] **Two pre-measurement positions in `docs/` were refuted by work built the
-      same week, and neither was reconciled.** One class, two instances, found
-      2026-09-02 by reading them against the rungs that landed after them. Done
-      when each doc states the position the measurement supports, with the
-      superseded reading kept and dated rather than deleted.
-      **(a) `docs/action-channel.md:82` says gate #1 "does not survive a model
-      DM"**, written 2026-08-25 from a design read, with "the innkeeper looks
-      nervous" as a leak carrying zero substring overlap. The DURF campaign then
-      measured it: gate #1 HELD 91/100, then 99/100 under the topology edits, and
-      `docs/durf-rung.md:811` decides the opposite call - a declared fact is entitled
-      by definition, the audit is correctly silent, and the forward-reveal
-      behaviour is a COUNT with no criterion. The innkeeper case is the one the
-      count covers, not a leak: a GM that infers a nervous novice and telegraphs
-      it is doing the job, and the residue is that **declaring sets its own bar**,
-      which is the real open question and is not what the 08-25 paragraph says.
-      **(b) `docs/open-arms.md` §While the card is busy rejects Secret Hitler as
-      "the same rung as cabal ... its policy deck is more rules, not a different
-      knowledge model."** `games/quorum/RULES.md:11` opens "Modelled on Secret
-      Hitler" and argues at length that it IS a different knowledge model -
-      entitlement cascades over an object created in play, keyed to a rotating
-      office, and the proposer's discard is an entitlement that EXPIRES one step
-      down a chain. Same day, hours apart: the rung's design landed 16:20, its
-      referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
-      carries a live recommendation against building what it had just built.
+      same week, and neither was reconciled.** `docs/action-channel.md:82` on
+      gate #1 and a model DM, against the DURF campaign that measured it;
+      `docs/open-arms.md` §While the card is busy on Secret Hitler, against
+      `games/quorum/RULES.md:11` which argues the opposite hours later. Both
+      instances in full: `docs/open-arms.md` §Two pre-measurement positions. CPU,
+      no card. Done when each doc states the position the measurement supports,
+      the superseded reading kept and dated rather than deleted.
 
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
