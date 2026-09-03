@@ -959,3 +959,32 @@ contradict; safe lies by office proposer 14, enactor 0; honest on a forced draw
 majority 73.55%, minority 69.32%; 42 writs enacted by an office that could have
 done otherwise. No win rate is reported and no deception figure is inferred from
 one - `majority_wins` is a property of the deck at this scale.
+
+## ensemble session 0 - the draft RAN, and its distribution is NOT a measurement, 2026-09-03
+
+The play-lane row's done-when is met: a draft completes with no duplicate seats
+and the pick distribution is recorded. Seven runs, five seats each, example pack
+(8 playbooks), clean route, `auto:reliable`, `eval` none - this is a driver, not
+a campaign, so the numbers below are a smoke result and **nothing here may be
+cited as a diversity read.** Three reasons, and any one of them is enough.
+
+- **`auto:reliable` is a routing strategy, not a model.** A different upstream may
+  serve each seat, so the run has no single subject. Observed: two ids that are
+  the same model (`nemotron-3-ultra` and `nvidia/nemotron-3-ultra-550b-a55b`), so
+  even counting upstreams would have double-counted one.
+- **The code changed mid-sweep.** Upstream recording landed between seeds 3 and 5,
+  so the runs are not all the same program. The fault is procedural and the fix
+  is a branch or a wait, not a caveat.
+- **2 of 7 runs died on a socket timeout** (seeds 4 and 6), so the surviving five
+  are a success-conditioned sample. Its own queue row.
+
+What it does establish, which is what the slice was for: **the loop runs end to
+end against live models at 0% fallback** in all five completed runs, 5 seats in
+~80 s serial. Picks over those 25 decisions: WITNESS 5, RETURNEE 5, FIXER 4,
+TRUE BELIEVER 4, PROVIDER 3, UNDERSTUDY 3, LATE BLOOMER 1, GOLDEN ONE 0, against
+a uniform 3.125. **That is mild concentration and it is NOT the collapse an
+interim read of the first two seeds looked like** - the early runs shared a set of
+five, and three more runs spread across seven of the eight. Recorded here so the
+premature reading does not survive as folklore; the real read needs a pinned
+model, one program, and the timeouts fixed.
+
