@@ -282,19 +282,22 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **Seat the heuristic against the MODEL.** Two arms over the heuristic rung,
-      `mixed-pack` then `mixed-village`, the suffix naming the LIVE side;
-      `docs/changeling-mixed-criterion.md`, recipe `eval/runs/changeling-mixed.cmd
-      <predecessor-log>`. **`mixed-pack` runs first, swapped before launch** - it
-      closes the artifact read and is the cheaper arm, so a card with time for one
-      gets the informative one. The criterion carries the two calls inside it: a
-      control rescored over its own first 200 seeds, and a void bar read off the
-      LIVE side's own fallback rate rather than the run's. Found in doing it - the
-      guard tested `startswith("llm")`, which a `mixed-` arm passes, so 200 games
-      would have scored the random policy. Reads against the artifact warning in
-      `docs/measurements.md`
-      §Measured first. Runs BEFORE the source-rules merge or its twin figure comes
-      from a different game.
+- [ ] **`mixed-village` is the unrun half - `mixed-pack` is READ 2026-09-03 and
+      INFORMS.** The rung's village win rate is +20.92% [+11.11, +30.16] against a
+      LIVE pack over its own twin, and the 77.36% silence artifact prices at 59.76%
+      against seats that talk (`docs/measurements.md`). What is open is the second
+      arm, ~3 h, `--arm mixed-village`, its figure the rung's PACK rate against
+      56.09% rescored: it is the direction the criterion says can disagree, and no
+      cross-arm claim may be made until it runs. Still pre-merge or its twin figure
+      comes from a different game.
+- [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
+      that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
+      rung it fired on, and the vote row carries no tier - so the census must
+      re-derive the ladder, a second copy of the policy. One field at the source
+      fixes it. The cost is specific: seated by dawn truth against a RANDOM control
+      every liar is a sleeper (tier 3, 0/111), and a live pack is the first place
+      tier 3 can catch a TRUE wolf. Done when a vote row carries the tier that
+      fired and `eval.mixed_verdict` reads it instead of declining.
 - [ ] **Theme as an experimental variable, not a default to fix**
       (`docs/moral-framing.md` owns the arm ladder). **A blurb is a prompt** - the
       four English faces are frozen at 53 words and an edit orphans what was

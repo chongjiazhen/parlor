@@ -1303,3 +1303,75 @@ with nothing read from the control's vocabulary.
 What this does NOT show: anything about a model. The arm that puts this rung at a
 table with LLM seats is the queue's "seat the heuristic against the MODEL" row
 and is GPU work. The rung is a denominator, not a player.
+
+## changeling mixed cells - the rung against a LIVE pack, INFORMS, READ 2026-09-03
+
+One arm of the two `docs/changeling-mixed-criterion.md` names. `mixed-pack`
+seats the model on the PACK by dawn truth and the hand-written rung on the
+village, so the rung's figure is the village win rate. `mixed-village` was NOT
+queued and never ran - a missing arm is a lost pair, not half a result, and no
+cross-arm claim is made below.
+
+Record `eval/records/cl-mixed-pack.json`, 200 games on seeds 5000..5199, 196
+scored, 5162 s (1.43 h) on `qwen36-35b-a3b-iq3` at 100% served. Read with
+`py -3 -m eval.mixed_verdict`; the record's own `args` pin against the
+criterion's §Settings and match.
+
+**Voids first, and the bar is the LIVE side's own rate.** The run-level
+`fallback_rate` is diluted here - every rung seat enters the denominator and a
+rung seat never falls back - so the number that governs is the pack seats' own:
+**4/900 = 0.44%** against a 10% bar. Run level 0.13% is reported and gates
+nothing. Recovered 1.67%, far under the 25% flag. 196 scored against a 150 floor.
+Nothing voids.
+
+**The control is RESCORED, never quoted.** `cl-heuristic.json` is 1000 games on
+5000..5999 and this arm plays 5000..5199, so its published 43.91% is a figure
+over a superset. `eval.mixed_verdict` rescores the first 200 game indices and
+pairs against that. Two things surfaced in the rescore and both are recorded
+because neither is visible from the summary: the JSONL held **3000 records for
+1000 game indices** - it was written more than once and the last write of each
+game is kept - and the recovered run reproduces the published summary exactly
+(977 scored, 429 village wins), which is what makes the rescore trustworthy.
+
+| the rung's VILLAGE win rate, 196 scored games | rate | Wilson 95% |
+|---|---|---|
+| against LIVE pack seats | **130/196 = 66.33%** | [59.45%, 72.57%] |
+| against its own twin, `cl-heuristic` first 200 | 89/196 = 45.41% | [38.59%, 52.40%] |
+| published at 1000 games - the wider reference, never the pair | 43.91% | - |
+
+**Difference +20.92%, Newcombe 95% [+11.11%, +30.16%] - excludes zero, so
+INFORMS.** The criterion pre-committed both directions and named this one: a live
+side that claims deals badly, inconsistently or in a grammar the ladder refutes,
+hands the rung evidence the random control never offered. The gap also clears the
+~10-point floor §Power said was the smallest this pair could settle, so it is not
+a marginal result.
+
+**The secondary prices the artifact, and the artifact is real but not the whole
+number.** Blind villager accuracy, same 251-vote stratum:
+
+| the rung's blind accuracy | rate | Wilson 95% |
+|---|---|---|
+| against LIVE pack seats | 150/251 = 59.76% | [53.59%, 65.64%] |
+| against its own twin | 123/251 = 49.00% | [42.88%, 55.16%] |
+| against a RANDOM pack (`heuristic-village`, published) | 77.36% | [74.35%, 80.28%] |
+
+The 77.36% was measured against a control that cannot talk, and the silence tier
+was shown to carry it (§changeling heuristic rung: 31.62% with that tier off).
+Priced against seats that DO talk it is 59.76%, so roughly 18 points of the
+77.36% was the artifact - and the remaining 59.76% still sits clear of the 49.00%
+twin, so the ladder holds signal underneath it. This is the artifact read the
+criterion was written for, taken against a live opponent instead of against a
+switch.
+
+**The tier census is NOT PAYABLE from this record**, and that is a finding rather
+than an omission. `HeuristicPolicy._vote` returns a seat, not the rung it fired
+on, and the vote row carries no tier field, so the census would have to
+re-derive the ladder - a second copy of the policy, the drift `eval.mixed_verdict`
+avoids everywhere else by importing. It needs one field at the source. The cost
+is specific: this is the first arm in the tree where tier 3 could catch a TRUE
+wolf rather than a sleeper (§changeling heuristic rung records 0/111 sleepers
+against a random control), so the read it would have bought is one no earlier
+record could offer.
+
+Gate #3's reference bar is 35.84% and this file makes no gate #3 call - the
+criterion did not name one. Nothing here is a statement about `mixed-village`.
