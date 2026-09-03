@@ -171,21 +171,19 @@ the one that goes stale.
       NOT SHOWN on the name-form axis. The general lesson is the row that matters -
       **an arm that doubles as a future control has a criterion deadline, and the
       deadline is the moment the arm's own report prints.**
-- [ ] **`slice/transport-retry` is not on the merge list, and it re-solves a
-      `core/` problem main solved a different way.** Found in the 2026-09-03
-      triage; nothing in this file has ever named it. Four commits, 971
-      insertions: a whole unlisted rung `games/bureau/` (deal, referee, session
-      and three test files), a shared rate budget so a transport stall does not
-      kill a rung, edits to `games/durf/facts.py`, and
-      `refactor(core): find_leaks keys a secret to any hashable, not a seat` -
-      which is a SECOND, independent generalisation of the key that `ed6bf11`
-      generalised this morning. It conflicts in exactly those two files,
-      `core/observability.py` and `core/test_observability.py`. Two branches
-      solved the gate #1 primitive apart and neither knows about the other, so
-      neither is trustworthy until one is chosen. Done when the two keyings are
-      read side by side and one is kept; **not** by merging and resolving, which
-      would pick a winner by textual accident in the repo's most load-bearing
-      primitive.
+- [ ] **`slice/transport-retry` is not on the merge list, and its keying
+      question is now DECIDED.** Four commits, 971 insertions, named nowhere in
+      this file until the 2026-09-03 triage. The `core/` collision is settled:
+      the branch's keying is KEPT over main's `ed6bf11`, argued in
+      `docs/decisions.md` - it admits DURF's non-seat key where main's halfway
+      widening does not, its sentinel cannot collide, and main's two extra rules
+      are both silent skips where the branch's are loud. **Applying it is a
+      REVERSAL of a landed mutation-checked guard**: `SecretKey` and `subject`
+      go, and main's bare-seat-covers-every-axis tests are deleted rather than
+      adapted. What is still open is the rest of the branch, each its own call:
+      the shared transport rate budget, the `games/durf/facts.py` simplification
+      that falls out of the keying, and a whole unlisted `games/bureau/` rung
+      that no row has ever named and that must not ride in on a `core/` fix.
 - [ ] **No criterion states the effect it EXPECTS, only the one it could see.**
       Every measured changeling pair is NOT SHOWN and each predicted it would be:
       resolution ~9-10 points at 200 games, observed prompt effects 1-3. The only

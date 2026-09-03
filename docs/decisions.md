@@ -607,6 +607,54 @@ already built the fact-keyed generalisation and says the move on a second asking
 game is to widen the key and delete the adapter. **It runs concurrently with the
 chain**, ahead of the GPU ranking rather than inside it.
 
+## The `find_leaks` key: the BRANCH's keying is kept, 2026-09-03
+
+Two branches generalised gate #1's key apart and neither knew about the other:
+main's `ed6bf11` (`(seat, axis)` behind a `subject()` accessor) and
+`slice/transport-retry`'s `0f729a5` (any hashable, opaque). The queue row asked
+for them to be read side by side rather than merged, because a textual resolution
+in this repo's most load-bearing primitive picks a winner by accident. Read
+2026-09-03. **Keep the branch's.**
+
+**It is a strict superset on key SHAPE.** Main widened halfway - `int |
+tuple[int, str]` - which does not admit DURF's `("hidden", "R2")`, so main still
+carries the numbering adapter in `games/durf/facts.py` that main's own comment
+(`:13`) calls the thing to delete "if a game asks". A game asked. The branch
+deletes it and calls the primitive directly.
+
+**Its sentinel cannot collide.** DURF's `NO_VIEWER` is `-1` on main, safe only
+because that module numbers its facts from zero - a coincidence, not a guarantee,
+and main's own comment says so. The branch moves it to `core/` as an `object()`,
+which is unequal to any key a caller can build.
+
+**The two rules main has and the branch lacks are both false-negative shaped.**
+Main grants entitlement to a bare seat covering EVERY axis of it, and skips the
+self-audit for every axis of the viewer's seat. Both are silent skips. During
+exactly the migration they were built for - a game adopting axis keys while one
+call site still grants a bare seat - main's blanket grant skips every axis of that
+seat and a leaked axis reports clean. The branch's stricter rule reports it, and
+the caller opts out by granting the axis explicitly. `AGENTS.md`'s first invariant
+decides this: a false positive is a loud test failure, a false negative is a
+shipped leak.
+
+**What the switch costs, stated because it is a reversal.** `ed6bf11` is
+committed and mutation-checked, and reversing a landed guard is not tidying:
+`SecretKey` and `subject` go (no consumer outside the module - grepped), and
+main's tests asserting that a bare-seat grant covers every axis must be DELETED
+rather than adapted, since that behaviour is the thing being removed. The
+Paranoia rung then grants per axis, including the viewer's own axes, and the
+queue row saying it "owes no `core/` change" is still true - it inherits a
+different primitive than it expected.
+
+**The two keys are even ordered oppositely** - main `(seat, axis)`, the branch
+`(axis, seat)`. Nothing depends on it; it is the clearest evidence the two were
+built without contact, and the kept order is the branch's.
+
+**Not decided here: the rest of that branch.** It also carries a shared transport
+rate budget (`5697df0`) and a whole unlisted `games/bureau/` rung, 971 insertions
+that nothing in this tree has ever named. A rung nobody planned must not ride in
+on a `core/` fix; each is its own call.
+
 ## No test suite runs while an arm is in flight, 2026-09-03
 
 Decided by the operator, against this session's own measurement. `cl-gate2-village`
