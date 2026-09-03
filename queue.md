@@ -162,6 +162,18 @@ the one that goes stale.
       declares the audit a free read and forbids a bar after the fact, and this
       is one of ~6 such reads, so the interval is unadjusted. Settling it needs a
       new criterion with the pack statistic PRIMARY on fresh seeds, not a re-read.
+- [ ] **Five `.cmd` recipes stamp a WRONG time on every per-arm line.** Measured
+      2026-09-03: `cl-rounds-pair.log` reads `[pair] arm rounds2 down Thu
+      03/09/2026  0:39:44` for an arm whose record was written at 05:38 - `%TIME%`
+      inside a parenthesized `for` block expands when cmd PARSES the block, not
+      when the line prints, so every in-loop stamp is the loop's start time. Hits
+      `chain-after`, `changeling-{powers,rounds,skin}-pair`, `solver-control`;
+      `chain-tail.cmd` alone sets `enabledelayedexpansion` and is correct. Lines
+      OUTSIDE the loop (`[pair] started`, `both arms down`) are fine, which is why
+      it survived - the wrong stamps sit next to right ones. Cost so far is a
+      misread of when a leg came down; the arm logs and JSON mtimes are the
+      authority either way. Fix is `setlocal enabledelayedexpansion` + `!TIME!`,
+      one line per recipe, and it cannot be done while the chain holds those files.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
