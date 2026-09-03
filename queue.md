@@ -324,15 +324,6 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       measured: `docs/open-arms.md` §The RP-tune bench. **Entry condition: the
       source-rules MERGE, not an idle card** - every frozen arm pairs against a
       control recorded on q36, so a re-arm before those run voids them.
-- [ ] **Two pre-measurement positions in `docs/` were refuted by work built the
-      same week, and neither was reconciled.** `docs/action-channel.md:82` on
-      gate #1 and a model DM, against the DURF campaign that measured it;
-      `docs/open-arms.md` §While the card is busy on Secret Hitler, against
-      `games/quorum/RULES.md:11` which argues the opposite hours later. Both
-      instances in full: `docs/open-arms.md` §Two pre-measurement positions. CPU,
-      no card. Done when each doc states the position the measurement supports,
-      the superseded reading kept and dated rather than deleted.
-
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`

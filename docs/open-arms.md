@@ -553,7 +553,8 @@ since been reworded in the queue is the live statement; this is the reasoning.
 
 ## While the card is busy - the standing menu
 
-Verbatim from `queue.md`. The question behind it recurs - *a run is in flight,
+Verbatim from `queue.md`, with ONE cell since superseded in place and dated -
+the Secret Hitler verdict, reconciled below the table. The question behind it recurs - *a run is in flight,
 so what can this session actually do?* - and the answer is stable, which is why
 it is reference rather than queue.
 
@@ -570,10 +571,36 @@ is waiting on.
 
 | option | verdict | why |
 |---|---|---|
-| Secret Hitler | **no** | Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
+| Secret Hitler | **no - SUPERSEDED 2026-08-28, see below** | *(2026-08-27 read, kept as written.)* Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
 | Blood on the Clocktower | **right target, wrong size - and now scope it against what exists** | The only one of these that is a genuinely different rung: the Storyteller makes *discretionary* rulings, which is the judgment-GM `docs/action-channel.md` splits the kernel/adjudicator for. But it is 20+ characters and the discretion is the hard part - so the session-sized version is a SPIKE that scopes the adjudicator against 3-4 characters, never the game. **Confirmed from outside 2026-08-27** - a public LLM-vs-LLM arena at this game already exists and is rated, another build scripts the storyteller outright, and a third puts an LLM in that seat; the off-repo ledger names all three. **So an LLM arena at this game is NOT the contribution. The discretionary adjudicator plus the entitlement audit is.** Two free controls worth copying from the rated one: shuffled turn order against positional advantage, and role-flipped mirrored matches |
 | 5e / a rules-lite RPG | **the endgame, and not yet** | This is the rung the repo is aimed at. `docs/action-channel.md` says do not harden cabal's `Phase` enum, `action_prompt` chain or `ACTION_KEYS` before game #2 exists - and a rules-lite system is the honest cheap version of this, not 5e |
 | `/improve-codebase-architecture` | **no, and least of all now** | A refactor under a freeze is risk with no measurement, and the two shapes actually worth restructuring are named in `docs/action-channel.md` as things to leave alone until game #2 |
+
+**The Secret Hitler row is refuted by `quorum`, built the same day it was
+written.** The row moved into this file verbatim at 20:30 on 2026-08-27; the
+rung's design landed 16:20 and its referee 16:28, so the tree carried a live
+recommendation against building what it had just built. The measurement the row
+lacked is `games/quorum/RULES.md`, and it decides the opposite: **entitlement
+here CASCADES over an object that did not exist at the deal.** Each legislative
+event creates a fresh secret - a hand drawn from a shuffled deck - which passes
+down a three-tier chain narrowing at each step, keyed to a ROTATING OFFICE rather
+than to a dealt role. So the audit question changes shape: cabal asks *may this
+seat know this fact*, quorum asks *may this seat know this fact at this point in
+the chain*, and a referee caching entitlement per seat rather than per event is
+wrong in a way that passes every cabal-era and changeling-era test. The
+proposer's discard is the sharp case - an entitlement that EXPIRES one step down
+a chain, with the next seat down actively trying to infer it - and **naive
+substring matching cannot see it**, because a card's vocabulary is shared with
+the public channel where a role name is not. That finding landed before the rung
+had any code, which is exactly what the row said the game could not produce.
+
+**What survives is the row's TEST, not its verdict.** "More rules, not a different
+knowledge model" is still the right question to put to a candidate rung; it was
+answered wrong here because it was asked of the published game's policy deck
+instead of its entitlement chain. The neighbouring verdicts are untouched - no
+model has played quorum, it has no gate, no criterion and no verdict, so this
+reconciles a design position and promotes nothing.
+
 
 **Direction, called 2026-08-27 against the literature** (argument kept off-repo):
 gate #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay
@@ -691,7 +718,12 @@ below, so nothing is rewritten on the way out.
 
 ### Two pre-measurement positions refuted by work built the same week
 
-- [ ] **Two pre-measurement positions in `docs/` were refuted by work built the
+- [x] **RECONCILED 2026-09-03, both instances.** (a) is dated and answered in
+      place under `docs/action-channel.md`'s "Gate #1 does not survive a model DM"
+      paragraph (that file carries no headings);
+      (b) is dated in the table above and answered in the two paragraphs under
+      it. Neither superseded reading was deleted. The ask, as written:
+      **Two pre-measurement positions in `docs/` were refuted by work built the
       same week, and neither was reconciled.** One class, two instances, found
       2026-09-02 by reading them against the rungs that landed after them. Done
       when each doc states the position the measurement supports, with the

@@ -80,6 +80,8 @@ is no `now` for a legality check to read; if the model owns whether the game is
 over, the transcript records a claim where it should record a result.
 
 **Gate #1 does not survive a model DM, and the fix is not a smarter matcher.**
+*(The 2026-08-25 design read, kept as written and REFUTED - see the two paragraphs
+below.)*
 `find_leaks` is sound today because the referee's private bytes are a fixed set
 of strings. A model DM paraphrases private state: "the innkeeper looks nervous"
 leaks that he is the cultist with zero substring overlap, and the audit reads
@@ -88,6 +90,26 @@ its intended reveals as typed facts, those are checked against entitlement, and
 the prose is audited against the facts it did NOT declare. Same naive matching,
 right input. This is the RPG rung's hardest problem and it is worth knowing about
 before anything is built on it.
+
+**Measured 2026-08-28, and the reading above is refuted: gate #1 HELD under a
+model referee.** The DURF rung is the model DM this paragraph anticipated, and
+the audit read **91/100 sessions [83.77%, 95.19%]**, then **99/100 [94.55%,
+99.82%]** under the topology edits (`docs/durf-rung.md` §The campaign, §The
+paired arm; both calls in `docs/decisions.md`). The paragraph's own worked
+example is what the measurement reclassifies. `docs/durf-rung.md` §What working
+that question turned up decides the opposite call: **a declared fact is entitled
+by definition, so the audit is correctly silent** - a referee that infers a
+nervous novice and telegraphs it is doing the job, and the forward-reveal
+behaviour is a COUNT with no criterion, which must never be promoted into the
+gate or into a quality rubric.
+
+**What survives is narrower, and it is the real open question: declaring sets
+its own bar.** Nothing constrains what the referee may declare, so entitlement
+moves off the matcher and onto the declaration - a second instrument, which has
+no criterion. So the 08-25 prescription stands unchanged and for a better
+reason: keep `find_leaks` naive, declare intended reveals as typed facts, audit
+the prose against the facts NOT declared. What was wrong is only its premise -
+that the audit would read clean while a real leak went out.
 
 **`LLMPolicy`'s refuse -> re-prompt-with-referee-error -> count-fallback loop is
 the strongest promotion candidate in the repo** and it currently lives in
