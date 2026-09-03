@@ -192,16 +192,6 @@ the one that goes stale.
       NOT SHOWN on the name-form axis. The general lesson is the row that matters -
       **an arm that doubles as a future control has a criterion deadline, and the
       deadline is the moment the arm's own report prints.**
-- [ ] **Five `.cmd` recipes stamp a WRONG time on every per-arm line.** Measured
-      2026-09-03 and REPRODUCED in isolation the same day: inside a parenthesised
-      block `%TIME%` prints the block's parse time on every iteration while
-      `!TIME!` prints the real one. Hits `chain-after`,
-      `changeling-{powers,rounds,skin}-pair`, `solver-control`; `chain-tail.cmd`
-      and `changeling-partner-arm.cmd` set `enabledelayedexpansion` and are
-      correct - the latter is the worked fix to copy. Lines outside the loop are
-      fine, which is why it survived. The arm logs and JSON mtimes are the
-      authority either way. One line per recipe, and it cannot be done while the
-      chain holds those files.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records

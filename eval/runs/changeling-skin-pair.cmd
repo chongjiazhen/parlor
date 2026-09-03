@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
+rem enabledelayedexpansion + !TIME!: %TIME% inside a parenthesised block
+rem expands at PARSE time, which misdated every per-arm line here (queue.md).
 rem Changeling name-form pair, greek vs greek-named - frozen 2026-09-02.
 rem Bound by docs\changeling-skin-pair-criterion.md; nothing here is a setting,
 rem every value below is a copy of that file's.
@@ -20,7 +22,7 @@ for %%T in (greek greek-named) do (
   if exist "%OUTDIR%\cl-skin-%%T-random.json" exit /b 1
 )
 
-echo [pair] started %DATE% %TIME% - 200 games/arm, seed %SEED%, model %MODEL%>>"%LOG%"
+echo [pair] started !DATE! !TIME! - 200 games/arm, seed %SEED%, model %MODEL%>>"%LOG%"
 echo [gate] burst-probing local/%MODEL% before either arm...>>"%LOG%"
 py -3 -m eval.probe_tier --backend local --model "%MODEL%" --require-served "%MODEL%" -n 3 --timeout 120 >>"%LOG%" 2>&1
 if %ERRORLEVEL% NEQ 0 (
@@ -47,8 +49,8 @@ for %%T in (greek greek-named) do (
     echo PARLOR PAIR DONE rc=1 >>"%LOG%"
     exit /b 1
   )
-  echo [pair] arm %%T down %DATE% %TIME%>>"%LOG%"
+  echo [pair] arm %%T down !DATE! !TIME!>>"%LOG%"
 )
 
-echo [pair] both arms down %DATE% %TIME%>>"%LOG%"
+echo [pair] both arms down !DATE! !TIME!>>"%LOG%"
 echo PARLOR PAIR DONE rc=0 arms=2/2 >>"%LOG%"

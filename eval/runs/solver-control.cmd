@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
+rem enabledelayedexpansion + !TIME!: %TIME% inside a parenthesised block
+rem expands at PARSE time, which misdated every per-arm line here (queue.md).
 rem The S26 solver control pair - `--arm solver` and `--arm random` on the SAME
 rem seeds, then the paired read. CPU only: neither arm calls a model.
 rem
@@ -43,7 +45,7 @@ set "OUTDIR=eval\records"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 set "LOG=%OUTDIR%\%TAG%.log"
 
-echo [pair] started %DATE% %TIME% - %GAMES% games/arm, seed %SEED%>>"%LOG%"
+echo [pair] started !DATE! !TIME! - %GAMES% games/arm, seed %SEED%>>"%LOG%"
 
 for %%A in (%ARM% random) do (
   echo [pair] arm %%A - log %OUTDIR%\%TAG%-%%A.log>>"%LOG%"
@@ -60,7 +62,7 @@ for %%A in (%ARM% random) do (
   )
 )
 
-echo [pair] both arms down %DATE% %TIME% - reading the pair>>"%LOG%"
+echo [pair] both arms down !DATE! !TIME! - reading the pair>>"%LOG%"
 python -m eval.solver_control "%OUTDIR%\%TAG%-%ARM%.json" "%OUTDIR%\%TAG%-random.json" ^
   > "%OUTDIR%\%TAG%.read" 2>>"%LOG%"
 if errorlevel 1 (

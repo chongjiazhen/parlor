@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
+rem enabledelayedexpansion + !TIME!: %TIME% inside a parenthesised block
+rem expands at PARSE time, which misdated every per-arm line here (queue.md).
 rem Changeling discussion-length pair, --rounds 2 vs --rounds 3 on folk.
 rem Bound by docs\changeling-rounds-pair-criterion.md; every value below is a
 rem copy of that file's. Two CPU controls, then two live arms serially on one
@@ -25,7 +27,7 @@ for %%R in (2 3) do (
   if exist "%OUTDIR%\cl-rounds%%R-random.json" exit /b 1
 )
 
-echo [pair] started %DATE% %TIME% - 200 games/arm, seed %SEED%, model %MODEL%>>"%LOG%"
+echo [pair] started !DATE! !TIME! - 200 games/arm, seed %SEED%, model %MODEL%>>"%LOG%"
 echo [gate] burst-probing local/%MODEL% before either arm...>>"%LOG%"
 py -3 -m eval.probe_tier --backend local --model "%MODEL%" --require-served "%MODEL%" -n 3 --timeout 120 >>"%LOG%" 2>&1
 if %ERRORLEVEL% NEQ 0 (
@@ -52,8 +54,8 @@ for %%R in (2 3) do (
     echo PARLOR PAIR DONE rc=1 >>"%LOG%"
     exit /b 1
   )
-  echo [pair] arm rounds%%R down %DATE% %TIME%>>"%LOG%"
+  echo [pair] arm rounds%%R down !DATE! !TIME!>>"%LOG%"
 )
 
-echo [pair] both arms down %DATE% %TIME%>>"%LOG%"
+echo [pair] both arms down !DATE! !TIME!>>"%LOG%"
 echo PARLOR PAIR DONE rc=0 arms=2/2 >>"%LOG%"

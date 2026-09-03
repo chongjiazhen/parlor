@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
+rem enabledelayedexpansion + !TIME!: %TIME% inside a parenthesised block
+rem expands at PARSE time, which misdated every per-arm line here (queue.md).
 rem The changeling POWERS pair - both arms, one variable, serially on one card.
 rem
 rem Usage:  eval\runs\changeling-powers-pair.cmd <before-tree> [games] [seed] [model]
@@ -57,7 +59,7 @@ rem -10pp paired finding still rests on those records, so they are not overwritt
 set "TAGB=cl-powers-before2"
 set "TAGA=cl-powers-after2"
 
-echo [pair] started %DATE% %TIME% - %GAMES% games/arm, seed %SEED%, model %MODEL%>>"%PAIRLOG%"
+echo [pair] started !DATE! !TIME! - %GAMES% games/arm, seed %SEED%, model %MODEL%>>"%PAIRLOG%"
 echo [pair] arm 1 BEFORE (name-only deck) from %BEFORE%>>"%PAIRLOG%"
 
 call "%BEFORE%\eval\runs\changeling-local.cmd" %TAGB% %GAMES% %SEED% %MODEL% llm
@@ -92,5 +94,5 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [pair] both arms down %DATE% %TIME%>>"%PAIRLOG%"
+echo [pair] both arms down !DATE! !TIME!>>"%PAIRLOG%"
 echo PARLOR PAIR DONE rc=0 arms=2/2 >>"%PAIRLOG%"
