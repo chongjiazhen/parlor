@@ -1068,3 +1068,55 @@ round is spent making more self-claims, not better ones, and the village side
 carries the whole decline. Consistent with `AGENTS.md`'s standing position that
 more context is not monotonically good, and it is the second dated instance of it
 on this box after `_night_against_the_table`.
+
+## changeling gate #2 as a pair - the live pack COSTS itself 17.9 points, READ 2026-09-03
+
+`docs/changeling-gate2-pair-criterion.md`, frozen 2026-09-02T06:47:03Z and
+unedited since. `py -3 -m eval.gate2_pair_verdict`, exit 0. Records
+`eval/records/cl-rounds2.json` (the live-pack arm, cited not chosen - it IS S22's
+two-round record) and `eval/records/cl-gate2-village.json` (`--arm llm-village`,
+village seats live by dawn truth, pack seats `RandomPolicy`), 200 games each on
+seeds 5000..5199.
+
+**Fallback first, per arm.** `llm` 0.43% fallback, 7.60% recovered; `llm-village`
+0.20% fallback, 5.17% recovered. Both are far under the 10% void and the 25%
+recovered flag. 196 scored games on each arm, above the 190 floor that would have
+REFUSED the pair. The settings pin matched both records against their own `args`.
+**Pairing is counted, not assumed: 200/200 pairs share their dawn truth.**
+
+| arm | pack behind the pack seats | pack win rate, scored | Wilson 95% |
+|---|---|---|---|
+| `llm` | live | **50.51%** (99/196) | [43.57%, 57.43%] |
+| `llm-village` | random | **68.37%** (134/196) | [61.56%, 74.47%] |
+| all-random reference | random, and a random village too | 64.29% (126/196) | [57.36%, 70.66%] |
+
+**The pair: -17.86%, Newcombe 95% [-27.10%, -8.15%], excludes zero -> INFORMS.**
+Paired game bootstrap [-26.02%, -9.69%] beside it, never deciding. The all-random
+row is a REFERENCE and never decides - it moves both populations, which is why it
+cannot be the control. The criterion pre-committed the reading in both directions,
+so this needs no interpretation after the fact: below zero reads **"the pack's
+play costs it against this village"**, a finding about the model rather than a
+failure of the instrument. The effect is larger than the pair's ~10-point
+half-width, so it is inside what this design can settle.
+
+**The named free read says what changed for the village.** Blind villager
+accuracy, same village population on both arms: **47.41%** [40.16%, 54.43%] with a
+live pack, **31.08%** [24.56%, 37.88%] with a random one, against a 36.47% chance
+bar. So the live-pack arm clears chance and holds gate #3; the random-pack arm
+does NOT clear it - its interval straddles the bar. The village deduces worse when
+the pack is unreadable, which is what the criterion anticipated a gap here would
+mean: the pack's play changed what the village had to work with.
+
+**Second named free read**, `eval.changeling_audit` on the village arm - how a
+live village votes when the pack's speech carries no intent at all: shown-village
+52/148 = 35.14% [27.91%, 43.11%]; partner 35/198 = 17.68% [12.99%, 23.59%], which
+is a RANDOM pack's partner rate and therefore a baseline, not a behaviour. **Do
+not read it against the skin pair's 24.75%/13.64%** - those arms are `greek` on
+different seeds and the denominators are not the same population.
+
+**What this does NOT show.** The mechanism is untested. "Speech is evidence, so a
+talking pack hands the village something to deduce from" is the obvious reading of
+the two numbers together and this pair does not test it; it moves the whole pack
+policy at once, not its speech. Nor does it say a live pack is worse at the game -
+only that against THIS village, on this model, at these settings, its play is
+worth -17.9 points against playing at random.

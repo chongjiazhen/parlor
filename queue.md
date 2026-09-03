@@ -214,10 +214,16 @@ the one that goes stale.
 - [ ] **Gate #2 has a cheaper falsifiable design than waiting on gate #3** -
       `--arm llm` vs `--arm llm-good` on the same seeds, using arms that exist, and
       `rate_ok`'s 5% CI-floor bar is pre-declared nowhere. **The changeling twin is
-      FROZEN 2026-09-02**, `docs/changeling-gate2-pair-criterion.md` - `llm` vs
-      `llm-village` on S22's seeds, one new arm
-      (`eval/runs/changeling-gate2-arm.cmd`), LAUNCHED as the chain's last leg and
-      unread. The cabal half is parked with cabal's GPU program.
+      READ 2026-09-03 and INFORMS**, `docs/changeling-gate2-pair-criterion.md`:
+      the live pack wins 50.51% against the same live village where a RANDOM pack
+      wins 68.37%, difference -17.86% Newcombe [-27.10%, -8.15%]
+      (`docs/measurements.md`). Its named free read is the other half - blind
+      villager accuracy 47.41% against a live pack, 31.08% against a random one on
+      a 36.47% chance bar, so the village deduces worse when the pack is
+      unreadable. **The mechanism is untested and is what survives as a row**: the
+      arm moves the whole pack policy at once, so "speech is evidence" is a
+      reading, not a finding, and separating speech from votes is a new pair with
+      a criterion of its own. The cabal half is parked with cabal's GPU program.
 - [ ] **The night.py conflict is TEXTUAL, measured 2026-09-03 - and the kindred
       order was never open.** Trial merge of `slice/changeling-source-rules` into
       main in a throwaway detached worktree, resolved and DISCARDED: one hunk, the
