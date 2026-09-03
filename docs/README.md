@@ -129,7 +129,8 @@ partly true is worse than none.
   LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
   §"changeling heuristic rung" names: a rung read against a control that cannot
   talk is partly reading its own twin. Pairs against `cl-heuristic.json` rescored
-  on its first 200 games, so it runs BEFORE the source-rules merge. UNLAUNCHED.
+  on its first 200 games, so it runs BEFORE the source-rules merge. `mixed-pack`
+  READ 2026-09-03, INFORMS; `mixed-village` UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

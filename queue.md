@@ -104,7 +104,7 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 |---|---|
 | `slice/changeling-source-rules` | the night rules - merge condition MET on the branch |
 | `slice/changeling-notebook` | `--notebook` |
-| `slice/fanout-s21` + `slice/fanout-s21-demo` | `--briefing`, arm then console |
+| `slice/s21-merged` | `--briefing`, arm + console, main ALREADY merged in and conflicts resolved (`95465bd`) - merge this, not the two s21 branches |
 | `slice/fanout-s27` + `slice/fanout-s27-demo` | `--turns random-active`, arm then console |
 | `slice/fanout-simul` | `--turns simultaneous`, sits over S27 |
 | `slice/fanout-replies` | the parser's complaints - **supersedes `slice/fanout-neg`**, which it sits on |
