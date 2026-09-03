@@ -156,21 +156,10 @@ the one that goes stale.
       - which of name form or round count causes it - is deliberately NOT in it:
       four arms split 2-2 and no single variable separates them, so that is a
       later pair against this arm's record.
-- [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
-      needs fresh seeds now.** Two criteria built the door and neither walked
-      through it: the skin pair's §"What this does NOT compare" says a folk-vs-greek
-      read "needs its own folk arm on these seeds under HEAD - a separate row, a
-      separate criterion", and the rounds pair's §Settings put its two-round `folk`
-      arm on seeds 5000..5199 for exactly that, with one condition - the vocabulary
-      criterion "is written before that arm is read, never after." The greek arms
-      were read 09-02 and `cl-rounds2` printed its own blind accuracy at 05:38 on
-      09-03. No such criterion exists in `docs/`. **The seeds are spent**; the read
-      is still worth having, but it costs a fresh folk arm and a fresh greek arm on
-      new seeds, ~10 h, not the zero it was priced at. Cheaper alternative first:
-      decide whether vocabulary is worth 10 h at all, given the skin pair showed
-      NOT SHOWN on the name-form axis. The general lesson is the row that matters -
-      **an arm that doubles as a future control has a criterion deadline, and the
-      deadline is the moment the arm's own report prints.**
+- [ ] **The folk-vs-greek vocabulary read needs a criterion and fresh seeds,
+      ~10 h.** Decide first whether it is worth 10 h at all, given the skin pair
+      showed NOT SHOWN on the name-form axis. Moved verbatim, with the general
+      lesson it carries, to `docs/open-arms.md` 2026-09-03.
 - [ ] **`slice/transport-retry` is not on the merge list, and its keying
       question is now DECIDED.** Four commits, 971 insertions, named nowhere in
       this file until the 2026-09-03 triage. The `core/` collision is settled:
@@ -224,22 +213,11 @@ the one that goes stale.
       policy at once, so "speech is evidence" is a reading, not a finding, and
       separating speech from votes is a new pair with a criterion of its own. The
       cabal half is parked with cabal's GPU program.
-- [ ] **Merge the changeling source rules when the campaign chain has read.**
-      The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
-      re-baselines cabal (`docs/measurements.md`). The changeling
-      half - a lone `pack` views one centre card at MEET, an `identity`-class
-      reveal that moves the strata and the chance baseline. **Every blocker has now
-      CLEARED**: the gate #2 arm, the skin pair and S22 are all READ
-      (`docs/measurements.md`), and the merge condition was already met on the
-      branch - the control never declines and the guard is mutation-checked.
-      Merging re-baselines the rung and the RULES.md notes flip then. What
-      remains is the ranked arms that must run first, then the merge, then
-      re-measure the bar. **Its one conflict is TEXTUAL and resolved in advance**
-      (trial merge 2026-09-03, discarded): one hunk in `night.py`, the branch's
-      `PASS` constant adjacent to the `MAX_DEAL_ATTEMPTS` comment main rewrote
-      for deck B; the two edit different functions and 386 tests pass with both.
-      Keep the `PASS` block, keep main's comment. Kindred re-bars AFTER the merge
-      (`docs/decisions.md` 2026-09-02); nothing here needs a decision.
+- [ ] **Merge the changeling source rules.** Every blocker has CLEARED; what
+      remains is the ranked arms first, then the merge, then re-measure the bar.
+      Kindred re-bars after (`docs/decisions.md` 2026-09-02). Its one conflict is
+      textual and resolved in advance - the resolution, verbatim, is
+      `docs/open-arms.md` 2026-09-03.
 
 Measured prompt arms - same seeds, one variable, reported beside both fallback
 rates, landed between campaigns rather than into one. Every one is FROZEN and
@@ -334,18 +312,9 @@ Runs that are frozen and want card - and one that is already in the chain:
       touch, so an arm is the honest next move and the cheap CPU route is done.
       Not measured: any mechanism.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
-      unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
-      a night, taken at the top of `_begin_night`. What seating found, and how the
-      audit's third scan is graded, is `docs/faction-heartbeat.md` §Seated in
-      belfry, on the branch. Open, each its own row when taken: the rumour rule is
-      LINEAR on a circular table, and at 5 seats most scheduled beats never fire.
-      **Entry condition is the merge list, as first written.** The correction
-      that stood here - that heartbeat is link 3 of the launched chain and runs
-      ahead of the ranked arms - is FALSE, checked 2026-09-03 against
-      `eval/runs/chain-tail.cmd`'s own argument list: the three legs are the
-      rounds pair, the gate #2 arm and `belfry-night-transcript.cmd`, no recipe
-      in the tree passes `--heartbeat`, and the flag is not on main. It was the
-      belfry session-memory row's slot, read onto this one.
+      unmeasured.** `docs/faction-heartbeat.md` §Seated in belfry, on the branch.
+      Entry condition is the merge list. What seating found and the chain-slot
+      correction are `docs/open-arms.md` 2026-09-03.
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
 measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
@@ -382,24 +351,10 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
       economy-compliance read, neither of which has a rubric yet. Still not
       sequenced against the Paranoia rung.
-- [ ] **A browser front-end for a human seat, so a person can play off the
-      terminal - phone included.** The seam is already right: `ConsoleBackend`
-      is a backend, and every game reaches it through one method,
-      `complete_meta(context) -> (reply, served_by)`. So this is a SECOND
-      implementation of that seam, not a rewrite - the blocking game loop runs
-      in a thread, `complete_meta` blocks on a queue an HTTP handler feeds, and
-      the browser is handed `context` verbatim. That is the whole safety
-      argument and it is also the trap: **rendering referee state into widgets
-      would be a second channel gate #1 does not audit.** v1 ships the audited
-      string and nothing else; tap targets are allowed only as a client-side
-      shorthand over the same tokens (`vote y`), derived from the game's own
-      `ACTION_KEYS`, never from the referee. Stdlib only - no build step.
-      **What it is actually worth is not mobile.** `--human` is capped at one
-      seat because a terminal is ONE channel; per-connection channels lift that
-      cap, and a table seating several people against models is a thing this
-      tree cannot do today. That needs a real seat-binding guard, since the
-      one-channel constraint is what currently makes the cap free. Unmeasured:
-      no number moves either way, so this is product work, not an arm.
+- [ ] **A browser front-end for a human seat, phone included.** A SECOND
+      implementation of the `complete_meta` seam, not a rewrite; v1 ships the
+      gate-#1-audited string and nothing else. The trap, and the multi-seat prize
+      that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
 
 Publishing:
 

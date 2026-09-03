@@ -786,3 +786,77 @@ tree against what the tree is doing.
 
 Not a call to stop. A call to make each arm state its expected effect before it
 takes the card, and to let that decide the ranking.
+
+
+## Four rows returned to ask-shape, moved verbatim from `queue.md` 2026-09-03
+
+The queue's mean row grew 432 -> 746 bytes in seven days at a flat row count of
+27, so the rows were carrying their arguments. These four were the largest. The
+asks stay in `queue.md`; the argument is here, unrewritten.
+
+- [ ] **A browser front-end for a human seat, so a person can play off the
+      terminal - phone included.** The seam is already right: `ConsoleBackend`
+      is a backend, and every game reaches it through one method,
+      `complete_meta(context) -> (reply, served_by)`. So this is a SECOND
+      implementation of that seam, not a rewrite - the blocking game loop runs
+      in a thread, `complete_meta` blocks on a queue an HTTP handler feeds, and
+      the browser is handed `context` verbatim. That is the whole safety
+      argument and it is also the trap: **rendering referee state into widgets
+      would be a second channel gate #1 does not audit.** v1 ships the audited
+      string and nothing else; tap targets are allowed only as a client-side
+      shorthand over the same tokens (`vote y`), derived from the game's own
+      `ACTION_KEYS`, never from the referee. Stdlib only - no build step.
+      **What it is actually worth is not mobile.** `--human` is capped at one
+      seat because a terminal is ONE channel; per-connection channels lift that
+      cap, and a table seating several people against models is a thing this
+      tree cannot do today. That needs a real seat-binding guard, since the
+      one-channel constraint is what currently makes the cap free. Unmeasured:
+      no number moves either way, so this is product work, not an arm.
+
+- [ ] **Merge the changeling source rules when the campaign chain has read.**
+      The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
+      re-baselines cabal (`docs/measurements.md`). The changeling
+      half - a lone `pack` views one centre card at MEET, an `identity`-class
+      reveal that moves the strata and the chance baseline. **Every blocker has now
+      CLEARED**: the gate #2 arm, the skin pair and S22 are all READ
+      (`docs/measurements.md`), and the merge condition was already met on the
+      branch - the control never declines and the guard is mutation-checked.
+      Merging re-baselines the rung and the RULES.md notes flip then. What
+      remains is the ranked arms that must run first, then the merge, then
+      re-measure the bar. **Its one conflict is TEXTUAL and resolved in advance**
+      (trial merge 2026-09-03, discarded): one hunk in `night.py`, the branch's
+      `PASS` constant adjacent to the `MAX_DEAL_ATTEMPTS` comment main rewrote
+      for deck B; the two edit different functions and 386 tests pass with both.
+      Keep the `PASS` block, keep main's comment. Kindred re-bars AFTER the merge
+      (`docs/decisions.md` 2026-09-02); nothing here needs a decision.
+
+- [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
+      needs fresh seeds now.** Two criteria built the door and neither walked
+      through it: the skin pair's §"What this does NOT compare" says a folk-vs-greek
+      read "needs its own folk arm on these seeds under HEAD - a separate row, a
+      separate criterion", and the rounds pair's §Settings put its two-round `folk`
+      arm on seeds 5000..5199 for exactly that, with one condition - the vocabulary
+      criterion "is written before that arm is read, never after." The greek arms
+      were read 09-02 and `cl-rounds2` printed its own blind accuracy at 05:38 on
+      09-03. No such criterion exists in `docs/`. **The seeds are spent**; the read
+      is still worth having, but it costs a fresh folk arm and a fresh greek arm on
+      new seeds, ~10 h, not the zero it was priced at. Cheaper alternative first:
+      decide whether vocabulary is worth 10 h at all, given the skin pair showed
+      NOT SHOWN on the name-form axis. The general lesson is the row that matters -
+      **an arm that doubles as a future control has a criterion deadline, and the
+      deadline is the moment the arm's own report prints.**
+
+- [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
+      unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
+      a night, taken at the top of `_begin_night`. What seating found, and how the
+      audit's third scan is graded, is `docs/faction-heartbeat.md` §Seated in
+      belfry, on the branch. Open, each its own row when taken: the rumour rule is
+      LINEAR on a circular table, and at 5 seats most scheduled beats never fire.
+      **Entry condition is the merge list, as first written.** The correction
+      that stood here - that heartbeat is link 3 of the launched chain and runs
+      ahead of the ranked arms - is FALSE, checked 2026-09-03 against
+      `eval/runs/chain-tail.cmd`'s own argument list: the three legs are the
+      rounds pair, the gate #2 arm and `belfry-night-transcript.cmd`, no recipe
+      in the tree passes `--heartbeat`, and the flag is not on main. It was the
+      belfry session-memory row's slot, read onto this one.
+
