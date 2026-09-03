@@ -752,3 +752,28 @@ already carry a second block are not going to rewrite themselves. And five
 recipes still `del` a stale JSONL instead of refusing; that is a queue row.
 
 Not measured: whether any recipe was ever re-run onto its own path deliberately.
+
+## Per-table play state lives under one ignored root, 2026-09-03
+
+Tables the operator plays at accumulate state a script reads and writes - raw
+transcripts, campaign state, persona definitions, derived memory. None of it is
+tracked: play transcripts carry a setting's own text, which the tree stays free
+of, and `transcripts/` is for the rendered evidence of a claim, not a play log.
+
+- **One root, `/local/`, ignored at the repo root** - not a `local/` under each
+  rung and not more subdirs of `.scratch/`. The split with `.scratch/` is by
+  KIND: `.scratch/` is prose nothing executes, `local/` is data a script
+  addresses by rung and table. One root because the backup is a nested private
+  git repo inside it, and a nested repo needs one root; N scattered dirs means N
+  repos or junctions, which is maintenance that stops happening.
+- **Event-sourced.** The transcript is the append-only log and every other file
+  is a projection regenerable from it by a tracked script - the same invariant
+  as "output untracked, recipe tracked". A projection carries a `version:`.
+- **A seat's memory derives from that seat's own audited view, never from the
+  referee-side transcript.** Memory rides in the payload on every later call, so
+  gate #1 reaches across sessions; a memory built from the referee view would
+  leak the GM's secrets into a player three sessions later, past every per-turn
+  audit.
+
+The layout and the cadence are `local/README.md`, which is untracked with the
+rest - it is the contract for a dir a clone does not have.
