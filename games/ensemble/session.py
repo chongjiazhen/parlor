@@ -19,6 +19,7 @@ def run_draft(pack, seats, seed: int | None = None) -> dict:
         "seed": seed,
         "seats": decisions,
         "picks": draft.picks,
+        "upstreams": {i: getattr(s, "upstream", None) for i, s in enumerate(seats)},
         "distribution": draft.distribution(),
         "fallbacks": draft.fallbacks,
         "fallback_rate": draft.fallbacks / decisions if decisions else 0.0,

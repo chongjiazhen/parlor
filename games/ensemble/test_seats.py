@@ -103,3 +103,54 @@ def test_a_fallback_can_take_the_name_a_later_seat_wanted(tmp_path):
     assert rec["picks"][0] == "B"
     assert rec["fallbacks"] == 2
     assert set(rec["picks"].values()) == {"A", "B"}
+
+
+class Meta:
+    """A backend that reports which upstream served the reply, as the real one does."""
+
+    def __init__(self, replies, upstream="up-1"):
+        self.replies = list(replies)
+        self.upstream = upstream
+
+    def complete_meta(self, context, history=None):
+        return (self.replies.pop(0) if self.replies else "{}"), self.upstream
+
+    def complete(self, context):
+        return self.complete_meta(context)[0]
+
+
+def test_the_seat_reports_the_upstream_that_served_it():
+    seat = ChoosingSeat(seat=0, backend=Meta(['{"pick": "B"}'], upstream="glm-4.7"))
+    assert seat.choose(MENU, taken=()) == "B"
+    assert seat.upstream == "glm-4.7"
+
+
+def test_a_backend_without_complete_meta_still_works():
+    """The test doubles and any scripted seat expose only ``complete``."""
+    seat = ChoosingSeat(seat=0, backend=Canned(['{"pick": "B"}']))
+    assert seat.choose(MENU, taken=()) == "B"
+    assert seat.upstream is None
+
+
+def test_the_record_names_the_upstream_per_seat(tmp_path):
+    """On ``auto:*`` a different upstream may serve each seat, so the record must
+    say which. A figure that cannot name its upstream cannot be compared later."""
+    import json
+    p = tmp_path / "p.json"
+    p.write_text(json.dumps({"pack": "t", "playbooks": [
+        {"name": n, "about": f"{n} line.", "questions": []} for n in "AB"]}), encoding="utf-8")
+    pack = Pack.load(p)
+    seats = [ChoosingSeat(seat=0, backend=Meta(['{"pick": "A"}'], upstream="x")),
+             ChoosingSeat(seat=1, backend=Meta(['{"pick": "B"}'], upstream="y"))]
+    rec = run_draft(pack, seats, seed=1)
+    assert rec["upstreams"] == {0: "x", 1: "y"}
+
+
+def test_upstreams_is_present_even_when_nothing_reports_one(tmp_path):
+    import json
+    p = tmp_path / "p.json"
+    p.write_text(json.dumps({"pack": "t", "playbooks": [
+        {"name": "A", "about": "A line.", "questions": []}]}), encoding="utf-8")
+    pack = Pack.load(p)
+    rec = run_draft(pack, [ChoosingSeat(seat=0, backend=Canned(['{"pick": "A"}']))], seed=1)
+    assert rec["upstreams"] == {0: None}

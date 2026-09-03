@@ -59,11 +59,19 @@ class ChoosingSeat:
     seat: int
     backend: object
     retries: int = 3
+    #: Which upstream served this seat's last call, when the backend reports one.
+    #: On an ``auto:*`` model a different upstream may answer each seat, so a
+    #: record that cannot name it cannot be compared with any later run.
+    upstream: str | None = None
 
     def choose(self, menu, taken=()) -> str | None:
         ask = render_choice_ask(self.seat, menu, taken)
         for _ in range(max(1, self.retries)):
-            reply = self.backend.complete(ask)
+            meta = getattr(self.backend, "complete_meta", None)
+            if meta is None:
+                reply = self.backend.complete(ask)
+            else:
+                reply, self.upstream = meta(ask)
             try:
                 action = extract_json(reply)
             except ParseError:

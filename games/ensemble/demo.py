@@ -44,7 +44,8 @@ def build_seats(args, pack, rng):
     for i in range(args.seats):
         backend = Backend(endpoint=endpoint, model=args.model, api_key=key,
                           temperature=args.temperature, timeout=args.timeout,
-                          seed=args.seed)
+                          max_tokens=args.max_tokens, seed=args.seed,
+                          enable_thinking=(False if args.no_thinking else None))
         out.append(ChoosingSeat(seat=i, backend=backend, retries=args.retries))
     return out
 
@@ -65,6 +66,14 @@ def main(argv=None) -> int:
     ap.add_argument("--temperature", type=float, default=0.8)
     ap.add_argument("--timeout", type=float, default=60.0)
     ap.add_argument("--retries", type=int, default=3)
+    # A reasoning upstream spends this budget on visible thinking before it
+    # answers, and a run that never emits JSON reads in the summary as a model
+    # that cannot follow the rules. Measured on the clean tier at max_tokens=8:
+    # auto:reliable and auto:fast both returned finish_reason "length" with the
+    # whole reply in reasoning_content.
+    ap.add_argument("--max-tokens", type=int, default=1536)
+    ap.add_argument("--no-thinking", action="store_true",
+                    help="ask the provider to disable visible reasoning")
     ap.add_argument("--json", action="store_true", help="print the record only")
     args = ap.parse_args(argv)
     # A pack may carry any script; the console's cp1252 default raises AFTER a
@@ -94,6 +103,9 @@ def main(argv=None) -> int:
     print(f"pack {rec['pack']}  seats {rec['seats']}  seed {rec['seed']}  arm {args.arm}")
     for seat in sorted(rec["picks"]):
         print(f"  seat {seat}: {rec['picks'][seat]}")
+    served = {u for u in rec["upstreams"].values() if u}
+    if served:
+        print("served by: " + ", ".join(sorted(served)))
     print(f"fell back: {rec['fallbacks']}/{rec['seats']} "
           f"({rec['fallback_rate']:.0%})")
     return 0
