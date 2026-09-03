@@ -324,14 +324,19 @@ Runs that are frozen and want card - and one that is already in the chain:
       `eval/runs/changeling-kindred.cmd kin1 200 14000 qwen36-35b-a3b-iq3`, ~7 h.
       Entry condition: no changeling arm in flight - it queues behind the chain
       in `queue.local.md`. A new deck re-baselines everything under it.
-- [ ] **Read the belfry session-memory night arm - LAUNCHED, it is the chain's
-      last leg.** Not a row that wants card: `eval/runs/chain-tail.cmd` holds it
-      as recipe 3 of 3 and it starts when the gate #2 arm's log carries its
-      marker. The withheld night ask carrying the referee's own transcript,
-      `prior` still dropped; criterion `docs/belfry-night-transcript-criterion.md`,
-      seeds 15000..15999, ~1 h. Read `py -3 -m eval.belfry_night_verdict
-      --criterion transcript`: RECALLS or NO RECALL against the withheld arm,
-      BELOW or AS GOOD AS the supplied one, on intervals.
+- [ ] **The own-transcript arm sits BELOW the withheld arm, and no criterion has
+      a verdict for that.** READ 2026-09-03 (`docs/measurements.md`): COHERENT,
+      NO RECALL, BELOW SUPPLIED, all three pre-committed and clean - control at
+      47.71% containing one half, 0.00% fallback everywhere. The unheld part is
+      the direction: 61.33% [54.07%, 68.12%] against the withheld arm's 77.05%
+      [68.83%, 83.62%], intervals NOT overlapping, so handing the referee its own
+      transcript looks worse than handing it nothing. The criterion licenses the
+      interval comparison and defines only RECALLS / NO RECALL, so this is an
+      observation, not a result. **Cheapest next step is not an arm**: the two
+      records exist, so ask first whether the transcript arm's asks are longer,
+      whether its false tellings sit later in a game, and whether its extra 59
+      pairs are a different population - all CPU against `.jsonl` already on
+      disk. An arm only if that turns up nothing. Not measured: any mechanism.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
       unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
       a night, taken at the top of `_begin_night`. What seating found, and how the

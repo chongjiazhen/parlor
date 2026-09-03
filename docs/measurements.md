@@ -1120,3 +1120,48 @@ the two numbers together and this pair does not test it; it moves the whole pack
 policy at once, not its speech. Nor does it say a live pack is worse at the game -
 only that against THIS village, on this model, at these settings, its play is
 worth -17.9 points against playing at random.
+
+## belfry night coherence, own TRANSCRIPT - NO RECALL, READ 2026-09-03
+
+`docs/belfry-night-transcript-criterion.md`, frozen 2026-09-02T10:16:52Z.
+`py -3 -m eval.belfry_night_verdict --criterion transcript`, exit 0, no void.
+The third and last leg of the 09-02/09-03 chain; model arm 1000/1000 at
+elapsed=3160s, seeds 15000..15999.
+
+**The instrument control passes**: the seeded-random arm sits at 47.71%, Wilson
+[39.95%, 55.59%], which contains one half, so nothing here is INSTRUMENT SUSPECT.
+Player fallback 0/167325 and 0/169397 = 0.00% on both sides; adjudicator fallback
+0/2454 = 0.00%, 27 recovered; every non-fallback gauge choice served by
+`qwen36-35b-a3b-iq3`. Model side 2266 gauge tellings, 505 false, all sourced
+`model`; control 2196 tellings, 462 false, all `random`.
+
+| read | pairs | coherent | Wilson 95% |
+|---|---|---|---|
+| control, seeded random | 153 | 73 = 47.71% | [39.95%, 55.59%] |
+| **this arm, own transcript, `prior` withheld** | 181 | **111 = 61.33%** | **[54.07%, 68.12%]** |
+| published withheld read, 2026-09-02 | 122 | 94 = 77.05% | [68.83%, 83.62%] |
+| published supplied read, 2026-09-02 | 163 | 152 = 93.25% | [88.32%, 96.19%] |
+
+**The three pre-committed lines.** Against chance: **COHERENT** - 61.33% clears
+one half on both floors, Wilson lower 54.07% and bootstrap-by-game 2.5th
+percentile 53.77%. Against the withheld read: **NO RECALL** - RECALLS needed this
+arm's Wilson lower endpoint above the withheld read's upper 83.62%, and 54.07% is
+not. Against the supplied read: **BELOW SUPPLIED** - the whole interval sits under
+88.32%.
+
+**What the criterion says NO RECALL means, in its own words:** the transcript
+bought nothing over the withheld ask - the model does not find its earlier telling
+in its own words, and a referee built from stateless completions needs the harness
+to remember for it. It is a fact about this model at this size, and it says
+nothing about a model that writes itself notes, which is a different mechanism and
+a different criterion.
+
+**Not pre-committed, and therefore not a verdict: this arm sits BELOW the withheld
+arm on non-overlapping intervals** - 61.33% [54.07%, 68.12%] against 77.05%
+[68.83%, 83.62%], upper 68.12% under lower 68.83%. The criterion licenses the
+interval comparison (fresh seeds were chosen so the published read IS the
+comparison) but defines only RECALLS / NO RECALL, with no verdict for below. So
+this is an observation with a row behind it, not a result: on this evidence
+handing the referee its own transcript looks worse than handing it nothing, and
+nothing here establishes why. Denominators differ (181 pairs against 122) and the
+games are different seeds by construction.
