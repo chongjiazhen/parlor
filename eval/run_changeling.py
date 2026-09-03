@@ -60,7 +60,15 @@ from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 MEASURED_RANDOM_VILLAGE_WINS = 0.3951
 MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES = 0.3845
 
-ARMS = ("random", "llm", "llm-village", "llm-pack")
+ARMS = ("random", "heuristic", "heuristic-village", "heuristic-pack",
+        "llm", "llm-village", "llm-pack",
+        "mixed-village", "mixed-pack")
+
+#: Arms that put a model on the box. They all need `--backend`, and the check that
+#: enforces that reads this rather than a name prefix: `mixed-village` seats live
+#: seats and does not start with "llm", so a prefix test let it reach the deal with
+#: no endpoint and fall back on every decision - a run whose only outcome is a void.
+LIVE_ARMS = ("llm", "llm-village", "llm-pack", "mixed-village", "mixed-pack")
 
 
 def build_backend(args, seed: int | None) -> Backend:
@@ -88,8 +96,10 @@ def build_backend(args, seed: int | None) -> Backend:
 
 def build_policies(ref: ChangelingReferee, args, rng: random.Random,
                    seed: int | None = None) -> dict:
-    """Which seats are live. A mixed arm seats one side live against the random
-    control, so the live side's contribution is the only thing moving.
+    """Which seats are live. A mixed arm seats one side live against a control, so
+    the live side's contribution is the only thing moving. The control is the
+    random policy in the `llm-*` arms and the hand-written rung in the `mixed-*`
+    arms; which one it is changes what the number means, never how it is seated.
 
     Seated by DAWN TRUTH, which is the only defensible reading: a seat wins with the
     card in front of it, so that is the side it is playing for whether or not it
@@ -98,6 +108,18 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random,
     """
     if args.arm == "random":
         return {s: RandomPolicy(rng) for s in range(ref.n)}
+    if args.arm.startswith("heuristic"):
+        # The ladder's middle rung, no model: what un-random looks like on this
+        # game. One shared rng, so the game is reproducible from its seed. The
+        # mixed forms seat one side by DAWN TRUTH against the random control, the
+        # same way the llm- forms do below, so a number can be charged to a side.
+        from games.changeling.heuristic import HeuristicPolicy
+        from games.changeling.roles import Side
+        if args.arm == "heuristic":
+            return {s: HeuristicPolicy(rng) for s in range(ref.n)}
+        want = Side.PACK if args.arm == "heuristic-pack" else Side.VILLAGE
+        return {s: (HeuristicPolicy(rng) if ref.holds(s).side is want
+                    else RandomPolicy(rng)) for s in range(ref.n)}
     backend = build_backend(args, seed)
 
     # One LLMPolicy PER SEAT. Sharing one object across seats makes `upstreams` a
@@ -111,6 +133,21 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random,
     if args.arm == "llm":
         return {s: live() for s in range(ref.n)}
     from games.changeling.roles import Side
+
+    if args.arm.startswith("mixed"):
+        # The third cell. The `llm-*` arms hold a live side against the RANDOM
+        # control, and the `heuristic-*` arms hold the rung against the same
+        # control - so both mixed cells so far are read against a policy that
+        # never claims a deal, and `docs/measurements.md` measures what that buys:
+        # the rung's 77.36% village cell is mostly the control's silence, and
+        # falls to 31.62% with the tier that reads it switched off. Seating the
+        # rung against LIVE seats is where that confound stops. Same dawn-truth
+        # seating as every other mixed arm.
+        from games.changeling.heuristic import HeuristicPolicy
+        want = Side.VILLAGE if args.arm == "mixed-village" else Side.PACK
+        return {s: (live() if ref.holds(s).side is want else HeuristicPolicy(rng))
+                for s in range(ref.n)}
+
     want = Side.PACK if args.arm == "llm-pack" else Side.VILLAGE
     return {s: (live() if ref.holds(s).side is want else RandomPolicy(rng))
             for s in range(ref.n)}
@@ -439,7 +476,7 @@ def main() -> None:
     args = ap.parse_args()
     RUN_STATE.requested = args.games
 
-    if args.arm != "random" and not args.backend:
+    if args.arm in LIVE_ARMS and not args.backend:
         ap.error("a live arm needs --backend")
 
     # Refuse at the DOOR, never at game 200. An off-box route with no key does

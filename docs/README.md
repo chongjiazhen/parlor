@@ -78,8 +78,12 @@ partly true is worse than none.
   axis, only the first is flag-shaped, and a flag list is 2^N unmeasured fallback
   rates wearing one measured number's name. Carries the boundary of the formal
   prior art (`arXiv:2205.00451`).
-- `docs/scripted-rungs-cabal.md` - why the control ladder keeps climbing on hand
-  rules rather than a learned policy, and the three rungs that follow. Unmeasured.
+- `docs/control-ladder.md` - the game-free argument for climbing the control
+  ladder on hand rules: the denominator-not-player case, the ceiling estimator
+  protocol, the two constraints every rung inherits. Moved out of the cabal file
+  2026-09-02 when changeling built a rung.
+- `docs/scripted-rungs-cabal.md` - cabal's three scripted rungs, unmeasured; its
+  §0 now points at `docs/control-ladder.md`.
 - `docs/quorum-live4-criterion.md` - **the operative quorum pre-commitment**;
   arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
   stand beside it, superseded IN WRITING and unrun: each was retired before
@@ -121,6 +125,11 @@ partly true is worse than none.
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
   `eval.gate2_pair_verdict`. UNLAUNCHED.
+- `docs/changeling-mixed-criterion.md` - the hand-written rung seated against
+  LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
+  §"changeling heuristic rung" names: a rung read against a control that cannot
+  talk is partly reading its own twin. Pairs against `cl-heuristic.json` rescored
+  on its first 200 games, so it runs BEFORE the source-rules merge. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
