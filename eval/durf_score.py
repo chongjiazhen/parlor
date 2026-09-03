@@ -72,7 +72,8 @@ from dataclasses import dataclass, field
 
 from core import integrity
 from core.backends import ENDPOINTS, Backend, api_key_from_env, require_key
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import wilson
 from games.durf import adjudicate, fixture, rules
 
@@ -480,6 +481,11 @@ def main() -> None:
                  "fall back on every item and score the random adjudicator")
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before an item is
+    # scored, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     fx = fixture.load()
     # Before anything is scored: the published counts, re-derived from the file.

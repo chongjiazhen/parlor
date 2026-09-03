@@ -38,13 +38,15 @@ MIMIC = Role("mimic", Team.EVIL, shown_to_watcher=True)
 HUNTER = Role("hunter", Team.EVIL)
 AGENT = Role("agent", Team.EVIL)  # generic evil for larger counts
 
-# The two information-degrading evils. Data only: `entitled_knowledge` has honoured
-# these flags since the first commit, so each is a role constant and a row in every
-# skin, and nothing else. No shipped setup seats them - at 5 seats there are two
-# evil, which makes the seer see exactly one (LURKER) or leaves two evils who know
-# nothing of each other (STRAY), swingy to the point of noise. They are 7+ roles,
-# and queue.md holds the measurement sequencing: not before gate #3 is called,
-# because changing what the seer knows mid-run voids the old number and the new one.
+# The two information-degrading evils. `entitled_knowledge` has honoured these flags
+# since the first commit, so each is a role constant and a row in every skin, and
+# nothing else. **`SETUP_7` deals both, 2026-09-02**; nothing below 7 seats does,
+# because at 5 seats there are two evil, which makes the seer see exactly one
+# (LURKER) or leaves two evils who know nothing of each other (STRAY), swingy to the
+# point of noise. Seating them re-baselines: changing what the seer knows means
+# neither the old number nor the new one is a claim about the other, so `SETUP_5`
+# stays exactly what it was and 7 seats is a separate setup rather than a variant of
+# it. Only the random control has been run at 7 (`docs/measurements.md`).
 #
 # `stray` rather than `blind` on purpose: "the blind stratum" already means the good
 # seats holding no night knowledge, in the gate #3 arithmetic. One word, two
@@ -90,8 +92,10 @@ def legal_hunt_targets(assignment: dict[int, Role], hunter: int) -> list[int]:
     its own role, and whoever the night named. What is left is the denominator of
     the hunt baseline - ``1/len(...)`` - so this function and the chance figure the
     gate is scored against are the same statement. Hardcoding ``1/3`` was correct
-    only at 5 seats with a hunter that sees its ally; at 7p/3-evil the set is 4,
-    and under the blind-evil variant it is 4 at 5 seats too.
+    only at 5 seats with a hunter that sees its ally. On ``SETUP_7`` the hunter is
+    named ONE of its two fellow evil - the ``stray`` is named to nobody - so the set
+    is 5 of 7, not 4, and a reader who derives the denominator from the evil count
+    rather than from this function grades against the wrong chance.
     """
     barred = known_allies(assignment, hunter) | {hunter}
     return [s for s in sorted(assignment) if s not in barred]
@@ -112,7 +116,60 @@ SETUP_5 = Setup(
     fails_required=(1, 1, 1, 1, 1),
 )
 
-SETUPS: dict[int, Setup] = {5: SETUP_5}
+# The folk ladder for the resistance family - the mission sizes and the two-fail
+# mission that every table of this game plays by, and that `docs/player-counts.md`
+# already recorded for 7 seats. Stated here as the source, so a reader of a setup
+# does not have to reconstruct it:
+#
+#   seats | evil | m1 m2 m3 m4 m5
+#       5 |    2 |  2  3  2  3  3
+#       6 |    2 |  2  3  4  3  4
+#       7 |    3 |  2  3  3  4  4   <- m4 needs TWO fails
+#
+# The two-fail mission is the part a larger setup gets silently wrong: at 3 evil a
+# single saboteur on every team would sink the game with no coordination at all, so
+# the ladder makes the fourth mission need a pair. `fails_required` is already a
+# per-mission tuple, so this is data.
+
+#: Six seats, two evil - the 5-seat knowledge model on a bigger table. One extra
+#: loyalist and nothing else moves, so this is the setup to read a size effect
+#: against: the seer still sees both evil, the watcher still holds a real aura pair,
+#: and the evil pair still know each other.
+SETUP_6 = Setup(
+    n=6,
+    roles=(SEER, WATCHER, LOYALIST, LOYALIST, MIMIC, HUNTER),
+    team_sizes=(2, 3, 4, 3, 4),
+    fails_required=(1, 1, 1, 1, 1),
+)
+
+#: Seven seats, three evil, and the setup the two information-degrading evils exist
+#: for. Both are dealt: the `lurker` the seer cannot see, and the `stray` that
+#: neither knows its side nor is known to it.
+#:
+#: **No watcher, and that is a decision rather than an omission.** The aura is a
+#: PAIR - one good seat and one evil seat carrying the same label - so seating the
+#: watcher costs an evil seat for the `mimic` to carry it. Three evil seats cannot
+#: hold `mimic`, `hunter`, `lurker` and `stray`, and the `hunter` is not optional:
+#: the endgame asks `seat_of("hunter")` by key. Seating the watcher anyway, with no
+#: evil carrying the aura, does not weaken the watcher - it hands it the seer's
+#: seat outright, which is a stronger reveal than the seer's own. So the choice at
+#: 7 seats is the aura pair or both variants, and the row this setup exists for
+#: wants both. `SETUP_6` is where the watcher keeps its pair on a larger table.
+#:
+#: What that leaves is three knowledge classes collapsed to two, `identity` and
+#: `none` - gate #3a's `aura` stratum is empty at 7 seats, and the scorer already
+#: reports an absent stratum as absent rather than as zero.
+SETUP_7 = Setup(
+    n=7,
+    roles=(SEER, LOYALIST, LOYALIST, LOYALIST, HUNTER, LURKER, STRAY),
+    team_sizes=(2, 3, 3, 4, 4),
+    fails_required=(1, 1, 1, 2, 1),
+)
+
+#: Seat count -> the deal. `SETUP_5` is the deal every recorded cabal number was
+#: played on; 6 and 7 have never been run against a model, and a setup change
+#: re-baselines everything measured under it.
+SETUPS: dict[int, Setup] = {5: SETUP_5, 6: SETUP_6, 7: SETUP_7}
 
 
 @dataclass(frozen=True)

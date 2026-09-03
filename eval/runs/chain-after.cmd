@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
+rem enabledelayedexpansion + !TIME!: %TIME% inside a parenthesised block
+rem expands at PARSE time, which misdated every per-arm line here (queue.md).
 rem Wait for a run to finish, then launch the next one. Keeps the GPU busy across
 rem the gap between an evening run and an overnight one.
 rem
@@ -38,7 +40,7 @@ if "%ONTIMEOUT%"=="" set "ONTIMEOUT=launch"
 set "CHAINLOG=eval\records\%TAG%-chain.log"
 if not exist "eval\records" mkdir "eval\records"
 
-echo [chain] started %DATE% %TIME% - waiting for %SENTINEL% to be non-empty>>"%CHAINLOG%"
+echo [chain] started !DATE! !TIME! - waiting for %SENTINEL% to be non-empty>>"%CHAINLOG%"
 
 rem Structural bound beside the predicate. The predicate decides WHETHER to go on;
 rem this decides that the loop ends at all, because a first run that dies without
@@ -80,6 +82,6 @@ ping -n 31 127.0.0.1 >nul
 goto wait
 
 :ready
-echo [chain] proceeding at %TIME% after %TRIES% poll(s) - launching %TAG%>>"%CHAINLOG%"
+echo [chain] proceeding at !TIME! after %TRIES% poll(s) - launching %TAG%>>"%CHAINLOG%"
 call "%~dp0hunt-local.cmd" %TAG% %GAMES% %SEED% %MODEL%
-echo [chain] hunt-local returned rc=%ERRORLEVEL% at %DATE% %TIME%>>"%CHAINLOG%"
+echo [chain] hunt-local returned rc=%ERRORLEVEL% at !DATE! !TIME!>>"%CHAINLOG%"

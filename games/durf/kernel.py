@@ -52,6 +52,10 @@ class TopologyError(Exception):
     """The dungeon's stated exits do not describe a usable dungeon."""
 
 
+class FixtureMismatch(Exception):
+    """A dungeon directory's two files describe two different dungeons."""
+
+
 # --- topology, added 2026-08-28 --------------------------------------------
 #
 # Until this, the fixture stated no adjacency and no sightlines, and the cost was
@@ -557,9 +561,21 @@ def load(seed: int | None = None, ledger=None, path=None) -> Kernel:
         location=n["location"]) for n in scenario["npcs"]}
     rooms = {r["id"]: r for r in scenario["rooms"]}
     check_topology(rooms)
+    if ledger is None:
+        # A ``path`` names a dungeon DIRECTORY, so its facts come from it too.
+        # Defaulting to the shipped set here would audit one dungeon against
+        # another's sentinels and report a hold over the wrong corpus.
+        ledger = (facts_mod.load() if path is None
+                  else facts_mod.load(root / "facts.json"))
+    want = scenario.get("scenario_id", "")
+    if ledger.scenario_id and want and ledger.scenario_id != want:
+        raise FixtureMismatch(
+            f"scenario.json describes {want!r} and the fact ledger describes "
+            f"{ledger.scenario_id!r}. One directory is one dungeon; auditing one "
+            f"against the other's terms reports a hold over the wrong corpus.")
     return Kernel(
         pcs=pcs, npcs=npcs, rooms=rooms,
-        ledger=facts_mod.load() if ledger is None else ledger,
+        ledger=ledger,
         room=scenario["rooms"][0]["id"],
         elapsed_turns=scenario["clock"]["elapsed_turns"],
         rng=random.Random(seed))

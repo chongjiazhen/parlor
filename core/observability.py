@@ -41,13 +41,25 @@ class SeatView:
     public: dict
 
 
+#: What a secret is keyed to. A bare seat is the original key and still the one
+#: every game in the tree passes; ``(seat, axis)`` names ONE of the several
+#: independent secrets a seat may hold, so entitlement can be granted to one
+#: without granting the rest.
+SecretKey = int | tuple[int, str]
+
+
+def subject(key: SecretKey) -> int:
+    """The seat a secret is about, whether the key names an axis or not."""
+    return key[0] if isinstance(key, tuple) else key
+
+
 def find_leaks(
     rendered: str,
-    secret_terms: dict[int, list[str]],
-    entitled: set[int],
+    secret_terms: dict[SecretKey, list[str]],
+    entitled: set[SecretKey],
     viewer: int,
     self_is_secret: bool = False,
-) -> list[tuple[int, str]]:
+) -> list[tuple[SecretKey, str]]:
     """Scan one seat's rendered context for a secret it is not entitled to.
 
     Returns ``(seat, term)`` for every non-entitled seat whose secret term appears
@@ -70,15 +82,31 @@ def find_leaks(
 
     The flag is here rather than in the caller because the skip it removes was
     here: a game cannot opt out of a rule the primitive applies before it is asked.
+
+    **A key may name an AXIS.** ``secret_terms`` was keyed to a seat and a seat
+    only, which makes entitlement all-or-nothing over everything that seat hides:
+    a viewer told one of seat 3's secrets was skipped on ALL of seat 3's terms,
+    and a leak of the others reported clean. That is the false-negative direction
+    the repo's first invariant forbids by name. A key may now be ``(seat, axis)``,
+    and the two rules that read a key read it through ``subject``: entitlement is
+    granted to a KEY, or to a bare seat which covers every axis of it, and the
+    self-skip is about the seat the secret is ABOUT.
+
+    Nothing in the tree passes an axis yet - six call sites, all seat-keyed, all
+    unchanged by construction, since a bare ``int`` takes both branches exactly
+    as before. What the widening buys is that a game which needs axes can adopt
+    them without the primitive reporting the viewer's own secrets at it, which is
+    the pressure that would send it back to a flat seat key.
     """
-    leaks: list[tuple[int, str]] = []
+    leaks: list[tuple[SecretKey, str]] = []
     low = rendered.lower()
-    for seat, terms in secret_terms.items():
-        if seat in entitled:
+    for key, terms in secret_terms.items():
+        seat = subject(key)
+        if key in entitled or seat in entitled:
             continue
         if seat == viewer and not self_is_secret:
             continue
         for term in terms:
             if term and term.lower() in low:
-                leaks.append((seat, term))
+                leaks.append((key, term))
     return leaks

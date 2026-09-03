@@ -96,8 +96,13 @@ class SolverPolicy:
         self.last_solver_mode = "deferred"
         if ref.phase is not Phase.VOTE:
             return self.fallback.act(ref, seat)
+        # The setup comes from the REFEREE, never from `team_taint`'s default. The
+        # solver enumerates every assignment of a setup's roles, so a default of
+        # `SETUP_5` against a 7-seat deal enumerates a different game: no assignment
+        # survives, `ConstraintViolation` is raised, and the driver swallows it into
+        # `rec.error` one game at a time. Setups larger than 5 exist now.
         taint = team_taint(evidence_from_referee(ref, seat),
-                           tuple(ref.proposal or ()))
+                           tuple(ref.proposal or ()), ref.setup)
         if taint == 0.0:
             self.last_solver_mode = "mechanical"
             return {"vote": True}
@@ -432,7 +437,8 @@ def evidence_from_referee(ref: CabalReferee, seat: int) -> Evidence:
 
 def hunter_reading_from_referee(ref: CabalReferee, hunter: int) -> HuntReading:
     ev = evidence_from_referee(ref, hunter)
-    return read_hunt(ev, ref.legal_hunt_targets(hunter), ref.seat_of("seer"))
+    return read_hunt(ev, ref.legal_hunt_targets(hunter), ref.seat_of("seer"),
+                     ref.setup)
 
 
 def evidence_from_record(game: dict, assignment: dict[int, Role], seat: int,

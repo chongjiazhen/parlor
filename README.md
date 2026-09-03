@@ -39,6 +39,7 @@ python -m parlor play cabal --human 0         # you play seat 0
 python -m parlor play changeling --human 0    # your own card can change under you
 python -m parlor play quorum --human 0        # the secret is dealt in play, not at the deal
 python -m parlor play belfry --seats 7 --human 0   # days and nights, and the referee may lie to you
+python -m parlor play durf --human 0          # a dungeon party: the secret is the world, not a seat
 ```
 
 Each game keeps its own flags - `play cabal --help` prints cabal's. One person per

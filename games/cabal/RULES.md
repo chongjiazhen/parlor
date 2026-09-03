@@ -27,10 +27,10 @@ Five seats, three good, two evil. `SETUP_5` in `roles.py`.
 | `mimic` | evil | its partner (`hunter`). Also *carries* the aura, so the watcher cannot tell it from the seer | `identity` |
 | `hunter` | evil | its partner (`mimic`) | `identity` |
 
-### Two evils no shipped setup seats yet
+### The two information-degrading evils
 
-`agent` is generic evil for larger counts. Two more exist as data only - defined,
-named in every skin, dealt by nothing:
+`agent` is generic evil for larger counts, dealt by nothing. Two more are dealt by
+`SETUP_7` and by nothing smaller:
 
 | seat key | side | what the night tells it | and what it costs the others |
 |---|---|---|---|
@@ -42,6 +42,81 @@ would play knowing nothing of each other, and either is swing rather than signal
 What they buy is stated in `queue.md` - they degrade information in a principled
 way, which is what turns the seer's measured edge into a claim about deduction and
 gate #2 into deception between agents that were never introduced.
+
+## The larger setups
+
+Two more registered deals, landed 2026-09-02, neither ever run against a model.
+`SETUP_5` is unchanged and is still what `--seats` defaults to: a setup change
+re-baselines every number measured under it, so 6 and 7 are separate setups rather
+than variants of the shipped one.
+
+Mission sizes follow **the folk ladder** - the mission sizes and the two-fail
+mission that tables of this family have played by for as long as the game has been
+played, and that `docs/player-counts.md` already recorded for 7 seats:
+
+| seats | evil | m1 | m2 | m3 | m4 | m5 |
+|---|---|---|---|---|---|---|
+| 5 | 2 | 2 | 3 | 2 | 3 | 3 |
+| 6 | 2 | 2 | 3 | 4 | 3 | 4 |
+| 7 | 3 | 2 | 3 | 3 | **4 (two fails)** | 4 |
+
+The two-fail mission is the half a larger setup gets silently wrong. At three evil
+seats a lone saboteur on every team would sink the game with no coordination at
+all, so the fourth mission needs a pair - which is a coordination problem for the
+side the `stray` is not part of. `fails_required` is a per-mission tuple, so this
+is data.
+
+### `SETUP_6` - the same knowledge model on a bigger table
+
+Six seats, two evil: `SETUP_5` plus one loyalist, and nothing else moves. The seer
+still sees both evil, the watcher still holds a real aura pair, and the evil pair
+still know each other. It exists so a size effect can be read on its own, without
+the knowledge model moving underneath it.
+
+### `SETUP_7` - three evil, and both degradations at once
+
+Seven seats, three evil: `seer`, three `loyalist`, `hunter`, `lurker`, `stray`.
+What each new evil degrades:
+
+- **The `lurker` halves the seer.** The seer is dealt two of the three evil seats
+  and is not told that a third exists. Its clean-team certification is no longer
+  sound, which is the point: the measured seer edge stops being partly "a seat
+  acting on a handed answer" and becomes a claim about deduction.
+- **The `stray` makes evil deceive without a partner.** It is named to nobody and
+  nobody is named to it, so it plays a fail card without knowing who else will, and
+  the two-fail mission is a coordination problem it cannot coordinate on. This is
+  the honest version of gate #2 - the current claim is really "two agents told
+  about each other cooperated".
+
+Two consequences the engine derives rather than special-cases:
+
+- **The conference is a pair, not the evil team.** `conference_seats` reads
+  `known_allies`, so the `hunter` and the `lurker` confer and the `stray` is not
+  in the channel. A conference reaching it would itself be the reveal the role
+  withholds.
+- **The hunt denominator widens to 5 of 7.** The hunter bars itself and the one
+  ally it was named, not all three evil. Every hunt records the size of the set it
+  faced, so the chance figure is `1/5` here and `1/3` at five seats without anyone
+  writing either down.
+
+**No watcher at 7 seats, and that is a decision rather than an omission.** The aura
+is a PAIR - one good seat and one evil seat carrying the same label - so seating the
+watcher spends an evil seat on the `mimic` to carry it. Three evil seats cannot hold
+`mimic`, `hunter`, `lurker` and `stray`, and the `hunter` is not optional: the
+endgame asks for it by key. Seating the watcher with no evil carrying the aura does
+not weaken it, it hands it the seer's seat outright - a stronger reveal than the
+seer's own. So the choice at 7 seats is the aura pair or both variants, and both
+variants are what the setup exists for. `SETUP_6` is where the watcher keeps its
+pair on a larger table.
+
+The cost is that gate #3a's `aura` stratum is empty at 7 seats. The scorer already
+reports an absent stratum as absent rather than as zero, and the 1000-game random
+control confirms it does (`docs/measurements.md`).
+
+**A bigger table is not a sampling fix.** Clean teams get combinatorially rarer as
+seats grow, faster than the extra good voters compensate, and hunts are one per game
+at any size. `docs/player-counts.md` has the arithmetic. These setups are worth
+running for what they degrade about information, and for nothing else.
 
 The knowledge class is what gate #3a stratifies on, and it is a different axis
 from side: a good seat can hold identity knowledge (the seer does). Naming the
@@ -121,8 +196,8 @@ pair that could not coordinate. **A number recorded before this date was measure
 on a different game** - `docs/measurements.md` is the ledger of which.
 
 Mission team sizes at 5 seats: **2, 3, 2, 3, 3**. Fails required: **1** for all
-five. (At 7+ seats mission 4 requires 2 fails - `fails_required` is a per-mission
-tuple, so a 7p setup left at all-ones is silently the wrong game.)
+five. The 6- and 7-seat ladders, and the two-fail mission at 7, are in
+§The larger setups.
 
 ## Win conditions
 
@@ -147,8 +222,10 @@ a baseline using knowledge the model was allowed to throw away.
 
 **The baseline is 1-in-3 only on this deal, and the scorer no longer assumes it.**
 Three candidates is what is left at 5 seats with a hunter its partner was named to.
-At 7p/3-evil the legal set is 4, and under the blind-evil variant (`stray`) it is 4
-at 5 seats too - and the referee and the control both derive it from
+On `SETUP_7` it is **5 of 7**, not 4: three evil seats, but the `stray` is named to
+nobody, so the hunter bars only itself and the `lurker`. That is the trap in
+deriving the denominator from the evil count - the referee and the control both
+derive it from
 `entitled_knowledge`, so under a variant they would silently agree on the wider set
 while a hardcoded `1/3` kept grading against the narrower one, in the flattering
 direction. Every hunt records the size of the set it faced (`hunt.legal_targets`);

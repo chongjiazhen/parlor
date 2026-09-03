@@ -821,6 +821,62 @@ to anything run after it. The driver also logs one more decision per conferring
 seat per game, so an aggregate fallback rate over all decisions runs on a larger
 denominator than before; per-phase rates are unaffected.
 
+## cabal 6- and 7-seat setups - RANDOM BASELINES ONLY, measured 2026-09-02
+
+`SETUP_6` and `SETUP_7` landed this day (`games/cabal/RULES.md` §The larger
+setups). **No model has been seated at either size**, and cabal has no GPU program
+left, so every figure below is the chance floor and nothing here is a gate claim.
+Three 1000-game random controls, same seed base, 0.00% fallback in all three:
+
+```
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 5 --out eval/records/cabal5-random.json
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 6 --out eval/records/cabal6-random.json
+py -3 -m eval.run_cabal --arm random --games 1000 --seed 5000 --seats 7 --out eval/records/cabal7-random.json
+```
+
+The 5-seat row is a REFERENCE, not the other arm of a pair: seats, evil count and
+the mission ladder all move together, so this is three separate chance floors and
+not one variable.
+
+| | 5 seats (2 evil) | 6 seats (2 evil) | 7 seats (3 evil) |
+|---|---|---|---|
+| evil win rate | 64.60% [61.59, 67.50] | 60.00% [56.93, 62.99] | 56.90% [53.81, 59.94] |
+| by path: missions failed / five rejects / hunt hit | 460 / 0 / 186 | 465 / 8 / 127 | 450 / 0 / 119 |
+| fail cards played | 2129 | 2178 | 2740 |
+| hunt chance, derived | 33.33% | 25.00% | **20.00%** |
+| hunter accuracy at random | 34.44% (186/540) | 24.10% (127/527) | 21.64% (119/550) |
+| blind taint sensitivity | +0.52% [-1.46, +2.60] | +0.06% [-1.28, +1.37] | -0.36% [-1.34, +0.64] |
+| blind clean / tainted votes | 837 / 3978 | 1968 / 8986 | 1599 / 12516 |
+| `aura` stratum | n=837/3978 | n=984/4493 | **n=0/0, REFUSED** |
+| decisions | 64795 | 85363 | 84737 |
+
+What the numbers say, and only this:
+
+- **The hunt bar falls with the table, and 7 seats does not fall as far as the
+  evil count suggests.** 1/5, not 1/4: three evil seats, but the `stray` is named
+  to nobody, so the hunter bars only itself and the `lurker`. A scorer deriving
+  chance from the evil count would grade a 7-seat hunt against 25% and read 21.6%
+  random play as below chance. The referee records the set each hunt faced, so
+  nothing here was assumed.
+- **The empty `aura` stratum prints as REFUSED, not as zero.** `SETUP_7` seats no
+  watcher, so gate #3a has two strata there rather than three. This is the
+  instrument check on the setup: an absent stratum rendered as 0.00% would have
+  been a gate reading over nothing.
+- **Evil's chance floor drops as the table grows** - 64.6% -> 60.0% -> 56.9%, with
+  the drop coming out of the hunt (186 -> 127 -> 119 wins) rather than out of the
+  missions, which hold near 460. Gate #2's floor is therefore setup-specific: the
+  ~65% figure the gate is conditional on is a 5-seat number and does not carry.
+- **The blind vote floor is flat at chance in all three**, as it must be with good
+  voting at random, and all three CIs straddle zero. The sampling half is
+  `docs/player-counts.md`'s point restated by measurement: clean teams are 17.4% of
+  blind votes at 5 seats, 18.0% at 6, and **11.3% at 7**. Per blind seat per game
+  that is 0.84 / 0.98 / **0.53** clean-team votes - 7 seats has three loyalists
+  instead of one and still collects fewer clean samples each. A bigger table is not
+  a sampling fix, and at three evil it is a sampling loss.
+- **Five-reject losses are not a 7-seat failure mode.** 0 of 1000 at 7 seats, 8 at
+  6, 0 at 5. Worth knowing before reading a live arm, since perfect good voting is
+  measured to convert certainty into five-reject losses at 5 seats.
+
 ## Quorum slice-9 control - the decoupled policy stream, measured 2026-08-29
 
 `eval/records/quorum-control-slice9.json`, 400 random games, seeds 7000..7399,
@@ -903,3 +959,419 @@ contradict; safe lies by office proposer 14, enactor 0; honest on a forced draw
 majority 73.55%, minority 69.32%; 42 writs enacted by an office that could have
 done otherwise. No win rate is reported and no deception figure is inferred from
 one - `majority_wins` is a property of the deck at this scale.
+
+## ensemble session 0 - the draft RAN, and its distribution is NOT a measurement, 2026-09-03
+
+The play-lane row's done-when is met: a draft completes with no duplicate seats
+and the pick distribution is recorded. Seven runs, five seats each, example pack
+(8 playbooks), clean route, `auto:reliable`, `eval` none - this is a driver, not
+a campaign, so the numbers below are a smoke result and **nothing here may be
+cited as a diversity read.** Three reasons, and any one of them is enough.
+
+- **`auto:reliable` is a routing strategy, not a model.** A different upstream may
+  serve each seat, so the run has no single subject. Observed: two ids that are
+  the same model (`nemotron-3-ultra` and `nvidia/nemotron-3-ultra-550b-a55b`), so
+  even counting upstreams would have double-counted one.
+- **The code changed mid-sweep.** Upstream recording landed between seeds 3 and 5,
+  so the runs are not all the same program. The fault is procedural and the fix
+  is a branch or a wait, not a caveat.
+- **2 of 7 runs died on a socket timeout** (seeds 4 and 6), so the surviving five
+  are a success-conditioned sample. Its own queue row.
+
+What it does establish, which is what the slice was for: **the loop runs end to
+end against live models at 0% fallback** in all five completed runs, 5 seats in
+~80 s serial. Picks over those 25 decisions: WITNESS 5, RETURNEE 5, FIXER 4,
+TRUE BELIEVER 4, PROVIDER 3, UNDERSTUDY 3, LATE BLOOMER 1, GOLDEN ONE 0, against
+a uniform 3.125. **That is mild concentration and it is NOT the collapse an
+interim read of the first two seeds looked like** - the early runs shared a set of
+five, and three more runs spread across seven of the eight. Recorded here so the
+premature reading does not survive as folklore; the real read needs a pinned
+model, one program, and the timeouts fixed.
+
+
+## changeling discussion length - S22's `--rounds 2` vs `--rounds 3` pair, READ 2026-09-03
+
+**NOT SHOWN.** A third discussion round did not move blind villager deduction, and
+it cost 30% more card. Read with `py -3 -m eval.rounds_pair_verdict`, exit 0,
+against the pre-committed `docs/changeling-rounds-pair-criterion.md` (frozen
+2026-09-02T06:38Z, before either arm ran). Records `eval/records/cl-rounds{2,3}
+{,-random}.json`, recipe `eval/runs/changeling-rounds-pair.cmd`.
+
+**The runs.** 200/200 games each, local `qwen36-35b-a3b-iq3`, `--arm llm --seats 5
+--theme folk --seed 5000 --no-thinking --timeout 240`, driver defaults otherwise.
+rounds2 down 2026-09-03T05:38 local in 17900 s (4.97 h); rounds3 down 12:07 in
+23340 s (6.48 h) - **+30.4% GPU for a difference that spans zero**. The verdict's
+settings pin read each record's own `args` against the criterion and both MATCH.
+196 scored per arm, 251 blind votes per arm.
+
+**The pair's figure.** Blind villager accuracy, three rounds minus two:
+**-2.79%**, Newcombe 95% **[-11.41%, +5.89%]** - the interval the criterion names,
+and it includes zero. Paired game bootstrap [-11.89%, +7.03%] beside it, deciding
+nothing. The criterion priced a half-width near 8.5 points and said the pair
+cannot settle a gap smaller than nine; the observed gap is under three, so this is
+the "not shown" the power section wrote down in advance. **No second pair chases
+it**, and no bar may be added now.
+
+**Fallback did NOT rise on the longer arm**, which was the pre-registered payload
+worry: 0.43% (rounds2) against 0.50% (rounds3), both far under the 10% void bar;
+recovered 7.60% against 6.45%, both under the 25% warn. A third round at a fixed
+`--max-tokens 1536` costs no measurable legality.
+
+**Gate #3 HOLDS on both arms**, secondary per the criterion: rounds2 119/251 =
+**47.41%** Wilson [41.32%, 53.58%]; rounds3 112/251 = **44.62%** Wilson [38.60%,
+50.81%]. Both floors clear the 35.84% reference. Each arm's own random control
+agrees with that reference within the criterion's one-point tolerance (35.44% and
+36.14%), so the reference stays the bar and the own-arm clause does not fire.
+**Gate #2 is reported with no verdict**, as the criterion requires: pack win 50.51%
+and 52.04%.
+
+**An instrument control worth keeping: the two random controls share a deal
+exactly.** The criterion demanded the census agree, since random play does not
+speak - it does, to the vote: blind votes 1281 on both, strata `identity` 1103 /
+`positional` 582 / `false` 448 on both, dawn-wolf denominators 23/483/494 on both.
+Their ACCURACIES differ (35.44% vs 36.14%) because a third round advances the seed
+stream and the random seats draw different votes, which is the expected shape and
+not a census disagreement.
+
+### The free reads - unadjusted, none a gate, and one of them points somewhere
+
+Six reads below share the arms' seeds and carry no multiplicity correction. The
+criterion declares them free and forbids a bar after the fact, so **nothing here
+is promotable and none of it revises the NOT SHOWN above.** Intervals are
+Newcombe over independent proportions, three rounds minus two.
+
+| free read | rounds2 | rounds3 | diff | Newcombe 95% |
+|---|---|---|---|---|
+| pack voted the fellow it was told | 15.66% (31/198) | 24.75% (49/198) | **+9.09%** | [+1.17%, +16.90%] |
+| present claims true ("I am X") | 78.75% (467/593) | 74.12% (716/966) | **-4.63%** | [-8.85%, -0.26%] |
+| ...village seats only | 87.16% | 82.31% | **-4.85%** | [-9.09%, -0.34%] |
+| ...pack seats only | 60.64% | 55.85% | -4.79% | [-13.56%, +4.23%] |
+| dealt claims true | 82.24% | 78.21% | -4.04% | [-9.01%, +0.95%] |
+| village voted a seat shown village | 29.73% (44/148) | 26.35% (39/148) | -3.38% | [-13.49%, +6.83%] |
+
+**The one that matters is the first, and it is the SAME statistic the skin pair's
+effect landed on.** `eval.changeling_audit` against each arm's own random control:
+under two rounds a pack seat voted its fellow 15.66%, well below its control's
+25.69% - the pack PROTECTING its partner. Under three rounds it reads 24.75%,
+sitting on its own control's 26.82%, so **the protection is gone by the third
+round.** That is a pack statistic; the pair's primary is a village one, so an
+effect this size is structurally outside what the criterion could see. It does not
+settle anything by itself - two unadjusted reads on two different axes both
+landing on the partner vote is a pattern worth ONE properly-powered arm, not a
+claim - and the row that would spend it already exists: the skin pair's row asks
+for a new criterion with the pack statistic PRIMARY on fresh seeds. **This read
+raises that row's value; it does not add a row.**
+
+**A third round buys more talk and slightly worse talk.** Present claims went 2.97
+per game to 4.83 (+63%) while their truth rate fell 4.63 points - so the extra
+round is spent making more self-claims, not better ones, and the village side
+carries the whole decline. Consistent with `AGENTS.md`'s standing position that
+more context is not monotonically good, and it is the second dated instance of it
+on this box after `_night_against_the_table`.
+
+## changeling gate #2 as a pair - the live pack COSTS itself 17.9 points, READ 2026-09-03
+
+`docs/changeling-gate2-pair-criterion.md`, frozen 2026-09-02T06:47:03Z and
+unedited since. `py -3 -m eval.gate2_pair_verdict`, exit 0. Records
+`eval/records/cl-rounds2.json` (the live-pack arm, cited not chosen - it IS S22's
+two-round record) and `eval/records/cl-gate2-village.json` (`--arm llm-village`,
+village seats live by dawn truth, pack seats `RandomPolicy`), 200 games each on
+seeds 5000..5199.
+
+**Fallback first, per arm.** `llm` 0.43% fallback, 7.60% recovered; `llm-village`
+0.20% fallback, 5.17% recovered. Both are far under the 10% void and the 25%
+recovered flag. 196 scored games on each arm, above the 190 floor that would have
+REFUSED the pair. The settings pin matched both records against their own `args`.
+**Pairing is counted, not assumed: 200/200 pairs share their dawn truth.**
+
+| arm | pack behind the pack seats | pack win rate, scored | Wilson 95% |
+|---|---|---|---|
+| `llm` | live | **50.51%** (99/196) | [43.57%, 57.43%] |
+| `llm-village` | random | **68.37%** (134/196) | [61.56%, 74.47%] |
+| all-random reference | random, and a random village too | 64.29% (126/196) | [57.36%, 70.66%] |
+
+**The pair: -17.86%, Newcombe 95% [-27.10%, -8.15%], excludes zero -> INFORMS.**
+Paired game bootstrap [-26.02%, -9.69%] beside it, never deciding. The all-random
+row is a REFERENCE and never decides - it moves both populations, which is why it
+cannot be the control. The criterion pre-committed the reading in both directions,
+so this needs no interpretation after the fact: below zero reads **"the pack's
+play costs it against this village"**, a finding about the model rather than a
+failure of the instrument. The effect is larger than the pair's ~10-point
+half-width, so it is inside what this design can settle.
+
+**The named free read says what changed for the village.** Blind villager
+accuracy, same village population on both arms: **47.41%** [40.16%, 54.43%] with a
+live pack, **31.08%** [24.56%, 37.88%] with a random one, against a 36.47% chance
+bar. So the live-pack arm clears chance and holds gate #3; the random-pack arm
+does NOT clear it - its interval straddles the bar. The village deduces worse when
+the pack is unreadable, which is what the criterion anticipated a gap here would
+mean: the pack's play changed what the village had to work with.
+
+**Second named free read**, `eval.changeling_audit` on the village arm - how a
+live village votes when the pack's speech carries no intent at all: shown-village
+52/148 = 35.14% [27.91%, 43.11%]; partner 35/198 = 17.68% [12.99%, 23.59%], which
+is a RANDOM pack's partner rate and therefore a baseline, not a behaviour. **Do
+not read it against the skin pair's 24.75%/13.64%** - those arms are `greek` on
+different seeds and the denominators are not the same population.
+
+**What this does NOT show.** The mechanism is untested. "Speech is evidence, so a
+talking pack hands the village something to deduce from" is the obvious reading of
+the two numbers together and this pair does not test it; it moves the whole pack
+policy at once, not its speech. Nor does it say a live pack is worse at the game -
+only that against THIS village, on this model, at these settings, its play is
+worth -17.9 points against playing at random.
+
+## changeling skin pair - the effect landed on the PACK, moved from `queue.md` 2026-09-03
+
+Free read, `eval.changeling_audit`, both arms 2026-09-02: a pack seat voted the
+fellow it was told 49/198 = 24.75% under `greek`, 27/198 = 13.64% under
+`greek-named`, diff -11.11% Newcombe [-18.75%, -3.35%]. `greek` sits ON its
+control's 25.69%; `greek-named` is below it, so proper names read as the pack
+PROTECTING its partner. The village-side shown-village count moved +2.70%
+[-7.31%, +12.65%] - nothing.
+
+The pair's primary is blind villager accuracy, a VILLAGE statistic, so the one
+thing that moved is structurally outside it. **Not promotable**: the criterion
+declares the audit a free read and forbids a bar after the fact, and this is one
+of ~6 such reads, so the interval is unadjusted. The rounds pair moved the same
+statistic the same way (§The free reads above), which is what the partner arm
+exists to spend properly.
+
+## belfry night coherence, own TRANSCRIPT - NO RECALL, READ 2026-09-03
+
+`docs/belfry-night-transcript-criterion.md`, frozen 2026-09-02T10:16:52Z.
+`py -3 -m eval.belfry_night_verdict --criterion transcript`, exit 0, no void.
+The third and last leg of the 09-02/09-03 chain; model arm 1000/1000 at
+elapsed=3160s, seeds 15000..15999.
+
+**The instrument control passes**: the seeded-random arm sits at 47.71%, Wilson
+[39.95%, 55.59%], which contains one half, so nothing here is INSTRUMENT SUSPECT.
+Player fallback 0/167325 and 0/169397 = 0.00% on both sides; adjudicator fallback
+0/2454 = 0.00%, 27 recovered; every non-fallback gauge choice served by
+`qwen36-35b-a3b-iq3`. Model side 2266 gauge tellings, 505 false, all sourced
+`model`; control 2196 tellings, 462 false, all `random`.
+
+| read | pairs | coherent | Wilson 95% |
+|---|---|---|---|
+| control, seeded random | 153 | 73 = 47.71% | [39.95%, 55.59%] |
+| **this arm, own transcript, `prior` withheld** | 181 | **111 = 61.33%** | **[54.07%, 68.12%]** |
+| published withheld read, 2026-09-02 | 122 | 94 = 77.05% | [68.83%, 83.62%] |
+| published supplied read, 2026-09-02 | 163 | 152 = 93.25% | [88.32%, 96.19%] |
+
+**The three pre-committed lines.** Against chance: **COHERENT** - 61.33% clears
+one half on both floors, Wilson lower 54.07% and bootstrap-by-game 2.5th
+percentile 53.77%. Against the withheld read: **NO RECALL** - RECALLS needed this
+arm's Wilson lower endpoint above the withheld read's upper 83.62%, and 54.07% is
+not. Against the supplied read: **BELOW SUPPLIED** - the whole interval sits under
+88.32%.
+
+**What the criterion says NO RECALL means, in its own words:** the transcript
+bought nothing over the withheld ask - the model does not find its earlier telling
+in its own words, and a referee built from stateless completions needs the harness
+to remember for it. It is a fact about this model at this size, and it says
+nothing about a model that writes itself notes, which is a different mechanism and
+a different criterion.
+
+**Not pre-committed, and therefore not a verdict: this arm sits BELOW the withheld
+arm on non-overlapping intervals** - 61.33% [54.07%, 68.12%] against 77.05%
+[68.83%, 83.62%], upper 68.12% under lower 68.83%. The criterion licenses the
+interval comparison (fresh seeds were chosen so the published read IS the
+comparison) but defines only RECALLS / NO RECALL, with no verdict for below. So
+this is an observation with a row behind it, not a result: on this evidence
+handing the referee its own transcript looks worse than handing it nothing, and
+nothing here establishes why. Denominators differ (181 pairs against 122) and the
+games are different seeds by construction.
+## belfry night coherence - is the transcript arm's deficit a POPULATION effect? NO, read 2026-09-03
+
+CPU read against records already on disk, answering the question the queue's
+own-transcript row named as its cheapest next step. **Post-hoc, unadjusted, and
+no criterion licenses a bar on any of it** - the transcript arm's verdict stays
+COHERENT / NO RECALL / BELOW SUPPLIED, and this only asks whether the unheld
+below-withheld observation survives the obvious confound. Instrument:
+`eval.belfry_night_verdict.coherence_pairs`, reused rather than re-implemented, so
+these are the same pairs the verdict graded.
+
+**The extra 59 pairs ARE a different population.** The transcript arm's pairs sit
+deeper in the game: 54/181 = 29.8% at night 4 or later against the withheld arm's
+23/122 = 18.9%, and its false tellings run later (mean night 2.30 against 2.10)
+because its play droisoned the gauge more often - 505 false tellings against 384
+on a near-identical 2266 against 2211 total. Depth is not free: the withheld arm
+itself falls 81.0% -> 75.0% -> 71.4% across nights 2, 3 and 4.
+
+**It does not explain the gap.** Per-night coherence, both arms:
+
+| night | withheld | transcript | diff |
+|---|---|---|---|
+| n2 | 51/63 = 81.0% | 47/72 = 65.3% | -15.7pp |
+| n3 | 27/36 = 75.0% | 32/55 = 58.2% | -16.8pp |
+| n4 | 10/14 = 71.4% | 20/32 = 62.5% | -8.9pp |
+| n5 | 3/4 = 75.0% | 7/14 = 50.0% | -25.0pp |
+| n6+ | 3/5 | 5/8 | cells too small to read |
+
+Direct standardisation, both directions: the transcript arm's rates on the
+withheld arm's night mix give **62.25%** against 77.05% crude, a **-14.8pp**
+difference where the crude one is -15.7pp; the withheld arm's rates on the
+transcript arm's mix give 75.63% against 61.33%, **-14.3pp**. So depth composition
+accounts for about one point of the fifteen. The deficit is inside the strata, not
+in the mix.
+
+**What it does NOT establish.** Stratifying spends the power that produced the
+non-overlap: at the largest matched stratum alone, night 2, the intervals OVERLAP
+- withheld 80.95% Wilson [69.6%, 88.8%] against transcript 65.28% [53.8%, 75.2%].
+This read removes an explanation; it does not add a result, and the row still
+needs an arm to settle direction.
+
+**Not answerable from any record: whether the transcript arm's ASKS are longer.**
+`ChoiceEvent` carries key, options, selection, fallback, recovered and upstream,
+and no size - while player decisions have carried `prompt_size` and `reply_size`
+through `core/callcost` all along. The code answers it unambiguously and the
+record cannot: `Adjudicator.choose(recall=True)` sends `history=list(self.transcript)`,
+and the transcript accumulates every accepted ask AND its reply for the whole game,
+including the two setup asks, so the ask grows monotonically within a game and the
+deepest pairs carry the longest one. That is a mechanism nothing on disk can size.
+
+## changeling heuristic rung - the ladder's middle rung, measured 2026-09-02
+
+`games/changeling/heuristic.py`, the changeling twin of cabal's hand-written
+rung, MERGED to main 2026-09-03 after the changeling chain read (it touches
+`eval/run_changeling.py`, which the chained recipes ran). Backend none, CPU, ~23 s
+per 1000 games. Seeds 5000..5999, `--theme folk --seats 5`, two rounds, 977 of
+1000 games scored (23 seated no pack at dawn). Records `eval/records/cl-heuristic*.json`,
+untracked; the command reproduces them exactly:
+
+```
+py -3 -m eval.run_changeling --games 1000 --arm heuristic --theme folk --seats 5 --seed 5000 --out eval/records/cl-heuristic.json
+```
+
+The rules are in the module docstring. A seat plays the card it BELIEVES; a
+village seat states its deal, its belief and every reveal truthfully in the
+claim grammar `eval.audit_decisions` reads; a pack seat claims the bystander card
+as its deal and accuses one village seat, and a fellow that reads the accusation
+repeats and votes it; a village seat votes down a ladder - night-named pack,
+refuted DEAL claim, a card claimed as a deal by more seats than the deck holds, a
+seat that claimed no deal, random. Present-tense claims are never refuted: the
+card may have moved. Gate #1 by construction and by test - the dawn-truth table is
+replaced with one that raises and every decision still lands.
+
+| arm, seeds 5000..5999 | village wins | BLIND accuracy (n=1281) | pack wins |
+|---|---|---|---|
+| `random` | 37.97% [34.98%, 41.06%] | 35.44% [32.77%, 37.99%] | 62.03% |
+| `heuristic` (all five seats) | 43.91% [40.83%, 47.04%] | **49.26% [46.36%, 52.21%]** | 56.09% [52.96%, 59.17%] |
+| `heuristic-village` vs random pack | 88.43% [86.28%, 90.29%] | 77.36% [74.35%, 80.28%] | 11.57% |
+| `heuristic-pack` vs random village | 32.34% [29.48%, 35.34%] | 37.78% [35.17%, 40.60%] | 67.66% [64.66%, 70.52%] |
+
+Chance for a blind villager on this deal is 35.85%.
+
+**What un-random looks like here: the all-heuristic table clears the gate at
+49.26% against 35.85%, and the pack still wins 56% of the games.** That is the
+number the "changeling feels random" row asked for. It is a floor - sixty lines
+of tallies - that a model arm on the same seeds can now be read against. Not
+against S2: that read 44.53% [38.47%, 50.77%] on 247 blind votes, under the
+pre-2026-09-02 vote rule and other seeds, so the intervals overlap and the
+objects differ. The fair comparison is the seated arm in the queue row, and a
+model losing to sixty lines of tallies would be the AvalonBench finding again
+(`docs/reference-policies.md` §The control ladder).
+
+**Two artifacts, both the kind `docs/control-ladder.md` warns about, and both
+measured rather than assumed:**
+
+- **The `heuristic-village` cell is mostly the control's vocabulary.** The random
+  policy's four canned lines never make a deal claim, so the ladder's fourth tier
+  (a seat that has claimed no deal) points at a random wolf by its silence. With
+  that tier switched off the same cell reads 34.90% village wins and 31.62%
+  [29.00%, 34.33%] blind accuracy - at or below chance. The all-heuristic cell
+  does not move when the tier is switched off (49.26% either way), because every
+  heuristic seat claims a deal and the tier never fires. **The 77.36% is not a
+  deduction number.** It is the rung reading a twin's tell, exactly as cabal's
+  99.5% hunter is.
+- **In a mixed arm every liar is a sleeper, so every refutation lands on a
+  villager.** Seated by dawn truth, the real wolves in `heuristic-village` are
+  random and claim nothing; the only seats that lie are heuristic seats robbed
+  INTO the pack card who believe they are wolves and hold village at dawn. Tier
+  census over 600 games with the silence tier off: tier 1 (night-named pack) 44/57
+  = 77.2%, because a seen wolf can be robbed or switched afterwards; tier 3
+  (over-claimed card) 0/111 - every catch a sleeper; tier 2 fired 3 times. That
+  0/111 is the belief/truth divergence the rung was built to make observable, in
+  a control with no model in it. Any instrument that scores "caught a liar" on
+  this game has to decide whether a sleeper counts, and the vote scorer says no.
+
+**`heuristic-pack` is the clean cell.** Coordination alone - two fingers on one
+village seat, the whole of `plurality-min2` - buys the pack +5.6 points over
+random wolves against a random village (67.66% vs 62.03%, intervals touching),
+with nothing read from the control's vocabulary.
+
+What this does NOT show: anything about a model. The arm that puts this rung at a
+table with LLM seats is the queue's "seat the heuristic against the MODEL" row
+and is GPU work. The rung is a denominator, not a player.
+
+## changeling mixed cells - the rung against a LIVE pack, INFORMS, READ 2026-09-03
+
+One arm of the two `docs/changeling-mixed-criterion.md` names. `mixed-pack`
+seats the model on the PACK by dawn truth and the hand-written rung on the
+village, so the rung's figure is the village win rate. `mixed-village` was NOT
+queued and never ran - a missing arm is a lost pair, not half a result, and no
+cross-arm claim is made below.
+
+Record `eval/records/cl-mixed-pack.json`, 200 games on seeds 5000..5199, 196
+scored, 5162 s (1.43 h) on `qwen36-35b-a3b-iq3` at 100% served. Read with
+`py -3 -m eval.mixed_verdict`; the record's own `args` pin against the
+criterion's §Settings and match.
+
+**Voids first, and the bar is the LIVE side's own rate.** The run-level
+`fallback_rate` is diluted here - every rung seat enters the denominator and a
+rung seat never falls back - so the number that governs is the pack seats' own:
+**4/900 = 0.44%** against a 10% bar. Run level 0.13% is reported and gates
+nothing. Recovered 1.67%, far under the 25% flag. 196 scored against a 150 floor.
+Nothing voids.
+
+**The control is RESCORED, never quoted.** `cl-heuristic.json` is 1000 games on
+5000..5999 and this arm plays 5000..5199, so its published 43.91% is a figure
+over a superset. `eval.mixed_verdict` rescores the first 200 game indices and
+pairs against that. Two things surfaced in the rescore and both are recorded
+because neither is visible from the summary: the JSONL held **3000 records for
+1000 game indices** - it was written more than once and the last write of each
+game is kept - and the recovered run reproduces the published summary exactly
+(977 scored, 429 village wins), which is what makes the rescore trustworthy.
+
+| the rung's VILLAGE win rate, 196 scored games | rate | Wilson 95% |
+|---|---|---|
+| against LIVE pack seats | **130/196 = 66.33%** | [59.45%, 72.57%] |
+| against its own twin, `cl-heuristic` first 200 | 89/196 = 45.41% | [38.59%, 52.40%] |
+| published at 1000 games - the wider reference, never the pair | 43.91% | - |
+
+**Difference +20.92%, Newcombe 95% [+11.11%, +30.16%] - excludes zero, so
+INFORMS.** The criterion pre-committed both directions and named this one: a live
+side that claims deals badly, inconsistently or in a grammar the ladder refutes,
+hands the rung evidence the random control never offered. The gap also clears the
+~10-point floor §Power said was the smallest this pair could settle, so it is not
+a marginal result.
+
+**The secondary prices the artifact, and the artifact is real but not the whole
+number.** Blind villager accuracy, same 251-vote stratum:
+
+| the rung's blind accuracy | rate | Wilson 95% |
+|---|---|---|
+| against LIVE pack seats | 150/251 = 59.76% | [53.59%, 65.64%] |
+| against its own twin | 123/251 = 49.00% | [42.88%, 55.16%] |
+| against a RANDOM pack (`heuristic-village`, published) | 77.36% | [74.35%, 80.28%] |
+
+The 77.36% was measured against a control that cannot talk, and the silence tier
+was shown to carry it (§changeling heuristic rung: 31.62% with that tier off).
+Priced against seats that DO talk it is 59.76%, so roughly 18 points of the
+77.36% was the artifact - and the remaining 59.76% still sits clear of the 49.00%
+twin, so the ladder holds signal underneath it. This is the artifact read the
+criterion was written for, taken against a live opponent instead of against a
+switch.
+
+**The tier census is NOT PAYABLE from this record**, and that is a finding rather
+than an omission. `HeuristicPolicy._vote` returns a seat, not the rung it fired
+on, and the vote row carries no tier field, so the census would have to
+re-derive the ladder - a second copy of the policy, the drift `eval.mixed_verdict`
+avoids everywhere else by importing. It needs one field at the source. The cost
+is specific: this is the first arm in the tree where tier 3 could catch a TRUE
+wolf rather than a sleeper (§changeling heuristic rung records 0/111 sleepers
+against a random control), so the read it would have bought is one no earlier
+record could offer.
+
+Gate #3's reference bar is 35.84% and this file makes no gate #3 call - the
+criterion did not name one. Nothing here is a statement about `mixed-village`.

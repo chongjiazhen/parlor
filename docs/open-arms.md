@@ -553,7 +553,8 @@ since been reworded in the queue is the live statement; this is the reasoning.
 
 ## While the card is busy - the standing menu
 
-Verbatim from `queue.md`. The question behind it recurs - *a run is in flight,
+Verbatim from `queue.md`, with ONE cell since superseded in place and dated -
+the Secret Hitler verdict, reconciled below the table. The question behind it recurs - *a run is in flight,
 so what can this session actually do?* - and the answer is stable, which is why
 it is reference rather than queue.
 
@@ -570,10 +571,36 @@ is waiting on.
 
 | option | verdict | why |
 |---|---|---|
-| Secret Hitler | **no** | Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
+| Secret Hitler | **no - SUPERSEDED 2026-08-28, see below** | *(2026-08-27 read, kept as written.)* Same rung as cabal - deterministic referee, bounded actions, no judgment - so it buys recognition and no engine progress. Identical argument to the one already made against a vanilla Werewolf rung. Its policy deck is more rules, not a different knowledge model |
 | Blood on the Clocktower | **right target, wrong size - and now scope it against what exists** | The only one of these that is a genuinely different rung: the Storyteller makes *discretionary* rulings, which is the judgment-GM `docs/action-channel.md` splits the kernel/adjudicator for. But it is 20+ characters and the discretion is the hard part - so the session-sized version is a SPIKE that scopes the adjudicator against 3-4 characters, never the game. **Confirmed from outside 2026-08-27** - a public LLM-vs-LLM arena at this game already exists and is rated, another build scripts the storyteller outright, and a third puts an LLM in that seat; the off-repo ledger names all three. **So an LLM arena at this game is NOT the contribution. The discretionary adjudicator plus the entitlement audit is.** Two free controls worth copying from the rated one: shuffled turn order against positional advantage, and role-flipped mirrored matches |
 | 5e / a rules-lite RPG | **the endgame, and not yet** | This is the rung the repo is aimed at. `docs/action-channel.md` says do not harden cabal's `Phase` enum, `action_prompt` chain or `ACTION_KEYS` before game #2 exists - and a rules-lite system is the honest cheap version of this, not 5e |
 | `/improve-codebase-architecture` | **no, and least of all now** | A refactor under a freeze is risk with no measurement, and the two shapes actually worth restructuring are named in `docs/action-channel.md` as things to leave alone until game #2 |
+
+**The Secret Hitler row is refuted by `quorum`, built the same day it was
+written.** The row moved into this file verbatim at 20:30 on 2026-08-27; the
+rung's design landed 16:20 and its referee 16:28, so the tree carried a live
+recommendation against building what it had just built. The measurement the row
+lacked is `games/quorum/RULES.md`, and it decides the opposite: **entitlement
+here CASCADES over an object that did not exist at the deal.** Each legislative
+event creates a fresh secret - a hand drawn from a shuffled deck - which passes
+down a three-tier chain narrowing at each step, keyed to a ROTATING OFFICE rather
+than to a dealt role. So the audit question changes shape: cabal asks *may this
+seat know this fact*, quorum asks *may this seat know this fact at this point in
+the chain*, and a referee caching entitlement per seat rather than per event is
+wrong in a way that passes every cabal-era and changeling-era test. The
+proposer's discard is the sharp case - an entitlement that EXPIRES one step down
+a chain, with the next seat down actively trying to infer it - and **naive
+substring matching cannot see it**, because a card's vocabulary is shared with
+the public channel where a role name is not. That finding landed before the rung
+had any code, which is exactly what the row said the game could not produce.
+
+**What survives is the row's TEST, not its verdict.** "More rules, not a different
+knowledge model" is still the right question to put to a candidate rung; it was
+answered wrong here because it was asked of the published game's policy deck
+instead of its entitlement chain. The neighbouring verdicts are untouched - no
+model has played quorum, it has no gate, no criterion and no verdict, so this
+reconciles a design position and promotes nothing.
+
 
 **Direction, called 2026-08-27 against the literature** (argument kept off-repo):
 gate #1 measures parlor and is durable; gates #2 and #3 measure a MODEL and decay
@@ -582,3 +609,180 @@ on 120B-class. Nothing built so far de-risks the actual product claim, "a refere
 that oversees without micromanaging". So after S6 and the S5 read, the next spike
 is the **adjudicator** against 3-4 discretion-heavy characters - not a whole
 game's roster, and not Secret Hitler, which is cabal's rung again.
+
+
+## 2026-09-02 - moved from queue.md
+
+Struck from the queue in the cull of 2026-09-02 because its trigger has never
+been met, verbatim, so the ask survives the row:
+
+- [ ] **Mini-personas** as per-seat judgment biases, assigned from the seed and
+      recorded so the scorer can split by persona. Trigger: only if a table that
+      argues from evidence still votes identically. Re-homed to changeling (S1);
+      its trigger was never met on cabal.
+
+The three DURF questions, moved out of `queue.md` the same day. They are argument
+and reference, not asks a session takes; the queue keeps one row pointing here.
+Verbatim:
+
+- **`hidden catch`, camp1's term**, colliding with ordinary searching prose
+  exactly as `loose flagstone` did - the model chose the words. Deliberately
+  unfixed, and the argument is `docs/durf-rung.md`: scoring it as a hold moves no
+  verdict, and the edit voids its own read. camp2's structural pair is CLOSED.
+  **Deciding it does NOT oblige a re-run** - the 91/100 is a dated read under its
+  own term set and stays quotable as that. Change the term, mark the read as
+  scored under the old set, and run again only when something else needs it.
+- **Movement is deliberately still unconstrained by the exit graph.** `call_move`
+  accepts any room, so the party can go R1 to R4 in one call. Making it respect
+  adjacency is a RULES change - it moves what is legal and therefore what the
+  fallback rate counts - and it would be a second variable in the same campaign.
+  Separate arm.
+- **The tell question is a SEPARATE instrument and must not be folded back in.**
+  Substring matching cannot see a referee that names the object of its own
+  undeclared secret without naming the secret (`docs/action-channel.md`).
+  Reveal-ahead is a COUNT, not a gate, and gate #1 must not be changed to catch it
+  - declaring is the referee's authority, so the audit is correctly silent.
+  Instrument `py -3 -m eval.durf_reveal_order <record>.json`, no GPU. There is
+  still **no rubric for whether a refereed session was any GOOD**, and the
+  reveal-ahead count must not be promoted into one.
+
+## Session-0 is the play lane's first slice, 2026-09-03
+
+The argument behind the play-lane row in `queue.md`. A scene loop is the obvious
+first slice and the wrong one: it produces prose, and prose needs a rubric this
+tree does not have (the same gap `docs/durf-rung.md` leaves open for a refereed
+session). **A playbook draft produces a number on day one.**
+
+- **A taken pick is an illegal move**, so the existing fallback instrument reads
+  the draft unchanged - no new scorer, and the void rule applies as written.
+- **The pick distribution is the read.** Whether seats collapse onto the same few
+  playbooks is a diversity question with a free baseline: the operator ranked all
+  22 by preference 2026-09-03, so model picks have a human ordering to correlate
+  against rather than only a uniform null. Mode collapse here is the narrative
+  twin of the agreeableness the economy-compliance question chases.
+- **The payload is the design problem, and it is the standing-context invariant
+  in miniature.** 22 full sheets in the choose-phase ask is a large payload paid
+  by every seat, and the invariant says a rule reaches a seat at the phase where
+  it is actionable. So: names plus a one-line hook to choose from, the full sheet
+  only to the seat that took it. That is a position held for a reason, and it is
+  measurable - a run that sends all 22 is the arm against it.
+- **Local pack, all 22 entries; the tracked example pack is a different object.**
+  `docs/content-packs.md`'s four-or-five-entries limit governs what SHIPS. A
+  draft needs a real menu, and a menu of five is not a table's choice.
+
+
+
+## 2026-09-03 - moved from queue.md
+
+Two rows whose ASK is one sentence and whose body had grown into the argument
+behind it. The queue keeps a short row pointing here; the reasoning is verbatim
+below, so nothing is rewritten on the way out.
+
+### The RP-tune bench
+
+- [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
+      bench.** Candidates offered: RP-tuned Anubis-mini-8B, Rocinante-X-12B,
+      Rocinante-XL-16B, Cydonia-24B against untuned gemma, qwen36-35b-a3b,
+      qwen3.8-27B and its MTP build. **Read the direction note first.** It earns
+      GPU on one parlor-shaped question only: whether fallback rate and deduction
+      move together or apart across tunes, which is what an RP tune buys.
+      Serial local lane; `--no-thinking` is a property of the rung, not the bench.
+      **Entry condition: no arm in flight** - it queues behind every frozen arm on
+      the merge list, all of which pair against a control that expires.
+      **The gate is the source-rules MERGE, not an idle card** (2026-09-02): every
+      frozen arm pairs against `cl-rounds2.json`, a control recorded on
+      `qwen36-35b-a3b-iq3`, so a re-arm before those run voids them - and the merge
+      re-baselines the rung anyway, so a second model's control is the only moment
+      it is marginal cost rather than a new debt. **One candidate is already
+      measured, and the row read as if none were:** `rocinante-x-12b-heretic-q4` is
+      Rocinante-X-12B, and its cabal reading is the bench's own question answered
+      apart - prose good enough to fabricate a prior conversation with no prompt
+      escalation, vote discrimination -0.2% at chance (`docs/measurements.md`
+      2026-08-25 and §Backend notes). One point, on the other rung and under the
+      superseded vote rule, so it sharpens the prior and does not spend the bench.
+      **Two corrections to the candidate list, 2026-09-02.** "Untuned gemma" is not
+      on this box: `gemma`/`gemma-6` both alias an abliterated E4B, ~4B active, so
+      against q36 they measure SCALE wearing a tune label. The armable comparator
+      is `ablx` (`gemma-4-26B-A4B-it-abliterix-V6`, IQ4_XS), configured identically
+      to q36 in `llm-serve/models.json` - same ctx, kv quant, batch, ngl, backend -
+      and MoE A4B against A3B, so it swaps one variable where the dense RP tunes
+      swap three. It is instruct, not a reasoning distill, so its per-game cost
+      must be re-timed rather than inherited from q36's 91 s. And **each tune is
+      TWO arms, not one**: gate #2 is conditional on gate #3, so a tune's evil win
+      rate is unreadable without that tune's own good-side control. The 12B is the
+      worked example - evil 62.5% (5/8, CI 30.6-86.3%) beside good discrimination
+      -0.2%, which is the ~65% no-deception baseline hit exactly, so the run is
+      consistent with the tune buying no deception at all. Its hunter, 3/6 against
+      a 33.3% chance floor, is the only evil-side signal and sits inside q36's own
+      33/55/56% range. **"An RP tune bought deception" is UNMEASURED, not shown.**
+
+### Two pre-measurement positions refuted by work built the same week
+
+- [x] **RECONCILED 2026-09-03, both instances.** (a) is dated and answered in
+      place under `docs/action-channel.md`'s "Gate #1 does not survive a model DM"
+      paragraph (that file carries no headings);
+      (b) is dated in the table above and answered in the two paragraphs under
+      it. Neither superseded reading was deleted. The ask, as written:
+      **Two pre-measurement positions in `docs/` were refuted by work built the
+      same week, and neither was reconciled.** One class, two instances, found
+      2026-09-02 by reading them against the rungs that landed after them. Done
+      when each doc states the position the measurement supports, with the
+      superseded reading kept and dated rather than deleted.
+      **(a) `docs/action-channel.md:82` says gate #1 "does not survive a model
+      DM"**, written 2026-08-25 from a design read, with "the innkeeper looks
+      nervous" as a leak carrying zero substring overlap. The DURF campaign then
+      measured it: gate #1 HELD 91/100, then 99/100 under the topology edits, and
+      `docs/durf-rung.md:811` decides the opposite call - a declared fact is entitled
+      by definition, the audit is correctly silent, and the forward-reveal
+      behaviour is a COUNT with no criterion. The innkeeper case is the one the
+      count covers, not a leak: a GM that infers a nervous novice and telegraphs
+      it is doing the job, and the residue is that **declaring sets its own bar**,
+      which is the real open question and is not what the 08-25 paragraph says.
+      **(b) `docs/open-arms.md` §While the card is busy rejects Secret Hitler as
+      "the same rung as cabal ... its policy deck is more rules, not a different
+      knowledge model."** `games/quorum/RULES.md:11` opens "Modelled on Secret
+      Hitler" and argues at length that it IS a different knowledge model -
+      entitlement cascades over an object created in play, keyed to a rotating
+      office, and the proposer's discard is an entitlement that EXPIRES one step
+      down a chain. Same day, hours apart: the rung's design landed 16:20, its
+      referee 16:28, the row moved to `docs/` verbatim at 20:30. So the tree
+      carries a live recommendation against building what it had just built.
+
+## Is the changeling arm program powered for what it chases? - opened 2026-09-03
+
+The operator asked why so much card goes to changeling. The tree does not hold an
+answer, and two things in it argue the other way.
+
+**Every measured changeling pair so far is NOT SHOWN, and each said in advance
+that it would be.** The rounds pair priced a half-width near 8.5 points and wrote
+that it "cannot settle a gap smaller than nine"; the observed gap was under three
+(`docs/measurements.md`). The skin pair came back +1.20% [-7.37%, +9.73%]. The
+partner arm names an 8.7-point MDE. The gate #2 pair prices ~10 points. So the
+design resolves roughly nine-to-ten-point effects at 200 games, and the observed
+prompt-sized effects cluster at one to three.
+
+**The one arm that INFORMED was not a prompt change.** Gate #2's -17.86% came
+from replacing an entire pack policy, not from editing a string. That is the
+pattern worth naming: this design sees POLICY-sized changes and cannot see
+PROMPT-sized ones, and most of the frozen queue is prompt-sized.
+
+**The counter-argument, and it is real.** Prompt effects are not uniformly small
+here - `AGENTS.md` records `_night_against_the_table` moving +7% to +63% on a 12B
+and then INVERTING on q36. A line can be worth sixty points. So the program is
+not irrational; it is a lottery with cheap tickets, most of which read NOT SHOWN.
+
+**What is actually missing is one step, and it is cheap.** Every criterion states
+its MDE. None states the effect size it EXPECTS, or why that effect should exceed
+the MDE. An arm whose expected effect is three points against a nine-point
+resolution is a NOT SHOWN bought with GPU hours, and it is knowable before launch.
+
+**And the tree's own direction already says this axis decays.** `queue.md`
+§Direction, called 2026-08-27: gate #1 measures parlor and is durable, gates #2
+and #3 measure a MODEL and decay with the next checkpoint, and nothing built so
+far de-risks the product claim - so the next spike is the adjudicator. Every
+frozen changeling arm is gate #2/#3 work. This is the same shape as the two
+pre-measurement positions reconciled earlier today: a live recommendation in the
+tree against what the tree is doing.
+
+Not a call to stop. A call to make each arm state its expected effect before it
+takes the card, and to let that decide the ranking.

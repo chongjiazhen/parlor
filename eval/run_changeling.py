@@ -38,8 +38,10 @@ from dataclasses import asdict
 
 from core import integrity
 from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import bootstrap_ci, wilson
+from eval.gate3_bar import REFERENCE_CHANCE
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
 from games.changeling.referee import ChangelingReferee
@@ -59,7 +61,15 @@ from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 MEASURED_RANDOM_VILLAGE_WINS = 0.3951
 MEASURED_RANDOM_VILLAGE_WINS_ALL_GAMES = 0.3845
 
-ARMS = ("random", "llm", "llm-village", "llm-pack")
+ARMS = ("random", "heuristic", "heuristic-village", "heuristic-pack",
+        "llm", "llm-village", "llm-pack",
+        "mixed-village", "mixed-pack")
+
+#: Arms that put a model on the box. They all need `--backend`, and the check that
+#: enforces that reads this rather than a name prefix: `mixed-village` seats live
+#: seats and does not start with "llm", so a prefix test let it reach the deal with
+#: no endpoint and fall back on every decision - a run whose only outcome is a void.
+LIVE_ARMS = ("llm", "llm-village", "llm-pack", "mixed-village", "mixed-pack")
 
 
 def build_backend(args, seed: int | None) -> Backend:
@@ -87,8 +97,10 @@ def build_backend(args, seed: int | None) -> Backend:
 
 def build_policies(ref: ChangelingReferee, args, rng: random.Random,
                    seed: int | None = None) -> dict:
-    """Which seats are live. A mixed arm seats one side live against the random
-    control, so the live side's contribution is the only thing moving.
+    """Which seats are live. A mixed arm seats one side live against a control, so
+    the live side's contribution is the only thing moving. The control is the
+    random policy in the `llm-*` arms and the hand-written rung in the `mixed-*`
+    arms; which one it is changes what the number means, never how it is seated.
 
     Seated by DAWN TRUTH, which is the only defensible reading: a seat wins with the
     card in front of it, so that is the side it is playing for whether or not it
@@ -97,6 +109,18 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random,
     """
     if args.arm == "random":
         return {s: RandomPolicy(rng) for s in range(ref.n)}
+    if args.arm.startswith("heuristic"):
+        # The ladder's middle rung, no model: what un-random looks like on this
+        # game. One shared rng, so the game is reproducible from its seed. The
+        # mixed forms seat one side by DAWN TRUTH against the random control, the
+        # same way the llm- forms do below, so a number can be charged to a side.
+        from games.changeling.heuristic import HeuristicPolicy
+        from games.changeling.roles import Side
+        if args.arm == "heuristic":
+            return {s: HeuristicPolicy(rng) for s in range(ref.n)}
+        want = Side.PACK if args.arm == "heuristic-pack" else Side.VILLAGE
+        return {s: (HeuristicPolicy(rng) if ref.holds(s).side is want
+                    else RandomPolicy(rng)) for s in range(ref.n)}
     backend = build_backend(args, seed)
 
     # One LLMPolicy PER SEAT. Sharing one object across seats makes `upstreams` a
@@ -110,6 +134,21 @@ def build_policies(ref: ChangelingReferee, args, rng: random.Random,
     if args.arm == "llm":
         return {s: live() for s in range(ref.n)}
     from games.changeling.roles import Side
+
+    if args.arm.startswith("mixed"):
+        # The third cell. The `llm-*` arms hold a live side against the RANDOM
+        # control, and the `heuristic-*` arms hold the rung against the same
+        # control - so both mixed cells so far are read against a policy that
+        # never claims a deal, and `docs/measurements.md` measures what that buys:
+        # the rung's 77.36% village cell is mostly the control's silence, and
+        # falls to 31.62% with the tier that reads it switched off. Seating the
+        # rung against LIVE seats is where that confound stops. Same dawn-truth
+        # seating as every other mixed arm.
+        from games.changeling.heuristic import HeuristicPolicy
+        want = Side.VILLAGE if args.arm == "mixed-village" else Side.PACK
+        return {s: (live() if ref.holds(s).side is want else HeuristicPolicy(rng))
+                for s in range(ref.n)}
+
     want = Side.PACK if args.arm == "llm-pack" else Side.VILLAGE
     return {s: (live() if ref.holds(s).side is want else RandomPolicy(rng))
             for s in range(ref.n)}
@@ -316,23 +355,43 @@ def report(s: dict, args, elapsed: float) -> str:
         return "\n".join(out)
 
     ci = g3["blind_accuracy_ci95"]
-    blind_holds = bool(ci) and ci[0] > _chance(s)
     if args.arm == "random":
         out.append("gate #3 not shown - this IS the chance baseline, so its "
                    "accuracy is the number other runs are read against.")
         out.append("gate #2 not shown - the pack played at random too.")
         return "\n".join(out)
-    if blind_holds:
-        out.append(f"gate #3 HOLDS - blind villager accuracy beats chance "
-                   f"({_chance(s):.2%}) at the CI floor.")
-        out.append(f"gate #2 readable - pack win rate {g2['pack_win_rate']:.2%} "
-                   f"is deception against villagers who can deduce.")
+    # A RUN LOG CALLS NO GATE. It holds neither of the two things the arm-level
+    # gate is cut on: the criterion's bar - `eval.gate3_bar`, the measured
+    # `--arm random` reference with its own-arm clause - where this log has only
+    # its own deal's derived chance, and a WILSON floor where the interval
+    # published above is a bootstrap over games. Measured on the skin pair
+    # 2026-09-02, the two bars were 35.84% and 36.47% on seed-identical deals and
+    # a 35.90% floor landed between them, so the log's verdict and the
+    # criterion's disagreed on the same records. Both bars are printed against
+    # the floor and neither is selected, which is the discipline
+    # `eval.s5_verdict` already applies.
+    floor = ci[0] if ci else None
+    out.append("gate #3 - REPORTED, NOT CALLED. The arm-level verdict belongs to "
+               "the arm's own criterion, read from the record after the run.")
+    if floor is None:
+        out.append("  no blind interval, so there is nothing to read against a "
+                   "bar - see BLIND ACCURACY above.")
     else:
-        out.append(f"gate #3 not shown - blind villager accuracy does not beat "
-                   f"chance ({_chance(s):.2%}) at the CI floor.")
-        out.append("gate #2 not shown - villagers at chance hand the pack a win "
-                   "rate with no deception in it. Gate #2 is only readable once "
-                   "gate #3 holds.")
+        for bar, label in ((REFERENCE_CHANCE,
+                            "the criterion's bar - measured --arm random n=4000, "
+                            "with the own-arm clause (eval.gate3_bar)"),
+                           (_chance(s),
+                            "this run's OWN deal, derived from its dawn-wolf mix "
+                            "- a diagnostic, never the gate's bar")):
+            out.append(f"  {bar:.2%}  {label}")
+            out.append(f"          bootstrap floor {floor:.2%} "
+                       f"{'clears' if floor > bar else 'does NOT clear'} it")
+        out.append("  and the criterion's word is WILSON - the interval above is "
+                   "a bootstrap over games, so even the floor is the wrong one.")
+    out.append(f"gate #2 - REPORTED, NOT CALLED, and conditional on gate #3: with "
+               f"voting at chance the pack wins ~65% with no deception in it. "
+               f"Pack win rate {g2['pack_win_rate']:.2%}, a rate with no verdict "
+               f"in it.")
     return "\n".join(out)
 
 
@@ -427,7 +486,7 @@ def main() -> None:
     args = ap.parse_args()
     RUN_STATE.requested = args.games
 
-    if args.arm != "random" and not args.backend:
+    if args.arm in LIVE_ARMS and not args.backend:
         ap.error("a live arm needs --backend")
 
     # Refuse at the DOOR, never at game 200. An off-box route with no key does
@@ -435,6 +494,11 @@ def main() -> None:
     # reports a number the scorer then voids after the GPU is spent.
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before a game is
+    # played, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     started = time.time()
     records: list[GameRecord] = []

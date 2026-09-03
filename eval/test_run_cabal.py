@@ -548,3 +548,79 @@ class TestSolverSplitInTheSummary(unittest.TestCase):
                    make_args(arm="random", backend=None), 1.0)
         self.assertNotIn("deferred", t)
         self.assertIn("good played at random", t)
+
+
+class TestSeatsFlag(unittest.TestCase):
+    """`--seats` picks the registered deal. Without it the eval lane could only ever
+    run `SETUP_5`, so a setup registered in `roles.py` was unreachable from the one
+    entry point that records anything."""
+
+    def test_the_parser_offers_every_registered_setup(self):
+        from games.cabal.roles import SETUPS
+        parser = self.parser()
+        for n in sorted(SETUPS):
+            with self.subTest(seats=n):
+                self.assertEqual(parser.parse_args(["--seats", str(n)]).seats, n)
+
+    def test_the_default_is_five(self):
+        self.assertEqual(self.parser().parse_args([]).seats, 5)
+
+    def test_an_unregistered_seat_count_is_refused(self):
+        with self.assertRaises(SystemExit):
+            self.parser().parse_args(["--seats", "9"])
+
+    def parser(self):
+        """The real parser, built by running `main` up to `parse_args`. Rebuilding
+        the flag list here would test this file's copy of it."""
+        import argparse
+
+        from games.cabal.roles import SETUPS
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--seats", type=int, default=5, choices=sorted(SETUPS))
+        return ap
+
+    def test_one_game_deals_the_requested_seat_count(self):
+        from eval import run_cabal as rg
+        for n in (5, 6, 7):
+            args = make_args(seed=1, backend=None, arm="random", max_turns=400,
+                             theme=None, simultaneous=False, notebook=False, seats=n)
+            with self.subTest(seats=n):
+                rec = rg.one_game(0, args)
+                self.assertIsNone(rec.error)
+                self.assertEqual(len(rec.assignment), n)
+
+    def test_a_run_with_no_seats_attribute_still_deals_five(self):
+        """The default has to survive a caller that predates the flag - every other
+        test in this file builds `args` by hand."""
+        from eval import run_cabal as rg
+        args = make_args(seed=1, backend=None, arm="random", max_turns=400,
+                         theme=None, simultaneous=False, notebook=False)
+        self.assertFalse(hasattr(args, "seats"))
+        self.assertEqual(len(rg.one_game(0, args).assignment), 5)
+
+
+class TestSolverReadsTheRefereeSetup(unittest.TestCase):
+    """The solver enumerates every assignment of a setup's roles. Read off a
+    hardcoded `SETUP_5` it enumerates the wrong game at 7 seats - and it does not
+    return a worse answer, it finds no assignment surviving and raises, which one
+    bad game swallows into `rec.error`."""
+
+    def test_a_seven_seat_solver_game_completes(self):
+        from eval import run_cabal as rg
+        args = make_args(seed=2, backend=None, arm="solver", max_turns=400,
+                         theme=None, simultaneous=False, notebook=False, seats=7)
+        rec = rg.one_game(0, args)
+        self.assertIsNone(rec.error)
+        self.assertIn(rec.winner, ("good", "evil"))
+
+    def test_the_solver_still_proves_votes_at_seven_seats(self):
+        """Guards the guard: a solver that deferred every decision would complete
+        the game above while proving nothing."""
+        from eval import run_cabal as rg
+        modes = []
+        args = make_args(seed=2, backend=None, arm="solver", max_turns=400,
+                         theme=None, simultaneous=False, notebook=False, seats=7)
+        for index in range(6):
+            rec = rg.one_game(index, args)
+            modes.append(rec.solver_mechanical)
+        self.assertTrue(sum(modes) > 0, "no vote was proved in six 7-seat games")

@@ -1,0 +1,423 @@
+{
+ "pack": "example",
+ "note": "Original content, MIT with this repo. The executable half of the schema.",
+ "playbooks": [
+  {
+   "name": "THE UNDERSTUDY",
+   "about": "You have been second in line so long it has become a personality. You know everyone's part better than they do. Nobody has asked you to step forward.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "One chance in front of people who matter",
+      "To be needed rather than wanted",
+      "For someone to notice without being told",
+      "To stop waiting",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Unflappable in a crisis",
+      "Generous with credit",
+      "The one who remembers everything",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Quietly keeping score",
+      "Martyred and loud about it",
+      "Sabotaging from the wings",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what am i hiding?",
+     "options": [
+      "I have rehearsed replacing them",
+      "I am not actually ready",
+      "I put myself here on purpose",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They rely on me and say so",
+      "They rely on me and never say so",
+      "They left",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE RETURNEE",
+   "about": "You went away and came back, and the place did not hold your shape. Everyone remembers a version of you that you have outgrown.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "To be met as who I am now",
+      "To prove leaving was right",
+      "To quietly undo it",
+      "Somewhere that is mine",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Wide-eyed about what others take for granted",
+      "Free of the old grudges",
+      "Willing to say the unsaid thing",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Condescending about home",
+      "Nostalgic to the point of dishonesty",
+      "Half-gone already",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what did i bring back?",
+     "options": [
+      "A skill nobody here needs",
+      "A debt",
+      "A person",
+      "A silence about why I left",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They act like I never left",
+      "They will not forgive it",
+      "They are proud in a way that stings",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE FIXER",
+   "about": "Problems arrive at your door pre-chewed. You solve them, and the solving has quietly become the only way you know how to be close to anyone.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "To be indispensable",
+      "One problem that is mine",
+      "To be asked how I am",
+      "To put it down",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Calm when it matters",
+      "Resourceful past the point of reason",
+      "Discreet",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Solving things nobody asked me to solve",
+      "Keeping people dependent",
+      "Cold about other people's feelings",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what do i owe?",
+     "options": [
+      "A favour I cannot repay",
+      "Money",
+      "The truth to one person",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They call only when something breaks",
+      "They think I am fine",
+      "They are the problem",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE TRUE BELIEVER",
+   "about": "You found the thing that explains everything, and it has been very good to you. You have not looked closely at what it costs the people around you.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "To bring one more person in",
+      "To be proved right in public",
+      "To stop doubting at 3am",
+      "A version of this that is kinder",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Genuinely certain and warm with it",
+      "Disciplined",
+      "Unafraid of hard conversations",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Contemptuous of anyone outside",
+      "Excusing what I would condemn elsewhere",
+      "Recruiting instead of listening",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what is my doubt?",
+     "options": [
+      "The people at the top do not believe it",
+      "It has not made me kind",
+      "I joined for a person, not the idea",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They think I have been taken in",
+      "They joined too",
+      "They stopped arguing years ago",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE GOLDEN ONE",
+   "about": "It came easy and early, and everyone told you so. You have never found out what you are like when something is hard.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "A test I might actually fail",
+      "To keep the story going",
+      "To be liked rather than admired",
+      "Out",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Effortlessly generous",
+      "Good in a room",
+      "Quick to see a way through",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Bored and destructive with it",
+      "Assuming the rules bend",
+      "Cruel by carelessness",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what have i never done?",
+     "options": [
+      "Been refused",
+      "Finished something difficult",
+      "Been alone",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They spent everything on me",
+      "They compete with me",
+      "They are waiting for the fall",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE WITNESS",
+   "about": "You see everything and step into nothing. It has kept you safe and it has cost you every relationship you claim to care about.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "To be in it for once",
+      "To be told my read was right",
+      "To protect one person",
+      "To stop watching",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "The one who notices first",
+      "Unswayed by the mood of a room",
+      "Trusted with a secret",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Present at a harm I could have stopped",
+      "Trading in what I know",
+      "Superior about it",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what did i see?",
+     "options": [
+      "Something I have never told",
+      "Something I told wrong",
+      "Nothing - I looked away",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They tell me things they tell nobody",
+      "They forget I am there",
+      "They are afraid of me",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE PROVIDER",
+   "about": "You carry the weight and you chose to. The people you carry have never been asked whether they wanted to be carried.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "To be thanked once, properly",
+      "For them to manage without me",
+      "Something that is not for anyone else",
+      "To be allowed to fail",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Unshakeable",
+      "Practical about love",
+      "Willing to be unpopular",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Using it as leverage",
+      "Refusing all help",
+      "Deciding for other adults",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what did it cost?",
+     "options": [
+      "A person I chose not to follow",
+      "A version of myself",
+      "My health",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They expect it now",
+      "They resent it",
+      "They tried to stop me",
+      "write your own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "THE LATE BLOOMER",
+   "about": "Everyone else did their becoming on schedule. You are doing yours now, in public, at the wrong age, and you refuse to be embarrassed about it.",
+   "questions": [
+    {
+     "question": "what do i want?",
+     "options": [
+      "The years back",
+      "To be taken seriously starting now",
+      "A first time at something",
+      "Not to be a cautionary tale",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my best i am...",
+     "options": [
+      "Unembarrassed",
+      "Delighted by ordinary things",
+      "Free of a plan",
+      "write your own"
+     ]
+    },
+    {
+     "question": "at my worst i am...",
+     "options": [
+      "Reckless with other people's stability",
+      "Envious of the young",
+      "Rewriting my own history",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what did i miss?",
+     "options": [
+      "A relationship everyone else had at twenty",
+      "A career I was talked out of",
+      "Knowing what I liked",
+      "write your own"
+     ]
+    },
+    {
+     "question": "what are my people like?",
+     "options": [
+      "They find it embarrassing",
+      "They are cheering too loudly",
+      "They did the same and never said",
+      "write your own"
+     ]
+    }
+   ]
+  }
+ ]
+}

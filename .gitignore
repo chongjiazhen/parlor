@@ -22,3 +22,5 @@ eval/records/
 *.egg-info/
 build/
 dist/
+games/*/packs/*/
+!games/*/packs/example/

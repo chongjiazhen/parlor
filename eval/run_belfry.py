@@ -47,7 +47,8 @@ from dataclasses import asdict
 from core import integrity
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import wilson
 from games.belfry.adjudicator import HERRING_STEER_RULE, ModelAdjudicator
 from games.belfry.player import GameRecord, LLMPolicy, RandomPolicy, play_game
@@ -494,6 +495,11 @@ def main() -> None:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
     if args.adjudicator == "model":
         require_key(ENDPOINTS[args.adjudicator_backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before a game is
+    # played, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     STATE.requested = args.games
     started = time.time()

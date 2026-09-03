@@ -23,6 +23,7 @@ it is the bar for promotion.
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 import traceback
@@ -47,8 +48,60 @@ def record_paths(out: str) -> tuple[str, str]:
     Verbatim won because it is what every record already on disk is named - cabal's
     ``hunt*.json`` beside ``hunt*.json.jsonl`` - so settling it here renames one run's
     files rather than every run's.
+
+    **It also CREATES the directory, 2026-09-03.** ``eval/records/`` is gitignored,
+    so a fresh worktree has no such directory and a driver invoked by hand died
+    ``FileNotFoundError`` at the first JSONL append - after the games had run,
+    which is the expensive place to find out. Every ``eval/runs/*.cmd`` carried
+    ``if not exist "%OUTDIR%" mkdir "%OUTDIR%"`` against exactly this, which is a
+    guarantee living in twenty copies of a launcher instead of in the one function
+    both drivers already route through. The launchers keep their line - it costs
+    nothing and a recipe is read by people - but it is no longer what holds.
     """
+    parent = os.path.dirname(out)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     return out, f"{out}.jsonl"
+
+
+def claim_record(out: str) -> tuple[str, str]:
+    """The run's claim on its two output paths, made ONCE before the first game.
+
+    Refuses when either file already exists, because the two are opened
+    differently and always were: ``land()`` appends the per-game JSONL while the
+    summary is written ``"w"``. A second run onto an occupied path therefore
+    STACKS a block of games into one file and REPLACES the other, and the pair
+    then describes two different populations with nothing raising. Three records
+    reached that state - ``cl-heuristic``, ``-pack`` and ``-village`` hold 3000
+    lines for 1000 games - and the first block of ``cl-heuristic.json.jsonl`` is a
+    stale play of the same seeds at 71.55% pack wins against the published 56.09%,
+    which a naive read of the file blends to about 61%: plausible, and five points
+    wrong. No published number is affected, because every one of them reproduces
+    from a deduped read, but that is a property of the two scorers that happen to
+    dedupe rather than of the writer.
+
+    **It refuses; it does not truncate.** The occupied path holds a run that cost
+    GPU-hours, and clearing it is the operator's call. Every launcher already
+    carries an ``if exist ... exit /b 1`` line against this, which is a guarantee
+    living in twenty copies of a recipe instead of in the one function all four
+    drivers route through - the same argument that moved ``makedirs`` here. The
+    recipes keep their line; it is no longer what holds.
+
+    Raises ``SystemExit`` rather than returning a flag, for the reason the drivers
+    already refuse that way: a run that cannot write its record has nothing to do,
+    and the marker still lands because ``run_with_marker`` maps every exit path.
+    """
+    summary, jsonl = record_paths(out)
+    occupied = [path for path in (summary, jsonl) if os.path.exists(path)]
+    if occupied:
+        raise SystemExit(
+            "refusing to run onto an occupied record path: "
+            + ", ".join(occupied)
+            + ". The JSONL is appended and the summary is truncated, so this run "
+              "would stack its games onto another run's and leave the two files "
+              "describing different populations. Move or delete those files, or "
+              "pass a different --out.")
+    return summary, jsonl
 
 
 @dataclass

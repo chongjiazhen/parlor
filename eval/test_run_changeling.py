@@ -14,14 +14,20 @@ import inspect
 import os
 import json
 import random
+import shutil
+import sys
 import tempfile
 import unittest
+from collections import Counter
+from unittest import mock
 
 import eval.run_changeling
 import eval.run_cabal
 from core.runlog import record_paths
+from eval.gate3_bar import REFERENCE_CHANCE
 from eval.run_changeling import (_chance, land, one_game, report, score,
                                  villager_votes)
+from games.changeling.player import RandomPolicy
 from games.changeling.referee import ChangelingReferee
 from games.changeling.roles import SETUPS
 
@@ -144,17 +150,38 @@ class TestVerdicts(unittest.TestCase):
         self.assertIn("VOID", text)
         self.assertNotIn("gate #3 HOLDS", text)
 
-    def test_gate2_stays_unreadable_while_gate3_is_at_chance(self):
-        text = report(self.s, make_args(arm="llm"), 1.0)
-        self.assertIn("gate #3 not shown", text)
-        self.assertIn("Gate #2 is only readable once gate #3 holds", text)
+    def test_the_run_log_CALLS_NO_GATE_however_well_the_blind_stratum_did(self):
+        """2026-09-02: the log called gate #3 off a bar the criterion never gave
+        it. `_chance` is the run's OWN dawn-wolf mix and the criterion's bar is
+        the measured `--arm random` reference, and on the skin pair they were
+        36.47% against 35.84% - `greek-named`'s 35.90% floor HOLDS against one
+        and is NOT SHOWN against the other. The interval is wrong too: the log
+        publishes a BOOTSTRAP over games and the criterion's word is Wilson. A
+        run log has neither the bar nor the interval the gate is cut on, so it
+        reports and does not call."""
+        for blind, ci in ((0.9, (0.85, 0.95)), (0.2, (0.15, 0.25))):
+            g3 = dict(self.s["gate3_deduction"], blind_accuracy=blind,
+                      blind_accuracy_ci95=ci)
+            text = report(dict(self.s, gate3_deduction=g3),
+                          make_args(arm="llm"), 1.0)
+            for claim in ("gate #3 HOLDS", "gate #3 not shown", "gate #2 readable",
+                          "gate #2 not shown"):
+                self.assertNotIn(claim, text, f"blind={blind}: {claim!r}")
 
-    def test_gate3_holding_makes_gate2_readable(self):
-        g3 = dict(self.s["gate3_deduction"], blind_accuracy=0.9,
-                  blind_accuracy_ci95=(0.85, 0.95))
-        text = report(dict(self.s, gate3_deduction=g3), make_args(arm="llm"), 1.0)
-        self.assertIn("gate #3 HOLDS", text)
-        self.assertIn("gate #2 readable", text)
+    def test_the_log_prints_BOTH_bars_and_selects_neither(self):
+        """The discipline `eval.s5_verdict` already applies: every bar on the
+        table against the floor, none quietly selected."""
+        text = report(self.s, make_args(arm="llm"), 1.0)
+        self.assertIn(f"{REFERENCE_CHANCE:.2%}", text)
+        self.assertIn(f"{_chance(self.s):.2%}", text)
+        self.assertIn("eval.gate3_bar", text)
+
+    def test_gate2_is_still_named_as_conditional_on_gate3(self):
+        """The conditionality is a measured fact, not a verdict, so dropping the
+        verdict must not drop it: with voting at chance evil wins ~65% with no
+        deception at all."""
+        text = report(self.s, make_args(arm="llm"), 1.0)
+        self.assertIn("conditional on gate #3", text)
 
     def test_an_empty_blind_stratum_is_REFUSED_not_rendered_as_zero(self):
         g3 = dict(self.s["gate3_deduction"], blind_accuracy=None,
@@ -244,6 +271,26 @@ class TestBothDriversAgreeOnWhatOutMeans(unittest.TestCase):
         self.assertEqual(record_paths("eval/records/s2.json"),
                          ("eval/records/s2.json", "eval/records/s2.json.jsonl"))
 
+    def test_asking_for_the_paths_CREATES_the_directory_they_are_in(self):
+        """`eval/records/` is gitignored, so a fresh worktree has none and a
+        driver invoked by hand died `FileNotFoundError` at the first JSONL
+        append - after the games had run. The launchers all carried a `mkdir`
+        against this; the guarantee belongs in the one function both drivers
+        route through, so it is here and the launchers are belt."""
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, True)
+        records = os.path.join(root, "eval", "records")
+        self.assertFalse(os.path.isdir(records))
+        summary, jsonl = record_paths(os.path.join(records, "s2.json"))
+        self.assertTrue(os.path.isdir(records))
+        for path in (summary, jsonl):
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("{}")
+
+    def test_a_bare_filename_has_no_directory_to_create_and_does_not_raise(self):
+        """`os.path.dirname("s2.json")` is empty, and `makedirs("")` raises."""
+        self.assertEqual(record_paths("s2.json"), ("s2.json", "s2.json.jsonl"))
+
     def test_neither_driver_composes_its_own_suffix(self):
         for module in (eval.run_changeling, eval.run_cabal):
             source = inspect.getsource(module)
@@ -324,3 +371,181 @@ class TestTheBriefingArmIsRecordedPerGame(unittest.TestCase):
         for seat in range(off.n):
             gap = on.render_context(seat).replace(on.briefing_text() + "\n\n", "")
             self.assertEqual(gap, off.render_context(seat))
+
+
+class TestTheMixedArmsSeatTheRungAgainstTheModel(unittest.TestCase):
+    """`mixed-village` and `mixed-pack` - the third cell of the ladder.
+
+    The two arms that already exist hold their live side against the RANDOM
+    control, and `docs/measurements.md` measures what that buys: a control that
+    never claims a deal is read by its silence, and the rung's 77.36% village cell
+    falls to 31.62% with that tier switched off. These arms replace the control
+    with the rung, so the tell has an opponent that talks.
+
+    `LLMPolicy` is stubbed here. A live seat that actually called a backend would
+    make these tests a network probe, and what is under test is the SEATING - which
+    side is live, which side is the rung, and that gate #1 still raises across the
+    mix.
+    """
+
+    class FakeLive:
+        """Stands in for a live seat: random moves, an LLMPolicy's shape."""
+
+        def __init__(self, backend=None, retries=0, fallback=None):
+            self.backend = backend
+            self.upstreams = Counter()
+            self.inner = fallback or RandomPolicy(random.Random(0))
+
+        def act(self, ref, seat):
+            return self.inner.act(ref, seat)
+
+    @staticmethod
+    def run_main(argv):
+        """`main` reads `sys.argv`; this is the only door onto its arg handling."""
+        with mock.patch.object(sys, "argv", ["run_changeling", *argv]):
+            eval.run_changeling.main()
+
+    def build(self, arm, seed=3, seats=5):
+        """Seat one deal under `arm` with the live half stubbed."""
+        from games.changeling.referee import ChangelingReferee
+        args = make_args(arm=arm, backend="local", model="m", seed=seed)
+        args.no_thinking = True
+        ref = ChangelingReferee.new(seats, seed=seed, discussion_rounds=1)
+        with mock.patch.object(eval.run_changeling, "LLMPolicy", self.FakeLive):
+            return ref, eval.run_changeling.build_policies(
+                ref, args, random.Random(seed), seed)
+
+    def test_both_arms_are_registered_and_declared_live(self):
+        for arm in ("mixed-village", "mixed-pack"):
+            self.assertIn(arm, eval.run_changeling.ARMS)
+            self.assertIn(arm, eval.run_changeling.LIVE_ARMS)
+
+    def test_a_mixed_arm_without_a_backend_is_refused_at_the_door(self):
+        """It does not start with "llm", so the old prefix guard let it through to
+        deal 200 games with no endpoint - falling back on every decision and
+        scoring the random policy. That run is a void, paid for in full."""
+        with self.assertRaises(SystemExit):
+            self.run_main(["--arm", "mixed-village"])
+
+    def test_the_live_side_is_exactly_the_side_the_arm_names(self):
+        """Seated by DAWN TRUTH, the same rule every other mixed arm uses: a seat
+        wins with the card in front of it, not the one it believes it holds."""
+        from games.changeling.heuristic import HeuristicPolicy
+        from games.changeling.roles import Side
+
+        for arm, want in (("mixed-village", Side.VILLAGE),
+                          ("mixed-pack", Side.PACK)):
+            for seed in range(3000, 3012):
+                ref, policies = self.build(arm, seed=seed)
+                live = {s for s, p in policies.items()
+                        if isinstance(p, self.FakeLive)}
+                rung = {s for s, p in policies.items()
+                        if isinstance(p, HeuristicPolicy)}
+                truth = {s for s in range(ref.n) if ref.holds(s).side is want}
+                self.assertEqual(live, truth, f"{arm} seed {seed}")
+                self.assertEqual(rung, set(range(ref.n)) - truth,
+                                 f"{arm} seed {seed}")
+                self.assertFalse(any(isinstance(p, RandomPolicy)
+                                     for p in policies.values()),
+                                 "the random control leaked into a mixed arm")
+
+    def test_the_seating_actually_splits_rather_than_seating_one_policy(self):
+        """A deal with every seat on one side would make the test above vacuous."""
+        for arm in ("mixed-village", "mixed-pack"):
+            ref, policies = self.build(arm, seed=3000)
+            kinds = {type(p) for p in policies.values()}
+            self.assertEqual(len(kinds), 2, f"{arm} seated one policy for all")
+
+    def test_each_live_seat_still_gets_its_own_policy_object(self):
+        """The comment in `build_policies` names the cost of sharing one: the
+        upstream census gets weighted by seats rather than by calls, and in a
+        mixed arm the live-seat count varies with the deal."""
+        _, policies = self.build("mixed-village", seed=3000)
+        live = [p for p in policies.values() if isinstance(p, self.FakeLive)]
+        self.assertGreater(len(live), 1)
+        self.assertEqual(len({id(p) for p in live}), len(live))
+
+    def test_the_rung_seats_share_one_rng_so_the_game_is_reproducible(self):
+        from games.changeling.heuristic import HeuristicPolicy
+        _, policies = self.build("mixed-pack", seed=3000)
+        rung = [p for p in policies.values() if isinstance(p, HeuristicPolicy)]
+        self.assertGreater(len(rung), 1)
+        self.assertEqual(len({id(p.rng) for p in rung}), 1)
+
+    def test_a_leaking_referee_STILL_RAISES_under_a_mixed_arm(self):
+        """Gate #1 is the driver's guarantee and does not care which policies are
+        seated. Asserted per arm because the audit runs over rendered bytes, and a
+        table where half the seats are the rung renders different ones."""
+        from games.changeling.audit import LeakDetected
+        from games.changeling.player import play_game
+        from games.changeling.test_referee import LeaksOwnTruth, find_diverged_seed
+
+        for arm in ("mixed-village", "mixed-pack"):
+            seed = find_diverged_seed()
+            args = make_args(arm=arm, backend="local", model="m", seed=seed)
+            args.no_thinking = True
+            ref = LeaksOwnTruth.new(5, seed=seed, discussion_rounds=1)
+            with mock.patch.object(eval.run_changeling, "LLMPolicy",
+                                   self.FakeLive):
+                policies = eval.run_changeling.build_policies(
+                    ref, args, random.Random(seed), seed)
+            with self.assertRaises(LeakDetected, msg=arm):
+                play_game(ref, policies)
+
+    def test_an_honest_mixed_table_plays_a_whole_game_without_raising(self):
+        """The control for the test above: the leak has to be the reason it raised,
+        not the mix."""
+        from games.changeling.player import play_game
+
+        for arm in ("mixed-village", "mixed-pack"):
+            ref, policies = self.build(arm, seed=3000)
+            rec = play_game(ref, policies)
+            self.assertIsNone(rec.error, rec.error)
+            self.assertTrue(rec.winner)
+
+    def test_the_written_record_names_the_arm_it_was_run_under(self):
+        """Read off the file, not off the Namespace. Every later instrument reads
+        `args.arm` out of the record to decide what it is looking at, and a verdict
+        tool that cannot tell a mixed arm from `llm-village` compares two different
+        games."""
+        canned = one_game(0, make_args(arm="random", seed=1000))
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "mixed.json")
+            with mock.patch.object(eval.run_changeling, "one_game",
+                                   lambda i, a: canned):
+                self.run_main(
+                    ["--arm", "mixed-pack", "--backend", "local", "--games", "1",
+                     "--seed", "1000", "--out", out])
+            written = json.load(open(out, encoding="utf-8"))
+        self.assertEqual(written["args"]["arm"], "mixed-pack")
+
+    def test_a_second_run_onto_the_same_record_path_is_REFUSED(self):
+        """The per-game JSONL is appended and the summary beside it is truncated,
+        so a re-run onto an occupied path stacked one run's games onto another's
+        and left the two files counting different populations. Three records
+        reached that state before the writer refused. The refusal has to land
+        before a game is played - the point is not to notice afterwards."""
+        canned = one_game(0, make_args(arm="random", seed=1000))
+        played = []
+
+        def count(i, a):
+            played.append(i)
+            return canned
+
+        argv = ["--arm", "mixed-pack", "--backend", "local", "--games", "1",
+                "--seed", "1000"]
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "mixed.json")
+            with mock.patch.object(eval.run_changeling, "one_game", count):
+                self.run_main([*argv, "--out", out])
+                self.assertEqual(len(played), 1)
+                with self.assertRaises(SystemExit) as caught:
+                    self.run_main([*argv, "--out", out])
+            self.assertEqual(len(played), 1,
+                             "the refused run played games before finding out "
+                             "its record path was occupied")
+            self.assertIn(out, str(caught.exception))
+            with open(out + ".jsonl", encoding="utf-8") as fh:
+                self.assertEqual(len(fh.read().splitlines()), 1,
+                                 "the second run stacked its games onto the "
+                                 "first, which is the whole failure")

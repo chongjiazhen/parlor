@@ -78,8 +78,12 @@ partly true is worse than none.
   axis, only the first is flag-shaped, and a flag list is 2^N unmeasured fallback
   rates wearing one measured number's name. Carries the boundary of the formal
   prior art (`arXiv:2205.00451`).
-- `docs/scripted-rungs-cabal.md` - why the control ladder keeps climbing on hand
-  rules rather than a learned policy, and the three rungs that follow. Unmeasured.
+- `docs/control-ladder.md` - the game-free argument for climbing the control
+  ladder on hand rules: the denominator-not-player case, the ceiling estimator
+  protocol, the two constraints every rung inherits. Moved out of the cabal file
+  2026-09-02 when changeling built a rung.
+- `docs/scripted-rungs-cabal.md` - cabal's three scripted rungs, unmeasured; its
+  §0 now points at `docs/control-ladder.md`.
 - `docs/quorum-live4-criterion.md` - **the operative quorum pre-commitment**;
   arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
   stand beside it, superseded IN WRITING and unrun: each was retired before
@@ -110,7 +114,13 @@ partly true is worse than none.
 - `docs/changeling-rounds-pair-criterion.md` - S22: `--rounds 2` vs `--rounds 3`
   on `folk`, same seeds as the name-form pair. Arithmetic
   `eval.rounds_pair_verdict`, which also pins every setting to the record's own
-  `args`. Ready to launch, UNLAUNCHED.
+  `args`. READ 2026-09-03, NOT SHOWN (`docs/measurements.md`).
+- `docs/changeling-partner-criterion.md` - the pack statistic as PRIMARY at last:
+  one arm on fresh seeds 17000.., the partner vote against its own random control,
+  after two pairs moved it as a free read and neither could promote it. Arithmetic
+  `eval.partner_verdict`, recipe `eval/runs/changeling-partner-arm.cmd`, both
+  written and pinned to the file by a test. UNLAUNCHED, and it must run BEFORE
+  the source-rules merge.
 - `docs/changeling-gate2-pair-criterion.md` - gate #2 with a control at last:
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
@@ -119,6 +129,11 @@ partly true is worse than none.
   the full standing frame in every render, `--briefing` off vs on, arm 1 being
   S22's two-round record. Arithmetic `eval.briefing_pair_verdict`. Must run
   BEFORE the source-rules merge. UNLAUNCHED.
+- `docs/changeling-mixed-criterion.md` - the hand-written rung seated against
+  LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
+  §"changeling heuristic rung" names: a rung read against a control that cannot
+  talk is partly reading its own twin. Pairs against `cl-heuristic.json` rescored
+  on its first 200 games, so it runs BEFORE the source-rules merge. UNLAUNCHED.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning

@@ -25,6 +25,7 @@ from pathlib import Path
 
 from core import integrity
 from core.stats import bootstrap_ci, wilson
+from eval.gate3_bar import OWN_ARM_TOLERANCE, REFERENCE_CHANCE, own_bar
 from eval.s5_verdict import (
     BLIND_FLOOR_VOTES,
     accuracy,
@@ -34,11 +35,9 @@ from eval.s5_verdict import (
     winnable,
 )
 
-#: Per-vote villager chance under `plurality-min2`, `--arm random` n=4000
-#: (games/changeling/RULES.md §The chance baseline, re-measured 2026-09-02).
-REFERENCE_CHANCE = 0.3584
-#: The own-arm clause: a control further than this from the reference IS the bar.
-OWN_ARM_TOLERANCE = 0.01
+#: The bar and its own-arm clause are `eval.gate3_bar` - re-exported here because
+#: this module's criterion names them and `rounds_pair_verdict` imported them
+#: through this file when it was their only home.
 ARMS = ("greek", "greek-named")
 BLIND = stratum("none")
 
@@ -106,17 +105,6 @@ def paired_bootstrap(games_a: list[dict], games_b: list[dict]
         return None if a is None or b is None else b - a
 
     return bootstrap_ci(pairs, stat)
-
-
-def own_bar(control_rate: float | None) -> tuple[float, str]:
-    """The criterion's own-arm clause, applied as written."""
-    if control_rate is None:
-        return REFERENCE_CHANCE, "no control read - reference bar stands"
-    if abs(control_rate - REFERENCE_CHANCE) > OWN_ARM_TOLERANCE:
-        return control_rate, (f"own arm {control_rate:.2%} is more than a point "
-                              f"from {REFERENCE_CHANCE:.2%} - the own arm is the bar")
-    return REFERENCE_CHANCE, (f"own arm {control_rate:.2%} agrees with "
-                              f"{REFERENCE_CHANCE:.2%} - the reference is the bar")
 
 
 def verdict(a: Arm, b: Arm) -> Verdict:

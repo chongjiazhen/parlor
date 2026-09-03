@@ -264,6 +264,16 @@ class TestEvidenceBoundary(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertTrue(any("classifier input leakage" in line for line in lines))
 
+    def test_a_priced_ask_is_provenance_the_classifier_reads_past(self):
+        # ask_size is the referee-side twin of core.callcost: a cost number, not
+        # a channel the classifier could learn the arm from. A record carrying it
+        # has to read, or the field cannot be turned on without voiding the rung.
+        control, model = _arm("random"), _arm("model")
+        for row in model[1]:
+            if row["adjudicator"]:
+                row["adjudicator"]["events"][0]["ask_size"] = 2802
+        self.assertEqual(report(control, model)[1], 0)
+
     def test_classifier_rejects_free_form_response_text(self):
         control, model = _arm("random"), _arm("model")
         event = next(row["adjudicator"]["events"][0] for row in model[1]

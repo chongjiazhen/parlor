@@ -35,7 +35,8 @@ from dataclasses import asdict
 from core.backends import (Backend, ENDPOINTS, REGISTERS, api_key_from_env,
                            require_key)
 from core import integrity
-from core.runlog import RunState, record_paths, run_with_marker
+from core.runlog import (RunState, claim_record, record_paths,
+                         run_with_marker)
 from core.stats import wilson
 from eval.quorum_claims import report as claim_report
 from eval.quorum_claims import score as claim_score
@@ -261,6 +262,11 @@ def main() -> None:
     # number the scorer then voids after the GPU is spent.
     if args.backend:
         require_key(ENDPOINTS[args.backend], api_key_from_env())
+
+    # The same door: an occupied record path is refused before a game is
+    # played, not discovered when two files disagree afterwards.
+    if args.out:
+        claim_record(args.out)
 
     STATE.requested = args.games
     started = time.time()
