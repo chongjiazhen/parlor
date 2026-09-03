@@ -200,6 +200,24 @@ the one that goes stale.
       three triggers and the split that would follow are `docs/decisions.md`
       §This directory stays flat. Done when the ceiling is met or deliberately
       raised with a reason.
+- [ ] **The per-game JSONL is opened in APPEND mode and the summary beside it
+      is TRUNCATED.** `core/runlog.py` hands out both paths and
+      `eval/run_changeling.py:437` appends each game, while the summary is
+      written `"w"` - so a second run onto an existing record path stacks a
+      block, and the two files then describe different populations with nothing
+      raising. Three records are already in that state: `cl-heuristic`,
+      `-pack` and `-village` hold 3000 lines for 1000 games. **The first block
+      of `cl-heuristic.json.jsonl` is a stale play of the same seeds at 71.55%
+      pack wins against the published 56.09%**, so a naive read of that file
+      blends to about 61% - plausible, five points off. No published number is
+      affected (`docs/measurements.md`'s 77.36% and 49.26% both reproduce from
+      the deduped read). `eval/mixed_verdict.py` dedupes to the last write and
+      checks the recovery against the summary's own counts, but that is one
+      scorer defending itself; every other tool reading a `.jsonl` is exposed.
+      Done when a re-run onto an existing record path cannot silently stack -
+      the recipes' `if exist` guard is the only thing standing between this and
+      a wrong published figure, and it is per-recipe prose, not a property of
+      the writer.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
