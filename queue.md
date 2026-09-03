@@ -313,14 +313,26 @@ Runs that are frozen and want card - and one that is already in the chain:
       a verdict for that.** READ 2026-09-03 (`docs/measurements.md`): COHERENT,
       NO RECALL, BELOW SUPPLIED, all three pre-committed and clean. The unheld
       part is the direction - handing the referee its own transcript looks worse
-      than handing it nothing, on non-overlapping intervals. The criterion
-      licenses the interval comparison and defines only RECALLS / NO RECALL, so
-      this is an observation, not a result. **Cheapest next step is not an arm**:
-      the two records exist, so ask first whether the transcript arm's asks are
-      longer, whether its false tellings sit later in a game, and whether its
-      extra 59 pairs are a different population - all CPU against `.jsonl`
-      already on disk. An arm only if that turns up nothing. Not measured: any
-      mechanism.
+      than handing it nothing, on non-overlapping intervals - and the criterion
+      defines only RECALLS / NO RECALL, so it is an observation, not a result.
+      **The population explanation is now CLOSED, 2026-09-03**: the extra 59
+      pairs are genuinely deeper (29.8% at night 4+ against 18.9%) and depth
+      genuinely costs coherence, but standardising either direction moves -15.7pp
+      to -14.8pp / -14.3pp, so the deficit is INSIDE the strata. What that read
+      also spent is the non-overlap: at the largest matched stratum the intervals
+      touch, so an arm is the honest next move and the cheap CPU route is done.
+      Not measured: any mechanism.
+- [ ] **The adjudicator's record carries no ask SIZE, and that is where the
+      transcript arm's mechanism lives.** Found 2026-09-03 in answering the row
+      above. `ChoiceEvent` holds key, options, selection, fallback, recovered and
+      upstream; player decisions have carried `prompt_size` and `reply_size`
+      through `core/callcost` all along. So "is the transcript arm's ask longer"
+      is answerable from the CODE - `choose(recall=True)` sends the whole
+      accumulated session transcript, setup asks included, growing within a game
+      - and from NO record, on either arm, past or future. Done when an
+      adjudicator event carries the two sizes the player path already records.
+      Cheap, `core/`-adjacent, and it is what would let the next transcript-class
+      arm price its own ask instead of arguing it.
 - [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
       unmeasured.** No Phase, turn kind or ACTION_KEYS entry was needed: a tick is
       a night, taken at the top of `_begin_night`. What seating found, and how the

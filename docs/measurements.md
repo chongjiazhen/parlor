@@ -1181,6 +1181,55 @@ this is an observation with a row behind it, not a result: on this evidence
 handing the referee its own transcript looks worse than handing it nothing, and
 nothing here establishes why. Denominators differ (181 pairs against 122) and the
 games are different seeds by construction.
+## belfry night coherence - is the transcript arm's deficit a POPULATION effect? NO, read 2026-09-03
+
+CPU read against records already on disk, answering the question the queue's
+own-transcript row named as its cheapest next step. **Post-hoc, unadjusted, and
+no criterion licenses a bar on any of it** - the transcript arm's verdict stays
+COHERENT / NO RECALL / BELOW SUPPLIED, and this only asks whether the unheld
+below-withheld observation survives the obvious confound. Instrument:
+`eval.belfry_night_verdict.coherence_pairs`, reused rather than re-implemented, so
+these are the same pairs the verdict graded.
+
+**The extra 59 pairs ARE a different population.** The transcript arm's pairs sit
+deeper in the game: 54/181 = 29.8% at night 4 or later against the withheld arm's
+23/122 = 18.9%, and its false tellings run later (mean night 2.30 against 2.10)
+because its play droisoned the gauge more often - 505 false tellings against 384
+on a near-identical 2266 against 2211 total. Depth is not free: the withheld arm
+itself falls 81.0% -> 75.0% -> 71.4% across nights 2, 3 and 4.
+
+**It does not explain the gap.** Per-night coherence, both arms:
+
+| night | withheld | transcript | diff |
+|---|---|---|---|
+| n2 | 51/63 = 81.0% | 47/72 = 65.3% | -15.7pp |
+| n3 | 27/36 = 75.0% | 32/55 = 58.2% | -16.8pp |
+| n4 | 10/14 = 71.4% | 20/32 = 62.5% | -8.9pp |
+| n5 | 3/4 = 75.0% | 7/14 = 50.0% | -25.0pp |
+| n6+ | 3/5 | 5/8 | cells too small to read |
+
+Direct standardisation, both directions: the transcript arm's rates on the
+withheld arm's night mix give **62.25%** against 77.05% crude, a **-14.8pp**
+difference where the crude one is -15.7pp; the withheld arm's rates on the
+transcript arm's mix give 75.63% against 61.33%, **-14.3pp**. So depth composition
+accounts for about one point of the fifteen. The deficit is inside the strata, not
+in the mix.
+
+**What it does NOT establish.** Stratifying spends the power that produced the
+non-overlap: at the largest matched stratum alone, night 2, the intervals OVERLAP
+- withheld 80.95% Wilson [69.6%, 88.8%] against transcript 65.28% [53.8%, 75.2%].
+This read removes an explanation; it does not add a result, and the row still
+needs an arm to settle direction.
+
+**Not answerable from any record: whether the transcript arm's ASKS are longer.**
+`ChoiceEvent` carries key, options, selection, fallback, recovered and upstream,
+and no size - while player decisions have carried `prompt_size` and `reply_size`
+through `core/callcost` all along. The code answers it unambiguously and the
+record cannot: `Adjudicator.choose(recall=True)` sends `history=list(self.transcript)`,
+and the transcript accumulates every accepted ask AND its reply for the whole game,
+including the two setup asks, so the ask grows monotonically within a game and the
+deepest pairs carry the longest one. That is a mechanism nothing on disk can size.
+
 ## changeling heuristic rung - the ladder's middle rung, measured 2026-09-02
 
 `games/changeling/heuristic.py`, the changeling twin of cabal's hand-written
