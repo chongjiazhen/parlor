@@ -110,7 +110,11 @@ partly true is worse than none.
 - `docs/changeling-rounds-pair-criterion.md` - S22: `--rounds 2` vs `--rounds 3`
   on `folk`, same seeds as the name-form pair. Arithmetic
   `eval.rounds_pair_verdict`, which also pins every setting to the record's own
-  `args`. Ready to launch, UNLAUNCHED.
+  `args`. READ 2026-09-03, NOT SHOWN (`docs/measurements.md`).
+- `docs/changeling-partner-criterion.md` - the pack statistic as PRIMARY at last:
+  one arm on fresh seeds 17000.., the partner vote against its own random control,
+  after two pairs moved it as a free read and neither could promote it. Arithmetic
+  `eval.partner_verdict` - OWED, with its recipe. UNLAUNCHED.
 - `docs/changeling-gate2-pair-criterion.md` - gate #2 with a control at last:
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic

@@ -160,8 +160,14 @@ the one that goes stale.
       primary is blind villager accuracy, a VILLAGE statistic, so the one thing
       that moved is structurally outside it. **Not promotable**: the criterion
       declares the audit a free read and forbids a bar after the fact, and this
-      is one of ~6 such reads, so the interval is unadjusted. Settling it needs a
-      new criterion with the pack statistic PRIMARY on fresh seeds, not a re-read.
+      is one of ~6 such reads, so the interval is unadjusted. **The rounds pair
+      moved the same statistic the same way** (2026-09-03, `docs/measurements.md`),
+      so the criterion is WRITTEN - `docs/changeling-partner-criterion.md`, one arm
+      on fresh seeds 17000.., ~5 h, primary the partner vote against its own
+      control. What it owes is `eval/partner_verdict.py` and its recipe, then the
+      card. The axis question - which of name form or round count causes it - is
+      deliberately NOT in it: four arms split 2-2 and no single variable separates
+      them, so that is a later pair against this arm's record.
 - [ ] **The same-seeds folk-vs-greek vocabulary read lapsed on 2026-09-03, and
       needs fresh seeds now.** Two criteria built the door and neither walked
       through it: the skin pair's §"What this does NOT compare" says a folk-vs-greek
