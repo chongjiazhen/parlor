@@ -280,7 +280,7 @@ left two instruments answering one question, which is how a stale second copy
 wins an argument later. The delete is recoverable from history; nothing in the
 tree imported the module, and `docs/` never cited its number.
 
-## No arm will produce `recovered > 0` - S29 closed 2026-09-01T15:44:11+00:00
+## No arm will produce `recovered > 0` - S29 closed 2026-09-01T15:44:11+00:00, FALSIFIED 2026-09-03
 
 The belfry adjudicator retry landed earlier the same day: `ModelAdjudicator` carries
 the seats' `retries=2` and doubling backoff, `ChoiceEvent.recovered` is set from a
@@ -323,6 +323,30 @@ own sake rather than to exercise the retry; or a future rung whose adjudicator a
 question wide enough that a legal first answer stops being the common case. If either
 lands, the field is already instrumented and the verdict already prints it - that is
 what S29's code half bought, and it is the durable half.
+
+**FALSIFIED 2026-09-03, and the reasoning above is kept because the conclusion
+survives it.** The belfry own-transcript arm produced `recovered 27` over 2454
+adjudicator calls in 27 distinct games - verified in the raw
+`belfry-night-transcript-model.json.jsonl`, not off the verdict line. So a record
+carrying `recovered > 0` exists, and the retry is now verified by a live record
+as well as by test.
+
+**Both halves of the mechanism above are wrong, and that is the correction worth
+keeping.** This section reasoned that recovery needs a high fallback rate to
+fumble, so the only record that could carry the field would be "a void record by
+construction the moment it succeeds". The arm that produced 27 recoveries has
+**0.00% fallback**. `recovered` is set from a RULES refusal that later answered,
+which is orthogonal to falling back: a refusal that recovers never becomes a
+fallback, so the two rates move independently and a clean arm can carry a large
+recovered count. The real reason the earlier arms read zero is the denominator -
+twenty setup choices each, against this arm's 2454 play-time calls - and the
+section generalised from that narrow surface to "no arm this repo intends to
+run".
+
+**What still stands: refusing to buy an arm for the demonstration.** That trade
+was correctly declined; the demonstration arrived free, from an arm run for its
+own reasons, which is the second of the two reopening conditions this section
+named. Nothing here asks for card.
 
 **S23's entry condition is amended in the same close.** It read "a belfry record whose
 adjudicator retried", which this decision makes unbuyable. The condition that was

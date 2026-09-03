@@ -45,7 +45,7 @@ second copy is the one that goes stale. `GLOSSARY.md` defines rung, arm and void
 | **cabal** | done | yes | nothing runnable. Its GPU program stopped at gate #3b and its live arms re-homed to changeling, so what it holds is parked, not work: **over-sabotage (b), naming the partner, is measured to HURT** and is an arm of its own if ever tried (`docs/open-arms.md`); **6/7p is dealt and baselined**, and what is left is a model (`docs/measurements.md`) |
 | **changeling** | done | yes - gate #3 HOLDS on BOTH decks (S5 five-seat, S19 six-seat waker) | the `waker` deck is read and its question ANSWERED: the waker seat's advantage does not clear zero. **Not shown, not no** - the deck hit the one-vote-per-game ceiling its criterion named, so settling it needs a NEW criterion, a longer arm or a deck seating two waker-class cards, never a re-read of these records. `kindred` deck B is FROZEN and unlaunched - its row below |
 | **quorum** | done, and the live4 arm READ 2026-09-01 | **never** | nothing runnable. Both clauses INFORM over one fallback decision in 2582; read `docs/measurements.md` before citing either. Seeds 11200..11219 are spent alongside 5200..5599 / 7000..7399, so a fifth arm needs fresh ones and a criterion of its own. The repeat-claim void has still never fired |
-| **belfry** | done, scoring lane, control instrument, sampled-player arm, S8 referee read, live2 READ | **never** | **one arm frozen 2026-09-02, unlaunched: the session-memory night arm** - its row below, queued behind the changeling chain. S8b is DISTINGUISHABLE and live2's Clause A INFORMS; Clause B spans chance and no second arm chases it. S29 CLOSED on the finding that no arm will carry `recovered > 0` (`docs/decisions.md`), so the rung owes no run for the adjudicator retry |
+| **belfry** | done, scoring lane, control instrument, sampled-player arm, S8 referee read, live2 READ | **never** | nothing runnable. The session-memory night arm RAN and is READ 2026-09-03 - COHERENT, NO RECALL, BELOW SUPPLIED - and what it left is an observation row below, not a run. S8b is DISTINGUISHABLE and live2's Clause A INFORMS; Clause B spans chance and no second arm chases it. **S29's central prediction is FALSIFIED**: that arm carries `recovered 27` over 2454 calls at 0.00% fallback, so the retry now has the live record S29 said no arm would produce - its refusal to buy one stands, its stated mechanism does not (`docs/decisions.md`) |
 | **DURF** | done | yes, and gate #1 held under the topology edits | a term decision and two questions that are not code, all three in §The three DURF questions. The adjacency question is DECIDED, its edits APPLIED, its campaign LANDED |
 | **adjudicator** | S8b read | referee only | held-out source accuracy clears its Wilson chance ceiling; bounded trace difference only |
 
@@ -85,7 +85,8 @@ spike is the **adjudicator** against 3-4 discretion-heavy characters. **Taken
 PLAY-TIME discretion arm** - the false count a switched-off gauge is told, held
 across nights. Both reads landed the same day, COHERENT supplied and COHERENT and
 NEEDS MEMORY with `prior` withheld (`docs/measurements.md`). **The third arm both
-reads end by naming is FROZEN** - the belfry row below.
+reads end by naming is READ 2026-09-03** - NO RECALL, and the belfry row below
+carries what it left.
 
 **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
 either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
@@ -94,20 +95,19 @@ either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
 
 **One list, and rows do not carry branch names.** A branch cannot touch the
 checkout the chain imports from, so "no changeling arm in flight" is met on a
-branch and the freeze binds only the MERGE. All of it waits on the chain reading.
+branch and the freeze binds only the MERGE. **The chain READ 2026-09-03, so no
+freeze binds and every row below is merge-ready on its conflicts alone.**
 
 No head sha: a copied sha is what goes stale, and a merge takes a name.
 
 | branch | what it carries |
 |---|---|
 | `slice/changeling-source-rules` | the night rules - merge condition MET on the branch |
-| `slice/changeling-heuristic` | the control ladder's middle rung |
 | `slice/changeling-notebook` | `--notebook` |
 | `slice/fanout-s21` + `slice/fanout-s21-demo` | `--briefing`, arm then console |
 | `slice/fanout-s27` + `slice/fanout-s27-demo` | `--turns random-active`, arm then console |
 | `slice/fanout-simul` | `--turns simultaneous`, sits over S27 |
 | `slice/fanout-replies` | the parser's complaints - **supersedes `slice/fanout-neg`**, which it sits on |
-| `slice/changeling-mixed` | the mixed cells, arm order swapped before launch |
 | `slice/fanout-heartbeat` | belfry `--heartbeat` |
 | `slice/fanout-print` | the stale pack reference prints a labelled absence |
 | `slice/fanout-wolf` | `--theme werewolf` |
@@ -117,22 +117,9 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 re-baselines the rung, or its pair is void. Which arm earns its ~7 h of card
 first is the operator's ranking; the criteria are frozen and wait.
 
-**GPU order, decided 2026-09-02** (reasoning in `docs/decisions.md`):
-mixed-pack (`slice/changeling-mixed`, ~2 h) first - cheapest, only arm that
-shows the heuristic village's 77.36% against a random pack collapsing
-against a live one. Then briefing (`slice/fanout-s21`, ~5 h) - tests
-`AGENTS.md`'s own standing-context position; either sign changes a written
-invariant. Then notebook (`slice/changeling-notebook`, ~5 h) - largest
-prompt change, a prediction recorded in advance, second point on briefing's
-axis. **Cut after #3**: run those three (~12 h), then merge source-rules -
-owed a fresh baseline anyway, so deferring turn-taking (`slice/fanout-s27`,
-`slice/fanout-simul` - shares s27's recipe, decide before launch whether it
-rides alone) and phrasing (`slice/fanout-replies` - primary stat is refusal
-rate, near 0%, lowest information per hour) costs a criterion rewrite each
-against the post-merge baseline, not an extra control run. mixed-village
-(arm 2 of mixed-pack's recipe, ~3 h) rides along unless cut. Kindred
-re-bars after the merge - its bar does not depend on the control's rules,
-a fresh one is minutes of CPU.
+**GPU order was decided 2026-09-02 and RE-RANKED the next day.** The 09-02
+reasoning is `docs/decisions.md` §GPU order for the frozen changeling arms and
+is not restated here; what binds is the line below.
 
 **Re-ranked 2026-09-03** (`docs/decisions.md`): the partner arm takes slot 3 and
 notebook slips to the deferred group, so the pre-merge set is mixed-pack, briefing,
@@ -206,6 +193,29 @@ the one that goes stale.
       `docs/decisions.md`: no suite runs while an arm is in flight, scheduling
       rather than a gate. What is left open is only the cause - CPU contention,
       IO, or the box's power budget - and nothing waits on it.
+- [ ] **`slice/transport-retry` is not on the merge list, and it re-solves a
+      `core/` problem main solved a different way.** Found in the 2026-09-03
+      triage; nothing in this file has ever named it. Four commits, 971
+      insertions: a whole unlisted rung `games/bureau/` (deal, referee, session
+      and three test files), a shared rate budget so a transport stall does not
+      kill a rung, edits to `games/durf/facts.py`, and
+      `refactor(core): find_leaks keys a secret to any hashable, not a seat` -
+      which is a SECOND, independent generalisation of the key that `ed6bf11`
+      generalised this morning. It conflicts in exactly those two files,
+      `core/observability.py` and `core/test_observability.py`. Two branches
+      solved the gate #1 primitive apart and neither knows about the other, so
+      neither is trustworthy until one is chosen. Done when the two keyings are
+      read side by side and one is kept; **not** by merging and resolving, which
+      would pick a winner by textual accident in the repo's most load-bearing
+      primitive.
+- [ ] **`docs/README.md` is the merge list's standing collision point.** 195
+      lines against its 150 advisory as of 2026-09-03, and it conflicts on seven
+      of the nine unmerged branches, because each adds its criterion to one flat
+      index. The advisory is not a block and the per-merge resolution is cheap,
+      so this is a row about whether the flat directory still pays: the other
+      three triggers and the split that would follow are `docs/decisions.md`
+      §This directory stays flat. Done when the ceiling is met or deliberately
+      raised with a reason.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
@@ -241,13 +251,14 @@ the one that goes stale.
       The cabal half, the evil conference before the hunt, LANDED 2026-09-02 and
       re-baselines cabal (`docs/measurements.md`). The changeling
       half - a lone `pack` views one centre card at MEET, an `identity`-class
-      reveal that moves the strata and the chance baseline - MUST NOT merge while
-      the gate #2 arm is unread: its criterion froze under the current rules. The
-      skin pair and S22 are READ (`docs/measurements.md`). Merging re-baselines the rung and the RULES.md notes flip
-      then. **Merge condition MET on the branch:** the control never declines and
-      the guard is mutation-checked; what it does to the baseline is
-      `docs/decisions.md`. What remains is the chain reading, then merge and
-      re-measure the bar.
+      reveal that moves the strata and the chance baseline. **Every blocker has now
+      CLEARED**: the gate #2 arm, the skin pair and S22 are all READ
+      (`docs/measurements.md`), and the merge condition was already met on the
+      branch - the control never declines and the guard is mutation-checked.
+      Merging re-baselines the rung and the RULES.md notes flip then. What
+      remains is the ranked arms that must run first, then the merge, then
+      re-measure the bar. Its one conflict is textual and its resolution is the
+      row above.
 
 Measured prompt arms - same seeds, one variable, reported beside both fallback
 rates, landed between campaigns rather than into one. Every one is FROZEN and
@@ -322,8 +333,9 @@ Runs that are frozen and want card - and one that is already in the chain:
       5376 random votes, `eval/records/kin-chance.json`) and the criterion is
       `docs/changeling-kindred-criterion.md`; recipe
       `eval/runs/changeling-kindred.cmd kin1 200 14000 qwen36-35b-a3b-iq3`, ~7 h.
-      Entry condition: no changeling arm in flight - it queues behind the chain
-      in `queue.local.md`. A new deck re-baselines everything under it.
+      **Entry condition MET 2026-09-03** - nothing is in flight. It still runs
+      after the source-rules merge and re-bars first (`docs/decisions.md`). A new
+      deck re-baselines everything under it.
 - [ ] **The own-transcript arm sits BELOW the withheld arm, and no criterion has
       a verdict for that.** READ 2026-09-03 (`docs/measurements.md`): COHERENT,
       NO RECALL, BELOW SUPPLIED, all three pre-committed and clean - control at
@@ -365,8 +377,8 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
 - [ ] **Changeling: respond to measured randomness.** Four levers and their order:
       `docs/open-arms.md` §"changeling feels random". Every rules or prompt change
       re-baselines this reading. The heuristic rung (`docs/scripted-rungs-cabal.md`
-      §0) is BUILT and says what un-random looks like here; it waits on the merge
-      list, and the mixed arms read it against a live seat.
+      §0) is MERGED 2026-09-03 and says what un-random looks like here; the mixed
+      arms read it against a live seat and are the run this row now waits on.
 
 - [ ] **Build the Paranoia-shaped rung, branding-free** - called 2026-09-03 and
       the pre-committed falsifier did NOT fire, `docs/decisions.md`. **The gate #1
