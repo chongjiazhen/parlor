@@ -363,20 +363,16 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
 - [ ] **The play lane, after session 0.** The draft is BUILT and RUN
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
       economy-compliance read, neither of which has a rubric yet.
-- [ ] **`core/` owes the private table arm a WRITTEN seam.** The tables are a
-      separate private repo consuming parlor as an installed dep (grilled
-      2026-09-04, spec off-tree). `core/` has no `Protocol` and no ABC - the
-      referee contract is duck-typed - so a rename breaks seven tables silently
-      in a tree this suite cannot see. Declare the render+ask path, the
-      entitlement query, the audit entry, `complete_meta` and the human-seat
-      policy; the rest of `core/` stays free. **One test, pinned to a synthetic
-      implementation** - read off the live rungs and it passes on whatever they
-      happen to expose. Free with this row: cross-session gate #1 has a rule and
-      no mechanism (a seat's memory derives from its own audited view, never the
-      referee transcript), and the fix is the same shape - audit the derived text
-      against that session's facts with the same matcher. That half lives in the
-      private repo; it is named here because it is the guarantee parlor is asked
-      to make good. Done when a rename of any declared member fails the test.
+- [ ] **Cross-session gate #1 has a rule and no mechanism.** A seat's memory
+      derives from that seat's own audited view, never the referee transcript -
+      written down, enforced nowhere, and the leak surfaces three sessions later
+      in a table nobody public can run. The parlor half LANDED 2026-09-04:
+      `core/seam.py` declares the table-facing contract and `audit_render` is the
+      one place a table reaches the matcher. What is left is the private half -
+      audit the DERIVED text against that session's declared facts, same matcher,
+      same point a render is audited, so a memory that would leak fails to be
+      written. Done when a derivation over a session holding an unentitled secret
+      refuses it, mutation-checked by removing the audit call.
 - [ ] **A browser front-end for a human seat, phone included.** A SECOND
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
