@@ -149,17 +149,19 @@ behind each is `docs/open-arms.md`; read the entry before taking the row**, and
 the reference each names is indexed in `docs/README.md`. A second index here is
 the one that goes stale.
 
-- [ ] **A fresh seed block deals a DIFFERENT eligibility census, and no row
-      predicted it.** The partner arm's 17000-block dealt partner-eligible games
-      at 168/200 where the 5000-block dealt 198/200 on all four prior arms
-      (`docs/measurements.md` 2026-09-04). The criterion's census check proves it
-      is the DEAL, not play - arm and control agree exactly over the 200 shared
-      deals - so this is a property of the seed block that every power section in
-      the tree currently assumes away: each one computes its half-width from an
-      eligibility rate measured on a block it is not going to play. It cost 0.9
-      points of half-width here and did not change the call. Done when a
-      criterion's power section takes its eligible-vote count from its OWN seed
-      block, which is a CPU census over the deal and needs no card.
+- [ ] **The next criterion written must take its power from `eval.deal_census`.**
+      The instrument landed 2026-09-04 and the gap it answers is real: the partner
+      criterion took ~198 partner-eligible votes from seeds 5000..5199 and ran on
+      17000..17199, which deals 168 - half-width 6.82 against a promised 5.9,
+      learned after 5.2 h of card. The census deals nights only, no model, and is
+      validated against play rather than itself: it reproduces 168 and 198 on the
+      two blocks with records, and `cl-partner-random`'s recorded 1252 blind votes
+      over 1000 deals, which pins all three blind filters at once. **Checked on
+      unspent card:** `kindred` assumed ~269 blind votes from seeds 11/910000 and
+      its own 14000 block deals 262, -2.6%, so its call stands and it needs no
+      edit. Frozen criteria are not rewritten for this. Done when a criterion's
+      Power section quotes a census of its OWN block, and a third statistic goes
+      in `RULES` rather than a fork.
 - [ ] **The folk-vs-greek vocabulary read needs a criterion and fresh seeds,
       ~10 h.** Decide first whether it is worth 10 h at all, given the skin pair
       showed NOT SHOWN on the name-form axis. Done when decided no (row deleted)
