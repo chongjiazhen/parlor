@@ -17,11 +17,12 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from core.console import ConsoleBackend, human_seats
-from games.changeling.demo import (BRIEFING, build_policies, constrained_deal,
-                                    opening_view)
+from games.changeling.demo import (BRIEFING, LISTEN_NOTE, build_policies,
+                                    constrained_deal, opening_view)
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                       play_game)
-from games.changeling.referee import ChangelingReferee
+from games.changeling.referee import (TURNS_FIXED, TURNS_RANDOM_ACTIVE,
+                                      ChangelingReferee)
 from games.changeling.roles import SETUP_5, Side
 
 
@@ -89,6 +90,31 @@ def test_the_flag_drops_the_consoles_own_furniture_text():
     assert policies[0].backend.briefing == ""
 
 
+def test_the_two_furniture_rules_compose_and_the_listen_note_survives_briefing():
+    """The merge of S21 and S27 put two independent reasons to change the
+    console furniture on one string, so the composed cell needs its own test.
+
+    `--briefing` drops BRIEFING because `ref.briefing_text()` covers it. It does
+    NOT cover the listen shorthand - briefing_text() names no `say`-with-nothing
+    and still says "one turn each, in seat order" - so under random-active turns
+    the note has to survive the arm, and it is then the ONLY furniture the seat
+    gets."""
+    ref = ChangelingReferee.new(5, seed=5, briefing=True,
+                                turn_mode=TURNS_RANDOM_ACTIVE)
+    policies = build_policies(ref, _BriefingArgs(), random.Random(5))
+    assert policies[0].backend.briefing == LISTEN_NOTE
+    assert BRIEFING not in policies[0].backend.briefing
+
+
+def test_the_listen_note_is_absent_when_turns_are_fixed_under_briefing():
+    """The negative half: without random-active turns the composed path must
+    still hand a --briefing seat nothing at all, or the test above would pass
+    on a briefing string that always carries the note."""
+    ref = ChangelingReferee.new(5, seed=5, briefing=True, turn_mode=TURNS_FIXED)
+    policies = build_policies(ref, _BriefingArgs(), random.Random(5))
+    assert policies[0].backend.briefing == ""
+
+
 def test_the_flag_leaves_other_seats_random():
     """The flag only changes what the human seat's console is handed, not who
     plays the table."""
@@ -126,6 +152,74 @@ def test_the_frame_is_absent_from_the_rendered_prompt_by_default():
     play_game(ref, {0: policies[0],
                     **{s: RandomPolicy(rng) for s in (1, 2, 3, 4)}})
     assert "How the day runs" not in out.getvalue()
+
+
+# ---- --turns: the console side of the turn-taking arm ---------------------
+
+
+def test_fixed_is_the_default_and_the_briefing_is_unchanged():
+    """The default arm's console furniture must stay byte-identical - a person
+    playing `fixed` today reads exactly what they read before this flag existed."""
+    ref = ChangelingReferee.new(5, seed=5)
+    assert ref.turn_mode == TURNS_FIXED
+    policies = build_policies(ref, _Args(), random.Random(5))
+    assert policies[0].backend.briefing == BRIEFING
+    assert "listen" not in policies[0].backend.briefing.lower()
+
+
+def test_random_active_appends_the_listen_note_to_the_briefing():
+    ref = ChangelingReferee.new(5, seed=5, turn_mode=TURNS_RANDOM_ACTIVE)
+    policies = build_policies(ref, _Args(), random.Random(5))
+    briefing = policies[0].backend.briefing
+    assert briefing == BRIEFING + LISTEN_NOTE
+    assert "listen" in briefing.lower()
+
+
+def test_random_active_prompts_the_human_only_on_their_own_turns():
+    """Seed 6's random-active schedule for one round is [0, 1, 0, 2, 0] - seat 0
+    holds the floor three times out of five, and seats 3 and 4 never do. A driver
+    that asked every seat every turn (the `fixed`-shaped bug this flag exists to
+    avoid) would prompt the human all five times instead of three."""
+    ref = ChangelingReferee.new(5, seed=6, discussion_rounds=1,
+                                turn_mode=TURNS_RANDOM_ACTIVE)
+    assert ref.speaking_order() == [0, 1, 0, 2, 0]
+    console = ConsoleBackend(keys=ACTION_KEYS)
+    console.stdin = io.StringIO("say I am seat 0\n" * 10 + "vote 1\n" * 10)
+    console.stdout = io.StringIO()
+    rng = random.Random(6)
+    human = LLMPolicy(backend=console, retries=8, fallback=RandomPolicy(rng))
+    policies = {s: (human if s == 0 else RandomPolicy(rng)) for s in range(ref.n)}
+
+    rec = play_game(ref, policies)
+
+    human_turns = [d for d in rec.decision_log
+                   if d.seat == 0 and d.phase == "discuss"]
+    assert len(human_turns) == 3
+    assert all(d.served_by == "human" for d in human_turns)
+
+
+def test_an_empty_human_entry_listens_exactly_like_the_driver_routes_say():
+    """Seed 6, turn 1: seat 0 is on the clock. A bare `say` - already legal
+    shorthand for ``{"say": ""}`` - must reach the referee as a listen, the same
+    route the driver takes for a model's empty ``say`` in `player.play_game`."""
+    ref = ChangelingReferee.new(5, seed=6, discussion_rounds=1,
+                                turn_mode=TURNS_RANDOM_ACTIVE)
+    assert ref.on_the_clock() == 0
+    console = ConsoleBackend(keys=ACTION_KEYS)
+    console.stdin = io.StringIO("say\n" + "say I am seat 0\n" * 10 +
+                                "vote 1\n" * 10)
+    console.stdout = io.StringIO()
+    rng = random.Random(6)
+    human = LLMPolicy(backend=console, retries=8, fallback=RandomPolicy(rng))
+    policies = {s: (human if s == 0 else RandomPolicy(rng)) for s in range(ref.n)}
+
+    rec = play_game(ref, policies)
+
+    first_seat0_turn = next(d for d in rec.decision_log
+                            if d.seat == 0 and d.phase == "discuss")
+    assert first_seat0_turn.played == "listens"
+    assert first_seat0_turn.served_by == "human"
+    assert rec.fallbacks == 0
 
 
 def test_a_hand_played_game_reaches_a_winner_with_gate_one_audited():
