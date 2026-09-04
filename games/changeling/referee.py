@@ -32,6 +32,7 @@ from typing import TextIO
 from core.observability import Knowledge, SeatView, find_leaks
 from games.changeling.night import (NightResult, is_centre, centre_slot,
                                     resolve_night)
+from games.changeling.phrasing import AS_IS, Phrasing
 from games.changeling.roles import (CARDS, DEFAULT_THEME, NIGHT_ORDER, SETUPS,
                                     Card, Setup, Side, Theme, indefinite)
 
@@ -73,6 +74,12 @@ class ChangelingReferee:
     setup: Setup
     night: NightResult
     theme: Theme = DEFAULT_THEME
+    #: Which copy of the steering strings this game renders. A MEASURED arm -
+    #: see ``games/changeling/phrasing.py`` and
+    #: ``docs/changeling-phrasing-criterion.md``. ``AS_IS`` is what every record
+    #: written before the flag existed was played on, so it is the default and
+    #: ``test_phrasing`` pins its bytes.
+    phrasing: Phrasing = AS_IS
     discussion_rounds: int = 2
     #: The `--briefing` arm, OFF by default. On, every render carries the full
     #: standing frame - the day's procedure, the accusation rule and what each
@@ -160,7 +167,8 @@ class ChangelingReferee:
             briefing: bool = False,
             choose=None, dealt=None, centre=None,
             turn_mode: str = TURNS_FIXED,
-            transcript_path: str | Path | None = None) -> "ChangelingReferee":
+            transcript_path: str | Path | None = None,
+            phrasing: Phrasing = AS_IS) -> "ChangelingReferee":
         """``dealt``/``centre`` pin the deal, forwarded to ``resolve_night``. They
         exist so a caller that needs a NAMED deal still comes through this one
         constructor: the alternative is building a referee by hand, which silently
@@ -168,7 +176,7 @@ class ChangelingReferee:
         setup = SETUPS[n]
         rng = random.Random(seed)
         night = resolve_night(setup, rng, choose, dealt=dealt, centre=centre)
-        ref = cls(setup=setup, night=night, theme=theme,
+        ref = cls(setup=setup, night=night, theme=theme, phrasing=phrasing,
                   discussion_rounds=discussion_rounds, briefing=briefing,
                   turn_mode=turn_mode, turn_seed=seed,
                   transcript_path=transcript_path)
@@ -396,8 +404,7 @@ class ChangelingReferee:
             lines.append("What your night gave you:")
             lines += [self._knowledge_line(k) for k in knowledge]
         else:
-            lines.append("Your night gave you nothing to go on. Reason from the "
-                         "table.")
+            lines.append(self.phrasing.no_knowledge)
         record = [text for tag, text in self.public_events
                   if include_speech or tag == "event"]
         if record:
@@ -464,11 +471,7 @@ class ChangelingReferee:
                     f"Keep `say` under {MAX_UTTERANCE_CHARS} characters.")
         if self.phase is Phase.VOTE:
             legal = ", ".join(str(s) for s in self.legal_votes(seat))
-            return ("Point at one seat. Everyone points at once, and the seat with "
-                    "the most fingers is accused - if it has more than one. A vote "
-                    "where no seat draws two accuses nobody. Reply as one JSON object: "
-                    '{"think": "your private reasoning", "vote": <seat number>}. '
-                    f"Choose from: {legal}.")
+            return self.phrasing.ask_vote.format(legal=legal)
         raise IllegalAction(f"nothing to ask in phase {self.phase.value}")
 
     def prompt_for(self, seat: int, include_speech: bool = True) -> str:
@@ -602,8 +605,7 @@ class ChangelingReferee:
             ("event", ("Accused: " + ", ".join(f"seat {s}" for s in self.accused)
                        + (" (tied, so all of them)" if len(self.accused) > 1
                           else ""))
-                      if self.accused else
-                      "Accused: nobody (no seat drew more than one vote)"))
+                      if self.accused else self.phrasing.accused_none))
 
         caught = [s for s in self.accused if self.holds(s).side is Side.PACK]
         wolves_seated = any(self.holds(s).side is Side.PACK for s in range(self.n))

@@ -41,7 +41,12 @@ def parse_action(reply: str, ref: ChangelingReferee, seat: int) -> dict:
     ``think`` is kept for the referee-side log and reaches no channel a seat can
     read. Only ``say`` is published.
     """
-    obj = read_reply(reply, ACTION_KEYS)
+    # The shared parser's complaints are model-facing too: the retry loop feeds
+    # one straight back into the next prompt. So they follow `--phrasing` like
+    # every other steering string, and the four games that pass no table keep
+    # `core.replies`' own default.
+    obj = read_reply(reply, ACTION_KEYS,
+                     complaints=ref.phrasing.complaints)
     out = {"think": str(obj.get("think", ""))[:400]}
     if ref.phase is Phase.DISCUSS:
         if "say" not in obj:
@@ -49,15 +54,20 @@ def parse_action(reply: str, ref: ChangelingReferee, seat: int) -> dict:
             # the idle action would launder a parse failure into a legal move and
             # out of the fallback count, which is the one number every other
             # number in this repo ships beside.
-            raise ParseError('missing "say"')
+            raise ParseError(ref.phrasing.missing_say)
         said = " ".join(str(obj["say"]).split())
         if not said and ref.turn_mode != TURNS_RANDOM_ACTIVE:
-            raise ParseError('missing "say" (an empty utterance is not a move)')
+            # An EMPTY string is the listen action under random-active turns and
+            # a malformed reply otherwise. Both refusals read the phrasing table
+            # rather than a literal, so the as-is arm keeps the bytes every
+            # recorded changeling run was played on.
+            raise ParseError(ref.phrasing.missing_say)
         out["say"] = said
     elif ref.phase is Phase.VOTE:
         if "vote" not in obj:
-            raise ParseError('missing "vote"')
-        out["vote"] = parse_index(obj["vote"], ref.n, noun="seat")
+            raise ParseError(ref.phrasing.missing_vote)
+        out["vote"] = parse_index(obj["vote"], ref.n, noun="seat",
+                                  complaints=ref.phrasing.complaints)
     else:
         raise ParseError(f"nothing to parse in phase {ref.phase.value}")
     return out
@@ -125,8 +135,8 @@ class LLMPolicy:
         complaint = ""
         for attempt in range(self.retries + 1):
             prompt = base if not complaint else (
-                f"{base}\n\nYour previous reply was refused: {complaint}\n"
-                "Answer again, correctly, as one JSON object.")
+                f"{base}\n\n"
+                + ref.phrasing.retry.format(complaint=complaint))
             try:
                 reply, served_by = self.backend.complete_meta(prompt)
                 self.upstreams[served_by] += 1
@@ -145,8 +155,8 @@ class LLMPolicy:
                 self._refused(seat, attempt, "unparsed", str(exc))
                 continue
             if ref.phase is Phase.VOTE and action["vote"] == seat:
-                complaint = (f"seat {seat} cannot point at itself; choose from "
-                             f"{ref.legal_votes(seat)}")
+                complaint = ref.phrasing.self_vote.format(
+                    seat=seat, legal=ref.legal_votes(seat))
                 self._refused(seat, attempt, "illegal", complaint)
                 continue
             return action
@@ -234,6 +244,11 @@ class GameRecord:
     winner: str | None = None
     reason: str = ""
     accused: tuple[int, ...] = ()
+    #: Which copy of the steering strings this game was played on - ``as-is`` or
+    #: ``positive``. Records written before the arm existed carry no key and were
+    #: all played ``as-is``; an instrument reading this must default, never assume
+    #: the field is present.
+    phrasing: str = "as-is"
     #: The vote rule the game was resolved under. Records without this key were
     #: played before 2026-09-02 under ``plurality`` - a flat tally accused every
     #: seat - and any instrument replaying votes must read it, never assume it.
@@ -313,8 +328,8 @@ def play_game(ref: ChangelingReferee, policies: dict[int, object],
     by default and stays that way: the property this arena exists to prove must not
     be something a caller can forget to switch on.
     """
-    rec = GameRecord(theme=ref.theme.name, uat=uat, briefing=ref.briefing,
-                     turns=ref.turn_mode)
+    rec = GameRecord(theme=ref.theme.name, phrasing=ref.phrasing.name, uat=uat,
+                     briefing=ref.briefing, turns=ref.turn_mode)
     turn = 0
     try:
         if audit:

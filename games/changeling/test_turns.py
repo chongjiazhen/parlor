@@ -17,6 +17,7 @@ import unittest
 
 from core.replies import ParseError
 from games.changeling.audit import assert_no_leak, leak_audit
+from games.changeling.phrasing import PHRASINGS
 from games.changeling.player import RandomPolicy, parse_action, play_game
 from games.changeling.referee import (TURNS_FIXED, TURNS_RANDOM_ACTIVE,
                                       ChangelingReferee, IllegalAction, Phase)
@@ -197,6 +198,43 @@ class TestTheParserFollowsTheMode(unittest.TestCase):
         ref = ref_for(5, TURNS_RANDOM_ACTIVE)
         with self.assertRaises(ParseError):
             parse_action('{"think": "x"}', ref, 0)
+
+
+class TestTheModeAndThePhrasingCompose(unittest.TestCase):
+    """The S27 merge put the turn mode and the phrasing arm on the same two
+    refusals, and neither branch had the cell where both move.
+
+    Both refusals now read ``ref.phrasing.missing_say`` rather than a literal,
+    which is what keeps the as-is arm on the bytes every recorded changeling run
+    was played on while the positive arm gets its own. The mode still decides
+    WHETHER an empty say is refused; the phrasing decides only what it says."""
+
+    def test_both_refusals_read_the_referees_table(self):
+        positive = ChangelingReferee.new(5, seed=5, phrasing=PHRASINGS["positive"])
+        with self.assertRaises(ParseError) as empty:
+            parse_action('{"think": "x", "say": ""}', positive, 0)
+        with self.assertRaises(ParseError) as absent:
+            parse_action('{"think": "x"}', positive, 0)
+        want = PHRASINGS["positive"].missing_say
+        self.assertIn(want, str(empty.exception))
+        self.assertIn(want, str(absent.exception))
+
+    def test_the_as_is_arm_keeps_the_recorded_bytes(self):
+        """The negative half - if the table were ignored and a literal used,
+        the test above could still pass on a coincidentally equal string."""
+        as_is = ref_for(5)
+        with self.assertRaises(ParseError) as caught:
+            parse_action('{"think": "x", "say": ""}', as_is, 0)
+        self.assertIn('missing "say" (an empty utterance is not a move)',
+                      str(caught.exception))
+
+    def test_listening_survives_the_positive_arm(self):
+        """The idle action is a MODE property, so swapping the phrasing must not
+        turn a listened turn back into a parse failure."""
+        ref = ChangelingReferee.new(5, seed=5, turn_mode=TURNS_RANDOM_ACTIVE,
+                                    phrasing=PHRASINGS["positive"])
+        out = parse_action('{"think": "x", "say": ""}', ref, 0)
+        self.assertEqual(out["say"], "")
 
 
 class LeaksInTheAsk(ChangelingReferee):

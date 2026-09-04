@@ -37,13 +37,15 @@ from collections import Counter
 from dataclasses import asdict
 
 from core import integrity
-from core.backends import Backend, ENDPOINTS, REGISTERS, api_key_from_env, require_key
+from core.backends import (Backend, ENDPOINTS, REGISTERS, REGISTER_SETS,
+                           api_key_from_env, require_key)
 from core.runlog import (RunState, claim_record, record_paths,
                          run_with_marker)
 from core.stats import bootstrap_ci, wilson
 from eval.gate3_bar import REFERENCE_CHANCE
 from games.changeling.player import (GameRecord, LLMPolicy, RandomPolicy,
                                      VoteRecord, play_game)
+from games.changeling.phrasing import PHRASINGS
 from games.changeling.referee import TURN_MODES, TURNS_FIXED, ChangelingReferee
 from games.changeling.roles import DEFAULT_THEME, SETUPS, THEMES
 
@@ -104,7 +106,11 @@ def build_backend(args, seed: int | None) -> Backend:
         endpoint=ENDPOINTS[args.backend],
         model=args.model,
         api_key=api_key_from_env(),
-        system_prompt=REGISTERS[args.register],
+        # The register map follows --phrasing, so one flag moves the system
+        # prompt and the referee's strings together. Picking one arm's referee
+        # text against the other's preamble would record a single name for two
+        # different games.
+        system_prompt=REGISTER_SETS[args.phrasing][args.register],
         temperature=args.temperature,
         timeout=args.timeout,
         max_tokens=args.max_tokens,
@@ -179,7 +185,8 @@ def one_game(index: int, args) -> GameRecord:
     ref = ChangelingReferee.new(args.seats, seed=seed, theme=theme,
                                 discussion_rounds=args.rounds,
                                 briefing=args.briefing,
-                                turn_mode=args.turns)
+                                turn_mode=args.turns,
+                                phrasing=PHRASINGS[args.phrasing])
     try:
         return play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
@@ -494,6 +501,14 @@ def main() -> None:
     ap.add_argument("--model", default="auto")
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--register", choices=list(REGISTERS), default="character")
+    ap.add_argument("--phrasing", choices=list(PHRASINGS), default="as-is",
+                    help="which copy of the model-facing steering strings to "
+                         "render. 'as-is' is what every recorded changeling "
+                         "number was played on and its bytes are pinned by a "
+                         "test; 'positive' is the negation pass "
+                         "(docs/model-facing-text.md). A MEASURED change, off "
+                         "by default - see "
+                         "docs/changeling-phrasing-criterion.md.")
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--temperature", type=float, default=0.8)
     ap.add_argument("--max-tokens", type=int, default=1536)

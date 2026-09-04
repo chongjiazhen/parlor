@@ -37,9 +37,34 @@ def make_args(**kw):
     base = dict(arm="random", backend=None, model="none", rounds=1, retries=0,
                 register="character", temperature=0.8, timeout=5.0,
                 max_tokens=512, theme=None, seed=1000, games=1, out=None,
-                seats=5, briefing=False, turns=TURNS_FIXED)
+                seats=5, briefing=False, turns=TURNS_FIXED, phrasing="as-is")
     base.update(kw)
     return argparse.Namespace(**base)
+
+
+class TestThePhrasingArmIsOffByDefault(unittest.TestCase):
+    """One flag has to move the referee's strings AND the system prompt, or a
+    record names one arm for two different games."""
+
+    def test_the_driver_default_is_as_is(self):
+        import argparse
+        from eval.run_changeling import main  # noqa: F401  - parser lives in main
+        self.assertEqual(make_args().phrasing, "as-is")
+
+    def test_the_register_follows_the_phrasing(self):
+        from core.backends import REGISTERS, REGISTERS_POSITIVE
+        from eval.run_changeling import build_backend
+        kw = dict(backend="local", model="m", no_thinking=False)
+        a = build_backend(make_args(**kw), 1)
+        b = build_backend(make_args(phrasing="positive", **kw), 1)
+        self.assertEqual(a.system_prompt, REGISTERS["character"])
+        self.assertEqual(b.system_prompt, REGISTERS_POSITIVE["character"])
+
+    def test_the_referee_and_the_record_follow_the_phrasing(self):
+        for want in ("as-is", "positive"):
+            with self.subTest(phrasing=want):
+                rec = one_game(0, make_args(phrasing=want, seed=3))
+                self.assertEqual(rec.phrasing, want)
 
 
 def random_records(n: int, seed: int = 1000):
