@@ -272,17 +272,12 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **`mixed-village` owes the card - its chain never fired, relaunch by hand.**
-      The chain-tail wrapper died mid-poll on 2026-09-03 without a log line;
-      forensics in `queue.local.md`, and the standing lesson is already
-      `AGENTS.md`'s judge-a-run-by-its-own-log. `mixed-pack` is READ and INFORMS
-      (`docs/measurements.md`). This arm's figure is the rung's PACK rate against
-      the rescored control - the direction the criterion says can disagree, and no
-      cross-arm claim may be made until it lands. Recipe
-      `eval/runs/changeling-mixed-village.cmd`, a byte-mirror of
-      `changeling-mixed-pack.cmd` except `--arm mixed-village`, its settings pinned
-      to the criterion 2026-09-04; the predecessor marker is already present. Read
-      both with `py -3 -m eval.mixed_verdict` once down.
+- [ ] **`mixed-village` is DOWN and UNREAD.** 200 games, 12793 s, terminal
+      2026-09-04T13:11 (`queue.local.md`). Read both arms with
+      `py -3 -m eval.mixed_verdict`: this arm's figure is the rung's PACK rate
+      against the rescored control, the direction the criterion says can
+      disagree, and **no cross-arm claim may be made until it lands**.
+      `mixed-pack` is READ and INFORMS (`docs/measurements.md`).
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
@@ -369,19 +364,28 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
       economy-compliance read, neither of which has a rubric yet. Still not
       sequenced against the Paranoia rung.
+- [ ] **The private play arm needs its own grill before a table is built.** The
+      public/private split was settled 2026-09-04 only where it touched `games/`:
+      migration means demotion that stays public and testable, the public arm is
+      feature-led by PRESENTATION rather than structure, and the direction stays
+      rung -> core while `core/` promotions are still landing. **What was never
+      interrogated is the private arm itself** - one repo or a directory under
+      `local/`, what may live there, whether a table's own code is testable at
+      all once it is untracked, and how gate #1 is evidenced for a table nobody
+      public can run. It blocked nothing this session because nothing migrated;
+      it blocks the first standing table. Entry condition: none. Done when those
+      four branches are answered or consciously deferred with reasons.
 - [ ] **A browser front-end for a human seat, phone included.** A SECOND
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
       that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
-- [ ] **One reclassification is left: belfry's FULL script.** Two landed
-      2026-09-04 - `heartbeat` and `ensemble` moved to `experiments/`, so
-      `games/` and `core/registry.py` now hold the same five names and every
-      directory in `games/` is a rung a person can sit at. Neither was a stub to
-      delete: belfry imports the heartbeat fixture, and ensemble is preserved as
-      a draft. What remains is belfry's FULL script, local-only or gone, its own
-      `RULES.md` saying compact already reaches every mechanic the rung
-      exercises - so the extra roles buy recognition surface and prompt cost.
-      Done when it sits in exactly one of the three destinations.
+- [ ] **Belfry's FULL script is the last reclassification, and it is UNBLOCKED
+      2026-09-04.** `heartbeat` and `ensemble` left `games/` the same day, so
+      `games/` and `core/registry.py` now name the same five. Belfry's own
+      `RULES.md` says COMPACT already reaches every mechanic the rung exercises,
+      so the extra roles buy recognition surface and prompt cost. It waited only
+      on a live changeling arm touching `games/belfry/`; that arm is down. Done
+      when the script is local-only or gone.
 - [ ] **`machina` is ONE of its six stories evidenced, and it is a LOCAL PLAY row
       before it is a public rung.** `docs/machina-rung.md` is the spec and
       `feature/machina` is four commits against it (~130 lines of source, 163 of
