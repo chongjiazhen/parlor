@@ -95,6 +95,15 @@ checkout the chain imports from, so "no changeling arm in flight" is met on a
 branch and the freeze binds only the MERGE. **Whether a freeze binds right now is
 `queue.local.md`**; every row below is merge-ready on its conflicts alone.
 
+**The freeze is no longer prose - ask the command**, which intersects a branch's
+diff with the live entry module's import closure:
+`py -3 scripts/merge-safety.py eval.run_changeling <branch>...`. Measured
+2026-09-04 against the live `mixed-village`: nine of the ten open branches are
+UNSAFE and only belfry's `fanout-heartbeat` is disjoint, so a run freezes very
+nearly everything and "wait for the card" is the normal state, not the cautious
+one. It reports a changed `RULES.md` inside an imported package as a runtime read
+rather than scoping it out.
+
 No head sha: a copied sha is what goes stale, and a merge takes a name.
 
 | branch | what it carries |
@@ -202,15 +211,6 @@ the one that goes stale.
       settings mismatch, and a guard that cries wolf is the belfry live1 lesson
       aimed back at itself. Done with that shape read and the pytest fixture over
       ~15 recipes.
-- [ ] **The merge freeze is prose, and the import graph is what it actually
-      means.** `queue.md` says a branch is free and a merge is not; what makes a
-      merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
-      2026-09-03 and it changed the plan - s21 touches `eval/run_changeling.py`
-      and `games/changeling/{referee,player,demo}.py`, so its merge waited and the
-      conflict work went to a worktree, where the 09-03 `durf-dungeon` merge went
-      ahead mid-chain on the same test. Nothing would have stopped a merge that
-      skipped the check. Done when the intersection of `git diff --name-only
-      main...<branch>` with the live arm's import graph is a command, not a habit.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records
