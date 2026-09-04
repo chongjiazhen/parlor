@@ -549,3 +549,32 @@ class TestTheMixedArmsSeatTheRungAgainstTheModel(unittest.TestCase):
                 self.assertEqual(len(fh.read().splitlines()), 1,
                                  "the second run stacked its games onto the "
                                  "first, which is the whole failure")
+
+
+class TestThePackReferencePrintsOnlyForItsOwnMeasurement(unittest.TestCase):
+    """`docs/changeling-kindred-criterion.md`: the 60.49% pack-take reference is
+    SETUP_5's figure under the pre-`plurality-min2` vote rule, and both deck
+    criteria say it is not to be read against a run. Every record this runner
+    produces carries `vote_rule="plurality-min2"` (`games/changeling/player.py`,
+    no CLI knob), which never matches the rule the reference was measured under
+    - so the number must not print for any deck under this code, only a
+    labelled absence naming why."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.s5 = score(random_records(20, seed=2000), seats=5)
+
+    def test_seven_seat_deck_gets_no_number_and_says_so(self):
+        s7 = dict(self.s5)
+        s7["seats"] = 7
+        text = report(s7, make_args(seats=7), 1.0)
+        self.assertNotIn("60.49%", text)
+        self.assertIn("no pack reference measured for this deck", text)
+
+    def test_five_seat_deck_under_the_current_rule_also_gets_no_number(self):
+        """SETUP_5 is the deck the reference was measured on, but under the OLD
+        `plurality` rule - the current runner always plays `plurality-min2`, so
+        even the five-seat report must not print the stale number."""
+        text = report(self.s5, make_args(seats=5), 1.0)
+        self.assertNotIn("60.49%", text)
+        self.assertIn("unmeasured under the current vote rule", text)
