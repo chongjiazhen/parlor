@@ -1304,13 +1304,16 @@ What this does NOT show: anything about a model. The arm that puts this rung at 
 table with LLM seats is the queue's "seat the heuristic against the MODEL" row
 and is GPU work. The rung is a denominator, not a player.
 
-## changeling mixed cells - the rung against a LIVE pack, INFORMS, READ 2026-09-03
+## changeling mixed cells - the rung against a LIVE opponent, the PAIR, READ 2026-09-03 and 2026-09-04
 
-One arm of the two `docs/changeling-mixed-criterion.md` names. `mixed-pack`
-seats the model on the PACK by dawn truth and the hand-written rung on the
-village, so the rung's figure is the village win rate. `mixed-village` was NOT
-queued and never ran - a missing arm is a lost pair, not half a result, and no
-cross-arm claim is made below.
+Both arms `docs/changeling-mixed-criterion.md` names, read with one tool,
+`py -3 -m eval.mixed_verdict`. Each seats one side live by dawn truth and the
+hand-written rung on the other, so the rung's figure is that side's win rate:
+`mixed-pack` puts the model on the PACK and the rung on the village,
+`mixed-village` the reverse. **`mixed-pack` INFORMS, `mixed-village` is NOT
+SHOWN**, and the criterion pre-committed that the two could disagree. The pair
+being complete is what makes the cross-arm claim at the end of this section
+legal; it was NOT legal while `mixed-village` was outstanding.
 
 Record `eval/records/cl-mixed-pack.json`, 200 games on seeds 5000..5199, 196
 scored, 5162 s (1.43 h) on `qwen36-35b-a3b-iq3` at 100% served. Read with
@@ -1374,7 +1377,52 @@ against a random control), so the read it would have bought is one no earlier
 record could offer.
 
 Gate #3's reference bar is 35.84% and this file makes no gate #3 call - the
-criterion did not name one. Nothing here is a statement about `mixed-village`.
+criterion did not name one.
+
+### `mixed-village` - the rung on the PACK, NOT SHOWN, read 2026-09-04
+
+Record `eval/records/cl-mixed-village.json`, 200 games on the same seeds
+5000..5199, 196 scored, 12793 s (3.55 h) on `qwen36-35b-a3b-iq3` at 100% served
+(2275 calls, one upstream). The record's own `args` pin against the criterion's
+§Settings and match. This is the expensive arm - three live seats to
+`mixed-pack`'s two, 2.5x the wall clock for the same 200 games.
+
+**Voids first, live side's own rate.** Village seats **6/2100 = 0.29%** against
+the 10% bar; run level 0.20% gates nothing. Recovered 5.10%, under the 25% flag.
+196 scored against the 150 floor. Nothing voids.
+
+| the rung's PACK win rate, 196 scored games | rate | Wilson 95% |
+|---|---|---|
+| against LIVE village seats | **97/196 = 49.49%** | [42.57%, 56.43%] |
+| against its own twin, `cl-heuristic` first 200 | 107/196 = 54.59% | [47.60%, 61.41%] |
+| published at 1000 games - the wider reference, never the pair | 56.09% | - |
+
+**Difference -5.10%, Newcombe 95% [-14.82%, +4.75%] - includes zero, so NOT
+SHOWN.** §Power said this pair can settle a gap of ten points or more and cannot
+settle a smaller one, and -5.10% is inside that band: the honest statement is
+that the arm did not resolve, NOT that the two are equal. No second pair chases
+it. The tier census is not payable here either, for the same reason recorded
+above.
+
+### The cross-arm claim, legal only now that both arms landed
+
+Replacing the rung with a live model **on the pack costs the pack 20.92 points
+of win rate; on the village it buys the village nothing measurable.** Same game,
+same seeds, same model, same settings, one variable moved from side to side.
+
+Read the direction carefully, because the arm's own framing hides it. Each arm
+reports the RUNG's rate, so `mixed-pack`'s +20.92% for the rung is the same
+number as the live model underperforming the hand-written pack it replaced. The
+asymmetry is therefore about the model, not the ladder: **this model is a worse
+pack than a hand-written heuristic, and a par village.** The deceptive role is
+where it falls behind.
+
+That is gate #3-adjacent evidence and **this file makes no gate #3 call on it** -
+the criterion named none, and a claim about deception capability from an arm
+written to price a heuristic's silence artifact would be a bar added after the
+fact. What it does license is a target: the pack side is where a changeling arm
+has room to move, and an arm that improves it has a 20.92-point hole to close
+against a control that already exists.
 
 ## changeling partner protection - the pre-registered replication is NOT SHOWN, READ 2026-09-04
 

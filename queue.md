@@ -98,7 +98,7 @@ branch and the freeze binds only the MERGE. **Whether a freeze binds right now i
 **The freeze is no longer prose - ask the command**, which intersects a branch's
 diff with the live entry module's import closure:
 `py -3 scripts/merge-safety.py eval.run_changeling <branch>...`. Measured
-2026-09-04 against the live `mixed-village`: nine of the ten open branches are
+2026-09-04 against `mixed-village` while it was live: nine of the ten branches were
 UNSAFE and only belfry's `fanout-heartbeat` was disjoint - since MERGED on that
 reading - so a run freezes very nearly everything and "wait for the card" is the
 normal state rather than the cautious one. It reports a changed `RULES.md` inside
@@ -131,7 +131,8 @@ briefing, partner (~12 h). **Partner is RUN and READ 2026-09-04 - NOT SHOWN**
 (`docs/measurements.md`), so the honesty debt of the two unadjusted free reads is
 paid and its criterion pre-committed that no second arm chases it. **Briefing is
 MERGED 2026-09-04** (suite 1836 passed, 5 skipped, 644 subtests in this tree) and
-now owes only the card; `mixed-village` owes the card its chain never gave it.
+now owes only the card. **`mixed-village` is RUN and READ 2026-09-04 - NOT
+SHOWN**, closing the mixed pair (`docs/measurements.md`).
 
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
@@ -272,12 +273,13 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **`mixed-village` is DOWN and UNREAD.** 200 games, 12793 s, terminal
-      2026-09-04T13:11 (`queue.local.md`). Read both arms with
-      `py -3 -m eval.mixed_verdict`: this arm's figure is the rung's PACK rate
-      against the rescored control, the direction the criterion says can
-      disagree, and **no cross-arm claim may be made until it lands**.
-      `mixed-pack` is READ and INFORMS (`docs/measurements.md`).
+- [ ] **The pack side is where a changeling arm has room to move.** The closed
+      mixed pair measures a live model 20.92 points WORSE than the hand-written
+      pack it replaced, and par on the village (`docs/measurements.md`
+      §changeling mixed cells). The control exists and the hole is stated, so an
+      arm aimed at pack play has its comparison already recorded. **No gate #3
+      claim rides on this** - the criterion named no bar and one may not be added
+      now.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
