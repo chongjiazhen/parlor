@@ -847,3 +847,55 @@ rung's tests keep running - `experiments/heartbeat` proves that.
 minimality would dress a nowhere-else-to-put-it as a principle, and the next rung
 would claim it. A reader applying the test and reaching demotion has read the
 test correctly; this section is the answer, not a hole in it.
+
+## Belfry's FULL script stays; the row that would have cut it was wrong, 2026-09-04
+
+The last of the three reclassifications, and it does not land. The queue row read
+"belfry's own `RULES.md` says COMPACT already reaches every mechanic the rung
+exercises, so the extra roles buy recognition surface and prompt cost. Done when
+the script is local-only or gone." Every clause of that is checkable and two of
+them are false.
+
+**COMPACT does not reach every mechanic.** It reaches nearly all of them, and
+`RULES.md` said "every" from `7962dd4` (2026-08-28) until today. The public day
+action anybody may claim is the `duelist`, which is full-only, and nothing on the
+compact script replaces it. The sentence was the row's whole evidentiary basis and
+nobody had read it against `roles.py`, where the same claim sat in a comment that
+also miscounted the script as ten roles.
+
+**And the extra roles are not content volume - they are the only script two table
+sizes have.** Eleven and twelve seats each take seven townsfolk, which is every
+townsfolk `COMPACT` holds, so the deluded seat has no spare role to believe it
+holds and `deal` refuses with `BadSetup`. Measured on seeds 0-19: ten seats deals
+20/20, eleven 9/20, twelve 0/20. Gate #1's every-size sweep,
+`test_a_full_game_of_every_size_leaks_nothing`, therefore covers the two largest
+tables on the full script alone - and twelve seats is where a leak has the most
+seats to leak between. Cutting FULL would have cut that coverage silently, because
+the sweep loops over the scripts it is given.
+
+**The prompt-cost clause is empty too.** Every belfry recipe in the tree passes
+`--script compact` - live1, live2, both adjudicator recipes - so FULL rides in no
+payload of any recorded or planned arm. Its only cost is maintenance.
+
+**What it would also have orphaned.** The 2026-09-02 random control is 1000 games
+per script (compact 472/528, full 484/516) and the headline **good 47.80%**
+[45.62%, 49.99%] pools both halves; a 5-seat model run is read against that line.
+`docs/measurements.md` separately carries a 10-seat full-script figure. Neither
+number could be recomputed from a tree without the script.
+
+**The invariant that motivated the row is untouched.** Belfry earns its `games/`
+slot on the discretionary adjudicator - one named executable risk to referee
+judgment, measured and read - not on its role list. The full script is capacity
+under that claim, not the claim, so the branding litmus does not reach it. What
+the litmus does reach is unchanged: the keys stay functional, and the source's
+names stay out of the tree.
+
+**The guarantee moved out of prose.**
+`test_every_published_table_size_is_dealable_by_some_script` fails, naming the
+sizes that lost their script, if `FULL` leaves `SCRIPTS`. Mutation-checked by
+removing it: red on eleven and twelve, green restored. A later pass proposing
+this reclassification now meets a red test instead of a paragraph, which is what
+the last two passes lacked.
+
+Not measured: whether the `duelist` mechanic is worth anything to a model, which
+is the only reading that would justify a compact script that reaches it.

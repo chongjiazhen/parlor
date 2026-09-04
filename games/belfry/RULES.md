@@ -105,10 +105,26 @@ role to a minion).
 
 ### Two scripts, and the second one is a budget
 
-`FULL` is all 22 roles. `COMPACT` is 12, chosen so every mechanic this rung exists
-to exercise is still reachable: information that can be false, a seat wrong about
-itself, protection, a public day action anybody may claim, an execution the good
-side must not make, and a demon that survives its own death.
+`FULL` is all 22 roles. `COMPACT` is 12, chosen so that nearly every mechanic this
+rung exists to exercise is still reachable: information that can be false, a seat
+wrong about itself, protection, an execution the good side must not make, and a
+demon that survives its own death.
+
+**Two things it does not reach, corrected 2026-09-04** - this section read "every
+mechanic" from `7962dd4` until then, and a queue row proposing to reclassify the
+full script out of `games/` rested on that sentence alone.
+
+* **The public day action anybody may claim.** That is the `duelist`, and it is
+  full-only. Nothing on the compact script replaces it.
+* **Eleven and twelve seats.** Both take seven townsfolk, which is every
+  townsfolk `COMPACT` has, so the deluded seat has no spare role to believe in
+  and `deal` refuses with `BadSetup`. Measured, seeds 0-19: ten seats deals 20/20,
+  eleven deals 9/20, twelve deals 0/20. So those two sizes are the full script or
+  they are nothing, and gate #1's every-size sweep
+  (`test_a_full_game_of_every_size_leaks_nothing`) reaches them on it alone.
+
+`test_every_published_table_size_is_dealable_by_some_script` is what holds that,
+so the next reclassification pass meets a red test rather than this paragraph.
 
 This is the repo's payload-budget invariant in its sharpest form. The script is the
 largest item in every seat's context and it is paid on **every call of every seat

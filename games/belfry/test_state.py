@@ -11,8 +11,8 @@ from __future__ import annotations
 import random
 import unittest
 
-from games.belfry.roles import (COMPACT, DISTRIBUTION, FULL, ROLES, Align,
-                                Team)
+from games.belfry.roles import (COMPACT, DISTRIBUTION, FULL, ROLES, SCRIPTS,
+                                Align, Team)
 from games.belfry.state import BadSetup, deal
 
 
@@ -55,6 +55,28 @@ class TestProportions(unittest.TestCase):
     def test_a_script_too_thin_for_the_table_is_refused_at_the_door(self):
         with self.assertRaises(BadSetup):
             deal(12, COMPACT, random.Random(0))
+
+    def test_every_published_table_size_is_dealable_by_some_script(self):
+        """A size this rung publishes proportions for must have a script.
+
+        This is what stops the full script being reclassified out of `games/`
+        on the argument that the compact one already reaches every mechanic.
+        It does, up to ten seats; above that the deluded seat has no spare
+        townsfolk role left and `deal` refuses, so eleven and twelve are FULL
+        or they are nothing - and gate #1's own every-size sweep covers those
+        two sizes on the full script alone. Delete `FULL` and this goes red
+        naming the sizes that lost their script, which an argument in a queue
+        row cannot do.
+        """
+        for n in DISTRIBUTION:
+            dealt_by = []
+            for script in SCRIPTS.values():
+                try:
+                    deal(n, script, random.Random(0))
+                except BadSetup:
+                    continue
+                dealt_by.append(script.name)
+            self.assertTrue(dealt_by, f"{n} seats has no script that deals it")
 
 
 class TestTheDeludedSeat(unittest.TestCase):

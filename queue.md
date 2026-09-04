@@ -360,13 +360,6 @@ gate #1 and machina. What remains is engine work a table depends on, not play.
       referee state into widgets** - a second channel the audit does not see.
       Per-connection channels also lift the one-seat cap a terminal forces, which
       needs a real seat-binding guard. Argument: `docs/open-arms.md` 2026-09-03.
-- [ ] **Belfry's FULL script is the last reclassification, and it is UNBLOCKED
-      2026-09-04.** `heartbeat` and `ensemble` left `games/` the same day, so
-      `games/` and `core/registry.py` now name the same five. Belfry's own
-      `RULES.md` says COMPACT already reaches every mechanic the rung exercises,
-      so the extra roles buy recognition surface and prompt cost. It waited only
-      on a live changeling arm touching `games/belfry/`; that arm is down. Done
-      when the script is local-only or gone.
 - [ ] **Obtain the paywalled theory chapter before publishing anything about gate
       #1** - the one result that could bound gate #1's shape, and two published
       hybrids are in the same debt (`docs/open-arms.md`). **No public claim about

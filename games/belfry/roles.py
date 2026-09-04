@@ -224,11 +224,23 @@ class Script:
 
 FULL = Script("full", ALL_ROLES)
 
-#: Ten roles, chosen so that every mechanic this rung exists to exercise is still
-#: reachable: information that can be false (`gauge`, `diviner`), a seat wrong
-#: about itself (`sot`), protection against the kill (`warder`), a public day
-#: action anybody may claim (`duelist`), an execution the good side must not make
-#: (`pilgrim`), and a demon that survives its own death (`heir`).
+#: Twelve roles, chosen so that every mechanic this rung exists to exercise is
+#: still reachable: information that can be false (`gauge`, `diviner`), a seat
+#: wrong about itself (`sot`), protection against the kill (`warder`), an
+#: execution the good side must not make (`pilgrim`), and a demon that survives
+#: its own death (`heir`).
+#:
+#: It does NOT reach the public day action anybody may claim - the `duelist` is
+#: full-only, and this comment claimed it from 7962dd4 (2026-08-28) until
+#: 2026-09-04.
+#:
+#: **Reachable up to ten seats, and not above.** At eleven and twelve the table
+#: takes seven townsfolk, which is every townsfolk this script has, so the
+#: deluded seat has no spare role to believe in and `deal` refuses (`state.py`).
+#: That is why FULL cannot be reclassified out of `games/` as content volume:
+#: it is the only script those two sizes have, and gate #1's every-size sweep
+#: covers them on it alone. Pinned by
+#: `test_every_published_table_size_is_dealable_by_some_script`.
 COMPACT = Script("compact", (
     WITNESS, GAUGE, DIVINER, WARDER, BULWARK, MORTICIAN, ORACLE,
     SOT, PILGRIM,
