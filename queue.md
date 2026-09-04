@@ -92,17 +92,18 @@ either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
 
 **One list, and rows do not carry branch names.** A branch cannot touch the
 checkout the chain imports from, so "no changeling arm in flight" is met on a
-branch and the freeze binds only the MERGE. **Whether a freeze binds right now is
-`queue.local.md`**; every row below is merge-ready on its conflicts alone.
+branch and the freeze binds only the MERGE. Every row below is merge-ready on
+its conflicts alone.
 
 **The freeze is no longer prose - ask the command**, which intersects a branch's
-diff with the live entry module's import closure:
-`py -3 scripts/merge-safety.py eval.run_changeling <branch>...`. Measured
-2026-09-04 against `mixed-village` while it was live: nine of the ten branches were
-UNSAFE and only belfry's `fanout-heartbeat` was disjoint - since MERGED on that
-reading - so a run freezes very nearly everything and "wait for the card" is the
-normal state rather than the cautious one. It reports a changed `RULES.md` inside
-an imported package as a runtime read rather than scoping it out.
+diff with the entry module's import closure:
+`py -3 scripts/merge-safety.py eval.run_changeling <branch>...`. **UNSAFE means
+"would collide with a changeling arm", not "is frozen now", which is
+`queue.local.md`** - no liveness argument; re-run 2026-09-04 with nothing in
+flight, byte-identical answer. Nine of the ten branches collide; only belfry's
+`fanout-heartbeat` was disjoint, since MERGED on that reading - an arm freezes
+nearly everything, so "wait for the card" is normal, not cautious. A
+changed `RULES.md` inside an imported package is reported as a runtime read.
 
 No head sha: a copied sha is what goes stale, and a merge takes a name.
 
