@@ -658,6 +658,49 @@ THEME_GREEK_NAMED = Theme(
     centre_name=THEME_GREEK.centre_name,
 )
 
+# Second folk-family arm, requested as public legibility rather than a new
+# design question - `folk` already answers "is this a copy of a branded
+# product" with public-domain Mafia/Werewolf vocabulary (Davidoff, 1986), and
+# the concern behind this row is the same one that removed the Six-Eared
+# Macaque and `Yellow Turban` above: a specific NAMED SET of one-night roles
+# (the swap-and-look role, the blind-swap-two role, the self-swap-blind role,
+# the wakes-last role) is the one-night-werewolf variant published by Bezier
+# Games as *One Night Ultimate Werewolf* (2014), and that game's own coined
+# terms for those roles - not "werewolf", which predates it, but the specific
+# quartet naming its swap mechanics - are that publisher's, not public-domain
+# folklore. Naming this skin's cards after that exact quartet would be the
+# thing this rung's own invariant forbids ("No published game's role names ...
+# appear here"), so this skin keeps the genre and the register - rural,
+# lunar, a hamlet instead of a village - and reaches for words that describe
+# what each card DOES rather than the branded name for doing it. `folk` is
+# the vocabulary-legible floor; this is a second point in the same family, at
+# a darker register, exactly as `folk-inv` sits beside `folk` on valence.
+#
+# 59 words / 313 chars against `folk`'s 59 / 316, inside this skin set's
+# 308-316 char band.
+THEME_WEREWOLF = Theme(
+    "werewolf",
+    {Side.VILLAGE: "The Hamlet", Side.PACK: "The Wolves"},
+    {
+        "pack": "Werewolf",
+        "spotter": "Tracker",       # reads one set of prints, or two in the den
+        "swapper": "Prowler",       # takes what it finds and leaves its own scent
+        "switcher": "Shifter",      # changes what two others are, and tells neither
+        "deceived": "Moonstruck",   # traded blind under the moon, and does not know for what
+        "bystander": "Farmhand",
+        "kindred": "Littermates",
+        "waker": "Cockcrow",        # checks its own coat at the one moment it is told to
+    },
+    blurb=(
+        "A hamlet at the wood's edge, one night a month, when the wolves walk "
+        "upright. Littermates know each other by scent; nobody else is sure of "
+        "anything, and some of what you believe about yourself changed while you "
+        "slept. At dawn the hamlet names one shape, once. Name a wolf and it "
+        "lives. Name wrong and it does not."
+    ),
+    centre_name="den",
+)
+
 DEFAULT_THEME = THEME_FOLK
 
 #: Ordering is a decision, not a tidy-up, so it is stated here: **`plain` first**,
@@ -676,4 +719,5 @@ THEMES: dict[str, Theme] = {
     "investiture": THEME_INVESTITURE,      # 2026-08-27
     "masquerade": THEME_MASQUERADE,        # 2026-08-27
     "journey": THEME_JOURNEY,              # 2026-08-27
+    "werewolf": THEME_WEREWOLF,            # 2026-09-02, second folk-family arm
 }

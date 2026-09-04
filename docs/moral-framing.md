@@ -229,6 +229,14 @@ weight from an act with no consequences, which one neutral arm alone would
 confound. The full set is floor / polarity / inverted polarity / vocabulary
 control / two neutrals, all at 59 words and 308-316 chars, all unrun.
 
+**`werewolf`, added 2026-09-02, is not an arm on this ladder.** It answers a
+different question - public legibility of the shipped default, not moral framing
+- and moves no variable this doc measures: same polarity as `folk`, same
+register family, no new claim about morality. It exists so the readme-level
+"what is this" reads in words a stranger already knows, the way `folk` itself
+does. 59 words, 313 chars, inside this set's band by construction rather than by
+design intent.
+
 **Greek myth as the vocabulary control.** Register-distant from `folk` in the way
 a fae skin (rejected above) was not, and the fit is structural rather than
 decorative: metamorphosis and theoxeny are the corpus, gods walk unrecognised,
