@@ -51,6 +51,7 @@ from core.runlog import (RunState, claim_record, record_paths,
                          run_with_marker)
 from core.stats import wilson
 from games.belfry.adjudicator import HERRING_STEER_RULE, ModelAdjudicator
+from games.belfry.heartbeat import DEFAULT_BEATS, BelfryHeartbeat
 from games.belfry.player import GameRecord, LLMPolicy, RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import DEFAULT_SCRIPT, DISTRIBUTION, SCRIPTS, Align
@@ -158,17 +159,23 @@ def one_game(index: int, args) -> GameRecord:
     rng = integrity.policy_rng(seed)
     script = SCRIPTS[args.script] if args.script else DEFAULT_SCRIPT
     adjudicator = build_adjudicator(args, seed)
+    heartbeat = (BelfryHeartbeat.build(seed, args.seats, max_days=args.max_days,
+                                       beats=args.heartbeat_beats)
+                 if getattr(args, "heartbeat", False) else None)
     ref = BelfryReferee.new(args.seats, seed=seed, script=script,
                             discussion_rounds=args.rounds,
-                            max_days=args.max_days, adjudicator=adjudicator)
+                            max_days=args.max_days, adjudicator=adjudicator,
+                            heartbeat=heartbeat)
     try:
-        return play_game(ref, build_policies(ref, args, rng, seed))
+        rec = play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
         raise                                # a leak is never scoreable
     except Exception as exc:                 # one bad game must not kill a run
         rec = GameRecord(script=script.name, seats=args.seats)
         rec.error = f"{type(exc).__name__}: {exc}"
-        return rec
+    if heartbeat is not None:
+        rec.heartbeat = heartbeat.report()
+    return rec
 
 
 # ---- scoring --------------------------------------------------------------
@@ -278,6 +285,33 @@ def score(records: list[GameRecord]) -> dict:
         "model_votes": len(votes),
         "integrity": integrity.summarise(played),
         "adjudicator_integrity": _adjudicator_integrity(played),
+        "heartbeat_integrity": _heartbeat_integrity(played),
+    }
+
+
+def _heartbeat_integrity(records: list[GameRecord]) -> dict | None:
+    """The faction's decisions, in their OWN denominator.
+
+    Kept apart from ``integrity.summarise`` on purpose: the gates measure seats,
+    a faction holds none, and folding its calls into the run-wide rate would
+    change what every earlier belfry number meant. It is still REPORTED - a
+    faction that fell back to random changed the world the seats then reasoned
+    about, and hiding that is the random-policy-wearing-a-model's-name failure
+    relocated off the map.
+    """
+    rows = [row for r in records
+            if (row := getattr(r, "heartbeat", None)) is not None]
+    if not rows:
+        return None
+    decisions = sum(row["decisions"] for row in rows)
+    fallbacks = sum(row["fallbacks"] for row in rows)
+    return {
+        "games": len(rows),
+        "decisions": decisions,
+        "fallbacks": fallbacks,
+        "fallback_rate": fallbacks / decisions if decisions else 0.0,
+        "scheduled": sum(row["scheduled"] for row in rows),
+        "taken": sum(row["taken"] for row in rows),
     }
 
 
@@ -347,6 +381,18 @@ def report(s: dict, args, elapsed: float) -> str:
                 f"{adjudicator_integrity['fallback_rate']:.2%} is above the "
                 f"{integrity.VOID_BAR:.0%} ceiling, so the game outcomes below "
                 "do not measure the model's setup discretion.")
+    heartbeat_integrity = s["heartbeat_integrity"]
+    if heartbeat_integrity is not None:
+        out.append(
+            "faction heartbeat  "
+            f"{heartbeat_integrity['taken']} tick(s) taken of "
+            f"{heartbeat_integrity['scheduled']} scheduled over "
+            f"{heartbeat_integrity['games']} game(s) - a game that ends before "
+            "the day bound never reaches its later beats, "
+            f"{heartbeat_integrity['fallbacks']}/"
+            f"{heartbeat_integrity['decisions']} fell back "
+            f"({heartbeat_integrity['fallback_rate']:.2%}) - its own denominator, "
+            "beside the seat figures and never inside them")
     vote_rate = s["vote_fallback_rate"]
     if vote_rate is not None:
         out.append(f"  vote fallback {s['vote_fallbacks']}/{s['vote_decisions']} "
@@ -469,11 +515,24 @@ def main() -> None:
                          "setup choice, and offer the menu in a seeded order. "
                          "Off by default: the blind ask is what S8b measured, and "
                          "this is a separate arm with its own criterion.")
+    ap.add_argument("--heartbeat", action="store_true",
+                    help="seat the off-map faction (games/belfry/heartbeat.py). "
+                         "OFF by default: a faction lays facts no seat's role "
+                         "explains, so a run with one is a separate arm and no "
+                         "belfry number recorded without it is comparable.")
+    ap.add_argument("--heartbeat-beats", type=int, default=DEFAULT_BEATS,
+                    help="how many nights of the run the faction acts on; the "
+                         "nights themselves derive from the game seed")
     ap.add_argument("--out", help="write the full per-game records here as JSON")
     args = ap.parse_args()
 
     if args.arm != "random" and not args.backend:
         raise SystemExit(f"--arm {args.arm} needs --backend")
+    if args.heartbeat_beats != DEFAULT_BEATS and not args.heartbeat:
+        raise SystemExit("--heartbeat-beats needs --heartbeat")
+    if args.heartbeat and args.heartbeat_beats > args.max_days:
+        raise SystemExit(f"--heartbeat-beats {args.heartbeat_beats} does not fit "
+                         f"in a {args.max_days}-day bound")
     if args.adjudicator_steer and args.adjudicator != "model":
         raise SystemExit("--adjudicator-steer needs --adjudicator model")
     if args.adjudicator_night and args.adjudicator != "model":

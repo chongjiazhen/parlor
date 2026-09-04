@@ -148,3 +148,54 @@ before a thing moves. It stays in `games/durf/` until a slice moves it; nothing 
 touched. Faction decisions are tallied in their own `Tally` with their own
 fallback rate; there are no seat decisions in the spike to pool them with, and
 the seam (`Policy.choose`) is where a model policy would drop in.
+
+## Seated in belfry 2026-09-02 - what seating found
+
+`games/belfry/heartbeat.py` seats the S24 spike at belfry's table, off by default
+behind `--heartbeat` on `eval/run_belfry.py`. The world, the three action types,
+the propagation rule, the schedule and the snapshot audit are imported from
+`games/heartbeat/heartbeat.py` unchanged; the seating adds no model of a faction.
+
+**Nothing in belfry's `Phase` handling had to move.** The warning in
+`docs/action-channel.md` was about the three shapes that harden early, and the
+faction needs none of them: it takes no seat decision, so the referee's cursor
+never learns it exists. A tick is a NIGHT, taken at the top of `_begin_night`
+before any role wakes, and that is the whole hook - two lines, no phase, no turn
+kind, no `ACTION_KEYS` entry.
+
+Four things seating settled that the spike could not:
+
+- **Gate #1 covers the new bytes by construction.** `BelfryReferee.audit` grows a
+  third scan over the faction's facts, so `play_game`'s default-on audit raises on
+  a leaky faction render exactly as it does on a leaked role. The leaked thing is
+  not a seat, so the scan reports seat `-1` and names the fact in the term slot.
+  Measured: the leaky renderer is caught, the honest one is clean over 50 seeds
+  played to the end, and removing the scan kills the named test.
+- **The render and its snapshot are one object, and the audit grades that pair.**
+  `seat_lines` builds the pair and `audit` reads the one just built, so the
+  recompute failure cannot arise inside a turn. It is still reachable from
+  outside - anything re-scoring a stored render - which is what
+  `heartbeat_render` exists for and what the guard test drives: a leaky render
+  built on night 1, the world moved on a night, the fact published by another
+  route, snapshot audit dirty and recompute clean. Mutating `leaks` to recompute
+  kills that test.
+- **The flag off is byte-identical, and it is pinned rather than argued.** The
+  digest in `games/belfry/test_heartbeat.py` covers every prompt sent over 20
+  seeded games plus each game's outcome, referee log and public channel, and it
+  was computed on the commit BEFORE the faction existed. A digest taken after the
+  change would have pinned the change to itself.
+- **Scheduled and taken come apart, and both ship.** The schedule runs to the day
+  bound; a 5-seat game ends in about three days, so most beats are never reached.
+  Reading only the taken count would let a run whose faction never acted pass as a
+  faction arm.
+
+Two things seating did NOT settle, and neither is a blocker:
+
+- **The rumour rule is linear, and belfry's table is a circle.** A seat's place is
+  its seat number, and the spike reaches `place +/- 1`, so seats 0 and n-1 are not
+  neighbours for rumour though they sit beside each other. Making it circular is a
+  change to a merged spike and a second variable; it is written down rather than
+  fixed quietly.
+- **No model has played against a faction.** The policy seam is `Policy.choose`
+  and the control policy is what ran. Whether an off-map actor changes how a table
+  reasons is unmeasured, and no criterion is written.

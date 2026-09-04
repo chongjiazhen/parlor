@@ -339,6 +339,12 @@ class GameRecord:
     #: Referee setup provenance, deliberately separate from player integrity.
     #: ``None`` preserves the meaning of records written before adjudication.
     adjudicator: dict | None = None
+    #: The off-map faction's own report - its schedule, its ticks per night and
+    #: its OWN fallback rate. Beside the run's figures and never inside them: the
+    #: gates measure seats, and pooling a faction's calls into the denominator
+    #: would stop every historical rate being comparable. ``None`` on every arm
+    #: without a faction, which is all of them by default.
+    heartbeat: dict | None = None
     #: Seat -> how many of the things it was told were false. Zero for every seat
     #: on a table with nothing that switches an ability off, which is what makes it
     #: readable as a check that the stratum below has a sample at all.

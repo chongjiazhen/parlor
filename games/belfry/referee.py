@@ -46,6 +46,7 @@ from enum import Enum
 
 from core.observability import Knowledge, SeatView, find_leaks
 from games.belfry import night as nightinfo
+from games.belfry.heartbeat import BelfryHeartbeat
 from games.belfry.night import Reveal
 from games.belfry.roles import (DISTRIBUTION, FIRST_NIGHT, OTHER_NIGHT,
                                 ROLES, Align, Script, Team)
@@ -166,6 +167,11 @@ class BelfryReferee:
     #: Kept past the deal for PLAY-TIME discretion (RULES §Discretion names it
     #: a variant axis). ``None`` is the seeded referee throughout.
     adjudicator: Adjudicator | None = None
+    #: The off-map faction, or ``None``. Off by default and off in every number
+    #: recorded before it existed: a faction lays facts no seat's role explains,
+    #: so a run with one is a different arm, not a better version of the same run.
+    #: `games/belfry/heartbeat.py` carries what seating it decides.
+    heartbeat: BelfryHeartbeat | None = None
     #: Every count the gauge was told, per seat, in order - truthful or not, and
     #: over which living neighbours. Referee-side and transcript-only; the
     #: night-coherence scorer reads this one field on BOTH arms.
@@ -173,6 +179,10 @@ class BelfryReferee:
     public_events: list[tuple[str, str]] = field(default_factory=list)
     referee_log: list[str] = field(default_factory=list)
 
+    #: Seat -> the faction render last BUILT for it, snapshot included. The
+    #: audit grades this pair rather than fetching entitlement again, which
+    #: is the whole finding of `docs/faction-heartbeat.md` section 1.
+    _hb_render: dict[int, object] = field(default_factory=dict)
     _turn: Turn | None = None
     _queue: list[str] = field(default_factory=list)
     _triggers: list[Turn] = field(default_factory=list)
@@ -209,11 +219,13 @@ class BelfryReferee:
     @classmethod
     def new(cls, n: int = 7, seed: int | None = None,
             script: Script = DEFAULT_SCRIPT, discussion_rounds: int = 1,
-            max_days: int = 12, adjudicator: state.Adjudicator | None = None) -> "BelfryReferee":
+            max_days: int = 12, adjudicator: state.Adjudicator | None = None,
+            heartbeat: BelfryHeartbeat | None = None) -> "BelfryReferee":
         rng = random.Random(seed)
         grim = deal(n, script, rng, adjudicator)
         ref = cls(grim=grim, rng=rng, discussion_rounds=discussion_rounds,
-                  max_days=max_days, adjudicator=adjudicator)
+                  max_days=max_days, adjudicator=adjudicator,
+                  heartbeat=heartbeat)
         ref.knowledge = {s: [] for s in range(n)}
         ref.gauge_told = {s: [] for s in range(n)}
         # A seat is entitled to its own role - except the one seat that is wrong
@@ -272,6 +284,11 @@ class BelfryReferee:
         else:
             order = [(r.other_night, r.key) for r in OTHER_NIGHT]
         self._queue = [key for _, key in sorted(order)]
+        if self.heartbeat is not None:
+            # The faction moves before any role wakes, so a fact laid tonight can
+            # reach tonight's renders. It takes no seat decision, so the cursor
+            # never learns it exists and no phase is added for it.
+            self.heartbeat.tick(self.day)
 
     def _night_step(self) -> None:
         while self._triggers:
@@ -805,6 +822,15 @@ class BelfryReferee:
             lines += [f"  night {r.night}: {r.text}" for r in mine]
         else:
             lines.append("You have been told nothing. Reason from the table.")
+        if self.heartbeat is not None:
+            # Built here and kept WITH its snapshot, because the audit below
+            # grades this exact pair. Every call rebuilds it, so the snapshot is
+            # always the one the text was written under.
+            render = self.heartbeat.render(seat, self.day)
+            self._hb_render[seat] = render
+            if render.text:
+                lines.append("Word reaching you from off the table:")
+                lines += [f"  {line}" for line in render.text.splitlines()]
         lines.append("")
         lines.append("Alive: " + ", ".join(str(s) for s in self.grim.alive_seats())
                      + ".")
@@ -1103,7 +1129,27 @@ class BelfryReferee:
                 viewer,
                 self_is_secret=True,
             )
+        if self.heartbeat is not None:
+            # The faction's bytes, against the snapshot captured when the lines
+            # above were BUILT one call ago in this method - never entitlement
+            # recomputed now. A fact can be legitimately secret at the night a
+            # render went out and legitimately public a night later, and the
+            # recomputed audit reads that real leak as clean
+            # (`docs/faction-heartbeat.md`, and the guard test that fixes it).
+            # ``-1`` is not a seat: a world fact belongs to nobody, and the term
+            # in the second slot names which fact it was.
+            leaks += [(-1, term)
+                      for _, term in self.heartbeat.leaks(self._hb_render[viewer])]
         return leaks
+
+    def heartbeat_render(self, seat: int):
+        """The faction render last BUILT for this seat, snapshot and all.
+
+        Read by tests and by anything re-scoring a record: a render is auditable
+        only against the entitlement that held when it was written, and this is
+        the only place the two are still attached to each other.
+        """
+        return self._hb_render.get(seat)
 
     def audit_all(self) -> dict[int, list[tuple[int, str]]]:
         found = {s: self.audit(s) for s in range(self.n)}
