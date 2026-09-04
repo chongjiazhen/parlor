@@ -99,10 +99,10 @@ branch and the freeze binds only the MERGE. **Whether a freeze binds right now i
 diff with the live entry module's import closure:
 `py -3 scripts/merge-safety.py eval.run_changeling <branch>...`. Measured
 2026-09-04 against the live `mixed-village`: nine of the ten open branches are
-UNSAFE and only belfry's `fanout-heartbeat` is disjoint, so a run freezes very
-nearly everything and "wait for the card" is the normal state, not the cautious
-one. It reports a changed `RULES.md` inside an imported package as a runtime read
-rather than scoping it out.
+UNSAFE and only belfry's `fanout-heartbeat` was disjoint - since MERGED on that
+reading - so a run freezes very nearly everything and "wait for the card" is the
+normal state rather than the cautious one. It reports a changed `RULES.md` inside
+an imported package as a runtime read rather than scoping it out.
 
 No head sha: a copied sha is what goes stale, and a merge takes a name.
 
@@ -113,7 +113,6 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 | `slice/fanout-s27` + `slice/fanout-s27-demo` | `--turns random-active`, arm then console |
 | `slice/fanout-simul` | `--turns simultaneous`, sits over S27 |
 | `slice/fanout-replies` | the parser's complaints - **supersedes `slice/fanout-neg`**, which it sits on |
-| `slice/fanout-heartbeat` | belfry `--heartbeat` |
 | `slice/fanout-print` | the stale pack reference prints a labelled absence |
 | `slice/fanout-wolf` | `--theme werewolf` |
 
@@ -328,10 +327,13 @@ Runs that are frozen and want card - and one that is already in the chain:
       also spent is the non-overlap: at the largest matched stratum the intervals
       touch, so an arm is the honest next move and the cheap CPU route is done.
       Not measured: any mechanism.
-- [ ] **Spike #2 heartbeat is SEATED in belfry - `--heartbeat`, off by default,
-      unmeasured.** `docs/faction-heartbeat.md` §Seated in belfry, on the branch.
-      Entry condition is the merge list. What seating found and the chain-slot
-      correction are `docs/open-arms.md` 2026-09-03.
+- [ ] **Spike #2 heartbeat is MERGED 2026-09-04 and still UNMEASURED.**
+      `--heartbeat` on belfry, off by default; `docs/faction-heartbeat.md` §Seated
+      in belfry. Merged mid-run because it is the one branch disjoint from a
+      changeling arm's import closure. What it owes is a criterion and card. The
+      review's call to move `games/heartbeat/` out of `games/` names a different
+      object. What seating found and the chain-slot correction are
+      `docs/open-arms.md` 2026-09-03.
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
 measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
