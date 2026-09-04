@@ -3,11 +3,11 @@
 The index of this directory, moved out of `queue.md` 2026-08-28. Durable material
 lives beside the code, not in the queue; `queue.md` keeps the open rows.
 
-**Flat on purpose, and the call plus its four triggers is
-`docs/decisions.md` §This directory stays flat.** One of the four - this file
-passing 150 lines - FIRED on 2026-09-02 and was answered by subtraction, because
-the growth was stale claims and an argument that belonged in `decisions.md`. If it
-fires again on live index entries, the answer is folders.
+**Flat on purpose; the call, its four triggers and their firing record are
+`docs/decisions.md` §This directory stays flat.** Two have fired and the split is
+owed, sequenced behind the merge list. **This index says what a doc IS, never
+whether its arm has run** - the readings are `docs/measurements.md`, the open
+asks `queue.md`.
 
 **Three of the files below are the queue's own drained halves** rather than design
 notes - what landed, what was measured, what was settled - and they are listed here
@@ -50,18 +50,10 @@ partly true is worse than none.
   Its kernel table is pinned to DURF 2.2 and the doc now carries the fetchable
   source URL plus the version line to check on any re-read.
 - `games/durf/fixtures/` - that rung's INSTRUMENT, labelled 2026-08-27 before any
-  model ran: 48 declarations and 12 morale events, each carrying the rule it
-  rests on. **Read its README before quoting any number from it.** Degenerate
-  baselines are **61.9% always-roll / 38.1% never-roll** over the 42 declarations
-  that admit a roll answer (54.2% / 33.3% over all 48) - the first draft's
-  "never-roll 46%" pooled the six refusal traps into the no-roll bucket and is
-  retracted there. Re-derived and source-verified the same day, which killed
-  three of the six traps: the slot costs made `d013`, `d017` and `d018`
-  satisfiable, so a model ruling them correctly would have scored a False Pass.
-  The state moved to the labels, never the reverse, and every `slots_used` is now
-  derivable from a `slot_costs` block. **The scorer landed 2026-08-28**
-  (`eval/durf_score.py`); there is still no durf engine, and nothing here needs
-  one - the fixture is 60 independent items against a fixed scenario.
+  model ran: 48 declarations and 12 morale events, each carrying the rule it rests
+  on. **Read its README before quoting any number from it.** Its degenerate
+  baselines, the first draft's retraction and the three traps that re-derivation
+  killed are `docs/durf-rung.md`; the scorer is `eval/durf_score.py`.
 - `docs/moral-framing.md` - the theme-polarity experiment, its confound, the
   verified deception/framing prior work, the name-form axis, and **§The changeling
   skin set, which owns every skin's design and sourcing rules** (moved out of this
@@ -87,57 +79,25 @@ partly true is worse than none.
   2026-09-02 when changeling built a rung.
 - `docs/scripted-rungs-cabal.md` - cabal's three scripted rungs, unmeasured; its
   §0 now points at `docs/control-ladder.md`.
-- `docs/quorum-live4-criterion.md` - **the operative quorum pre-commitment**;
-  arithmetic `eval/quorum_live1_verdict.py`. `-live1-`, `-live2-` and `-live3-`
-  stand beside it, superseded IN WRITING and unrun: each was retired before
-  launch because the instrument changed under it, never after a number landed.
-- `docs/belfry-live2-criterion.md` - **the operative belfry pre-commitment**;
-  arithmetic `eval.belfry_live1_verdict --criterion live2`. `-live1-` beside it
-  is retired on RUNNABILITY not a bar - its settings measure 58.33% fallback
-  and fire its own void. Neither is to be edited.
-- `docs/belfry-discretion-quality-criterion.md` - S23's pre-commitment, and the
-  finding that made it what it is: belfry's setup discretion has NO board-derived
-  quality ordering to grade, so what it grades is whether that discretion follows
-  a stated rule. Arithmetic `eval.belfry_steering_verdict --criterion s23`. Unrun.
-- `docs/belfry-night-coherence-criterion.md` - the first PLAY-TIME discretion
-  arm: the false count a switched-off gauge is told, chosen by the model with
-  its prior tellings in view, graded on whether the lie is held across nights.
-  Chance is exactly one half per pair. Arithmetic `eval.belfry_night_verdict`.
-- `docs/belfry-night-noprior-criterion.md` - its follow-up, the same ask with
-  `prior` withheld: grades whether the false count is a content function of the
-  board. `eval.belfry_night_verdict --criterion withheld`. READ 2026-09-02.
-- `docs/belfry-night-transcript-criterion.md` - the session-memory arm: the
-  withheld ask carrying the referee's own transcript of the game, graded
-  against both published reads. `--criterion transcript`. Frozen, unlaunched.
-- `docs/changeling-skin-pair-criterion.md` - the first GPU spend on the skin
-  set: `greek` vs `greek-named`, eight card names and nothing else, read on blind
-  villager accuracy. Direction not pre-committed. Arithmetic
-  `eval.skin_pair_verdict` (Newcombe on the difference, paired game bootstrap
-  beside it). LAUNCHED 2026-09-02.
-- `docs/changeling-rounds-pair-criterion.md` - S22: `--rounds 2` vs `--rounds 3`
-  on `folk`, same seeds as the name-form pair. Arithmetic
-  `eval.rounds_pair_verdict`, which also pins every setting to the record's own
-  `args`. READ 2026-09-03, NOT SHOWN (`docs/measurements.md`).
-- `docs/changeling-partner-criterion.md` - the pack statistic as PRIMARY at last:
-  one arm on fresh seeds 17000.., the partner vote against its own random control,
-  after two pairs moved it as a free read and neither could promote it. Arithmetic
-  `eval.partner_verdict`, recipe `eval/runs/changeling-partner-arm.cmd`, both
-  written and pinned to the file by a test. UNLAUNCHED, and it must run BEFORE
-  the source-rules merge.
-- `docs/changeling-gate2-pair-criterion.md` - gate #2 with a control at last:
-  the pack live vs the pack at random against the SAME live village, on S22's
-  two-round record plus one `--arm llm-village` arm. Arithmetic
-  `eval.gate2_pair_verdict`. UNLAUNCHED.
-- `docs/changeling-briefing-criterion.md` - S21: the ask's per-phase drip against
-  the full standing frame in every render, `--briefing` off vs on, arm 1 being
-  S22's two-round record. Arithmetic `eval.briefing_pair_verdict`. Must run
-  BEFORE the source-rules merge. UNLAUNCHED.
-- `docs/changeling-mixed-criterion.md` - the hand-written rung seated against
-  LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
-  §"changeling heuristic rung" names: a rung read against a control that cannot
-  talk is partly reading its own twin. Pairs against `cl-heuristic.json` rescored
-  on its first 200 games, so it runs BEFORE the source-rules merge. `mixed-pack`
-  READ 2026-09-03, INFORMS; `mixed-village` UNLAUNCHED.
+- **Criteria are a class, not entries.** A criterion is a frozen pre-commitment,
+  never edited, and it names its own verdict tool in its own header - so
+  `docs/<rung>-<arm>-criterion.md` IS the index, and adding one no longer touches
+  this file. That is deliberate: each new criterion editing one flat index is why
+  this file collided on seven of nine open branches. The dated reads are
+  `docs/measurements.md`; what is still owed a run is `queue.md`.
+  - **Operative per rung:** `quorum-live4`, `belfry-live2`, `changeling-waker`.
+    Superseded siblings sit beside each, retired IN WRITING before launch rather
+    than after a number landed - `quorum-live1`/`-live2`/`-live3`, and
+    `belfry-live1`, which is retired on RUNNABILITY: its settings measure 58.33%
+    fallback and fire its own void.
+  - **Outcome lives elsewhere for two:** `changeling-gate3-criterion.md` resolves
+    in `games/changeling/RULES.md` §S2 read, and `durf-gate1-criterion.md` in
+    `docs/durf-rung.md` §The campaign.
+  - **`group-sequential-criterion.md` is a TEMPLATE, not an arm** - Lan-DeMets
+    alpha spending for a criterion that may look before the end (`eval/sequential.py`).
+    No old record is re-read under it.
+  - **`changeling-kindred-criterion.md` carries a NEW baseline** (25.39% over 4000
+    random games): nothing measured on another deck transfers to `SETUP_7_KIN`.
 - `docs/player-counts.md` - supported vs best-play sizes per rung, Secret Hitler's
   native blind-evil at 7+, and why a bigger cabal table worsens the denominator.
 - **OFF-REPO, path in `CLAUDE.local.md`** - the neighbour list, the positioning
@@ -175,29 +135,16 @@ partly true is worse than none.
 - `eval/durf_camp1_verdict.py` - the DURF gate #1 criterion as arithmetic,
   written before the campaign landed and pinned by `eval/test_durf_camp1_verdict.py`
   against synthetic records, so the promise cannot drift to fit the result.
-- `docs/durf-gate1-criterion.md` - DURF's pre-commitment for the campaign that
-  replaces the voided 3/6 read: 100 sessions, the Wilson-floor-clears-50% bar and
-  the power arithmetic behind it. Written before the run; not to be edited.
-- `docs/changeling-gate3-criterion.md` - changeling's pre-commitment, verbatim and
-  not to be edited; the outcome is `games/changeling/RULES.md` §S2 read.
-- `docs/changeling-kindred-criterion.md` - the `SETUP_7_KIN` deck's
-  pre-commitment, frozen 2026-09-02, unlaunched. Carries the measured bar
-  (25.39%, 4000 random games), the power (~269 blind votes at 200 games) and the
-  exact flags; recipe `eval/runs/changeling-kindred.cmd`. A NEW baseline.
-- `docs/changeling-waker-criterion.md` - **the operative changeling
-  pre-commitment**, S18, for the `SETUP_6_WAKER` deck. Carries the measured bar
-  (30.14%), the power (~272 blind votes at 200 games) and the exact flags; recipe
-  `eval/runs/changeling-waker.cmd`. A NEW baseline - nothing on `SETUP_5`
-  transfers. Unrun.
-- `docs/group-sequential-criterion.md` - 2026-09-02, S25. A criterion template
-  that may LOOK before the end: Lan-DeMets alpha spending, OBF-type by default,
-  worked for the next changeling campaign. `eval/sequential.py`. No old record is re-read under it.
 - `docs/gate3-modelling-review.md` - the 2026-08-26 review that sharpened the old
   blind gate, closed on all six items. **Read its header before its body** - its
   line citations are stale.
 - `docs/faction-heartbeat.md` - Spike #2 scoped: the typed-fact channel, why it is
   the small version of the adjudicator's hardest part, and the one new gate #1
   failure it introduces (entitlement gains a time axis).
+- `docs/plans/` and `docs/specs/` - the only subdirectories, holding one
+  belfry-adjudicator execution plan and its design spec. **An execution plan goes
+  stale where a design spec does not**, so the plan is a candidate to leave a
+  public tree while the spec stays.
 - `docs/reproducibility.md` - two 20-game runs at one seed came back byte-identical,
   so a same-seed repeat cannot measure spread. Read before scheduling ANY run whose
   purpose is variability, and before quoting a "+X% vs +Y%" comparison.

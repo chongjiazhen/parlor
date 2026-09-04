@@ -137,6 +137,22 @@ Four triggers, any one of which flips the answer. The first is checked by
    2026-09-02**, so this one is closer than the prose suggested when it was written
    against 23.
 
+**Both numeric triggers FIRED 2026-09-04, and the answer is now folders.** The
+line trigger fired a second time, at 203 lines, on live entries - which is the
+firing this section pre-committed to answer with folders rather than with another
+subtraction. The file backstop fired the same day at 49 tracked files. Two things
+were done instead of the split, and neither substitutes for it: the per-criterion
+run status came out, six of about twelve such claims having been measured stale
+against `docs/measurements.md`, and the 23 criteria collapsed to one class block
+so that adding a criterion no longer edits the index - which was the mechanism
+behind this file colliding on seven of nine open branches. That took it to under
+150 without folders.
+
+**The split is deferred on SEQUENCING, not on merit.** Moving criteria into a
+records directory while nine unmerged branches each add one at the flat path
+lands their files in the old location silently on merge, which is a worse defect
+than the length was. Do it once the merge list drains.
+
 ## Pre-committed criteria - all applied, all moved out
 
 None is edited to agree with its outcome; that is the whole value of a
