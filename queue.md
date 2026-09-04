@@ -111,38 +111,30 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 |---|---|
 | `slice/changeling-source-rules` | the night rules - merge condition MET on the branch |
 | `slice/changeling-notebook` | `--notebook` |
-| `slice/fanout-s27` + `slice/fanout-s27-demo` | `--turns random-active`, arm then console |
-| `slice/fanout-simul` | `--turns simultaneous`, sits over S27 |
-| `slice/fanout-replies` | the parser's complaints - **supersedes `slice/fanout-neg`**, which it sits on |
-| `slice/fanout-print` | the stale pack reference prints a labelled absence |
-| `slice/fanout-wolf` | `--theme werewolf` |
+| `slice/fanout-simul` | `--turns simultaneous` - waits on source-rules by the order below, not on card |
+
+**MERGED 2026-09-04, freeze lifted:** `fanout-print`, `fanout-wolf`,
+`fanout-s27` + `-demo`, `fanout-replies` (carrying `fanout-neg`). Suite 1970.
+Nearly every conflict was additive - `briefing=`, `turn_mode=`, `phrasing=`
+reaching one constructor - and `docs/README.md` collided on all three until each
+took HEAD, which is the criteria class block doing what it was built for.
 
 **Order is forced by the controls:** every prompt arm pairs against S22's
 `cl-rounds2.json`, so it must merge AND RUN before the source-rules merge
 re-baselines the rung, or its pair is void. Which arm earns its ~7 h of card
 first is the operator's ranking; the criteria are frozen and wait.
 
-**GPU order was decided 2026-09-02 and RE-RANKED the next day.** The 09-02
-reasoning is `docs/decisions.md` §GPU order for the frozen changeling arms and
-is not restated here; what binds is the line below.
+**GPU order and its 09-03 re-rank are `docs/decisions.md` §GPU order.** The
+2026-09-04 card cleared that set: partner, briefing and both mixed arms are RUN
+and READ (`docs/measurements.md`); briefing owes only its card. What is left
+unrun is the ranking question, not a queue of merges.
 
-**Re-ranked 2026-09-03** (`docs/decisions.md`): the partner arm took slot 3 and
-notebook slipped to the deferred group, so the pre-merge set was mixed-pack,
-briefing, partner (~12 h). **Partner is RUN and READ 2026-09-04 - NOT SHOWN**
-(`docs/measurements.md`), so the honesty debt of the two unadjusted free reads is
-paid and its criterion pre-committed that no second arm chases it. **Briefing is
-MERGED 2026-09-04** (suite 1836 passed, 5 skipped, 644 subtests in this tree) and
-now owes only the card. **`mixed-village` is RUN and READ 2026-09-04 - NOT
-SHOWN**, closing the mixed pair (`docs/measurements.md`).
-
-**Two conflict pairs are foreseen, each with a required order.** In
-`games/changeling/referee.py` simul rewrites the turn machinery source-rules also
-moves: merge source-rules FIRST, then rebase simul onto it and re-run its 20-seed
-byte-identity pins, which are what would catch a silent drift. In
-`games/changeling/player.py` replies threads `complaints` through `parse_action`
-where s27 and simul both edit the discussion path: re-run the replies golden
-sha256 after any merge touching `parse_action`. The demo pair conflicts on one
-argparse block and is trivial.
+**One conflict pair is still foreseen.** In `games/changeling/referee.py` simul
+rewrites the turn machinery source-rules also moves: merge source-rules FIRST,
+then rebase simul onto it and re-run its 20-seed byte-identity pins, which are
+what would catch a silent drift. The `parse_action` pair is SPENT - replies
+merged over s27 2026-09-04 and the golden sha256 passed by name; re-run it again
+after any later merge touching that function.
 
 ## The queue
 
@@ -281,6 +273,13 @@ unlaunched, and waits on the merge list above:
       arm aimed at pack play has its comparison already recorded. **No gate #3
       claim rides on this** - the criterion named no bar and one may not be added
       now.
+- [ ] **`briefing_text()` describes FIXED turns and no longer knows it.** S21 and
+      S27 merged 2026-09-04 without meeting: the frame says "one turn each, in
+      seat order", which under `--turns random-active` is false, and it rides in
+      the payload gate #1 audits for every seat. Nothing recorded is affected -
+      no frozen criterion sets both flags, checked - so this is latent, and it
+      lands the moment an arm pairs them. Done when the frame reads the mode, or
+      `--briefing` refuses a mode it cannot describe.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
