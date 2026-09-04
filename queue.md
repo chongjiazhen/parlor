@@ -196,14 +196,19 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
-- [ ] **`scripts/check-recipe-settings.py` reports DISAGREEMENTS where it means
-      NOT CHECKED.** The valueless-flag swallow is fixed and all 12 pairable
-      recipes swept 2026-09-04 - six agree, three honest NOT CHECKED. The four
-      belfry ones read two `run_belfry` invocations plus a `probe_tier` line
-      against a criterion with no settings block, so a scope limit prints as a
-      settings mismatch, and a guard that cries wolf is the belfry live1 lesson
-      aimed back at itself. Done with that shape read and the pytest fixture over
-      ~15 recipes.
+- [ ] **`check-recipe-settings.py` is honest now; the pytest fixture is what is
+      left.** Three vacuous passes and one false alarm came out on 2026-09-04, all
+      the same disease - reading text that is not the arm. A valueless flag ate
+      the next one, so `--seed` went unchecked. The multi-invocation shape
+      compared a control arm against a criterion stating the model arm, printing
+      a scope limit as a settings mismatch. Only `eval.run_*` lines are read now,
+      so a `probe_tier` gate contributes nothing. And `rem` lines are prose:
+      `belfry-live2.cmd`'s only `py -3 -m eval.` text is a commented scoring
+      hint, off which the checker had reported AGREES - a recipe pinned to its
+      criterion on the strength of a comment. **Re-swept all 13 pairable
+      recipes: five agree, eight NOT CHECKED, zero false mismatches.** Done when
+      it is a pytest fixture over them, which needs the `for %%T` loop shape read
+      and a rule for which invocation of a multi-arm recipe a criterion means.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records

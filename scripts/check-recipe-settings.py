@@ -22,14 +22,13 @@ text in the criterion. Exits 0 (and prints nothing) if every pair agrees.
   silently check nothing;
 - it does not follow a `for %%T in (...)` loop variable (`changeling-skin-
   pair.cmd`) or a two-invocation control/model pair with different game counts
-  (the belfry family) - both need their own reading, not a shared regex. The
-  0-pair shape reports NOT CHECKED; the two-invocation shape does NOT, and
-  reports every line's flags as disagreements instead. Measured 2026-09-04 on
-  four belfry recipes: reads as a settings mismatch, is a scope limit, and a
-  guard that cries wolf is a guard that gets ignored - the belfry live1 lesson
-  pointing back at this script;
-- it reads every `py -3 -m eval.` line, so a `probe_tier` gate line contributes
-  its `--model` alongside the arm's;
+  (the belfry family) - both need their own reading, not a shared regex. **Both
+  now report NOT CHECKED** rather than a disagreement: until 2026-09-04 the
+  multi-invocation shape compared every line's flags against a criterion stating
+  one arm's, so a scope limit printed as a settings mismatch on four belfry
+  recipes, and a guard that cries wolf gets ignored;
+- it reads only `eval.run_*` invocations, so a `probe_tier` gate line and a
+  verdict tool contribute nothing - the criterion describes the ARM;
 - it checks presence, not absence - a criterion naming a flag the recipe omits
   is not caught here, only a value that disagrees.
 
@@ -56,6 +55,11 @@ FLAG_RE = re.compile(r'--([A-Za-z][A-Za-z0-9-]*)(?:\s+(?!--)(\S+))?')
 #: Flags whose value is a run-scoped path or a literal outfile, never a setting
 #: a criterion states in prose - checking these would only ever produce noise.
 SKIP_FLAGS = {"out", "backend", "require-served", "timeout"}
+#: A recipe launches several `eval.` modules and only one of them is the ARM the
+#: criterion describes. `probe_tier` is a gate whose `--model` is not the
+#: promise; a verdict tool reads the record afterwards. Matching on `run_` keeps
+#: the criterion's subject and drops the scaffolding around it.
+INVOCATION_RE = re.compile(r"py -3 -m eval\.([A-Za-z_][A-Za-z0-9_]*)")
 
 
 def substitute(value: str, env: dict[str, str]) -> str:
@@ -84,6 +88,21 @@ def logical_lines(text: str) -> list[str]:
     return out
 
 
+def arm_invocations(text: str) -> list[str]:
+    """The logical lines that launch a RUN module, one per arm the recipe runs."""
+    out = []
+    for line in logical_lines(text):
+        # A `rem` line is prose. `belfry-live2.cmd` carries its scoring command
+        # in one, and reading it made the checker report AGREES for a recipe
+        # whose arm it had never seen (2026-09-04).
+        if line.lstrip().lower().startswith("rem "):
+            continue
+        m = INVOCATION_RE.search(line)
+        if m and m.group(1).startswith("run_"):
+            out.append(line)
+    return out
+
+
 def recipe_pairs(text: str) -> list[tuple[str, str]]:
     """Every `--flag value` pair on a `py -3 -m eval.` invocation, substituted.
 
@@ -93,9 +112,7 @@ def recipe_pairs(text: str) -> list[tuple[str, str]]:
     """
     env = {name: val for name, val in SET_RE.findall(text)}
     pairs = []
-    for line in logical_lines(text):
-        if "py -3 -m eval." not in line:
-            continue
+    for line in arm_invocations(text):
         for flag, raw in FLAG_RE.findall(line):
             if flag in SKIP_FLAGS:
                 continue
@@ -125,23 +142,32 @@ def check(recipe: Path, criterion: Path) -> list[str]:
     # flag/value pair split by the wrap, not a disagreement. Collapsing every
     # whitespace run to one space is what a reader's eye already does.
     ctext = re.sub(r'\s+', ' ', criterion.read_text(encoding="utf-8"))
+    arms = arm_invocations(rtext)
     pairs = recipe_pairs(rtext)
     if not pairs:
-        # A recipe this parser cannot read (a loop variable, a two-invocation
-        # control/model pair, a recipe that names its criterion but carries no
-        # inline settings) must not report the vacuous "agrees" a 0-pair loop
-        # produces for free - that is the exact green-with-nothing-behind-it
-        # this repo already has a name for.
+        # A recipe this parser cannot read (a loop variable, a recipe that names
+        # its criterion but carries no inline settings) must not report the
+        # vacuous "agrees" a 0-pair loop produces for free - that is the exact
+        # green-with-nothing-behind-it this repo already has a name for.
         return [f"{recipe.name}: 0 flag/value pairs extracted - unsupported "
-                f"recipe shape (a loop variable or multi-invocation pair), "
+                f"recipe shape (a loop variable, or no arm invocation), "
                 f"NOT CHECKED against {criterion.name}"]
-    disagreements = []
-    for flag, value in pairs:
-        if not mentions(ctext, flag, value):
-            literal = f"--{flag}" if value is None else f"--{flag} {value}"
-            disagreements.append(
-                f"{recipe.name}: {literal} not found as literal text "
-                f"in {criterion.name}")
+    missing = [f"--{flag}" if value is None else f"--{flag} {value}"
+               for flag, value in pairs if not mentions(ctext, flag, value)]
+    disagreements = [f"{recipe.name}: {lit} not found as literal text "
+                     f"in {criterion.name}" for lit in missing]
+    if missing and len(arms) > 1:
+        # A recipe running a control arm AND a model arm carries two settings
+        # blocks on purpose. When the criterion states BOTH - as the partner
+        # criterion does - every pair matches and the check is real, so that
+        # case is kept. When something does not match, this file cannot tell a
+        # genuine mismatch from a control the criterion never stated, and on
+        # four belfry recipes it called the second the first (2026-09-04). An
+        # ambiguous answer is reported as ambiguous.
+        return [f"{recipe.name}: {len(arms)} arm invocations and "
+                f"{len(missing)} flag(s) {criterion.name} does not state - a "
+                f"control/model pair this file cannot tell apart, so NOT "
+                f"CHECKED. Read these by hand: " + ", ".join(missing)]
     return disagreements
 
 

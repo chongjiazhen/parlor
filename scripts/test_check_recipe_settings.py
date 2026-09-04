@@ -17,10 +17,14 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).with_name("check-recipe-settings.py")
 _spec = importlib.util.spec_from_file_location("check_recipe_settings", SCRIPT)
 crs = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(crs)
+
+REPO = Path(__file__).resolve().parent.parent
 
 
 def _pair(tmp_path: Path, recipe_body: str, criterion_body: str):
@@ -37,6 +41,10 @@ CRITERION = (
     "Arm: `eval.run_changeling --games 200 --arm llm --seats 5 --briefing\n"
     "--seed 5000`, driver defaults otherwise.\n"
 )
+
+BELFRY_PAIR = ("py -3 -m eval.run_belfry --games 1000 --arm random --seats 9\n"
+               "py -3 -m eval.run_belfry --games 60 --arm llm --seats 9\n")
+BELFRY_CRITERION = "Arm: `eval.run_belfry --games 60 --arm llm --seats 9`.\n"
 
 
 class TestAValuelessFlagDoesNotEatTheNextOne:
@@ -113,3 +121,70 @@ class TestAValuelessFlagIsAPresenceCheck:
         assert any("--no-thinking" in p and "--briefing" not in p
                    for p in problems), (
             "the absent switch must be named alone, not glued to the next flag")
+
+
+class TestAMultiInvocationRecipeSaysNOTCHECKED:
+    """The shape that cries wolf: a control arm plus a model arm plus a probe.
+
+    Measured 2026-09-04 on four belfry recipes - every flag of every line was
+    compared against a criterion stating one arm's settings, so a SCOPE LIMIT
+    printed as a settings mismatch. The script already refuses to vacuous-pass a
+    shape it cannot read; this is the same refusal for a shape it was reading
+    wrongly. A guard that cries wolf gets ignored, which is the belfry live1
+    lesson aimed back at the script written for it.
+    """
+
+    def test_two_run_invocations_report_not_checked(self, tmp_path):
+        recipe, criterion = _pair(tmp_path, BELFRY_PAIR, BELFRY_CRITERION)
+        assert any("NOT CHECKED" in p for p in crs.check(recipe, criterion))
+
+    def test_it_does_not_report_them_as_disagreements(self, tmp_path):
+        recipe, criterion = _pair(tmp_path, BELFRY_PAIR, BELFRY_CRITERION)
+        problems = crs.check(recipe, criterion)
+        assert not [p for p in problems if "not found as literal text" in p], (
+            "a scope limit must not read as a settings mismatch")
+
+    def test_a_probe_line_contributes_no_settings(self, tmp_path):
+        """`probe_tier` is a gate, not the arm; its --model is not the promise."""
+        recipe, criterion = _pair(
+            tmp_path,
+            'py -3 -m eval.probe_tier --model wrong-model --timeout 120\n'
+            'py -3 -m eval.run_belfry --games 60 --arm llm --seats 9\n',
+            BELFRY_CRITERION)
+        assert crs.check(recipe, criterion) == []
+
+
+class TestARefusalIsNotASilentPass:
+
+    def test_a_commented_invocation_is_not_an_invocation(self, tmp_path):
+        """`belfry-live2.cmd`'s only `py -3 -m eval.` text is a `rem` scoring
+        hint, and the checker read its flags and reported AGREES - a recipe
+        pinned to its criterion on the strength of a comment."""
+        recipe, criterion = _pair(
+            tmp_path,
+            "rem Score it with:  py -3 -m eval.run_belfry --games 60 --arm llm\n",
+            BELFRY_CRITERION)
+        assert any("NOT CHECKED" in p for p in crs.check(recipe, criterion))
+
+    def test_a_recipe_with_no_arm_invocation_is_not_checked(self, tmp_path):
+        recipe, criterion = _pair(
+            tmp_path, "echo nothing to run here\n", BELFRY_CRITERION)
+        assert any("NOT CHECKED" in p for p in crs.check(recipe, criterion))
+
+
+class TestAgainstTheRealRecipes:
+    """Regression on the tree itself, in both directions."""
+
+    def test_the_briefing_recipe_still_agrees(self):
+        assert crs.check(REPO / "eval/runs/changeling-briefing-arm.cmd",
+                         REPO / "docs/changeling-briefing-criterion.md") == []
+
+    def test_the_partner_recipe_still_agrees(self):
+        assert crs.check(REPO / "eval/runs/changeling-partner-arm.cmd",
+                         REPO / "docs/changeling-partner-criterion.md") == []
+
+    def test_a_belfry_recipe_reports_not_checked_rather_than_mismatches(self):
+        problems = crs.check(REPO / "eval/runs/belfry-night.cmd",
+                             REPO / "docs/belfry-night-coherence-criterion.md")
+        assert any("NOT CHECKED" in p for p in problems)
+        assert not [p for p in problems if "not found as literal text" in p]
