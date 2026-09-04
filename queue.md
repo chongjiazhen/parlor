@@ -184,14 +184,6 @@ the one that goes stale.
       arm that INFORMED swapped a whole policy. Argument, the real counter and
       the one cheap fix: `docs/open-arms.md` §Is the changeling arm program
       powered. Done when a criterion must name its expected effect before launch.
-- [ ] **`docs/README.md` is the merge list's standing collision point.** 195
-      lines against its 150 advisory as of 2026-09-03, and it conflicts on seven
-      of the nine unmerged branches, because each adds its criterion to one flat
-      index. The advisory is not a block and the per-merge resolution is cheap,
-      so this is a row about whether the flat directory still pays: the other
-      three triggers and the split that would follow are `docs/decisions.md`
-      §This directory stays flat. Done when the ceiling is met or deliberately
-      raised with a reason.
 - [ ] **Five recipes DELETE a stale JSONL where the others refuse.**
       `belfry-live1`, `belfry-live2`, `durf-fixture`, `durf-session` and
       `quorum-live4` carry `if exist ... del` against the append hazard the
