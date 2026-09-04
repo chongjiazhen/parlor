@@ -126,9 +126,11 @@ re-baselines the rung, or its pair is void. Which arm earns its ~7 h of card
 first is the operator's ranking; the criteria are frozen and wait.
 
 **GPU order and its 09-03 re-rank are `docs/decisions.md` §GPU order.** The
-2026-09-04 card cleared that set: partner, briefing and both mixed arms are RUN
-and READ (`docs/measurements.md`); briefing owes only its card. What is left
-unrun is the ranking question, not a queue of merges.
+2026-09-04 card cleared most of that set: partner and both mixed arms are RUN and
+READ (`docs/measurements.md`). **Briefing is UNLAUNCHED** - merged, criterion
+frozen, recipe pinned, and no `cl-briefing` record exists - so it is the
+top-ranked unrun arm on the re-ranked order. What is left unrun is the ranking
+question, not a queue of merges.
 
 **One conflict pair is still foreseen.** In `games/changeling/referee.py` simul
 rewrites the turn machinery source-rules also moves: merge source-rules FIRST,
