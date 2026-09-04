@@ -73,6 +73,9 @@ partly true is worse than none.
   ships, what stays local, why the example pack is required rather than a courtesy,
   and why "local" is not the same as "untransmitted". Read before laying out
   `games/<rung>/`, not after.
+- `docs/machina-rung.md` - 2026-09-03. The proposed Parlor-native dramatic-mecha
+  rung: one theatre-of-mind kernel, gate #1 over private pilot and machine facts,
+  and three bounded example packs. Read before building or changing `machina`.
 - `docs/preset-axes.md` - the question after content packs, answered no: entitlement
   schema, resolution kernel and authority topology are three different kinds of
   axis, only the first is flag-shaped, and a flag list is 2^N unmeasured fallback

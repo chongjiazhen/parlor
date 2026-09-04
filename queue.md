@@ -380,6 +380,27 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
       that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
+- [ ] **`machina` is ONE of its six stories evidenced, and it is a LOCAL PLAY row
+      before it is a public rung.** `docs/machina-rung.md` is the spec and
+      `feature/machina` is four commits against it (~130 lines of source, 163 of
+      test, 11 passing). Checked against the branch 2026-09-04, not against the
+      spec: **story 2, gate #1 over private pilot facts, is REAL** - `audit.py`
+      keys `(seat, "pilot")` through `find_leaks`, entitles only the viewer and
+      raises by default. The other five have no code. The sharp tell is
+      carried-but-unread state: `Pilot.pressure` is written by nothing and
+      `Scene.pressure_max` is read by nothing, so story 4's pack-specific pressure
+      transition cannot be tested at all; `resolve` takes an `outcome` string from
+      its caller, so there is no player-action protocol (story 1) and no referee
+      decision record or refusal path (story 3); `pack.load` has no validation, so
+      story 6's loud refusal is a `KeyError`; and no mission means no fallout
+      (story 5). **This is the row's whole content: the rung owes a playable
+      mission, not more schema.** Ranked with the table rows above, under the
+      2026-09-03 direction, and the mecha table is a wanted one
+      (`CLAUDE.local.md`). Public merge is BLOCKED and that call is not this
+      row's to reopen - it is a `.local.md` review, and the litmus it applies is
+      whether the smallest retained surface proves a named isolation failure no
+      existing rung expresses. Done when one seeded mission plays end to end at
+      the console with pressure and fallout moving, on the branch.
 
 Publishing:
 
