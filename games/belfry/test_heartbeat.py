@@ -17,7 +17,7 @@ from games.belfry.heartbeat import BelfryHeartbeat, honest_render
 from games.belfry.player import RandomPolicy, play_game
 from games.belfry.referee import BelfryReferee
 from games.belfry.roles import SCRIPTS
-from games.heartbeat.heartbeat import audit as fact_audit
+from experiments.heartbeat.heartbeat import audit as fact_audit
 
 #: seeds 0..19, 5 seats, compact script, one talk round, 12-day bound, the random
 #: policy on `Random(9000 + seed)`. Every byte every seat was sent, plus each

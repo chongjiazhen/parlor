@@ -118,7 +118,7 @@ exists to warn about.
 
 ## Built 2026-09-02 - what the spike found
 
-`games/heartbeat/` is the cheapest version above, built S24 and scored on the one
+`experiments/heartbeat/` is the cheapest version above, built S24 and scored on the one
 question. **The snapshot audit is sound at this size.** Each render carries the
 entitlement snapshot taken in the same step it was built - tick, the facts that
 existed, and what each seat held - and `audit(render, snapshot)` takes those two
@@ -154,7 +154,7 @@ the seam (`Policy.choose`) is where a model policy would drop in.
 `games/belfry/heartbeat.py` seats the S24 spike at belfry's table, off by default
 behind `--heartbeat` on `eval/run_belfry.py`. The world, the three action types,
 the propagation rule, the schedule and the snapshot audit are imported from
-`games/heartbeat/heartbeat.py` unchanged; the seating adds no model of a faction.
+`experiments/heartbeat/heartbeat.py` unchanged; the seating adds no model of a faction.
 
 **Nothing in belfry's `Phase` handling had to move.** The warning in
 `docs/action-channel.md` was about the three shapes that harden early, and the

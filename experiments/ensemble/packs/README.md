@@ -1,7 +1,7 @@
 # packs
 
 A pack is one table's material: the playbooks a draft chooses from, as JSON.
-`games/ensemble/pack.py` is the loader and `RULES.md` is what the engine does
+`experiments/ensemble/pack.py` is the loader and `RULES.md` is what the engine does
 with it. The layout and the reasoning are `docs/content-packs.md`.
 
 A pack directory holds `playbooks.json`:

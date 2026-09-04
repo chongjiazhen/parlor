@@ -14,7 +14,7 @@ eval/records/
 
 /.scratch/
 /.worktrees/
-/local/
+local/
 
 .claude/settings.local.json
 

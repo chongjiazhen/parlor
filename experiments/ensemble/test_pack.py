@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from games.ensemble.pack import Pack, PackError
+from experiments.ensemble.pack import Pack, PackError
 
 
 def _pack(tmp_path, playbooks):
@@ -84,7 +84,7 @@ def test_the_shipped_example_pack_loads_and_satisfies_the_schema():
 
 
 def test_the_example_pack_seats_a_full_draft():
-    from games.ensemble.draft import Draft
+    from experiments.ensemble.draft import Draft
     pack = Pack.load(EXAMPLE)
     d = Draft(pack.names(), seats=5, seed=1)
     while not d.done:

@@ -373,17 +373,15 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
       that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
-- [ ] **Three rung reclassifications are CALLED and unexecuted.** Against the
-      earning test in `AGENTS.md`: **belfry's FULL script** is local-only or gone,
-      its own `RULES.md` saying compact already reaches every mechanic the rung
-      exercises, so the extra roles buy recognition surface and prompt cost;
-      **`games/heartbeat/`** leaves `games/` - it proves snapshot-time entitlement
-      catches what an end-of-run recompute misses, and is not a game a person
-      plays; **`games/ensemble/`** leaves the rung ladder, its session-0 draft
-      having no secrets and declaring gate #1 vacuous. Both dirs are still on main.
-      **Sequence behind the merge list** - heartbeat is on an open branch and
-      moving it mid-branch buys conflicts for nothing. Done when each sits in
-      exactly one of the three destinations.
+- [ ] **One reclassification is left: belfry's FULL script.** Two landed
+      2026-09-04 - `heartbeat` and `ensemble` moved to `experiments/`, so
+      `games/` and `core/registry.py` now hold the same five names and every
+      directory in `games/` is a rung a person can sit at. Neither was a stub to
+      delete: belfry imports the heartbeat fixture, and ensemble is preserved as
+      a draft. What remains is belfry's FULL script, local-only or gone, its own
+      `RULES.md` saying compact already reaches every mechanic the rung
+      exercises - so the extra roles buy recognition surface and prompt cost.
+      Done when it sits in exactly one of the three destinations.
 - [ ] **`machina` is ONE of its six stories evidenced, and it is a LOCAL PLAY row
       before it is a public rung.** `docs/machina-rung.md` is the spec and
       `feature/machina` is four commits against it (~130 lines of source, 163 of

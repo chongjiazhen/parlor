@@ -15,7 +15,7 @@ import json
 
 import pytest
 
-from games.heartbeat import heartbeat as hb
+from experiments.heartbeat import heartbeat as hb
 
 
 def leaky_renderer(leak_at: dict[tuple[int, int], hb.FactId]):

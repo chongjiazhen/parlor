@@ -1,6 +1,6 @@
 """The off-map faction, seated at belfry's table. Off by default.
 
-`docs/faction-heartbeat.md` scoped it and `games/heartbeat/heartbeat.py` built it
+`docs/faction-heartbeat.md` scoped it and `experiments/heartbeat/heartbeat.py` built it
 as a standalone spike; this file is that spike SEATED, and it adds nothing to the
 model of a faction. The world, the three action types, the propagation rule, the
 schedule and the snapshot audit are imported unchanged, because a second copy of
@@ -40,10 +40,10 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from games.durf.facts import FactId
-from games.heartbeat.heartbeat import (Action, Policy, RandomPolicy, Render,
+from experiments.heartbeat.heartbeat import (Action, Policy, RandomPolicy, Render,
                                        Snapshot, Tally, World)
-from games.heartbeat.heartbeat import audit as fact_audit
-from games.heartbeat.heartbeat import schedule
+from experiments.heartbeat.heartbeat import audit as fact_audit
+from experiments.heartbeat.heartbeat import schedule
 
 #: How many nights of the run the faction acts on. Three, as the spike ran it.
 DEFAULT_BEATS = 3

@@ -44,8 +44,12 @@ packages = [
     "games.cabal",
     "games.changeling",
     "games.durf",
-    "games.heartbeat",
     "games.quorum",
+    # Not rungs and not playable - `experiments/__init__.py` says why. Listed
+    # because `games.belfry` imports the heartbeat fixture, so an install
+    # missing it fails at belfry's `--heartbeat`, nowhere near this line.
+    "experiments",
+    "experiments.heartbeat",
 ]
 
 [tool.setuptools.package-data]

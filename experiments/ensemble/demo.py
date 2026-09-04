@@ -1,7 +1,7 @@
 """Run one session-0 draft. Scripted by default, model seats on ``--arm llm``.
 
-    py -3 -m games.ensemble.demo --pack <dir-or-file> --seats 5 --seed 1
-    py -3 -m games.ensemble.demo --pack <path> --arm llm --backend local
+    py -3 -m experiments.ensemble.demo --pack <dir-or-file> --seats 5 --seed 1
+    py -3 -m experiments.ensemble.demo --pack <path> --arm llm --backend local
 
 The pack is a path because a table's material is not in this tree
 (``docs/content-packs.md``). Nothing here names a system.

@@ -2,7 +2,7 @@
 
 import pytest
 
-from games.ensemble.draft import Draft, NotEnoughPlaybooks
+from experiments.ensemble.draft import Draft, NotEnoughPlaybooks
 
 
 NAMES = ("A", "B", "C", "D")

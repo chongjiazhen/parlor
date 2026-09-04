@@ -1,9 +1,9 @@
 """The choosing seat: a model reply becomes a pick, or the budget hands it back."""
 
-from games.ensemble.draft import Draft
-from games.ensemble.pack import Pack
-from games.ensemble.seats import ChoosingSeat, render_choice_ask
-from games.ensemble.session import run_draft
+from experiments.ensemble.draft import Draft
+from experiments.ensemble.pack import Pack
+from experiments.ensemble.seats import ChoosingSeat, render_choice_ask
+from experiments.ensemble.session import run_draft
 
 
 class Canned:

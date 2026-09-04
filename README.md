@@ -30,6 +30,15 @@ are deliberately the *hard* case: if seats can keep secrets from each other and
 from you in a hidden-role game, a party where the rogue has a secret patron is
 easy by comparison.
 
+**Five rungs, and the set is gated rather than collected.** A game earns a place
+in `games/` by exposing one named executable risk to information isolation or
+referee judgment that no existing rung already expresses - the five below are
+five different information models, not five card games. Genre, familiarity and a
+working play loop earn nothing on their own, which is why `games/` and
+`core/registry.py` hold the same five names and why proof fixtures that nobody
+sits down at live in `experiments/` instead. The full test is `AGENTS.md`
+§Invariants.
+
 ## Try it
 
 ```bash
