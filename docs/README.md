@@ -141,10 +141,10 @@ partly true is worse than none.
 - `docs/faction-heartbeat.md` - Spike #2 scoped: the typed-fact channel, why it is
   the small version of the adjudicator's hardest part, and the one new gate #1
   failure it introduces (entitlement gains a time axis).
-- `docs/plans/` and `docs/specs/` - the only subdirectories, holding one
-  belfry-adjudicator execution plan and its design spec. **An execution plan goes
-  stale where a design spec does not**, so the plan is a candidate to leave a
-  public tree while the spec stays.
+- `docs/specs/` - the only subdirectory, holding the belfry model-adjudicator
+  design spec. **A design spec is durable where an execution plan is not**: a
+  plan's checkboxes describe a past state and go stale against the code, so
+  plans are kept out of the tree and specs stay in it.
 - `docs/reproducibility.md` - two 20-game runs at one seed came back byte-identical,
   so a same-seed repeat cannot measure spread. Read before scheduling ANY run whose
   purpose is variability, and before quoting a "+X% vs +Y%" comparison.
