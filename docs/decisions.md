@@ -142,7 +142,7 @@ line trigger fired a second time, at 203 lines, on live entries - which is the
 firing this section pre-committed to answer with folders rather than with another
 subtraction. The file backstop fired the same day at 49 tracked files. Two things
 were done instead of the split, and neither substitutes for it: the per-criterion
-run status came out, six of about twelve such claims having been measured stale
+run status came out, six of the ten such claims having been measured stale
 against `docs/measurements.md`, and the 23 criteria collapsed to one class block
 so that adding a criterion no longer edits the index - which was the mechanism
 behind this file colliding on seven of nine open branches. That took it to under
