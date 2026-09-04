@@ -80,7 +80,7 @@ outrank the run it waits on.
 measure a model.** The 08-27 call (gate #1 is durable, gates #2/#3 decay with
 the checkpoint, so spike the adjudicator) stands and is spent - the belfry
 discretion arms are all READ. What ranks first now: **the play lane, the browser
-seat, and the Paranoia-shaped rung** - the three rows that end in a table. The
+seat, and the multi-axis entitlement rung** - the rows that end in a table. The
 frozen changeling arms keep their criteria and their card only where a run is
 already chained or a merge is already resolved; no new changeling criterion is
 cut ahead of a table row. Argument: `docs/decisions.md` §Tables ahead of arms.
@@ -353,30 +353,30 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       half is DONE, 2026-09-03**: `find_leaks` takes a `(seat, axis)` key, so one
       seat's several secrets are entitled separately, and seat-level entitlement
       still covers every axis (`core/test_observability.py`, both branches
-      mutation-checked). The rung inherits it and owes no `core/` change. What was
-      actually wrong is narrower than this row claimed - tuple keys already
-      discriminated; what they lacked was the self-skip and the seat-level grant,
-      whose absence reports the VIEWER'S OWN secrets at a game that adopts axes and
-      pushes it back to the flat seat key where the false negative lives.
-      Functional keys only - the setting, its role names and its text stay out of
-      the tree. Done when a seat holds four orthogonal secrets and the audit
+      mutation-checked). The rung inherits it and owes no `core/` change; what was
+      wrong is narrower than this row claimed, `docs/decisions.md`. Functional
+      keys only. **This is the multi-axis ENTITLEMENT rung, which earns `games/`
+      on that risk - not the operator's Paranoia table, which is private
+      (2026-09-04).** Done when a seat holds four orthogonal secrets and the audit
       distinguishes them.
 
 - [ ] **The play lane, after session 0.** The draft is BUILT and RUN
       (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
-      economy-compliance read, neither of which has a rubric yet. Still not
-      sequenced against the Paranoia rung.
-- [ ] **The private play arm needs its own grill before a table is built.** The
-      public/private split was settled 2026-09-04 only where it touched `games/`:
-      migration means demotion that stays public and testable, the public arm is
-      feature-led by PRESENTATION rather than structure, and the direction stays
-      rung -> core while `core/` promotions are still landing. **What was never
-      interrogated is the private arm itself** - one repo or a directory under
-      `local/`, what may live there, whether a table's own code is testable at
-      all once it is untracked, and how gate #1 is evidenced for a table nobody
-      public can run. It blocked nothing this session because nothing migrated;
-      it blocks the first standing table. Entry condition: none. Done when those
-      four branches are answered or consciously deferred with reasons.
+      economy-compliance read, neither of which has a rubric yet.
+- [ ] **`core/` owes the private table arm a WRITTEN seam.** The tables are a
+      separate private repo consuming parlor as an installed dep (grilled
+      2026-09-04, spec off-tree). `core/` has no `Protocol` and no ABC - the
+      referee contract is duck-typed - so a rename breaks seven tables silently
+      in a tree this suite cannot see. Declare the render+ask path, the
+      entitlement query, the audit entry, `complete_meta` and the human-seat
+      policy; the rest of `core/` stays free. **One test, pinned to a synthetic
+      implementation** - read off the live rungs and it passes on whatever they
+      happen to expose. Free with this row: cross-session gate #1 has a rule and
+      no mechanism (a seat's memory derives from its own audited view, never the
+      referee transcript), and the fix is the same shape - audit the derived text
+      against that session's facts with the same matcher. That half lives in the
+      private repo; it is named here because it is the guarantee parlor is asked
+      to make good. Done when a rename of any declared member fails the test.
 - [ ] **A browser front-end for a human seat, phone included.** A SECOND
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
