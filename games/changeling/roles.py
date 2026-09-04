@@ -664,12 +664,12 @@ THEME_GREEK_NAMED = Theme(
 # the concern behind this row is the same one that removed the Six-Eared
 # Macaque and `Yellow Turban` above: a specific NAMED SET of one-night roles
 # (the swap-and-look role, the blind-swap-two role, the self-swap-blind role,
-# the wakes-last role) is the one-night-werewolf variant published by Bezier
-# Games as *One Night Ultimate Werewolf* (2014), and that game's own coined
-# terms for those roles - not "werewolf", which predates it, but the specific
-# quartet naming its swap mechanics - are that publisher's, not public-domain
-# folklore. Naming this skin's cards after that exact quartet would be the
-# thing this rung's own invariant forbids ("No published game's role names ...
+# the wakes-last role) is the one-night-werewolf variant *One Night Ultimate
+# Werewolf* (2014), and that game's own coined terms for those roles - not
+# "werewolf", which predates it, but the specific quartet naming its swap
+# mechanics - are that title's, not public-domain folklore. Naming this skin's
+# cards after that exact quartet would be the thing this rung's own invariant
+# forbids ("No published game's role names ...
 # appear here"), so this skin keeps the genre and the register - rural,
 # lunar, a hamlet instead of a village - and reaches for words that describe
 # what each card DOES rather than the branded name for doing it. `folk` is

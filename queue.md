@@ -328,8 +328,8 @@ Runs that are frozen and want card - and one that is already in the chain:
       `--heartbeat` on belfry, off by default; `docs/faction-heartbeat.md` §Seated
       in belfry. Merged mid-run because it is the one branch disjoint from a
       changeling arm's import closure. What it owes is a criterion and card. The
-      review's call to move `games/heartbeat/` out of `games/` names a different
-      object. What seating found and the chain-slot correction are
+      review's call that moved `experiments/heartbeat/` out of `games/` names a
+      different object. What seating found and the chain-slot correction are
       `docs/open-arms.md` 2026-09-03.
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
