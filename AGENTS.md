@@ -83,7 +83,14 @@ Change them against a measurement, and change them HERE.
   while that game's role names, art and text stay out of the code. Published work
   is cited by identifier, never by author. Who ELSE built something, what their
   work is worth, and any claim nobody here has read first-hand go to the untracked
-  working notes.
+  working notes. **Branding-free is what a public rung NEEDS, never what earns
+  it.** A rung earns `games/` by exposing one named executable risk to information
+  isolation or referee judgment no existing rung expresses; familiarity, genre,
+  content volume and a playable loop earn nothing. Litmus: restore the source
+  names, and if that recreates the original game nearly whole it is `local/` play.
+  Three destinations and a rung sits in exactly one - `games/` instruments, an
+  experiment namespace for proof fixtures nobody plays, `local/` play. The edit
+  this stops is a rung added because it plays well.
 - **A run's OUTPUT is untracked, a run's RECIPE is tracked.** `eval/records/` holds
   the raw blobs and never enters history; the rendered transcript that evidences a
   claim does, in `transcripts/`. The launchers in `eval/runs/` are inputs, not

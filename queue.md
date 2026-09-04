@@ -194,20 +194,14 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
-- [ ] **`scripts/check-recipe-settings.py`'s swallow is FIXED 2026-09-04; the
-      two-invocation shape still cries wolf.** The defect: `FLAG_RE`'s `(\S+)` ate
-      a following `--flag`, so `--briefing` consumed `--seed` and `findall` resumed
-      past it - the seed went unchecked, the class belfry live1 cost 11.5 h. Fixed
-      structurally (a `--`-leading token is not a value; a switch is a presence
-      check) with the boundary hole beside it (`--seed 5000` no longer answered by
-      `--seed 50000`), tests first in `scripts/test_check_recipe_settings.py`, the
-      boundary rule mutation-checked. **Swept all 12 pairable recipes after:** six
-      AGREE including partner, both mixed arms and gate2; three report NOT CHECKED
-      (`kindred`, `waker`, `quorum-live4`, the `for %%T` shape). **The four belfry
-      ones report DISAGREEMENTS where they mean NOT CHECKED** - two `run_belfry`
-      invocations plus a `probe_tier` line, all read against a criterion with no
-      settings block - so it reads as a settings mismatch and is a scope limit.
-      That is what is still owed, with the pytest fixture over ~15 recipes.
+- [ ] **`scripts/check-recipe-settings.py` reports DISAGREEMENTS where it means
+      NOT CHECKED.** The valueless-flag swallow is fixed and all 12 pairable
+      recipes swept 2026-09-04 - six agree, three honest NOT CHECKED. The four
+      belfry ones read two `run_belfry` invocations plus a `probe_tier` line
+      against a criterion with no settings block, so a scope limit prints as a
+      settings mismatch, and a guard that cries wolf is the belfry live1 lesson
+      aimed back at itself. Done with that shape read and the pytest fixture over
+      ~15 recipes.
 - [ ] **The merge freeze is prose, and the import graph is what it actually
       means.** `queue.md` says a branch is free and a merge is not; what makes a
       merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
@@ -251,14 +245,14 @@ unlaunched, and waits on the merge list above:
       complaints and pins the other four games through their own parse paths. Found
       in wiring it: `Phrasing.retry` had a golden hash and no consumer, so the
       positive arm was shipping the as-is retry sentence.
-- [ ] **Does the standing frame belong in the PAYLOAD? `--briefing` (S21).** The
-      frame is 553 bytes on a 1620-byte render, off by default and byte-identical
-      off. **It renders inside `seat_lines`, never `preamble`**: measured, a leaky
-      frame placed in the preamble escapes gate #1's per-seat scan and is caught
-      from `seat_lines`. That is the rule for every standing-context arm.
-      `docs/changeling-briefing-criterion.md`, `eval.briefing_pair_verdict`, one
-      arm against `cl-rounds2`. Playable at the console on its demo branch, which
-      moves no model-facing byte, so the criterion still binds.
+- [ ] **Does the standing frame belong in the PAYLOAD? `--briefing` (S21).**
+      MERGED 2026-09-04; owes only the card. 553 bytes on a 1620-byte render, off
+      by default and byte-identical off. **It renders inside `seat_lines`, never
+      `preamble`**: measured, a leaky frame in the preamble escapes gate #1's
+      per-seat scan and is caught from `seat_lines` - the rule for every
+      standing-context arm. `docs/changeling-briefing-criterion.md`,
+      `eval.briefing_pair_verdict`, one arm against `cl-rounds2`; recipe pinned to
+      its criterion 2026-09-04.
 - [ ] **A per-seat private notebook.** Promoted to `core/notebook.py` (two games
       needed it); `--notebook` on the changeling runner, notes stamped by round,
       off by default and byte-identical off. Criterion
@@ -280,23 +274,17 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **`mixed-village`'s chain NEVER FIRED - partner is terminal, the chain-tail
-      wrapper died silently, relaunch by hand.** Partner arm ended
-      2026-09-04T02:06:52 local, `PARLOR DONE rc=0 games=200/200 elapsed=18830s`
-      in `cl-partner-arm.log`, well inside `chain-tail.cmd`'s 24 h bound. But
-      neither `cl-mixed-village-chain-tail.log` nor `cl-mixed-village-chain-launch.log`
-      grew a byte past their 23:04:34 start lines - no `[tail] marker seen`, no
-      `WRAPPER DONE` - and WMI ProcessId 20948 (the chain-tail wrapper) is gone.
-      The wrapper process died mid-poll with no log line to say why or when; GPU
-      sat idle from ~02:07 to at least 08:12 local, the sleep window it was
-      chained to spend. `mixed-pack` is READ and INFORMS (`docs/measurements.md`).
-      The second arm's figure is the rung's PACK rate against the rescored
-      control - the direction the criterion says can disagree, and no cross-arm
-      claim may be made until it lands. Recipe
-      `eval/runs/changeling-mixed-village.cmd`, committed, a byte-mirror of
-      `changeling-mixed-pack.cmd` except `--arm mixed-village`; launch by hand now
-      against `eval\records\cl-partner-arm.log` (predecessor marker already
-      present). Read both with `py -3 -m eval.mixed_verdict` once down.
+- [ ] **`mixed-village` owes the card - its chain never fired, relaunch by hand.**
+      The chain-tail wrapper died mid-poll on 2026-09-03 without a log line;
+      forensics in `queue.local.md`, and the standing lesson is already
+      `AGENTS.md`'s judge-a-run-by-its-own-log. `mixed-pack` is READ and INFORMS
+      (`docs/measurements.md`). This arm's figure is the rung's PACK rate against
+      the rescored control - the direction the criterion says can disagree, and no
+      cross-arm claim may be made until it lands. Recipe
+      `eval/runs/changeling-mixed-village.cmd`, a byte-mirror of
+      `changeling-mixed-pack.cmd` except `--arm mixed-village`, its settings pinned
+      to the criterion 2026-09-04; the predecessor marker is already present. Read
+      both with `py -3 -m eval.mixed_verdict` once down.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
@@ -384,6 +372,17 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       implementation of the `complete_meta` seam, not a rewrite; v1 ships the
       gate-#1-audited string and nothing else. The trap, and the multi-seat prize
       that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
+- [ ] **Three rung reclassifications are CALLED and unexecuted.** Against the
+      earning test in `AGENTS.md`: **belfry's FULL script** is local-only or gone,
+      its own `RULES.md` saying compact already reaches every mechanic the rung
+      exercises, so the extra roles buy recognition surface and prompt cost;
+      **`games/heartbeat/`** leaves `games/` - it proves snapshot-time entitlement
+      catches what an end-of-run recompute misses, and is not a game a person
+      plays; **`games/ensemble/`** leaves the rung ladder, its session-0 draft
+      having no secrets and declaring gate #1 vacuous. Both dirs are still on main.
+      **Sequence behind the merge list** - heartbeat is on an open branch and
+      moving it mid-branch buys conflicts for nothing. Done when each sits in
+      exactly one of the three destinations.
 - [ ] **`machina` is ONE of its six stories evidenced, and it is a LOCAL PLAY row
       before it is a public rung.** `docs/machina-rung.md` is the spec and
       `feature/machina` is four commits against it (~130 lines of source, 163 of
