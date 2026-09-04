@@ -194,19 +194,20 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
-- [ ] **`scripts/check-recipe-settings.py` SWALLOWS the flag after a valueless
-      one, and the SEED is what it swallowed.** Measured 2026-09-04 on the merged
-      `changeling-briefing-arm.cmd`: `FLAG_RE`'s `(\S+)` matches a following
-      `--flag`, so `--briefing --seed` reported a disagreement while `--seed 5000`
-      went unchecked - `findall` resumes past it. `--no-thinking --seats` PASSED
-      only because the criterion lists those two adjacent in prose: a coincidental
-      green, the vacuous pass its own header claims it refuses. It verified games,
-      arm, model, theme, rounds; skipped seats and seed - the load-bearing value,
-      the class belfry live1 cost 11.5 h. The recipe AGREES with its criterion,
-      checked by hand. Fix is structural, no registry to drift: a `--`-leading
-      token is not a value, a valueless flag becomes a presence check. Guard work,
-      test first. Still owed: the pytest fixture over ~15 recipes, which needs the
-      `for %%T` and two-invocation shapes read.
+- [ ] **`scripts/check-recipe-settings.py`'s swallow is FIXED 2026-09-04; the
+      two-invocation shape still cries wolf.** The defect: `FLAG_RE`'s `(\S+)` ate
+      a following `--flag`, so `--briefing` consumed `--seed` and `findall` resumed
+      past it - the seed went unchecked, the class belfry live1 cost 11.5 h. Fixed
+      structurally (a `--`-leading token is not a value; a switch is a presence
+      check) with the boundary hole beside it (`--seed 5000` no longer answered by
+      `--seed 50000`), tests first in `scripts/test_check_recipe_settings.py`, the
+      boundary rule mutation-checked. **Swept all 12 pairable recipes after:** six
+      AGREE including partner, both mixed arms and gate2; three report NOT CHECKED
+      (`kindred`, `waker`, `quorum-live4`, the `for %%T` shape). **The four belfry
+      ones report DISAGREEMENTS where they mean NOT CHECKED** - two `run_belfry`
+      invocations plus a `probe_tier` line, all read against a criterion with no
+      settings block - so it reads as a settings mismatch and is a scope limit.
+      That is what is still owed, with the pytest fixture over ~15 recipes.
 - [ ] **The merge freeze is prose, and the import graph is what it actually
       means.** `queue.md` says a branch is free and a merge is not; what makes a
       merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand

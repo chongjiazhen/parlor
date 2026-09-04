@@ -22,9 +22,22 @@ text in the criterion. Exits 0 (and prints nothing) if every pair agrees.
   silently check nothing;
 - it does not follow a `for %%T in (...)` loop variable (`changeling-skin-
   pair.cmd`) or a two-invocation control/model pair with different game counts
-  (the belfry family) - both need their own reading, not a shared regex;
+  (the belfry family) - both need their own reading, not a shared regex. The
+  0-pair shape reports NOT CHECKED; the two-invocation shape does NOT, and
+  reports every line's flags as disagreements instead. Measured 2026-09-04 on
+  four belfry recipes: reads as a settings mismatch, is a scope limit, and a
+  guard that cries wolf is a guard that gets ignored - the belfry live1 lesson
+  pointing back at this script;
+- it reads every `py -3 -m eval.` line, so a `probe_tier` gate line contributes
+  its `--model` alongside the arm's;
 - it checks presence, not absence - a criterion naming a flag the recipe omits
   is not caught here, only a value that disagrees.
+
+A VALUELESS switch (`--briefing`, `--no-thinking`) is a presence check: the
+criterion must name the flag, and there is no value to compare. Both halves are
+bounded on the right, so a longer setting cannot satisfy a shorter one
+(`--seed 5000` must not be answered by `--seed 50000`). Tests, and the defect
+that bought them, are `scripts/test_check_recipe_settings.py`.
 """
 
 from __future__ import annotations
@@ -34,7 +47,12 @@ import sys
 from pathlib import Path
 
 SET_RE = re.compile(r'^\s*set\s+"([A-Za-z_][A-Za-z0-9_]*)=([^"]*)"', re.M)
-FLAG_RE = re.compile(r'--([A-Za-z][A-Za-z0-9-]*)\s+(\S+)')
+#: The value group is OPTIONAL and refuses a `--`-leading token, because a
+#: valueless switch (`--briefing`, `--no-thinking`) is followed by the next flag
+#: rather than by a value. A `(\S+)` that ate it did two things, and the loud one
+#: was the harmless one: it reported `--briefing --seed` as a disagreement, and
+#: `findall` then resumed PAST `--seed`, so the seed was never checked at all.
+FLAG_RE = re.compile(r'--([A-Za-z][A-Za-z0-9-]*)(?:\s+(?!--)(\S+))?')
 #: Flags whose value is a run-scoped path or a literal outfile, never a setting
 #: a criterion states in prose - checking these would only ever produce noise.
 SKIP_FLAGS = {"out", "backend", "require-served", "timeout"}
@@ -81,9 +99,24 @@ def recipe_pairs(text: str) -> list[tuple[str, str]]:
         for flag, raw in FLAG_RE.findall(line):
             if flag in SKIP_FLAGS:
                 continue
-            value = substitute(raw, env).strip('"')
+            # `raw` is "" for a switch: no value to substitute, and the pair
+            # becomes a presence check rather than a value comparison.
+            value = substitute(raw, env).strip('"') if raw else None
             pairs.append((flag, value))
     return pairs
+
+
+def mentions(ctext: str, flag: str, value: str | None) -> bool:
+    """Is this flag - with its value, or alone - literal text in the criterion?
+
+    Bounded on the right, because an unbounded substring lets a LONGER setting
+    satisfy a shorter one: `--seed 5000` sits inside `--seed 50000`, and
+    `--arm llm` inside `--arm llm-good`. Both are settings this repo actually
+    runs, and either false pass is the same silent card-spend the script exists
+    to stop.
+    """
+    literal = f"--{flag}" if value is None else f"--{flag} {value}"
+    return re.search(re.escape(literal) + r'(?![A-Za-z0-9-])', ctext) is not None
 
 
 def check(recipe: Path, criterion: Path) -> list[str]:
@@ -104,9 +137,10 @@ def check(recipe: Path, criterion: Path) -> list[str]:
                 f"NOT CHECKED against {criterion.name}"]
     disagreements = []
     for flag, value in pairs:
-        if f"--{flag} {value}" not in ctext:
+        if not mentions(ctext, flag, value):
+            literal = f"--{flag}" if value is None else f"--{flag} {value}"
             disagreements.append(
-                f"{recipe.name}: --{flag} {value} not found as literal text "
+                f"{recipe.name}: {literal} not found as literal text "
                 f"in {criterion.name}")
     return disagreements
 
