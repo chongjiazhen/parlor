@@ -276,14 +276,23 @@ unlaunched, and waits on the merge list above:
       stays built and unmeasured - two rungs, two criteria, never one. Free with
       this row: **the salience line has no measured benefit anywhere and is a
       removal candidate**, on cabal, its own arm.
-- [ ] **`mixed-village` is CHAINED behind partner, 2026-09-03T23:04 local -
-      `mixed-pack` is READ and INFORMS** (`docs/measurements.md`). The second
-      arm's figure is the rung's PACK rate against the rescored control - the
-      direction the criterion says can disagree, and no cross-arm claim may be
-      made until it lands. Recipe
+- [ ] **`mixed-village`'s chain NEVER FIRED - partner is terminal, the chain-tail
+      wrapper died silently, relaunch by hand.** Partner arm ended
+      2026-09-04T02:06:52 local, `PARLOR DONE rc=0 games=200/200 elapsed=18830s`
+      in `cl-partner-arm.log`, well inside `chain-tail.cmd`'s 24 h bound. But
+      neither `cl-mixed-village-chain-tail.log` nor `cl-mixed-village-chain-launch.log`
+      grew a byte past their 23:04:34 start lines - no `[tail] marker seen`, no
+      `WRAPPER DONE` - and WMI ProcessId 20948 (the chain-tail wrapper) is gone.
+      The wrapper process died mid-poll with no log line to say why or when; GPU
+      sat idle from ~02:07 to at least 08:12 local, the sleep window it was
+      chained to spend. `mixed-pack` is READ and INFORMS (`docs/measurements.md`).
+      The second arm's figure is the rung's PACK rate against the rescored
+      control - the direction the criterion says can disagree, and no cross-arm
+      claim may be made until it lands. Recipe
       `eval/runs/changeling-mixed-village.cmd`, committed, a byte-mirror of
-      `changeling-mixed-pack.cmd` except `--arm mixed-village`; launch mechanics
-      in `queue.local.md`. Read both with `py -3 -m eval.mixed_verdict` once down.
+      `changeling-mixed-pack.cmd` except `--arm mixed-village`; launch by hand now
+      against `eval\records\cl-partner-arm.log` (predecessor marker already
+      present). Read both with `py -3 -m eval.mixed_verdict` once down.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
