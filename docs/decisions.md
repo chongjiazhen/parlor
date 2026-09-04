@@ -805,6 +805,18 @@ chained or a merge already resolved, and no new changeling criterion is cut
 ahead of a table row. The arms measure a model and the tables are what the
 model is for.
 
+**Superseded in its PREMISE, 2026-09-04, and not in its conclusion.** The tables
+moved to a private repo that consumes parlor as an installed dependency, so the
+play lane, cross-session memory and machina left this queue. The ranking above
+was a contest for one session budget between rows in one file, and there is no
+longer a contest: parlor's queue holds arms and the engine work a table depends
+on, and the table rows are ranked in the other repo against each other.
+
+**The last sentence still stands.** The arms measure a model and the tables are
+what the model is for - that is why the split happened, not a thing the split
+reversed. A later reader finding only arm rows in `queue.md` should not read it
+as tables being dropped.
+
 ## cabal keeps its `games/` slot by elimination, not by the earning test, 2026-09-04
 
 The earning test in `AGENTS.md` admits a rung that exposes one named executable

@@ -648,6 +648,11 @@ Verbatim:
 
 ## Session-0 is the play lane's first slice, 2026-09-03
 
+**The row this argues for LEFT parlor on 2026-09-04**, with the tables, to a
+private repo. The argument stays here because it was made here and the draft was
+built and run here - an archive that deletes what moved stops being one. Nothing
+below is a live parlor row.
+
 The argument behind the play-lane row in `queue.md`. A scene loop is the obvious
 first slice and the wrong one: it produces prose, and prose needs a rubric this
 tree does not have (the same gap `docs/durf-rung.md` leaves open for a refereed

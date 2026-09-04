@@ -76,14 +76,15 @@ flight**, the standing menu is `docs/open-arms.md` §While the card is busy - an
 instrument scored against records that already exist costs nothing and can
 outrank the run it waits on.
 
-**Direction, re-called 2026-09-03: tables a person plays at, ahead of arms that
-measure a model.** The 08-27 call (gate #1 is durable, gates #2/#3 decay with
-the checkpoint, so spike the adjudicator) stands and is spent - the belfry
-discretion arms are all READ. What ranks first now: **the play lane, the browser
-seat, and the multi-axis entitlement rung** - the rows that end in a table. The
-frozen changeling arms keep their criteria and their card only where a run is
-already chained or a merge is already resolved; no new changeling criterion is
-cut ahead of a table row. Argument: `docs/decisions.md` §Tables ahead of arms.
+**Direction, 2026-09-04: this queue is the INSTRUMENT, and the tables left it.**
+The 09-03 re-call ranked table rows ahead of arms; that contest is over, because
+the play lane, cross-session memory and machina moved to a private repo with its
+own queue. **This is not tables being demoted** - the priority went with them,
+and a reader finding only arm rows here should not read a change of mind. What
+stays first is what the tables DEPEND on: the seam (`core/seam.py`, landed) and
+the browser seat. Behind those, the frozen changeling arms, whose criteria and
+card are unchanged. Argument: `docs/decisions.md` §Tables ahead of arms, with
+its 2026-09-04 supersession note.
 
 **Gate #3a is RETIRED and gate #3b is NOT SHOWN, and nothing below reopens
 either.** Read `docs/gate3a-retired.md` before restarting any cabal run.
@@ -333,6 +334,8 @@ Runs that are frozen and want card - and one that is already in the chain:
 
 Human-seat play, triaged from one hand-played session 2026-08-29. Nothing here is
 measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
+**Three rows left for the tables repo 2026-09-04** - the play lane, cross-session
+gate #1 and machina. What remains is engine work a table depends on, not play.
 
 - [ ] **"q36 is terse and robotic" is a claim about a model, and there is no
       bench.** RP tunes against `ablx` and q36, on ONE parlor-shaped question:
@@ -355,28 +358,16 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       still covers every axis (`core/test_observability.py`, both branches
       mutation-checked). The rung inherits it and owes no `core/` change; what was
       wrong is narrower than this row claimed, `docs/decisions.md`. Functional
-      keys only. **This is the multi-axis ENTITLEMENT rung, which earns `games/`
-      on that risk - not the operator's Paranoia table, which is private
-      (2026-09-04).** Done when a seat holds four orthogonal secrets and the audit
-      distinguishes them.
+      keys only. **What earns `games/` here is multi-axis entitlement, not the
+      setting** - a rung, not a table someone sits at. Done when a seat holds four
+      orthogonal secrets and the audit distinguishes them.
 
-- [ ] **The play lane, after session 0.** The draft is BUILT and RUN
-      (`docs/measurements.md` 2026-09-03); what is left is the scene loop and the
-      economy-compliance read, neither of which has a rubric yet.
-- [ ] **Cross-session gate #1 has a rule and no mechanism.** A seat's memory
-      derives from that seat's own audited view, never the referee transcript -
-      written down, enforced nowhere, and the leak surfaces three sessions later
-      in a table nobody public can run. The parlor half LANDED 2026-09-04:
-      `core/seam.py` declares the table-facing contract and `audit_render` is the
-      one place a table reaches the matcher. What is left is the private half -
-      audit the DERIVED text against that session's declared facts, same matcher,
-      same point a render is audited, so a memory that would leak fails to be
-      written. Done when a derivation over a session holding an unentitled secret
-      refuses it, mutation-checked by removing the audit call.
-- [ ] **A browser front-end for a human seat, phone included.** A SECOND
-      implementation of the `complete_meta` seam, not a rewrite; v1 ships the
-      gate-#1-audited string and nothing else. The trap, and the multi-seat prize
-      that is worth more than mobile, are `docs/open-arms.md` 2026-09-03.
+- [ ] **A browser front-end for a human seat.** A SECOND implementation of the
+      `complete_meta` seam (`core/seam.py` §Transport), not a rewrite; v1 ships
+      the gate-#1-audited string and nothing else. **The trap is rendering
+      referee state into widgets** - a second channel the audit does not see.
+      Per-connection channels also lift the one-seat cap a terminal forces, which
+      needs a real seat-binding guard. Argument: `docs/open-arms.md` 2026-09-03.
 - [ ] **Belfry's FULL script is the last reclassification, and it is UNBLOCKED
       2026-09-04.** `heartbeat` and `ensemble` left `games/` the same day, so
       `games/` and `core/registry.py` now name the same five. Belfry's own
@@ -384,27 +375,6 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       so the extra roles buy recognition surface and prompt cost. It waited only
       on a live changeling arm touching `games/belfry/`; that arm is down. Done
       when the script is local-only or gone.
-- [ ] **`machina` is ONE of its six stories evidenced, and it is a LOCAL PLAY row
-      before it is a public rung.** `docs/machina-rung.md` is the spec and
-      `feature/machina` is four commits against it (~130 lines of source, 163 of
-      test, 11 passing). Checked against the branch 2026-09-04, not against the
-      spec: **story 2, gate #1 over private pilot facts, is REAL** - `audit.py`
-      keys `(seat, "pilot")` through `find_leaks`, entitles only the viewer and
-      raises by default. The other five have no code. The sharp tell is
-      carried-but-unread state: `Pilot.pressure` is written by nothing and
-      `Scene.pressure_max` is read by nothing, so story 4's pack-specific pressure
-      transition cannot be tested at all; `resolve` takes an `outcome` string from
-      its caller, so there is no player-action protocol (story 1) and no referee
-      decision record or refusal path (story 3); `pack.load` has no validation, so
-      story 6's loud refusal is a `KeyError`; and no mission means no fallout
-      (story 5). **The rung owes a playable mission, not more schema.** Ranked
-      with the table rows above; the mecha table is a wanted one
-      (`CLAUDE.local.md`). Public merge is BLOCKED by a `.local.md` review and
-      that call is not this row's to reopen. Done when one seeded mission plays
-      end to end at the console with pressure and fallout moving, on the branch.
-
-Publishing:
-
 - [ ] **Obtain the paywalled theory chapter before publishing anything about gate
       #1** - the one result that could bound gate #1's shape, and two published
       hybrids are in the same debt (`docs/open-arms.md`). **No public claim about
