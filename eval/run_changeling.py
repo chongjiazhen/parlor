@@ -159,13 +159,14 @@ def one_game(index: int, args) -> GameRecord:
     seed = None if args.seed is None else args.seed + index
     rng = random.Random(seed)
     ref = ChangelingReferee.new(args.seats, seed=seed, theme=theme,
-                                discussion_rounds=args.rounds)
+                                discussion_rounds=args.rounds,
+                                briefing=args.briefing)
     try:
         return play_game(ref, build_policies(ref, args, rng, seed))
     except AssertionError:
         raise                                    # a leak is never scoreable
     except Exception as exc:                     # one bad game must not kill a run
-        rec = GameRecord(theme=theme.name)
+        rec = GameRecord(theme=theme.name, briefing=args.briefing)
         rec.error = f"{type(exc).__name__}: {exc}"
         return rec
 
@@ -467,6 +468,14 @@ def main() -> None:
                          "pass. A reasoning-distill model can fail to terminate "
                          "its reasoning and no token cap fixes that; see "
                          "core/backends.py. A MEASURED change, off by default.")
+    ap.add_argument("--briefing", action="store_true",
+                    help="carry the full standing frame - the day's procedure, "
+                         "the accusation rule and what each side wins on - in "
+                         "every render, byte-identical for every seat. Off by "
+                         "default: the ask is incremental by design and the "
+                         "default payload stays byte-identical to every run "
+                         "recorded before this flag. A MEASURED change, bound "
+                         "by docs/changeling-briefing-criterion.md.")
     ap.add_argument("--seats", type=int, default=5, choices=sorted(SETUPS),
                     help="which registered deck to deal - 5 is the shipped "
                          "SETUP_5 every recorded number was played on, 6 is the "

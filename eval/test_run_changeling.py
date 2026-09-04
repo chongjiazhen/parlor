@@ -36,7 +36,7 @@ def make_args(**kw):
     base = dict(arm="random", backend=None, model="none", rounds=1, retries=0,
                 register="character", temperature=0.8, timeout=5.0,
                 max_tokens=512, theme=None, seed=1000, games=1, out=None,
-                seats=5)
+                seats=5, briefing=False)
     base.update(kw)
     return argparse.Namespace(**base)
 
@@ -346,6 +346,31 @@ class TestTheWakerDeckIsDealable(unittest.TestCase):
         """A deck change re-baselines everything, so SETUP_5 must not drift."""
         self.assertNotIn("waker", [c.key for c in SETUPS[5].deck])
 
+
+
+class TestTheBriefingArmIsRecordedPerGame(unittest.TestCase):
+    """The pair's two arms differ in one flag, so the flag has to be readable off
+    a record. `vars(args)` carries it in the run header; the per-game field is
+    what keeps a JSONL reader from pooling two arms that landed in one file."""
+
+    def test_off_by_default_and_the_record_says_so(self):
+        rec = one_game(0, make_args())
+        self.assertFalse(rec.briefing)
+
+    def test_on_reaches_the_referee_and_the_record(self):
+        rec = one_game(0, make_args(briefing=True))
+        self.assertTrue(rec.briefing)
+
+    def test_the_flag_moves_the_rendered_bytes_and_nothing_else(self):
+        """One variable. Same seed, same deal, and the only difference in what a
+        seat is sent is the standing frame."""
+        off = ChangelingReferee.new(5, seed=1000, discussion_rounds=1)
+        on = ChangelingReferee.new(5, seed=1000, discussion_rounds=1,
+                                   briefing=True)
+        self.assertEqual(off.night.dealt, on.night.dealt)
+        for seat in range(off.n):
+            gap = on.render_context(seat).replace(on.briefing_text() + "\n\n", "")
+            self.assertEqual(gap, off.render_context(seat))
 
 
 class TestTheMixedArmsSeatTheRungAgainstTheModel(unittest.TestCase):

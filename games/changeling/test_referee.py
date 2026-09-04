@@ -591,3 +591,99 @@ class TestThemesChangeNoRule(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LeaksViaBriefing(ChangelingReferee):
+    """The plausible bug in the briefing arm: a standing frame written as a
+    worked example, with a real seat's dawn card interpolated into it.
+
+    It is plausible precisely because the briefing is meant to be furniture -
+    seat-invariant standing rules that carry no seat fact - so an author adding
+    "for instance, seat 2 holds the Werewolf" to make the win condition concrete
+    is doing the natural thing. The arm survives that only if the bytes go
+    through the audited scope, which is the reason `briefing_text` is rendered
+    inside ``seat_lines`` and not inside ``preamble``.
+    """
+
+    def briefing_text(self) -> str:
+        victim = 1 % self.n
+        return (super().briefing_text() + "\n"
+                + self.reveal_forms(victim, self.holds(victim).key)[0])
+
+
+class TestBriefingArm(unittest.TestCase):
+    """`--briefing` moves the standing frame INTO the payload. Off by default,
+    and the default render is byte-identical to the render before the flag
+    existed - the arm exists to measure the frame, so a default that carried any
+    of it would re-baseline every number taken under the per-phase drip."""
+
+    def test_the_arm_is_off_by_default(self):
+        self.assertFalse(ChangelingReferee.new(5, seed=3).briefing)
+
+    def test_the_default_render_carries_no_briefing(self):
+        """One variable. With the flag off the render must equal, byte for byte,
+        what a referee built with no knowledge of the flag renders."""
+        for seed in range(20):
+            off = ChangelingReferee.new(5, seed=seed)
+            for seat in range(off.n):
+                self.assertEqual(off.briefing_text(), "")
+                self.assertNotIn("points at once", off.render_context(seat))
+
+    def test_briefing_on_adds_the_frame_once_per_render(self):
+        on = ChangelingReferee.new(5, seed=3, briefing=True)
+        text = on.briefing_text()
+        self.assertTrue(text)
+        for seat in range(on.n):
+            self.assertEqual(on.render_context(seat).count(text), 1)
+
+    def test_the_frame_states_the_three_things_the_drip_withholds(self):
+        """The discussion procedure, the accusation rule and what each side wins
+        on. Named by content rather than by length, so a rewrite that drops one
+        of the three fails here instead of passing on a byte count."""
+        on = ChangelingReferee.new(5, seed=3, discussion_rounds=2, briefing=True)
+        text = on.briefing_text()
+        self.assertIn("2 round(s)", text)                 # the procedure
+        self.assertIn("more than one", text)              # the accusation rule
+        self.assertIn("The Village", text)                # what the village wins on
+        self.assertIn("The Wolves", text)                 # and the pack
+
+    def test_the_frame_speaks_the_skin_s_vocabulary(self):
+        """A skin renames the sides and the cards, so a briefing hardcoding
+        "werewolf" would describe a different table from the one the preamble
+        just listed."""
+        on = ChangelingReferee.new(5, seed=3, theme=THEME_PLAIN, briefing=True)
+        self.assertIn("Pack", on.briefing_text())
+        self.assertNotIn("Werewolf", on.briefing_text())
+
+    def test_the_frame_is_byte_identical_for_every_seat(self):
+        """The invariance the arm rests on. A frame that differed per seat would
+        be a per-seat channel wearing the word "rules"."""
+        for seed in range(20):
+            on = ChangelingReferee.new(5, seed=seed, briefing=True)
+            self.assertEqual(len({on.briefing_text() for _ in range(on.n)}), 1)
+
+    def test_the_frame_names_no_seat(self):
+        on = ChangelingReferee.new(5, seed=3, briefing=True)
+        self.assertNotIn("Seat ", on.briefing_text())
+        self.assertNotIn("seat 0", on.briefing_text())
+
+    def test_gate_one_holds_with_the_briefing_on(self):
+        """200 seeded games, both phases. The frame is new bytes reaching a seat,
+        so it is audited like every other byte rather than excused as furniture."""
+        for seed in range(200):
+            ref = ChangelingReferee.new(5, seed=seed, briefing=True)
+            self.assertEqual(leak_audit(ref), [], f"discuss leak on seed {seed}")
+            ref.phase = Phase.VOTE
+            self.assertEqual(leak_audit(ref), [], f"vote leak on seed {seed}")
+
+    def test_a_briefing_that_names_a_seat_fact_is_caught(self):
+        """The mutation check with teeth: the honest frame above passes because
+        it says nothing about a seat, not because the audit stopped looking."""
+        caught = 0
+        for seed in range(40):
+            ref = LeaksViaBriefing(
+                setup=SETUP_5, briefing=True,
+                night=resolve_night(SETUP_5, random.Random(seed)))
+            if leak_audit(ref):
+                caught += 1
+        self.assertEqual(caught, 40, "a leaky briefing rode past gate #1")

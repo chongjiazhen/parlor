@@ -128,6 +128,10 @@ partly true is worse than none.
   the pack live vs the pack at random against the SAME live village, on S22's
   two-round record plus one `--arm llm-village` arm. Arithmetic
   `eval.gate2_pair_verdict`. UNLAUNCHED.
+- `docs/changeling-briefing-criterion.md` - S21: the ask's per-phase drip against
+  the full standing frame in every render, `--briefing` off vs on, arm 1 being
+  S22's two-round record. Arithmetic `eval.briefing_pair_verdict`. Must run
+  BEFORE the source-rules merge. UNLAUNCHED.
 - `docs/changeling-mixed-criterion.md` - the hand-written rung seated against
   LIVE seats, `--arm mixed-village` and `--arm mixed-pack`, closing the artifact
   §"changeling heuristic rung" names: a rung read against a control that cannot

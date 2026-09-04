@@ -17,7 +17,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from core.console import ConsoleBackend, human_seats
-from games.changeling.demo import (build_policies, constrained_deal,
+from games.changeling.demo import (BRIEFING, build_policies, constrained_deal,
                                     opening_view)
 from games.changeling.player import (ACTION_KEYS, LLMPolicy, RandomPolicy,
                                       play_game)
@@ -53,6 +53,7 @@ class _Args:
     no_thinking = False
     human = "0"
     human_retries = 4
+    briefing = False
 
 
 def test_only_the_named_seat_gets_a_console():
@@ -61,6 +62,70 @@ def test_only_the_named_seat_gets_a_console():
     assert isinstance(policies[0].backend, ConsoleBackend)
     for seat in (1, 2, 3, 4):
         assert isinstance(policies[seat], RandomPolicy)
+
+
+# ---- --briefing: wired into the console, and said once, not twice ----------
+
+
+class _BriefingArgs(_Args):
+    briefing = True
+
+
+def test_the_briefing_flag_is_off_by_default_on_the_console():
+    """The console keeps its own furniture text when the referee's frame arm
+    is off - nothing changed for the un-flagged path."""
+    ref = ChangelingReferee.new(5, seed=5)
+    policies = build_policies(ref, _Args(), random.Random(5))
+    assert policies[0].backend.briefing == BRIEFING
+
+
+def test_the_flag_drops_the_consoles_own_furniture_text():
+    """ref.briefing_text() now rides IN the payload, and a human seat prints
+    its own payload every render - so the console's furniture briefing, which
+    covers the same ground (the day's procedure, the accusation rule, what
+    each side wins on), is dropped rather than said a second time."""
+    ref = ChangelingReferee.new(5, seed=5, briefing=True)
+    policies = build_policies(ref, _BriefingArgs(), random.Random(5))
+    assert policies[0].backend.briefing == ""
+
+
+def test_the_flag_leaves_other_seats_random():
+    """The flag only changes what the human seat's console is handed, not who
+    plays the table."""
+    ref = ChangelingReferee.new(5, seed=5, briefing=True)
+    policies = build_policies(ref, _BriefingArgs(), random.Random(5))
+    for seat in (1, 2, 3, 4):
+        assert isinstance(policies[seat], RandomPolicy)
+
+
+def test_the_frame_reaches_the_human_seats_rendered_prompt_when_the_arm_is_on():
+    """End to end: --briefing on the referee puts the frame in seat 0's own
+    render, and the console prints exactly that render every turn."""
+    ref = ChangelingReferee.new(5, seed=5, briefing=True)
+    policies = build_policies(ref, _BriefingArgs(), random.Random(5))
+    console = policies[0].backend
+    console.stdin = io.StringIO("say I will wait\nvote 1\n" * 40)
+    out = io.StringIO()
+    console.stdout = out
+    rng = random.Random(5)
+    play_game(ref, {0: policies[0],
+                    **{s: RandomPolicy(rng) for s in (1, 2, 3, 4)}})
+    printed = out.getvalue()
+    assert ref.briefing_text() in printed
+    assert "How the day runs" in printed
+
+
+def test_the_frame_is_absent_from_the_rendered_prompt_by_default():
+    ref = ChangelingReferee.new(5, seed=5)
+    policies = build_policies(ref, _Args(), random.Random(5))
+    console = policies[0].backend
+    console.stdin = io.StringIO("say I will wait\nvote 1\n" * 40)
+    out = io.StringIO()
+    console.stdout = out
+    rng = random.Random(5)
+    play_game(ref, {0: policies[0],
+                    **{s: RandomPolicy(rng) for s in (1, 2, 3, 4)}})
+    assert "How the day runs" not in out.getvalue()
 
 
 def test_a_hand_played_game_reaches_a_winner_with_gate_one_audited():
