@@ -103,8 +103,8 @@ each other's private view. A second human seat needs a second channel.
 | **quorum** (entitlement cascades over a secret created in play) | deterministic, per event | spike #3 |
 | Secret Hitler | deterministic + forced reveals | **not as a port** - a port buys recognition and no engine progress. `quorum` is that shape, built for the entitlement axis below rather than the recognition |
 | **belfry** (the referee may state a falsehood to a seat, as a rule) | deterministic, discretion drawn from the seed | spike #4 |
-| the same rung with a MODEL in the referee's seat | LLM judgment over one isolated decision | next - belfry's discretionary choices are already isolated and logged, so this replaces one function and nothing about the audit |
-| Freeform TTRPG (5e SRD) | mostly LLM judgment | the actual product |
+| **durf** (the secret belongs to the WORLD, not to a seat) | a MODEL in the referee's seat, over a deterministic rules kernel | spike #5 - and the one that carries a model. Its entitlement key is a fact rather than a seat, so a room's contents before entry belongs to nobody and every seat is equally un-entitled to it |
+| a freeform TTRPG table | mostly LLM judgment | what the ladder is for |
 
 Ordered by how much JUDGMENT the referee needs, which is the axis the engine risk
 sits on. A rung that adds rules without adding discretion is a lateral move, which
@@ -154,6 +154,9 @@ isolated, logged set of calls, so putting a model in that seat changes one funct
 
 Full rules and the knowledge tables: `games/cabal/RULES.md`,
 `games/changeling/RULES.md`, `games/quorum/RULES.md`, `games/belfry/RULES.md`.
+**durf has no `RULES.md` and that is deliberate** - its ruleset is a digest the
+referee is actually handed, so `games/durf/rules.py` is the single source and a
+second prose account beside it would be the thing that goes stale.
 
 ## Two public channels, and the line between them
 
@@ -241,6 +244,8 @@ seat actually played against, and how many games ran with neither.
 
 ```
 core/observability.py      SeatView, Knowledge, find_leaks  (partial-observability spine + gate #1)
+core/seam.py               the referee/transport contract, written down - what an
+                           outside consumer may depend on; the rest of core/ may move
 core/backends.py           one adapter, three routes (local / clean / gray), pluggable player prompt
 core/console.py            a human seat wearing the backend interface (--human)
 core/replies.py            model reply -> values (JSON out of prose, salvage, coercion)
@@ -288,8 +293,8 @@ eval/derivable.py          what a seat could derive with no model at all
 eval/ladder.py             the control ladder: random, rules-only, model
 eval/audit_decisions.py    mine a finished run for moves wrong on their own terms
 
-games/durf/                a fourth rung, scoped - a session engine and a labelled
-                           fixture, and no console seat yet, so it is not registered
+games/durf/                the fifth rung - a session engine, a rules kernel, a
+                           labelled fixture, and a model in the referee's seat
 
 scripts/hygiene-check.sh   a pre-commit gate over the lines a commit ADDS
 scripts/install-hooks.sh   installs it (`.git/hooks` is per-clone, so this is one command)
