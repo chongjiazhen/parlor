@@ -41,8 +41,11 @@ set "LOG=%OUTDIR%\belfry-live1.log"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 
 rem The per-game JSONL is APPENDED as each game lands, so a stale one from the
-rem previous occupant of this name would silently double the file.
-if exist "%OUTDIR%\belfry-live1.json.jsonl" del "%OUTDIR%\belfry-live1.json.jsonl"
+rem previous occupant of this name would silently double the file. REFUSE, never
+rem clear: the occupant cost GPU-hours and clearing it is the operator's call,
+rem and core.runlog.claim_record refuses on the summary anyway - so a recipe that
+rem deleted the JSONL here would destroy half a record and still not launch.
+if exist "%OUTDIR%\belfry-live1.json.jsonl" exit /b 1
 
 echo [gate] burst-probing local/%MODEL% before spending a run...>>"%LOG%"
 python -m eval.probe_tier --backend local --model "%MODEL%" -n 3 --timeout 120 >>"%LOG%" 2>&1

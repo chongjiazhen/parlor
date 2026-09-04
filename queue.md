@@ -183,16 +183,17 @@ the one that goes stale.
       arm that INFORMED swapped a whole policy. Argument, the real counter and
       the one cheap fix: `docs/open-arms.md` §Is the changeling arm program
       powered. Done when a criterion must name its expected effect before launch.
-- [ ] **Five recipes DELETE a stale JSONL where the others refuse.**
-      `belfry-live1`, `belfry-live2`, `durf-fixture`, `durf-session` and
-      `quorum-live4` carry `if exist ... del` against the append hazard the
-      writer now holds (`core/runlog.py claim_record`, 2026-09-03), so the
-      line is both redundant and the only launcher line in the tree that
-      destroys a record - and it deletes the JSONL while leaving the summary,
-      which is the half-state the claim then refuses anyway. The other nine
-      recipes `exit /b 1` instead. Done when the five refuse rather than
-      delete. Not measured: whether any of the five was ever re-run onto its
-      own path, which is what the `del` was written for.
+- [ ] **One recipe still OVERWRITES a record, and it is not a `del`.**
+      `eval/runs/changeling-powers-pair.cmd:83` lifts a JSONL out of a worktree
+      with `copy /y` into `eval\records\`, no existence test, so a same-named
+      record there is replaced without a word. Found 2026-09-04 while closing the five
+      `del` lines: `scripts/test_recipe_guards.py` is deliberately scoped to
+      `del` and to `if exist` guards, because a rule wide enough to catch a
+      `copy` would forbid READING a record, which that recipe legitimately does.
+      **Not measured: whether it ever overwrote one** - the pair's records are
+      down and a stale-name collision needs a re-run onto the same tag to
+      happen. Done when the copy refuses on an occupied destination, or the
+      guard test grows a shape that covers a write rather than a name.
 - [ ] **`check-recipe-settings.py` is honest now; the pytest fixture is what is
       left.** Three vacuous passes and one false alarm came out on 2026-09-04, all
       the same disease - reading text that is not the arm. A valueless flag ate

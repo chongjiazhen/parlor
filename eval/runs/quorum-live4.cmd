@@ -43,8 +43,11 @@ set "LOG=%OUTDIR%\quorum-live4.log"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 
 rem The per-game JSONL is APPENDED as each game lands, so a stale one from an
-rem earlier attempt would silently double the file.
-if exist "%OUTDIR%\quorum-live4.json.jsonl" del "%OUTDIR%\quorum-live4.json.jsonl"
+rem earlier attempt would silently double the file. REFUSE, never clear: the
+rem occupant cost GPU-hours and clearing it is the operator's call, and
+rem core.runlog.claim_record refuses on the summary anyway - so a recipe that
+rem deleted the JSONL here would destroy half a record and still not launch.
+if exist "%OUTDIR%\quorum-live4.json.jsonl" exit /b 1
 
 echo [gate] burst-probing local/%MODEL% before spending a run...>>"%LOG%"
 python -m eval.probe_tier --backend local --model "%MODEL%" -n 3 --timeout 120 >>"%LOG%" 2>&1

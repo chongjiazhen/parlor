@@ -50,9 +50,11 @@ set "LOG=%OUTDIR%\%TAG%.log"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 
 rem The per-item JSONL is APPENDED as each item lands, so a stale one from an
-rem earlier run of the same tag would silently double the file. The summary .json
-rem is rewritten and needs no such care.
-if exist "%OUTDIR%\%TAG%.json.jsonl" del "%OUTDIR%\%TAG%.json.jsonl"
+rem earlier run of the same tag would silently double the file. REFUSE, never
+rem clear: the occupant cost GPU-hours and clearing it is the operator's call.
+rem The summary .json needs no line here either, and NOT because it is rewritten
+rem - core.runlog.claim_record refuses on whichever of the two it finds.
+if exist "%OUTDIR%\%TAG%.json.jsonl" exit /b 1
 
 echo [gate] burst-probing local/%MODEL% before spending a run...>>"%LOG%"
 python -m eval.probe_tier --backend local --model "%MODEL%" -n 3 --timeout 120 >>"%LOG%" 2>&1

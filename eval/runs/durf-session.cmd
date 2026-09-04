@@ -54,9 +54,11 @@ set "LOG=%OUTDIR%\%TAG%.log"
 if not exist "%OUTDIR%" mkdir "%OUTDIR%"
 
 rem The per-session JSONL is APPENDED as each session lands, so a stale one from
-rem an earlier run of the same tag would silently double the file. The summary
-rem .json is rewritten and needs no such care.
-if exist "%OUTDIR%\%TAG%.json.jsonl" del "%OUTDIR%\%TAG%.json.jsonl"
+rem an earlier run of the same tag would silently double the file. REFUSE, never
+rem clear: the occupant cost GPU-hours and clearing it is the operator's call.
+rem The summary .json needs no line here either, and NOT because it is rewritten
+rem - core.runlog.claim_record refuses on whichever of the two it finds.
+if exist "%OUTDIR%\%TAG%.json.jsonl" exit /b 1
 
 echo [control] the free scripted arm before spending a live one...>>"%LOG%"
 python -m eval.durf_session --arm scripted --sessions 3 --rounds %ROUNDS% ^
