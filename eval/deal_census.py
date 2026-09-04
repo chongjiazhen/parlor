@@ -104,9 +104,11 @@ def main(argv: list[str]) -> int:
     print(f"  {c.statistic}-eligible decisions: {c.eligible} "
           f"({c.per_game:.2f} per deal)")
     print(f"  deals offering none: {sum(1 for n in c.per_deal if not n)}")
-    print("\nQuote this in the criterion's §Power, for THIS block. An eligibility "
-          "rate\nmeasured on a block the arm will not play is not that arm's "
-          "power.")
+    # No section sign here: this prints to a cp1252 console on the box that runs
+    # it, where a non-ASCII byte comes back as mojibake or kills the write.
+    print("\nQuote this in the criterion's Power section, for THIS block. An "
+          "eligibility rate\nmeasured on a block the arm will not play is not "
+          "that arm's power.")
     return 0
 
 
