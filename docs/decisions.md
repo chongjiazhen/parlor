@@ -804,3 +804,34 @@ changeling arms keep their criteria; they get card only where a run is already
 chained or a merge already resolved, and no new changeling criterion is cut
 ahead of a table row. The arms measure a model and the tables are what the
 model is for.
+
+## cabal keeps its `games/` slot by elimination, not by the earning test, 2026-09-04
+
+The earning test in `AGENTS.md` admits a rung that exposes one named executable
+risk to isolation or referee judgment no existing rung expresses. **Applied
+honestly, cabal fails it.** Its model is static asymmetric knowledge dealt at
+setup, and two rungs verifiably contain that: `games/quorum/RULES.md` line 173 -
+at five seats the two minority seats know each other and the majority do not,
+entitlement "evaluated at the deal" - and changeling, whose pack seats are shown
+`fellow-pack` at the meet. Belfry does NOT contain it: its evil briefings moved
+to seven seats and up on 2026-09-02, so at five seats its evil seats are
+strangers.
+
+It stays because every alternative is worse, and that is the whole reason.
+`experiments/` is definitionally wrong - its `__init__` says proof fixtures and
+drafts that are NOT games a person plays, and cabal is playable and registered.
+The private arm is ruled out by the migration shape settled the same day: a rung
+with published figures stays public and testable, and cabal's gate #3 numbers are
+cited. A namespace invented for one retired-but-playable rung is the artifact-of-
+last-resort this layer keeps refusing.
+
+**Two arguments for keeping it were checked and do NOT hold.** "No model needed"
+is not a cabal property: all five rungs run to completion modelless, exit 0, and
+the README line implying otherwise was drift, fixed the same day. And minimality
+as a regression control does not require a `games/` slot, because a demoted
+rung's tests keep running - `experiments/heartbeat` proves that.
+
+**So the invariant is NOT amended.** Adding a second admission ground for
+minimality would dress a nowhere-else-to-put-it as a principle, and the next rung
+would claim it. A reader applying the test and reaching demotion has read the
+test correctly; this section is the answer, not a hole in it.

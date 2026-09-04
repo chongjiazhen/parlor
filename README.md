@@ -32,18 +32,18 @@ easy by comparison.
 
 **Five rungs, and the set is gated rather than collected.** A game earns a place
 in `games/` by exposing one named executable risk to information isolation or
-referee judgment that no existing rung already expresses - the five below are
-five different information models, not five card games. Genre, familiarity and a
-working play loop earn nothing on their own, which is why `games/` and
-`core/registry.py` hold the same five names and why proof fixtures that nobody
-sits down at live in `experiments/` instead. The full test is `AGENTS.md`
-§Invariants.
+referee judgment that no existing rung already expresses; genre, familiarity and
+a working play loop earn nothing on their own. That is why `games/` and
+`core/registry.py` hold the same five names, and why proof fixtures nobody sits
+down at live in `experiments/` instead. The test is `AGENTS.md` §Invariants, and
+`docs/decisions.md` records where a rung is kept on grounds the test does not
+cover.
 
 ## Try it
 
 ```bash
 python -m parlor --list                       # the games you can sit at
-python -m parlor play cabal                   # a whole game, random players, no model needed
+python -m parlor play cabal                   # a whole game, five seats, nobody watching
 python -m parlor play cabal --human 0         # you play seat 0
 python -m parlor play changeling --human 0    # your own card can change under you
 python -m parlor play quorum --human 0        # the secret is dealt in play, not at the deal
