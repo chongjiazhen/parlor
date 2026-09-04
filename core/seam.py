@@ -132,6 +132,22 @@ class Transport(Protocol):
         """
 
 
+#: What each protocol above declares, written down so a consumer can read the
+#: seam without reaching into CPython. ``Protocol.__protocol_attrs__`` carries the
+#: same answer on 3.13 and is a private detail this package cannot depend on -
+#: ``pyproject.toml`` claims 3.10, where it does not exist.
+#:
+#: A hand-written copy of a computed fact is a thing that drifts, so
+#: ``core/test_seam.py`` asserts the two agree wherever the interpreter can be
+#: asked. That test is the reason this constant is safe to read.
+SEAM: dict[str, tuple[str, ...]] = {
+    "Rendered": ("n", "phase", "prompt_for", "render_context", "seat_view"),
+    "Audited": ("entitled_seats", "secret_terms"),
+    "Asked": ("acting_seats", "ask"),
+    "Transport": ("complete_meta",),
+}
+
+
 def audit_render(ref: Audited, viewer: int, rendered: str
                  ) -> list[tuple[SecretKey, str]]:
     """Scan bytes about to reach ``viewer``'s model for a secret it may not hold.
