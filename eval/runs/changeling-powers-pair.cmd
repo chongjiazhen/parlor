@@ -79,6 +79,33 @@ if errorlevel 1 (
 
 rem The before tree is a worktree, so its records live there. Bring them home -
 rem eval\records\ in the primary checkout is the durable one this repo reads.
+rem
+rem REFUSE AN OCCUPIED DESTINATION FIRST. `copy /y` says in its own flag that it
+rem replaces without asking, and a same-named record here cost GPU-hours; a
+rem launcher cannot know which, so clearing it is the operator's call, exactly as
+rem it is for the `exit /b 1` every other recipe makes on its own output path.
+rem Arm 1's records are NOT lost when this fires - they are still in the worktree,
+rem and the echo says where.
+if exist "%OUTDIR%\%TAGB%.json" (
+  echo [pair] %OUTDIR%\%TAGB%.json already exists - refusing to overwrite it.>>"%PAIRLOG%"
+  echo [pair] Arm 1's records are intact in %BEFORE%\%OUTDIR%\ - move them yourself.>>"%PAIRLOG%"
+  echo PARLOR PAIR DONE rc=1 arms=1/2 >>"%PAIRLOG%"
+  exit /b 1
+)
+if exist "%OUTDIR%\%TAGB%.json.jsonl" (
+  echo [pair] %OUTDIR%\%TAGB%.json.jsonl already exists - refusing to overwrite it.>>"%PAIRLOG%"
+  echo [pair] Arm 1's records are intact in %BEFORE%\%OUTDIR%\ - move them yourself.>>"%PAIRLOG%"
+  echo PARLOR PAIR DONE rc=1 arms=1/2 >>"%PAIRLOG%"
+  exit /b 1
+)
+rem The log is not a record and the guard test does not ask for this one. It is
+rem here anyway: the log is what a run is judged by, and losing it silently costs
+rem the same as losing the summary.
+if exist "%OUTDIR%\%TAGB%.log" (
+  echo [pair] %OUTDIR%\%TAGB%.log already exists - refusing to overwrite it.>>"%PAIRLOG%"
+  echo PARLOR PAIR DONE rc=1 arms=1/2 >>"%PAIRLOG%"
+  exit /b 1
+)
 copy /y "%BEFORE%\%OUTDIR%\%TAGB%.json" "%OUTDIR%\" >nul
 copy /y "%BEFORE%\%OUTDIR%\%TAGB%.json.jsonl" "%OUTDIR%\" >nul
 copy /y "%BEFORE%\%OUTDIR%\%TAGB%.log" "%OUTDIR%\" >nul
