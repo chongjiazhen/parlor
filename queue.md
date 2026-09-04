@@ -101,7 +101,6 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 |---|---|
 | `slice/changeling-source-rules` | the night rules - merge condition MET on the branch |
 | `slice/changeling-notebook` | `--notebook` |
-| `slice/s21-merged` | `--briefing`, arm + console, main ALREADY merged in and conflicts resolved (`95465bd`) - merge this, not the two s21 branches |
 | `slice/fanout-s27` + `slice/fanout-s27-demo` | `--turns random-active`, arm then console |
 | `slice/fanout-simul` | `--turns simultaneous`, sits over S27 |
 | `slice/fanout-replies` | the parser's complaints - **supersedes `slice/fanout-neg`**, which it sits on |
@@ -122,9 +121,9 @@ is not restated here; what binds is the line below.
 notebook slipped to the deferred group, so the pre-merge set was mixed-pack,
 briefing, partner (~12 h). **Partner is RUN and READ 2026-09-04 - NOT SHOWN**
 (`docs/measurements.md`), so the honesty debt of the two unadjusted free reads is
-paid and its criterion pre-committed that no second arm chases it. What is left of
-the pre-merge set is briefing, and `mixed-village` owes the card its chain never
-gave it.
+paid and its criterion pre-committed that no second arm chases it. **Briefing is
+MERGED 2026-09-04** (suite 1836 passed, 5 skipped, 644 subtests in this tree) and
+now owes only the card; `mixed-village` owes the card its chain never gave it.
 
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
@@ -195,15 +194,19 @@ the one that goes stale.
       recipes `exit /b 1` instead. Done when the five refuse rather than
       delete. Not measured: whether any of the five was ever re-run onto its
       own path, which is what the `del` was written for.
-- [ ] **A recipe's flags are pinned to its criterion by a standalone SCRIPT,
-      2026-09-03 - not yet by the suite.** `scripts/check-recipe-settings.py`,
-      mutation-checked, holds a `.cmd`'s `--flag value`s against its criterion's
-      text; how it parses is its own header. **It refuses to vacuous-pass**: a
-      shape it cannot read (a `for %%T` loop, a two-invocation pair -
-      `changeling-rounds-pair.cmd`, `-skin-pair.cmd`) reports NOT CHECKED, never
-      a silent 0-pair "agrees". Done when it is a pytest fixture over all ~15
-      criterion-bound recipes, which needs those two shapes read and the suite
-      ban lifted.
+- [ ] **`scripts/check-recipe-settings.py` SWALLOWS the flag after a valueless
+      one, and the SEED is what it swallowed.** Measured 2026-09-04 on the merged
+      `changeling-briefing-arm.cmd`: `FLAG_RE`'s `(\S+)` matches a following
+      `--flag`, so `--briefing --seed` reported a disagreement while `--seed 5000`
+      went unchecked - `findall` resumes past it. `--no-thinking --seats` PASSED
+      only because the criterion lists those two adjacent in prose: a coincidental
+      green, the vacuous pass its own header claims it refuses. It verified games,
+      arm, model, theme, rounds; skipped seats and seed - the load-bearing value,
+      the class belfry live1 cost 11.5 h. The recipe AGREES with its criterion,
+      checked by hand. Fix is structural, no registry to drift: a `--`-leading
+      token is not a value, a valueless flag becomes a presence check. Guard work,
+      test first. Still owed: the pytest fixture over ~15 recipes, which needs the
+      `for %%T` and two-invocation shapes read.
 - [ ] **The merge freeze is prose, and the import graph is what it actually
       means.** `queue.md` says a branch is free and a merge is not; what makes a
       merge unsafe mid-arm is touching what the live run IMPORTS. Checked by hand
@@ -393,14 +396,11 @@ measured. Which of it may be handed to a worker is S12 and `docs/worklane.md`.
       its caller, so there is no player-action protocol (story 1) and no referee
       decision record or refusal path (story 3); `pack.load` has no validation, so
       story 6's loud refusal is a `KeyError`; and no mission means no fallout
-      (story 5). **This is the row's whole content: the rung owes a playable
-      mission, not more schema.** Ranked with the table rows above, under the
-      2026-09-03 direction, and the mecha table is a wanted one
-      (`CLAUDE.local.md`). Public merge is BLOCKED and that call is not this
-      row's to reopen - it is a `.local.md` review, and the litmus it applies is
-      whether the smallest retained surface proves a named isolation failure no
-      existing rung expresses. Done when one seeded mission plays end to end at
-      the console with pressure and fallout moving, on the branch.
+      (story 5). **The rung owes a playable mission, not more schema.** Ranked
+      with the table rows above; the mecha table is a wanted one
+      (`CLAUDE.local.md`). Public merge is BLOCKED by a `.local.md` review and
+      that call is not this row's to reopen. Done when one seeded mission plays
+      end to end at the console with pressure and fallout moving, on the branch.
 
 Publishing:
 
