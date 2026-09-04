@@ -118,13 +118,13 @@ first is the operator's ranking; the criteria are frozen and wait.
 reasoning is `docs/decisions.md` §GPU order for the frozen changeling arms and
 is not restated here; what binds is the line below.
 
-**Re-ranked 2026-09-03** (`docs/decisions.md`): the partner arm takes slot 3 and
-notebook slips to the deferred group, so the pre-merge set is mixed-pack, briefing,
-partner (~12 h). Partner's effect has been observed twice against an 8.7-point MDE
-where notebook has a prediction and no observation, and it closes the honesty debt
-of two unadjusted free reads published with no pre-committed test. It runs BEFORE
-the merge, which would leave its numbers readable while changing what they
-replicate.
+**Re-ranked 2026-09-03** (`docs/decisions.md`): the partner arm took slot 3 and
+notebook slipped to the deferred group, so the pre-merge set was mixed-pack,
+briefing, partner (~12 h). **Partner is RUN and READ 2026-09-04 - NOT SHOWN**
+(`docs/measurements.md`), so the honesty debt of the two unadjusted free reads is
+paid and its criterion pre-committed that no second arm chases it. What is left of
+the pre-merge set is briefing, and `mixed-village` owes the card its chain never
+gave it.
 
 **Two conflict pairs are foreseen, each with a required order.** In
 `games/changeling/referee.py` simul rewrites the turn machinery source-rules also
@@ -142,17 +142,17 @@ behind each is `docs/open-arms.md`; read the entry before taking the row**, and
 the reference each names is indexed in `docs/README.md`. A second index here is
 the one that goes stale.
 
-- [ ] **Run the partner arm - the pack statistic, PRIMARY, on fresh seeds.**
-      Two unadjusted free reads on two different axes both landed on the partner
-      vote and neither pair's primary could see it (`docs/measurements.md`: the
-      skin pair 2026-09-02, the rounds pair 2026-09-03). The criterion is
-      WRITTEN - `docs/changeling-partner-criterion.md`, one arm on fresh seeds
-      17000.., ~5 h - and the tool and recipe are written. What it owes is the
-      card, and it must run BEFORE the source-rules merge, which would leave
-      every number readable while changing what is replicated. The axis question
-      - which of name form or round count causes it - is deliberately NOT in it:
-      four arms split 2-2 and no single variable separates them, so that is a
-      later pair against this arm's record.
+- [ ] **A fresh seed block deals a DIFFERENT eligibility census, and no row
+      predicted it.** The partner arm's 17000-block dealt partner-eligible games
+      at 168/200 where the 5000-block dealt 198/200 on all four prior arms
+      (`docs/measurements.md` 2026-09-04). The criterion's census check proves it
+      is the DEAL, not play - arm and control agree exactly over the 200 shared
+      deals - so this is a property of the seed block that every power section in
+      the tree currently assumes away: each one computes its half-width from an
+      eligibility rate measured on a block it is not going to play. It cost 0.9
+      points of half-width here and did not change the call. Done when a
+      criterion's power section takes its eligible-vote count from its OWN seed
+      block, which is a CPU census over the deal and needs no card.
 - [ ] **The folk-vs-greek vocabulary read needs a criterion and fresh seeds,
       ~10 h.** Decide first whether it is worth 10 h at all, given the skin pair
       showed NOT SHOWN on the name-form axis. Done when decided no (row deleted)

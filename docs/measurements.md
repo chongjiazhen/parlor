@@ -1375,3 +1375,49 @@ record could offer.
 
 Gate #3's reference bar is 35.84% and this file makes no gate #3 call - the
 criterion did not name one. Nothing here is a statement about `mixed-village`.
+
+## changeling partner protection - the pre-registered replication is NOT SHOWN, READ 2026-09-04
+
+`docs/changeling-partner-criterion.md`, frozen 2026-09-03T05:25:31Z.
+`py -3 -m eval.partner_verdict`, exit 0, no void. This is the arm the two free
+reads above (§changeling skin pair, §changeling discussion length) were sent here
+to spend, and it spends them in the direction that says they were not an effect.
+
+Record `eval/records/cl-partner.json`, 200 games on fresh seeds 17000..17199, 193
+scored, 18830 s (5.23 h) on `qwen36-35b-a3b-iq3` at 100% served; control
+`cl-partner-random.json`, 1000 games from the arm's own seed base. The record's
+own `args` pin against the criterion's §Settings on both records and match.
+
+**Voids first.** Fallback **0.70%** against the 10% bar. Recovered 8.73%, under
+the 25% flag. 168 partner-eligible votes against the criterion's REFUSED floor of
+150. The census check passes - arm and control agree exactly on the eligible
+count over the 200 deals they share, which is the check that proves eligibility
+is a property of the deal and not of play. Nothing voids.
+
+| the partner vote - a pack seat voted the fellow it was told | rate | Wilson 95% |
+|---|---|---|
+| arm | **37/168 = 22.02%** | [16.42%, 28.88%] |
+| its own random control | 178/840 = 21.19% | [18.56%, 24.08%] |
+
+**Difference +0.83%, Newcombe 95% [-5.47%, +8.17%] - includes zero, so NOT
+SHOWN.** Direction was deliberately not pre-committed and the point estimate sits
+on the wrong side of zero for the prior anyway: the two free reads that motivated
+this arm were -10.03% and -12.05%, and both lie outside this interval. The
+criterion pre-committed that no second arm chases it, so the effect does not
+survive its first pre-registered test and the two free reads are not quotable as
+a finding.
+
+**The instrument came in wider than its own power section.** §Power computed a
+5.9-point half-width from ~198 partner-eligible votes, measured at 198/200 on all
+four prior arms; this arm got 168, and the realized Newcombe half-width is 6.82
+points. The arm stayed powered for the effect it was chasing - both prior effects
+clear even the widened interval - so this does not soften the call. **What it
+costs is a separate question the tree does not hold an answer to:** the fresh
+17000-block deals partner-eligible games at 168/200 where the 5000-block dealt
+198/200, the census check proves that is the deal rather than play, and no row
+predicted it. It is a row now.
+
+Free read, no verdict, and the criterion forbids promoting it: blind villager
+accuracy 119/264 = 45.08% [39.19%, 51.11%] on the arm against 469/1252 = 37.46%
+[34.82%, 40.18%] on its control, reference 35.84%. This file makes no gate #3
+call - the criterion did not name one.
