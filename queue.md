@@ -192,10 +192,18 @@ the one that goes stale.
       so a `probe_tier` gate contributes nothing. And `rem` lines are prose:
       `belfry-live2.cmd`'s only `py -3 -m eval.` text is a commented scoring
       hint, off which the checker had reported AGREES - a recipe pinned to its
-      criterion on the strength of a comment. **Re-swept all 13 pairable
-      recipes: five agree, eight NOT CHECKED, zero false mismatches.** Done when
-      it is a pytest fixture over them, which needs the `for %%T` loop shape read
-      and a rule for which invocation of a multi-arm recipe a criterion means.
+      criterion on the strength of a comment. **The LAUNCHER SPELLING was the
+      largest hole and is CLOSED 2026-09-05**: the regex demanded `py -3 -m`,
+      so the ten recipes saying `python -m` all read as "unsupported shape",
+      blaming a loop variable none of them has - `belfry-live1.cmd` among them,
+      the recipe whose mismatch bought the invariant. **Re-swept: 18 pairable
+      (was 13), nine agree (was five), nine NOT CHECKED, zero mismatches**, and
+      live1 and live2 are mechanically pinned for the first time. Done when it
+      is a pytest fixture over them, which needs the `for %%T` loop shape read,
+      a rule for which invocation of a multi-arm recipe a criterion means, and
+      **the positional-argument shape**: `changeling-kindred.cmd` carries its
+      settings as `%~2 %~3 %~4`, so grading it means reading the argv the
+      criterion states under §The run, exactly and substituting it.
 - [ ] **Find what writes a stale `.git/index.lock` in this repo.** 2026-08-28: a
       0-byte lock at 08:44, no `git.exe` running, blocked a commit 40 minutes
       later with the index intact. An unattended run that commits its own records

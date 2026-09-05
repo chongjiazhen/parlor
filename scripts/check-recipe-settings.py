@@ -59,7 +59,15 @@ SKIP_FLAGS = {"out", "backend", "require-served", "timeout"}
 #: criterion describes. `probe_tier` is a gate whose `--model` is not the
 #: promise; a verdict tool reads the record afterwards. Matching on `run_` keeps
 #: the criterion's subject and drops the scaffolding around it.
-INVOCATION_RE = re.compile(r"py -3 -m eval\.([A-Za-z_][A-Za-z0-9_]*)")
+#:
+#: The LAUNCHER SPELLING is part of the pattern and was wrong until 2026-09-05.
+#: Ten of the tree's recipes say `python -m`, including `belfry-live1.cmd` - the
+#: recipe whose settings mismatch bought this invariant - and every one of them
+#: read as "unsupported recipe shape", blaming a loop variable none of them has.
+#: The launcher is not a setting: `py -3`, `python` and `python3` all mean the
+#: same arm, so the check must not turn on which one a recipe happens to use.
+INVOCATION_RE = re.compile(
+    r"(?:py\s+-3|python3?)\s+-m\s+eval\.([A-Za-z_][A-Za-z0-9_]*)")
 
 
 def substitute(value: str, env: dict[str, str]) -> str:

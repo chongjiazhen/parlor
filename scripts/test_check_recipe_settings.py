@@ -188,3 +188,65 @@ class TestAgainstTheRealRecipes:
                              REPO / "docs/belfry-night-coherence-criterion.md")
         assert any("NOT CHECKED" in p for p in problems)
         assert not [p for p in problems if "not found as literal text" in p]
+
+
+class TestTheLauncherSpelling:
+    """Ten of the tree's recipes invoke the arm as `python -m`, not `py -3 -m`.
+
+    Found 2026-09-05 while hand-pinning `changeling-kindred.cmd` before a 7 h
+    run: the checker reported it NOT CHECKED and blamed a loop variable, and the
+    recipe has no loop - it says `python -m eval.run_changeling`. The regex was
+    written against the recipes that happened to be open at the time.
+
+    The cost is concentrated: `belfry-live1.cmd` is one of the ten, and it is
+    the recipe whose settings mismatch bought the invariant (11.5 h at the wrong
+    temperature, `AGENTS.md`). The checker built for that class could not read
+    the case that motivated it.
+    """
+
+    def test_python_dash_m_is_an_arm_invocation(self, tmp_path):
+        recipe, criterion = _pair(
+            tmp_path,
+            "python -m eval.run_belfry --games 60 --arm llm --seats 5\n",
+            BELFRY_CRITERION)
+        assert crs.arm_invocations(recipe.read_text(encoding="utf-8"))
+
+    def test_a_disagreement_behind_python_dash_m_is_caught(self, tmp_path):
+        """The check that matters: not merely 'is seen', but 'is graded'."""
+        recipe, criterion = _pair(
+            tmp_path,
+            "python -m eval.run_belfry --games 60 --arm llm --seats 5\n",
+            BELFRY_CRITERION)
+        problems = crs.check(recipe, criterion)
+        assert any("--seats 5" in p and "not found as literal text" in p
+                   for p in problems)
+
+    def test_the_kindred_recipe_is_read_and_says_why_it_cannot_be_graded(self):
+        """The honest outcome, and it is not "agrees".
+
+        With the spelling fixed the checker SEES this recipe, and then reports
+        NOT CHECKED for a real reason instead of a wrong one: the recipe takes
+        its settings from positional arguments (`%~2`, `%~3`, `%~4`), so its
+        text does not carry the values at all - they live in the command line
+        the criterion states under §The run, exactly. Grading it needs the
+        checker to read that argv and substitute, which is the open queue row,
+        not this fix. Seeing the arm and naming the obstacle is what closes the
+        blind spot; the hand pin still stands behind the 01:00 launch.
+        """
+        problems = crs.check(REPO / "eval/runs/changeling-kindred.cmd",
+                             REPO / "docs/changeling-kindred-criterion.md")
+        assert any("NOT CHECKED" in p for p in problems)
+        assert any("%~" in p for p in problems), (
+            "the obstacle named must be the positional args, not a loop")
+
+    def test_no_recipe_is_unread_merely_for_how_it_spells_the_launcher(self):
+        """The sweep that proves the blind spot is closed rather than narrowed."""
+        unread = []
+        for recipe in sorted((REPO / "eval/runs").glob("*.cmd")):
+            text = recipe.read_text(encoding="utf-8")
+            if "eval.run_" not in text:
+                continue
+            if not crs.arm_invocations(text):
+                unread.append(recipe.name)
+        assert unread == [], (
+            "these name an arm the checker cannot see: " + ", ".join(unread))
