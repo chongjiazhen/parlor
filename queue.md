@@ -126,11 +126,11 @@ re-baselines the rung, or its pair is void. Which arm earns its ~7 h of card
 first is the operator's ranking; the criteria are frozen and wait.
 
 **GPU order and its 09-03 re-rank are `docs/decisions.md` §GPU order.** The
-2026-09-04 card cleared most of that set: partner and both mixed arms are RUN and
-READ (`docs/measurements.md`). **Briefing is UNLAUNCHED** - merged, criterion
-frozen, recipe pinned, and no `cl-briefing` record exists - so it is the
-top-ranked unrun arm on the re-ranked order. What is left unrun is the ranking
-question, not a queue of merges.
+2026-09-04 card cleared that set: partner, both mixed arms and briefing are RUN
+and READ (`docs/measurements.md`), briefing terminal 2026-09-04T21:52 local at
+18935 s. **Nothing on the re-ranked order is left unrun**, so the next arm is a
+ranking question among the frozen rows below, not a queue of merges. The card is
+FREE.
 
 **One conflict pair is still foreseen.** In `games/changeling/referee.py` simul
 rewrites the turn machinery source-rules also moves: merge source-rules FIRST,
@@ -230,14 +230,6 @@ unlaunched, and waits on the merge list above:
       complaints and pins the other four games through their own parse paths. Found
       in wiring it: `Phrasing.retry` had a golden hash and no consumer, so the
       positive arm was shipping the as-is retry sentence.
-- [ ] **Does the standing frame belong in the PAYLOAD? `--briefing` (S21).**
-      MERGED 2026-09-04; owes only the card. 553 bytes on a 1620-byte render, off
-      by default and byte-identical off. **It renders inside `seat_lines`, never
-      `preamble`**: measured, a leaky frame in the preamble escapes gate #1's
-      per-seat scan and is caught from `seat_lines` - the rule for every
-      standing-context arm. `docs/changeling-briefing-criterion.md`,
-      `eval.briefing_pair_verdict`, one arm against `cl-rounds2`; recipe pinned to
-      its criterion 2026-09-04.
 - [ ] **A per-seat private notebook.** Promoted to `core/notebook.py` (two games
       needed it); `--notebook` on the changeling runner, notes stamped by round,
       off by default and byte-identical off. Criterion

@@ -899,3 +899,17 @@ the last two passes lacked.
 
 Not measured: whether the `duelist` mechanic is worth anything to a model, which
 is the only reading that would justify a compact script that reaches it.
+
+## A standing frame renders in `seat_lines`, never `preamble`, 2026-09-05
+
+Carried out of `queue.md` with the briefing row when that arm was read, because
+it is a rule for every standing-context arm and not a fact about S21. Verbatim
+from the row:
+
+> **It renders inside `seat_lines`, never `preamble`**: measured, a leaky frame
+> in the preamble escapes gate #1's per-seat scan and is caught from
+> `seat_lines` - the rule for every standing-context arm.
+
+The arm itself is NOT SHOWN (`docs/measurements.md` 2026-09-05), which does not
+touch this: where the bytes render decides whether gate #1 can SEE them, and that
+is independent of whether they help a seat deduce.

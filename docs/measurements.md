@@ -1469,3 +1469,58 @@ Free read, no verdict, and the criterion forbids promoting it: blind villager
 accuracy 119/264 = 45.08% [39.19%, 51.11%] on the arm against 469/1252 = 37.46%
 [34.82%, 40.18%] on its control, reference 35.84%. This file makes no gate #3
 call - the criterion did not name one.
+
+## changeling standing briefing - the frame in the PAYLOAD is NOT SHOWN, READ 2026-09-05
+
+`docs/changeling-briefing-criterion.md`, created 2026-09-02T11:21:17Z and not
+edited after. `py -3 -m eval.briefing_pair_verdict`, exit 0, no void. S21's
+question: the ask is incremental by design, so a seat meets the accusation rule
+only at VOTE and meets what each side wins on nowhere at all. `--briefing` puts a
+standing frame in the payload - 553 bytes on a 1620-byte render, +34% - and asks
+whether a seat deduces better for holding it.
+
+Record `eval/records/cl-briefing.json`, 200 games on seeds 5000..5199, 196
+scored, **18935 s (5.26 h)** on `qwen36-35b-a3b-iq3`; control is S22's
+`cl-rounds2.json`, the same 200 seeds with the frame off. The verdict tool pins
+both records' own `args` against §Settings and both match, `turns` included - so
+the latent `briefing_text()` fixed-turns defect (`queue.md`) does not reach this
+record, as that row predicted.
+
+**Voids first.** Fallback **0.43%** control and **0.53%** arm against the 10%
+bar; recovered 7.60% and 8.20%. Gate #3 holds on both arms - blind villager
+accuracy 47.41% and 44.22%, each Wilson floor clearing the 35.84% reference.
+Nothing voids.
+
+| blind villager accuracy | rate | Wilson 95% |
+|---|---|---|
+| frame off (`cl-rounds2`) | 119/251 = **47.41%** | [41.32%, 53.58%] |
+| frame on (`cl-briefing`) | 111/251 = **44.22%** | [38.21%, 50.41%] |
+
+**Difference -3.19%, Newcombe 95% [-11.80%, +5.49%] - includes zero, so NOT
+SHOWN.** Paired game bootstrap [-11.20%, +5.33%] beside it, deciding nothing. The
+criterion pre-committed that a marginal result is not shown and that no second
+pair chases it. Free read, deciding nothing: village win rate 49.49% -> 47.45%.
+
+**This is the fifth consecutive NOT SHOWN on a changeling prompt arm, and the
+open row predicted it.** The criterion priced its half-width near 8.5 points and
+said in as many words that it cannot settle a smaller gap; the observed gap is
+3.19. `queue.md`'s row - no criterion states the effect it EXPECTS, only the one
+it could see - now has a fifth instance and no counter-example. What this arm
+adds is that the axis was a plausible one: the frame is a third of the render
+again, not a sentence, and it still moved nothing that this design can see.
+
+**Direction is not a finding, and the point estimate is negative.** More standing
+context is measured to cut both ways on this rung already
+(`_night_against_the_table`, +7% -> +63% on a 12B and INVERTING on q36), so a
+-3.19 point estimate is consistent with that and settles nothing on its own.
+
+**The pace instrument scored again, second time.** Predicted marker ~21:55 local
+in a 21:30-22:30 bracket, derived from `cl-rounds2`'s 17900 s over the same 200
+games / 5 live seats plus a measured +5.4% per-call cost for +24% prompt; actual
+marker 21:52, three minutes off over five hours. What was WRONG was the panic
+read: the first two games ran 2 m/game against the control's 89 s and were
+straight-lined to ~23:05, a projection the run beat by 73 minutes. Two games is
+not a pace, and the anchor transferred across a prompt a third longer.
+
+Not measured: whether a frame the seat is asked to USE - rather than one it
+merely holds - moves anything. That is a different arm and it has no criterion.
