@@ -10,13 +10,17 @@ from __future__ import annotations
 import random
 import unittest
 from dataclasses import replace
+from unittest import mock
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from core.observability import Knowledge
 from games.changeling.audit import leak_audit
 from games.changeling.night import centre_ref, resolve_night
-from games.changeling.referee import ChangelingReferee, IllegalAction, Phase
+from games.changeling import referee as referee_mod
+from games.changeling.referee import (_BRIEFING_DAY_LINE, TURN_MODES,
+                                      TURNS_RANDOM_ACTIVE, ChangelingReferee,
+                                      IllegalAction, Phase)
 from games.changeling.roles import (ALL_CARDS, BYSTANDER, DECEIVED, KINDRED,
                                     PACK, SETUP_5,
                                     SPOTTER, SWAPPER, SWITCHER, THEME_FOLK,
@@ -646,6 +650,53 @@ class TestBriefingArm(unittest.TestCase):
         self.assertIn("more than one", text)              # the accusation rule
         self.assertIn("The Village", text)                # what the village wins on
         self.assertIn("The Wolves", text)                 # and the pack
+
+    def test_the_frame_under_fixed_turns_is_the_recorded_bytes(self):
+        """`cl-briefing` was played under `fixed`, so this sentence is frozen.
+
+        A mode-neutral rewrite would have re-baselined the arm that is already
+        read (`docs/measurements.md` 2026-09-05) - the same argument that keeps
+        the discussion-opens event byte-identical under `fixed`.
+        """
+        on = ChangelingReferee.new(5, seed=3, discussion_rounds=2, briefing=True)
+        self.assertIn("The table talks for 2 round(s), one turn each, in seat "
+                      "order.", on.briefing_text())
+
+    def test_the_frame_describes_the_turn_mode_it_is_actually_run_under(self):
+        """S21 and S27 merged without meeting: the frame said "one turn each, in
+        seat order" under a mode that draws the floor at random, and it rides in
+        the payload gate #1 audits for every seat. A referee-written falsehood is
+        a worse cost than a second mode-dependent line."""
+        on = ChangelingReferee.new(5, seed=3, discussion_rounds=2, briefing=True,
+                                   turn_mode=TURNS_RANDOM_ACTIVE)
+        text = on.briefing_text()
+        self.assertNotIn("one turn each, in seat order", text)
+        self.assertIn("drawn at random", text)
+        self.assertIn("5 turns", text)          # the budget, not the seat count
+        self.assertIn("listen", text)           # the option only this mode has
+
+    def test_every_turn_mode_has_a_sentence_the_frame_can_say(self):
+        """The guard against the next S27 - a mode added without a briefing line
+        would silently reuse another mode's description. This is what a
+        `simultaneous` merge meets."""
+        self.assertEqual(set(_BRIEFING_DAY_LINE), set(TURN_MODES))
+
+    def test_the_briefing_refuses_a_mode_it_cannot_describe(self):
+        """A mode the RUNNER accepts but the frame has no sentence for.
+
+        Not `turn_mode="pigeon-post"` - that dies on the pre-existing unknown-mode
+        check and would pass with this guard deleted. The failure being guarded
+        is a mode legitimately added to `TURN_MODES`, which is what merging
+        `simultaneous` does.
+        """
+        with mock.patch.object(referee_mod, "TURN_MODES",
+                               TURN_MODES + ("simultaneous",)):
+            ChangelingReferee.new(5, seed=3, turn_mode="simultaneous")  # no frame
+            with self.assertRaises(ValueError) as caught:
+                ChangelingReferee.new(5, seed=3, briefing=True,
+                                      turn_mode="simultaneous")
+        self.assertIn("simultaneous", str(caught.exception))
+        self.assertIn("_BRIEFING_DAY_LINE", str(caught.exception))
 
     def test_the_frame_speaks_the_skin_s_vocabulary(self):
         """A skin renames the sides and the cards, so a briefing hardcoding

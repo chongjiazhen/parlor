@@ -68,6 +68,23 @@ TURNS_FIXED = "fixed"
 TURNS_RANDOM_ACTIVE = "random-active"
 TURN_MODES = (TURNS_FIXED, TURNS_RANDOM_ACTIVE)
 
+#: How the standing frame describes the day, per turn mode. Keyed rather than
+#: branched so that adding a mode without a sentence is a KeyError at
+#: construction instead of a seat being told a falsehood in the payload - S21 and
+#: S27 merged 2026-09-04 without meeting and the frame described `fixed` under
+#: every mode for a day. The `fixed` string is frozen: `cl-briefing` was played
+#: under it (`docs/measurements.md` 2026-09-05) and a rewrite re-baselines that
+#: arm. `{rounds}` and `{seats}` are filled by `briefing_text`.
+_BRIEFING_DAY_LINE: dict[str, str] = {
+    TURNS_FIXED:
+        "  - The table talks for {rounds} round(s), one turn each, in seat "
+        "order.",
+    TURNS_RANDOM_ACTIVE:
+        "  - The table talks for {rounds} round(s) of {seats} turns; each turn "
+        "the floor goes to one seat, drawn at random, and that seat may speak "
+        "or listen.",
+}
+
 
 @dataclass
 class ChangelingReferee:
@@ -124,6 +141,14 @@ class ChangelingReferee:
             raise ValueError(
                 f"unknown turn mode {self.turn_mode!r}; choose from "
                 f"{list(TURN_MODES)}")
+        # The frame is furniture a seat holds from its first turn, so it must not
+        # describe a day the referee is not running. Refused here rather than at
+        # render time: a run that cannot brief its seats should die before the
+        # deal, not a hundred calls in.
+        if self.briefing and self.turn_mode not in _BRIEFING_DAY_LINE:
+            raise ValueError(
+                f"--briefing has no sentence for turn mode {self.turn_mode!r}; "
+                f"add one to _BRIEFING_DAY_LINE before pairing them")
         # A str seed is hashed by `random.seed` itself (bytes -> int), so this is
         # reproducible across processes without depending on PYTHONHASHSEED.
         self._turn_rng = random.Random(
@@ -370,8 +395,8 @@ class ChangelingReferee:
         wolf = self.theme.card_names["pack"]
         return "\n".join([
             "How the day runs, start to finish:",
-            f"  - The table talks for {self.discussion_rounds} round(s), one "
-            f"turn each, in seat order.",
+            _BRIEFING_DAY_LINE[self.turn_mode].format(
+                rounds=self.discussion_rounds, seats=self.setup.n),
             "  - Then everyone points at once, each at one other seat. The seat "
             "with the most fingers is accused, and only when it drew more than "
             "one; on a tie every tied seat is accused, and a round where no seat "

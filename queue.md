@@ -112,7 +112,7 @@ No head sha: a copied sha is what goes stale, and a merge takes a name.
 |---|---|
 | `slice/changeling-source-rules` | the night rules - merge condition MET on the branch |
 | `slice/changeling-notebook` | `--notebook` |
-| `slice/fanout-simul` | `--turns simultaneous` - waits on source-rules by the order below, not on card |
+| `slice/fanout-simul` | `--turns simultaneous` - waits on source-rules by the order below, not on card. **Owes a `_BRIEFING_DAY_LINE` entry**: adding a mode without one now RAISES at construction under `--briefing`, and `test_every_turn_mode_has_a_sentence_the_frame_can_say` is what the merge meets |
 
 **MERGED 2026-09-04, freeze lifted:** `fanout-print`, `fanout-wolf`,
 `fanout-s27` + `-demo`, `fanout-replies` (carrying `fanout-neg`). Suite 1970.
@@ -258,13 +258,6 @@ unlaunched, and waits on the merge list above:
       arm aimed at pack play has its comparison already recorded. **No gate #3
       claim rides on this** - the criterion named no bar and one may not be added
       now.
-- [ ] **`briefing_text()` describes FIXED turns and no longer knows it.** S21 and
-      S27 merged 2026-09-04 without meeting: the frame says "one turn each, in
-      seat order", which under `--turns random-active` is false, and it rides in
-      the payload gate #1 audits for every seat. Nothing recorded is affected -
-      no frozen criterion sets both flags, checked - so this is latent, and it
-      lands the moment an arm pairs them. Done when the frame reads the mode, or
-      `--briefing` refuses a mode it cannot describe.
 - [ ] **The tier census is NOT PAYABLE from any record, and `mixed-pack` is where
       that first cost something.** `HeuristicPolicy._vote` returns a seat, not the
       rung it fired on, and the vote row carries no tier - so the census must
